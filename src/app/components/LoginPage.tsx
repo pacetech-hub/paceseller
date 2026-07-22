@@ -48,17 +48,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         <div className="relative z-10 space-y-8">
           <div>
-            <p
-              className="text-muted-foreground mb-4"
-              style={{
-                fontSize: "0.75rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-              }}
-            >
-              Plataforma B2B
-            </p>
             <h1
               className="text-foreground mb-4"
               style={{
