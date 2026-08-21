@@ -190,7 +190,7 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
 
 const quickActionClass = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0';
 
-const payCtaClass = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex-shrink-0';
+const payCtaClass = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors flex-shrink-0';
 
 const methodToggleClass = (selected: boolean) =>
   `flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
