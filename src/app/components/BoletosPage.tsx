@@ -419,9 +419,9 @@ export function BoletosPage({ profile }: BoletosPageProps) {
   const totalOverdue = overdueList.reduce((acc, p) => acc + p.amount, 0);
 
   const stats = [
-    { label: 'Em aberto', value: formatCurrency(totalOpen), caption: isLojista ? 'a pagar' : 'a receber', tone: 'default' as const },
+    { label: 'Em aberto', value: formatCurrency(totalOpen), caption: undefined, tone: 'default' as const },
     { label: 'A vencer', value: formatCurrency(totalDueSoon), caption: 'nos próximos 30 dias', tone: 'default' as const },
-    { label: 'Vencidos', value: formatCurrency(totalOverdue), caption: 'em atraso', tone: 'danger' as const },
+    { label: 'Vencidos', value: formatCurrency(totalOverdue), caption: undefined, tone: 'danger' as const },
   ];
 
   return (
