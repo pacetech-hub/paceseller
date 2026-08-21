@@ -190,6 +190,15 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
 
 const quickActionClass = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0';
 
+const payCtaClass = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex-shrink-0';
+
+const methodToggleClass = (selected: boolean) =>
+  `flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+    selected
+      ? 'bg-primary text-primary-foreground border-primary'
+      : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+  }`;
+
 function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile }) {
   const [expanded, setExpanded] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>('boleto');
@@ -197,11 +206,6 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 
   const isPago = payment.status === 'pago';
   const StatusIcon = statusIcon[payment.status];
-
-  const openMethod = (m: PaymentMethod) => {
-    setMethod(m);
-    setExpanded(true);
-  };
 
   const metaParts = [
     `Pedido ${payment.orderId}`,
@@ -237,26 +241,24 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {!isPago ? (
+            <button onClick={() => setExpanded(e => !e)} className={payCtaClass} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+              Pagar
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+          ) : (
             <>
-              <button onClick={() => openMethod('boleto')} className={quickActionClass} style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                <Barcode className="w-3.5 h-3.5" /> Boleto
+              <button onClick={() => setExpanded(e => !e)} className={quickActionClass} style={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                <Download className="w-3.5 h-3.5" /> Comprovante
               </button>
-              <button onClick={() => openMethod('pix')} className={quickActionClass} style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                <QrCode className="w-3.5 h-3.5" /> Pix
+              <button
+                onClick={() => setExpanded(e => !e)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0"
+                title={expanded ? 'Recolher detalhes' : 'Ver detalhes'}
+              >
+                <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
               </button>
             </>
-          ) : (
-            <button onClick={() => setExpanded(e => !e)} className={quickActionClass} style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-              <Download className="w-3.5 h-3.5" /> Comprovante
-            </button>
           )}
-          <button
-            onClick={() => setExpanded(e => !e)}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0"
-            title={expanded ? 'Recolher detalhes' : 'Ver detalhes'}
-          >
-            <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-          </button>
         </div>
       </div>
 
@@ -281,6 +283,25 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>
                 Valor a pagar: <span className="text-foreground mono" style={{ fontWeight: 700 }}>{formatCurrency(payment.amount)}</span>
               </p>
+
+              <div className="flex items-center gap-1.5 mb-3" role="tablist" aria-label="Forma de pagamento">
+                <button
+                  onClick={() => setMethod('boleto')}
+                  aria-pressed={method === 'boleto'}
+                  className={methodToggleClass(method === 'boleto')}
+                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                >
+                  <Barcode className="w-3.5 h-3.5" /> Boleto
+                </button>
+                <button
+                  onClick={() => setMethod('pix')}
+                  aria-pressed={method === 'pix'}
+                  className={methodToggleClass(method === 'pix')}
+                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                >
+                  <QrCode className="w-3.5 h-3.5" /> Pix
+                </button>
+              </div>
 
               {method === 'boleto' ? (
                 <div className="space-y-3">
@@ -398,9 +419,9 @@ export function BoletosPage({ profile }: BoletosPageProps) {
   const totalOverdue = overdueList.reduce((acc, p) => acc + p.amount, 0);
 
   const stats = [
-    { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), caption: `${openList.length} boleto(s) em aberto`, tone: 'default' as const },
-    { label: 'A vencer', value: formatCurrency(totalDueSoon), caption: `${dueSoonList.length} boleto(s) nos próximos 30 dias`, tone: 'default' as const },
-    { label: 'Total em atraso', value: formatCurrency(totalOverdue), caption: `${overdueList.length} boleto(s) atrasado(s)`, tone: 'danger' as const },
+    { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), caption: undefined, tone: 'default' as const },
+    { label: 'A vencer', value: formatCurrency(totalDueSoon), caption: 'a vencer nos próximos 30 dias', tone: 'default' as const },
+    { label: 'Vencidos', value: formatCurrency(totalOverdue), caption: 'em atraso', tone: 'danger' as const },
   ];
 
   return (
@@ -410,8 +431,8 @@ export function BoletosPage({ profile }: BoletosPageProps) {
         {stats.map(stat => (
           <div key={stat.label} className={`bg-card border rounded-xl p-4 ${stat.tone === 'danger' ? 'border-red-500/30' : 'border-border'}`}>
             <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
-            <p className={`mono mb-1 ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.caption}</p>
+            <p className={`mono ${stat.caption ? 'mb-1' : ''} ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
+            {stat.caption && <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.caption}</p>}
           </div>
         ))}
       </div>
