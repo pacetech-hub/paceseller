@@ -272,12 +272,11 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
       : profile === 'rep'
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : [
-          { icon: ShoppingBag, label: 'Meus Pedidos', view: 'history' },
+          { icon: ShoppingBag, label: 'Pedidos', view: 'history' },
           { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
