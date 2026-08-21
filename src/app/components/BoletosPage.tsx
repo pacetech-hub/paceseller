@@ -188,11 +188,6 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   );
 }
 
-const methodPillClass = (active: boolean) =>
-  `flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-    active ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'
-  }`;
-
 const quickActionClass = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0';
 
 function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile }) {
@@ -283,17 +278,9 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-                <button onClick={() => setMethod('boleto')} className={methodPillClass(method === 'boleto')} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-                  <Barcode className="w-3.5 h-3.5" /> Boleto
-                </button>
-                <button onClick={() => setMethod('pix')} className={methodPillClass(method === 'pix')} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-                  <QrCode className="w-3.5 h-3.5" /> Pix
-                </button>
-                <span className="ml-auto text-muted-foreground" style={{ fontSize: '0.75rem' }}>
-                  Valor a pagar: <span className="text-foreground mono" style={{ fontWeight: 700 }}>{formatCurrency(payment.amount)}</span>
-                </span>
-              </div>
+              <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>
+                Valor a pagar: <span className="text-foreground mono" style={{ fontWeight: 700 }}>{formatCurrency(payment.amount)}</span>
+              </p>
 
               {method === 'boleto' ? (
                 <div className="space-y-3">
@@ -384,7 +371,7 @@ export function BoletosPage({ profile }: BoletosPageProps) {
     ? boletosCarteira.filter(p => p.rep === 'Marcos Andrade')
     : boletosCarteira;
 
-  const statuses: Array<'todos' | PaymentStatus> = ['todos', 'pago', 'atrasado', 'pendente'];
+  const statuses: Array<'todos' | PaymentStatus> = ['todos', 'atrasado', 'pendente', 'pago'];
 
   const statusPriority: Record<PaymentStatus, number> = { atrasado: 0, pendente: 1, pago: 2 };
 
