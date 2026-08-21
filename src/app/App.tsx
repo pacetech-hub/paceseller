@@ -38,7 +38,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   admin: { title: 'Gestão', subtitle: 'Usuários, produtos, políticas e configurações' },
   clients: { title: 'Clientes', subtitle: 'Sua carteira de clientes' },
   profile: { title: 'Meu Perfil', subtitle: 'Seus dados, preferências e acesso' },
-  boletos: { title: 'Boletos e Pagamentos', subtitle: 'Suas faturas, boletos e histórico de pagamentos' },
+  boletos: { title: 'Pagamentos e Boletos', subtitle: 'Suas faturas, boletos e histórico de pagamentos' },
   stock: { title: 'Meu Estoque', subtitle: 'Cadastre ou integre seu estoque da marca' },
   'industry-stock': { title: 'Estoque', subtitle: 'Estoque industrial e por cliente — somente visualização' },
   permissions: { title: 'Permissões de Acesso', subtitle: 'Controle o que os usuários vinculados à sua conta podem acessar' },

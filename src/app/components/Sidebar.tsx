@@ -265,20 +265,20 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
     profile === 'admin'
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Boletos e Pagamentos', view: 'boletos' },
+          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : profile === 'rep'
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Boletos e Pagamentos', view: 'boletos' },
+          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : [
           { icon: ShoppingBag, label: 'Meus Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Boletos e Pagamentos', view: 'boletos' },
+          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ];
