@@ -398,9 +398,9 @@ export function BoletosPage({ profile }: BoletosPageProps) {
   const totalOverdue = overdueList.reduce((acc, p) => acc + p.amount, 0);
 
   const stats = [
-    { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), count: `${openList.length} em aberto`, tone: 'default' as const },
-    { label: 'Vence em 30 dias', value: formatCurrency(totalDueSoon), count: `${dueSoonList.length} a vencer`, tone: 'default' as const },
-    { label: 'Total em atraso', value: formatCurrency(totalOverdue), count: `${overdueList.length} atrasado(s)`, tone: 'danger' as const },
+    { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), caption: `${openList.length} boleto(s) em aberto`, tone: 'default' as const },
+    { label: 'A vencer', value: formatCurrency(totalDueSoon), caption: `${dueSoonList.length} boleto(s) nos próximos 30 dias`, tone: 'default' as const },
+    { label: 'Total em atraso', value: formatCurrency(totalOverdue), caption: `${overdueList.length} boleto(s) atrasado(s)`, tone: 'danger' as const },
   ];
 
   return (
@@ -409,8 +409,9 @@ export function BoletosPage({ profile }: BoletosPageProps) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map(stat => (
           <div key={stat.label} className={`bg-card border rounded-xl p-4 ${stat.tone === 'danger' ? 'border-red-500/30' : 'border-border'}`}>
-            <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label} · {stat.count}</p>
-            <p className={`mono ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
+            <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
+            <p className={`mono mb-1 ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
+            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.caption}</p>
           </div>
         ))}
       </div>
