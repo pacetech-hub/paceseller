@@ -219,12 +219,9 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="p-4 flex items-center gap-4 flex-wrap">
-        <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
-          <Receipt className="w-4.5 h-4.5 text-primary" />
-        </div>
-
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          {/* line 1: status + due/payment date */}
+          <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[payment.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
               <StatusIcon className="w-3 h-3" />
               {statusLabel[payment.status]}
@@ -232,8 +229,10 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
             <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>
               {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
             </span>
-            <span className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{payment.product}</span>
           </div>
+          {/* line 2: order title */}
+          <p className="text-foreground truncate mb-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{payment.product}</p>
+          {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
           <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{metaParts.join(' · ')}</p>
         </div>
 
@@ -412,9 +411,9 @@ export function BoletosPage({ profile }: BoletosPageProps) {
   const totalOverdue = overdueList.reduce((acc, p) => acc + p.amount, 0);
 
   const stats = [
-    { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), sub: `${openList.length} boleto(s) em aberto`, tone: 'default' as const },
-    { label: 'Vence em 30 dias', value: formatCurrency(totalDueSoon), sub: `${dueSoonList.length} boleto(s) a vencer`, tone: 'default' as const },
-    { label: 'Total em atraso', value: formatCurrency(totalOverdue), sub: `${overdueList.length} boleto(s) atrasado(s)`, tone: 'danger' as const },
+    { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), count: `${openList.length} em aberto`, tone: 'default' as const },
+    { label: 'Vence em 30 dias', value: formatCurrency(totalDueSoon), count: `${dueSoonList.length} a vencer`, tone: 'default' as const },
+    { label: 'Total em atraso', value: formatCurrency(totalOverdue), count: `${overdueList.length} atrasado(s)`, tone: 'danger' as const },
   ];
 
   return (
@@ -423,9 +422,8 @@ export function BoletosPage({ profile }: BoletosPageProps) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map(stat => (
           <div key={stat.label} className={`bg-card border rounded-xl p-4 ${stat.tone === 'danger' ? 'border-red-500/30' : 'border-border'}`}>
-            <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
-            <p className={`mono ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.sub}</p>
+            <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label} · {stat.count}</p>
+            <p className={`mono ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
           </div>
         ))}
       </div>
