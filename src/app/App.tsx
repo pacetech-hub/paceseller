@@ -18,6 +18,7 @@ import { SelloutDashboard } from "./components/SelloutDashboard";
 import { AdminPage } from "./components/AdminPage";
 import { ClientsPage } from "./components/ClientsPage";
 import { ProfilePage } from "./components/ProfilePage";
+import { BoletosPage } from "./components/BoletosPage";
 import { LojistaFiltersSidebar, defaultFilters, type CatalogFilters } from "./components/LojistaFiltersSidebar";
 import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
@@ -37,6 +38,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   admin: { title: 'Gestão', subtitle: 'Usuários, produtos, políticas e configurações' },
   clients: { title: 'Clientes', subtitle: 'Sua carteira de clientes' },
   profile: { title: 'Meu Perfil', subtitle: 'Seus dados, preferências e acesso' },
+  boletos: { title: 'Boletos e Pagamentos', subtitle: 'Suas faturas, boletos e histórico de pagamentos' },
   stock: { title: 'Meu Estoque', subtitle: 'Cadastre ou integre seu estoque da marca' },
   'industry-stock': { title: 'Estoque', subtitle: 'Estoque industrial e por cliente — somente visualização' },
   permissions: { title: 'Permissões de Acesso', subtitle: 'Controle o que os usuários vinculados à sua conta podem acessar' },
@@ -209,6 +211,8 @@ export default function App() {
         return <ClientsPage onNavigate={navigate} selectedClient={selectedClient} setSelectedClient={setSelectedClient} />;
       case 'profile':
         return <ProfilePage profile={profile} />;
+      case 'boletos':
+        return <BoletosPage profile={profile} />;
       case 'stock':
         return <StockPage />;
       case 'industry-stock':

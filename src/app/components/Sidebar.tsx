@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package2, ShoppingBag, ShoppingBasket, Clock,
   Sparkles, BarChart3, Settings, Users, Store, ChevronDown, ChevronRight,
   Bell, Search, Menu, X, Building2, LogOut, ChevronLeft,
-  UserCheck, Tag, Shield, Boxes,
+  UserCheck, Tag, Shield, Boxes, Receipt,
 } from "lucide-react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
@@ -12,7 +12,7 @@ import teslaLogo from "../../assets/tesla-footwear-logo.png";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions';
+  | 'industry-stock' | 'permissions' | 'boletos';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -265,17 +265,20 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
     profile === 'admin'
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
+          { icon: Receipt, label: 'Boletos e Pagamentos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : profile === 'rep'
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
+          { icon: Receipt, label: 'Boletos e Pagamentos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : [
           { icon: ShoppingBag, label: 'Meus Pedidos', view: 'history' },
+          { icon: Receipt, label: 'Boletos e Pagamentos', view: 'boletos' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ];
