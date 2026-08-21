@@ -280,10 +280,6 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
             </div>
           ) : (
             <>
-              <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>
-                Valor a pagar: <span className="text-foreground mono" style={{ fontWeight: 700 }}>{formatCurrency(payment.amount)}</span>
-              </p>
-
               <div className="flex items-center gap-1.5 mb-3" role="tablist" aria-label="Forma de pagamento">
                 <button
                   onClick={() => setMethod('boleto')}
