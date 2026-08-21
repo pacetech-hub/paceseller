@@ -188,8 +188,6 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   );
 }
 
-const quickActionClass = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0';
-
 const payCtaClass = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors flex-shrink-0';
 
 const methodToggleClass = (selected: boolean) =>
@@ -239,22 +237,14 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
           <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(payment.amount)}</p>
         </div>
 
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {!isPago ? (
+        {!isPago && (
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button onClick={() => setExpanded(e => !e)} className={payCtaClass} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
               Pagar
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
             </button>
-          ) : (
-            <button
-              onClick={() => toast.success('Comprovante baixado')}
-              className={quickActionClass}
-              style={{ fontSize: '0.75rem', fontWeight: 500 }}
-            >
-              <Download className="w-3.5 h-3.5" /> Comprovante
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {expanded && !isPago && (
