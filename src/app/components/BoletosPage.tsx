@@ -387,14 +387,18 @@ export function BoletosPage({ profile }: BoletosPageProps) {
 
   const statuses: Array<'todos' | PaymentStatus> = ['todos', 'pago', 'atrasado', 'pendente'];
 
-  const filtered = basePayments.filter(p => {
-    const matchSearch = p.id.toLowerCase().includes(search.toLowerCase()) ||
-      p.orderId.toLowerCase().includes(search.toLowerCase()) ||
-      p.client.toLowerCase().includes(search.toLowerCase()) ||
-      p.product.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === 'todos' || p.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const statusPriority: Record<PaymentStatus, number> = { atrasado: 0, pendente: 1, pago: 2 };
+
+  const filtered = basePayments
+    .filter(p => {
+      const matchSearch = p.id.toLowerCase().includes(search.toLowerCase()) ||
+        p.orderId.toLowerCase().includes(search.toLowerCase()) ||
+        p.client.toLowerCase().includes(search.toLowerCase()) ||
+        p.product.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === 'todos' || p.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
 
   const cutoff30 = new Date(TODAY);
   cutoff30.setDate(cutoff30.getDate() + 30);
