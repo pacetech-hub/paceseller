@@ -211,6 +211,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   const metaParts = [
     `Pedido ${payment.orderId}`,
     `Parcela ${payment.installment}`,
+    `Valor do pedido: ${formatCurrency(payment.orderTotal)}`,
     ...(profile !== 'lojista' ? [payment.client] : []),
     ...(profile === 'admin' ? [payment.rep] : []),
   ];
@@ -228,18 +229,15 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               <StatusIcon className="w-3 h-3" />
               {statusLabel[payment.status]}
             </span>
+            <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>
+              {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
+            </span>
             <span className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{payment.product}</span>
           </div>
           <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{metaParts.join(' · ')}</p>
         </div>
 
         <div className="text-right flex-shrink-0">
-          <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>{isPago ? 'Pago em' : 'Vencimento'}</p>
-          <p className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}</p>
-        </div>
-
-        <div className="text-right flex-shrink-0">
-          <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Pedido: {formatCurrency(payment.orderTotal)}</p>
           <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(payment.amount)}</p>
         </div>
 
@@ -413,13 +411,12 @@ export function BoletosPage({ profile }: BoletosPageProps) {
     { label: isLojista ? 'Em aberto (a pagar)' : 'Em aberto (a receber)', value: formatCurrency(totalOpen), sub: `${openList.length} boleto(s) em aberto`, tone: 'default' as const },
     { label: 'Vence em 30 dias', value: formatCurrency(totalDueSoon), sub: `${dueSoonList.length} boleto(s) a vencer`, tone: 'default' as const },
     { label: 'Total em atraso', value: formatCurrency(totalOverdue), sub: `${overdueList.length} boleto(s) atrasado(s)`, tone: 'danger' as const },
-    { label: 'Boletos atrasados', value: String(overdueList.length), sub: 'requerem atenção imediata', tone: 'danger' as const },
   ];
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       {/* Financial summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map(stat => (
           <div key={stat.label} className={`bg-card border rounded-xl p-4 ${stat.tone === 'danger' ? 'border-red-500/30' : 'border-border'}`}>
             <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
