@@ -246,128 +246,105 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
             </button>
           ) : (
-            <>
-              <button onClick={() => setExpanded(e => !e)} className={quickActionClass} style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                <Download className="w-3.5 h-3.5" /> Comprovante
-              </button>
-              <button
-                onClick={() => setExpanded(e => !e)}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors flex-shrink-0"
-                title={expanded ? 'Recolher detalhes' : 'Ver detalhes'}
-              >
-                <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-              </button>
-            </>
+            <button
+              onClick={() => toast.success('Comprovante baixado')}
+              className={quickActionClass}
+              style={{ fontSize: '0.75rem', fontWeight: 500 }}
+            >
+              <Download className="w-3.5 h-3.5" /> Comprovante
+            </button>
           )}
         </div>
       </div>
 
-      {expanded && (
+      {expanded && !isPago && (
         <div className="border-t border-border bg-secondary/20 p-4">
-          {isPago ? (
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-1.5 mb-3" role="tablist" aria-label="Forma de pagamento">
+            <button
+              onClick={() => setMethod('boleto')}
+              aria-pressed={method === 'boleto'}
+              className={methodToggleClass(method === 'boleto')}
+              style={{ fontSize: '0.78rem', fontWeight: 600 }}
+            >
+              <Barcode className="w-3.5 h-3.5" /> Boleto
+            </button>
+            <button
+              onClick={() => setMethod('pix')}
+              aria-pressed={method === 'pix'}
+              className={methodToggleClass(method === 'pix')}
+              style={{ fontSize: '0.78rem', fontWeight: 600 }}
+            >
+              <QrCode className="w-3.5 h-3.5" /> Pix
+            </button>
+          </div>
+
+          {method === 'boleto' ? (
+            <div className="space-y-3">
               <div>
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Valor pago</p>
-                <p className="text-emerald-400 mono" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(payment.amount)}</p>
+                <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Linha digitável</p>
+                <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.78rem' }}>
+                  {payment.boletoLine}
+                </code>
               </div>
-              <button
-                onClick={() => toast.success('Comprovante baixado')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                style={{ fontSize: '0.78rem', fontWeight: 500 }}
-              >
-                <Download className="w-3.5 h-3.5" /> Baixar comprovante
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copiar código de barras
+                </button>
+                <button
+                  onClick={() => toast.success('Fatura baixada')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+                  style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                >
+                  <Download className="w-3.5 h-3.5" /> Baixar fatura
+                </button>
+              </div>
             </div>
           ) : (
-            <>
-              <div className="flex items-center gap-1.5 mb-3" role="tablist" aria-label="Forma de pagamento">
+            <div className="space-y-3">
+              <div>
+                <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Pix Copia e Cola</p>
+                <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.72rem' }}>
+                  {payment.pixCode}
+                </code>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
-                  onClick={() => setMethod('boleto')}
-                  aria-pressed={method === 'boleto'}
-                  className={methodToggleClass(method === 'boleto')}
+                  onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                   style={{ fontSize: '0.78rem', fontWeight: 600 }}
                 >
-                  <Barcode className="w-3.5 h-3.5" /> Boleto
+                  <Copy className="w-3.5 h-3.5" /> Copiar código Pix
                 </button>
                 <button
-                  onClick={() => setMethod('pix')}
-                  aria-pressed={method === 'pix'}
-                  className={methodToggleClass(method === 'pix')}
-                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                  onClick={() => setShowQr(v => !v)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+                  style={{ fontSize: '0.78rem', fontWeight: 500 }}
                 >
-                  <QrCode className="w-3.5 h-3.5" /> Pix
+                  <QrCode className="w-3.5 h-3.5" /> {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
                 </button>
               </div>
 
-              {method === 'boleto' ? (
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Linha digitável</p>
-                    <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.78rem' }}>
-                      {payment.boletoLine}
-                    </code>
+              {showQr && (
+                <div className="flex items-start gap-4 flex-wrap pt-1">
+                  <div className="inline-block bg-white p-3 rounded-lg border border-border flex-shrink-0">
+                    <PixQrCode data={payment.pixCode} />
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button
-                      onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                      style={{ fontSize: '0.78rem', fontWeight: 600 }}
-                    >
-                      <Copy className="w-3.5 h-3.5" /> Copiar código de barras
-                    </button>
-                    <button
-                      onClick={() => toast.success('Fatura baixada')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                      style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                    >
-                      <Download className="w-3.5 h-3.5" /> Baixar fatura
-                    </button>
+                  <div className="flex-1 min-w-[220px]">
+                    <p className="text-foreground mb-1" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Como pagar</p>
+                    <ol className="text-muted-foreground space-y-1 list-decimal list-inside" style={{ fontSize: '0.75rem' }}>
+                      <li>Abra o app do seu banco</li>
+                      <li>Escolha pagar via Pix com QR Code ou Copia e Cola</li>
+                      <li>Escaneie o código ao lado ou cole o código copiado</li>
+                      <li>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</li>
+                    </ol>
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Pix Copia e Cola</p>
-                    <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.72rem' }}>
-                      {payment.pixCode}
-                    </code>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button
-                      onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                      style={{ fontSize: '0.78rem', fontWeight: 600 }}
-                    >
-                      <Copy className="w-3.5 h-3.5" /> Copiar código Pix
-                    </button>
-                    <button
-                      onClick={() => setShowQr(v => !v)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                      style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                    >
-                      <QrCode className="w-3.5 h-3.5" /> {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
-                    </button>
-                  </div>
-
-                  {showQr && (
-                    <div className="flex items-start gap-4 flex-wrap pt-1">
-                      <div className="inline-block bg-white p-3 rounded-lg border border-border flex-shrink-0">
-                        <PixQrCode data={payment.pixCode} />
-                      </div>
-                      <div className="flex-1 min-w-[220px]">
-                        <p className="text-foreground mb-1" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Como pagar</p>
-                        <ol className="text-muted-foreground space-y-1 list-decimal list-inside" style={{ fontSize: '0.75rem' }}>
-                          <li>Abra o app do seu banco</li>
-                          <li>Escolha pagar via Pix com QR Code ou Copia e Cola</li>
-                          <li>Escaneie o código ao lado ou cole o código copiado</li>
-                          <li>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</li>
-                        </ol>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       )}
