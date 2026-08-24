@@ -159,18 +159,21 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
   const [statusFilter, setStatusFilter] = useState('todos');
 
   const statuses = ['todos', 'em análise', 'aprovado', 'faturado', 'entregue', 'cancelado'];
+  const statusPriority: Record<string, number> = { 'em análise': 0, 'aprovado': 1, 'faturado': 2, 'entregue': 3, 'cancelado': 4 };
 
   const baseOrders = profile === 'rep'
     ? orders.filter(o => o.rep === 'Marcos Andrade')
     : orders;
 
-  const filtered = baseOrders.filter(o => {
-    const matchSearch = o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.client.toLowerCase().includes(search.toLowerCase()) ||
-      o.rep.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === 'todos' || o.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const filtered = baseOrders
+    .filter(o => {
+      const matchSearch = o.id.toLowerCase().includes(search.toLowerCase()) ||
+        o.client.toLowerCase().includes(search.toLowerCase()) ||
+        o.rep.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === 'todos' || o.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
