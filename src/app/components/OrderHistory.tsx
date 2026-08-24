@@ -48,11 +48,6 @@ function shiftDate(dateStr: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-function formatDateShort(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-}
-
 function statusSupportText(order: Order): string {
   switch (order.status) {
     case 'aprovado':
@@ -97,7 +92,6 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
             </span>
             <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
           </div>
-          <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.72rem' }}>{formatDateShort(order.date)}</p>
           <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
             <span className="mono">{order.id}</span> — {productName}
           </p>
