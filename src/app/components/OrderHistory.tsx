@@ -98,20 +98,17 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
         {/* column 2: representante */}
         {profile !== 'rep' && (
           <div className="flex-shrink-0" style={{ minWidth: '120px' }}>
-            <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Representante</p>
             <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.rep}</p>
           </div>
         )}
 
         {/* column 3: quantidade */}
         <div className="flex-shrink-0" style={{ minWidth: '80px' }}>
-          <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Quantidade</p>
           <p className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
         </div>
 
         {/* column 4: total */}
         <div className="text-right flex-shrink-0">
-          <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Total</p>
           <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
         </div>
 
@@ -159,7 +156,7 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
 
-  const statuses = ['todos', 'aprovado', 'em análise', 'faturado', 'entregue', 'cancelado'];
+  const statuses = ['todos', 'em análise', 'aprovado', 'faturado', 'entregue', 'cancelado'];
 
   const baseOrders = profile === 'rep'
     ? orders.filter(o => o.rep === 'Marcos Andrade')
@@ -220,18 +217,32 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
       </div>
 
       {/* Orders */}
-      <div className="space-y-3">
-        {filtered.map(order => (
-          <OrderCard key={order.id} order={order} profile={profile} onNavigate={onNavigate} />
-        ))}
-
-        {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-            <Clock className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido encontrado</p>
-            <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
+      <div className="space-y-2">
+        {filtered.length > 0 && (
+          <div
+            className="flex items-center gap-4 px-4 flex-wrap text-muted-foreground"
+            style={{ fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}
+          >
+            <div className="flex-1 min-w-0">Pedido</div>
+            {profile !== 'rep' && <div className="flex-shrink-0" style={{ minWidth: '120px' }}>Representante</div>}
+            <div className="flex-shrink-0" style={{ minWidth: '80px' }}>Quantidade</div>
+            <div className="text-right flex-shrink-0">Total</div>
+            <div className="w-4 flex-shrink-0" />
           </div>
         )}
+        <div className="space-y-3">
+          {filtered.map(order => (
+            <OrderCard key={order.id} order={order} profile={profile} onNavigate={onNavigate} />
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
+              <Clock className="w-10 h-10 text-muted-foreground/30 mb-3" />
+              <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido encontrado</p>
+              <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
