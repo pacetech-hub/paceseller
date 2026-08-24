@@ -18,14 +18,16 @@ const OBJECTIVES = [
   { id: 'institucional', label: 'Institucional de marca', icon: Trophy, description: 'Fortalecimento de brand' },
 ];
 
+const FORMAT_GROUPS = ['WhatsApp', 'Instagram', 'TikTok', 'Impressão'] as const;
+
 const FORMATS = [
-  { id: 'whatsapp', label: 'WhatsApp', description: 'Status e disparo para lista de clientes', spec: '1080 × 1080', icon: MessageCircle },
-  { id: 'instagram-feed', label: 'Instagram Feed 4:5', description: 'Publicação no feed, formato vertical', spec: '1080 × 1350 · 4:5', icon: Instagram },
-  { id: 'story', label: 'Story 9:16', description: 'Tela cheia, com espaço para o dedo tocar', spec: '1080 × 1920 · 9:16', icon: Smartphone },
-  { id: 'tiktok', label: 'TikTok', description: 'Vertical cheia, texto grande para vídeo', spec: '1080 × 1920 · 9:16 · 5s', icon: Music2 },
-  { id: 'impressao-a3', label: 'Impressão A3', description: 'Cartaz grande para vitrine', spec: '29,7 × 42 cm · PDF', icon: Printer },
-  { id: 'impressao-a4', label: 'Impressão A4', description: 'Cartaz para parede e balcão', spec: '21 × 29,7 cm · PDF', icon: Printer },
-  { id: 'impressao-a5', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: Printer },
+  { id: 'whatsapp', group: 'WhatsApp', label: 'WhatsApp', description: 'Status e disparo para lista de clientes', spec: '1080 × 1080', icon: MessageCircle },
+  { id: 'instagram-feed', group: 'Instagram', label: 'Instagram Feed 4:5', description: 'Publicação no feed, formato vertical', spec: '1080 × 1350 · 4:5', icon: Instagram },
+  { id: 'story', group: 'Instagram', label: 'Instagram Story 9:16', description: 'Tela cheia, com espaço para o dedo tocar', spec: '1080 × 1920 · 9:16', icon: Smartphone },
+  { id: 'tiktok', group: 'TikTok', label: 'TikTok', description: 'Vertical cheia, texto grande para vídeo', spec: '1080 × 1920 · 9:16 · 5s', icon: Music2 },
+  { id: 'impressao-a3', group: 'Impressão', label: 'Impressão A3', description: 'Cartaz grande para vitrine', spec: '29,7 × 42 cm · PDF', icon: Printer },
+  { id: 'impressao-a4', group: 'Impressão', label: 'Impressão A4', description: 'Cartaz para parede e balcão', spec: '21 × 29,7 cm · PDF', icon: Printer },
+  { id: 'impressao-a5', group: 'Impressão', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: Printer },
 ];
 
 const THEMES = [
@@ -89,7 +91,7 @@ interface HistoryItem {
 const initialHistory: HistoryItem[] = [
   { id: 'hist-1', image: campaignPreviewMock, formatLabel: 'Instagram Feed 4:5', copy: AI_PROMPTS[0], createdAt: '18 de jun' },
   { id: 'hist-2', image: bannerLimitedEdition, formatLabel: 'WhatsApp', copy: AI_PROMPTS[1], createdAt: '12 de jun' },
-  { id: 'hist-3', image: campaignPreviewMock, formatLabel: 'Story 9:16', copy: AI_PROMPTS[2], createdAt: '05 de jun' },
+  { id: 'hist-3', image: campaignPreviewMock, formatLabel: 'Instagram Story 9:16', copy: AI_PROMPTS[2], createdAt: '05 de jun' },
   { id: 'hist-4', image: bannerLimitedEdition, formatLabel: 'Impressão A4', copy: AI_PROMPTS[0], createdAt: '28 de mai' },
 ];
 
@@ -351,26 +353,35 @@ function CampaignWizard({ profile, onBack, onFinish }: { profile: Profile; onBac
               <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedFormats.size} selecionado(s)</span>
             </div>
             <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Onde esta campanha será usada? Selecione um ou mais formatos.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {FORMATS.map(f => {
-                const Icon = f.icon;
-                const isSelected = selectedFormats.has(f.id);
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => toggleFormat(f.id)}
-                    className={`rounded-xl border p-4 text-left transition-all ${isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <p className="text-foreground mt-2" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{f.label}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{f.description}</p>
-                    <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.68rem' }}>{f.spec}</p>
-                    {isSelected && <Check className="w-4 h-4 text-primary mt-2" />}
-                  </button>
-                );
-              })}
+            <div className="space-y-5">
+              {FORMAT_GROUPS.map(group => (
+                <div key={group}>
+                  <p className="text-muted-foreground mb-2" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {group}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {FORMATS.filter(f => f.group === group).map(f => {
+                      const Icon = f.icon;
+                      const isSelected = selectedFormats.has(f.id);
+                      return (
+                        <button
+                          key={f.id}
+                          onClick={() => toggleFormat(f.id)}
+                          className={`rounded-xl border p-4 text-left transition-all ${isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Icon className="w-5 h-5 text-primary" />
+                          </div>
+                          <p className="text-foreground mt-2" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{f.label}</p>
+                          <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{f.description}</p>
+                          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.68rem' }}>{f.spec}</p>
+                          {isSelected && <Check className="w-4 h-4 text-primary mt-2" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
