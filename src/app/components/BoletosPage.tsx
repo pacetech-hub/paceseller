@@ -188,8 +188,6 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   );
 }
 
-const payCtaClass = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors flex-shrink-0';
-
 const methodToggleClass = (selected: boolean) =>
   `flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
     selected
@@ -215,7 +213,10 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div className="p-4 flex items-center gap-4 flex-wrap">
+      <div
+        onClick={!isPago ? () => setExpanded(e => !e) : undefined}
+        className={`p-4 flex items-center gap-4 flex-wrap ${!isPago ? 'cursor-pointer hover:bg-secondary/30 transition-colors' : ''}`}
+      >
         <div className="min-w-0 flex-1">
           {/* line 1: status + due/payment date */}
           <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -238,12 +239,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
         </div>
 
         {!isPago && (
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button onClick={() => setExpanded(e => !e)} className={payCtaClass} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-              Pagar
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
+          <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         )}
       </div>
 
