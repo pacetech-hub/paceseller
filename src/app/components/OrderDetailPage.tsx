@@ -111,7 +111,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
         <p className="text-muted-foreground mb-3" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           Detalhes do pedido
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr] gap-4 sm:gap-8">
           {/* column 1: status + order id/name */}
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -127,7 +127,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           </div>
 
           {/* column 2: value + payment + link to Pagamentos e Boletos */}
-          <div className="min-w-0">
+          <div className="min-w-0 sm:border-l sm:border-border sm:pl-8">
             <p className="text-foreground mono" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
             <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.8rem' }}>{order.paymentCondition}</p>
             {profile !== 'rep' && (
@@ -142,7 +142,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           </div>
 
           {/* column 3: NF de compra */}
-          <div className="min-w-0 sm:text-right">
+          <div className="min-w-0 sm:border-l sm:border-border sm:pl-8">
             <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               NF de compra
             </p>
