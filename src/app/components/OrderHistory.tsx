@@ -51,7 +51,7 @@ function shiftDate(dateStr: string, days: number): string {
 function statusSupportText(order: Order): string {
   switch (order.status) {
     case 'aprovado':
-      return formatDate(order.date);
+      return `em ${formatDate(order.date)}`;
     case 'em análise':
       return `Emissão em ${formatDate(order.date)}`;
     case 'faturado':
