@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { Clock, Package2, RotateCcw, Eye, Search, Filter, ChevronDown, Download, FileText } from "lucide-react";
-import { orders, formatCurrency, formatDate } from "../data/mockData";
+import { toast } from "sonner";
+import {
+  Search, ChevronRight, Download, RotateCcw, Clock,
+  CheckCircle2, XCircle, FileCheck2, PackageCheck,
+} from "lucide-react";
+import { orders, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
@@ -19,18 +23,141 @@ const statusColors: Record<string, string> = {
   'entregue': 'text-purple-400 bg-purple-400/10',
 };
 
-const statusDot: Record<string, string> = {
-  'aprovado': 'bg-black',
-  'em análise': 'bg-amber-400',
-  'faturado': 'bg-emerald-400',
-  'cancelado': 'bg-red-400',
-  'entregue': 'bg-purple-400',
+const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = {
+  'aprovado': CheckCircle2,
+  'em análise': Clock,
+  'faturado': FileCheck2,
+  'cancelado': XCircle,
+  'entregue': PackageCheck,
 };
+
+const orderProductNames: Record<string, string> = {
+  'PED-2026-0412': 'Tênis Casual — Grade Mista',
+  'PED-2026-0411': 'Sapatos Sociais — Linha Executiva',
+  'PED-2026-0410': 'Botas Impermeáveis — Coleção Verão 26',
+  'PED-2026-0409': 'Chinelos Infantis — Coleção Verão 26',
+  'PED-2026-0408': 'Tênis Infantil — Coleção Verão 26',
+  'PED-2026-0407': 'Sandálias Femininas — Coleção Verão 26',
+  'PED-2026-0406': 'Tênis Esportivo — Coleção Verão 26',
+  'PED-2026-0405': 'Sandálias Rasteiras — Coleção Verão 26',
+};
+
+function shiftDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function formatDateShort(dateStr: string): string {
+  const date = new Date(dateStr + 'T00:00:00');
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
+
+function statusSupportText(order: Order): string | null {
+  switch (order.status) {
+    case 'faturado':
+      return `Entrega prevista: ${formatDate(shiftDate(order.date, 10))}`;
+    case 'entregue':
+      return `Entregue em: ${formatDate(shiftDate(order.date, 6))}`;
+    case 'em análise':
+      return 'Aguardando aprovação';
+    default:
+      return null;
+  }
+}
+
+function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Profile; onNavigate: (view: View) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const StatusIcon = statusIcon[order.status];
+  const support = statusSupportText(order);
+  const productName = orderProductNames[order.id] ?? order.collection;
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div
+        onClick={() => setExpanded(e => !e)}
+        className="p-4 flex items-center gap-4 flex-wrap cursor-pointer hover:bg-secondary/30 transition-colors"
+      >
+        {/* column 1: order info */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[order.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+              <StatusIcon className="w-3 h-3" />
+              {order.status}
+            </span>
+            {support && (
+              <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
+            )}
+          </div>
+          <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.72rem' }}>{formatDateShort(order.date)}</p>
+          <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+            <span className="mono">{order.id}</span> — {productName}
+          </p>
+        </div>
+
+        {/* column 2: representante */}
+        {profile !== 'rep' && (
+          <div className="flex-shrink-0" style={{ minWidth: '120px' }}>
+            <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Representante</p>
+            <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.rep}</p>
+          </div>
+        )}
+
+        {/* column 3: quantidade */}
+        <div className="flex-shrink-0" style={{ minWidth: '80px' }}>
+          <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Quantidade</p>
+          <p className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
+        </div>
+
+        {/* column 4: total */}
+        <div className="text-right flex-shrink-0">
+          <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Total</p>
+          <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
+        </div>
+
+        <ChevronRight className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+      </div>
+
+      {expanded && (
+        <div className="border-t border-border bg-secondary/20 p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            {[
+              { label: 'Coleção', value: order.collection },
+              { label: 'Pagamento', value: order.paymentCondition },
+              { label: 'Total de pares', value: `${order.items} pares` },
+              { label: 'Ticket médio/par', value: formatCurrency(order.total / order.items) },
+            ].map(detail => (
+              <div key={detail.label}>
+                <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{detail.label}</p>
+                <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{detail.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={e => { e.stopPropagation(); onNavigate('cart'); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              style={{ fontSize: '0.78rem', fontWeight: 600 }}
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Repetir pedido
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); toast.success('PDF baixado'); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+              style={{ fontSize: '0.78rem', fontWeight: 500 }}
+            >
+              <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const statuses = ['todos', 'aprovado', 'em análise', 'faturado', 'entregue', 'cancelado'];
 
@@ -92,97 +219,14 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
         </div>
       </div>
 
-      {/* Orders table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <table className="w-full text-left" style={{ fontSize: '0.82rem' }}>
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '30%' }}>Pedido</th>
-              {profile !== 'rep' && <th className="px-4 py-2.5 font-semibold text-muted-foreground">Representante</th>}
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Status</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Data</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Pares</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground text-right">Total</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(order => (
-              <>
-                <tr
-                  key={order.id}
-                  className={`border-b border-border cursor-pointer transition-colors hover:bg-primary/5 ${expandedId === order.id ? 'bg-primary/5' : ''}`}
-                  onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-foreground mono truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{order.id}</p>
-                        <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{order.client}</p>
-                      </div>
-                    </div>
-                  </td>
-                  {profile !== 'rep' && (
-                    <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{order.rep}</td>
-                  )}
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full ${statusColors[order.status]}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{formatDate(order.date)}</td>
-                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{order.items}</td>
-                  <td className="px-4 py-3 text-right">
-                    <p className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform inline-block ${expandedId === order.id ? 'rotate-180' : ''}`} />
-                  </td>
-                </tr>
-                {expandedId === order.id && (
-                  <tr key={`${order.id}-expanded`} className="border-b border-border bg-secondary/20">
-                    <td colSpan={profile !== 'rep' ? 7 : 6} className="px-4 py-4">
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                        {[
-                          { label: 'Coleção', value: order.collection },
-                          { label: 'Pagamento', value: order.paymentCondition },
-                          { label: 'Total de pares', value: `${order.items} pares` },
-                          { label: 'Ticket médio/par', value: formatCurrency(order.total / order.items) },
-                        ].map(detail => (
-                          <div key={detail.label}>
-                            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{detail.label}</p>
-                            <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{detail.value}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
-                          <Eye className="w-3.5 h-3.5" /> Ver detalhes
-                        </button>
-                        <button
-                          onClick={e => { e.stopPropagation(); onNavigate('cart'); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                          style={{ fontSize: '0.78rem', fontWeight: 600 }}
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" /> Repetir pedido
-                        </button>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
-                          <Download className="w-3.5 h-3.5" /> PDF
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </>
-            ))}
-          </tbody>
-        </table>
+      {/* Orders */}
+      <div className="space-y-3">
+        {filtered.map(order => (
+          <OrderCard key={order.id} order={order} profile={profile} onNavigate={onNavigate} />
+        ))}
 
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
             <Clock className="w-10 h-10 text-muted-foreground/30 mb-3" />
             <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido encontrado</p>
             <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
