@@ -215,7 +215,7 @@ export default function App() {
       case 'order-detail':
         return <OrderDetailPage order={selectedOrder} onNavigate={navigate} profile={profile} />;
       case 'marketing':
-        return <MarketingStudio />;
+        return <MarketingStudio profile={profile} />;
       case 'sellout':
         return <SelloutDashboard />;
       case 'admin':

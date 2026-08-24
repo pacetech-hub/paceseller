@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { toast } from "sonner";
 import {
-  Sparkles, Check, ChevronRight, ChevronLeft, Share2, Instagram, MessageCircle, Printer,
+  Sparkles, Check, ChevronRight, ChevronLeft, Instagram, MessageCircle, Printer,
   Wand2, RefreshCw, Rocket, Tag, Trophy, Zap, Download, Palette, Plus, Image as ImageIcon,
+  Music2, Smartphone,
 } from "lucide-react";
-import { products, formatCurrency } from "../data/mockData";
+import { products, formatCurrency, type Product } from "../data/mockData";
 import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
 import bannerLimitedEdition from "@/assets/banner-edicao-limitada.webp";
+
+type Profile = 'admin' | 'rep' | 'lojista';
 
 const OBJECTIVES = [
   { id: 'lancamento', label: 'Lançamento de coleção', icon: Rocket, description: 'Apresente novidades com destaque' },
@@ -16,19 +19,22 @@ const OBJECTIVES = [
 ];
 
 const FORMATS = [
-  { id: 'instagram-post', label: 'Post Instagram', dimensions: '1080 × 1080', icon: Instagram },
-  { id: 'instagram-story', label: 'Story Instagram', dimensions: '1080 × 1920', icon: Instagram },
-  { id: 'whatsapp', label: 'Banner WhatsApp', dimensions: '1080 × 1080', icon: MessageCircle },
-  { id: 'impressao', label: 'Impressão', dimensions: 'A4 / PDF', icon: Printer },
+  { id: 'whatsapp', label: 'WhatsApp', description: 'Status e disparo para lista de clientes', spec: '1080 × 1080', icon: MessageCircle },
+  { id: 'instagram-feed', label: 'Instagram Feed 4:5', description: 'Publicação no feed, formato vertical', spec: '1080 × 1350 · 4:5', icon: Instagram },
+  { id: 'story', label: 'Story 9:16', description: 'Tela cheia, com espaço para o dedo tocar', spec: '1080 × 1920 · 9:16', icon: Smartphone },
+  { id: 'tiktok', label: 'TikTok', description: 'Vertical cheia, texto grande para vídeo', spec: '1080 × 1920 · 9:16 · 5s', icon: Music2 },
+  { id: 'impressao-a3', label: 'Impressão A3', description: 'Cartaz grande para vitrine', spec: '29,7 × 42 cm · PDF', icon: Printer },
+  { id: 'impressao-a4', label: 'Impressão A4', description: 'Cartaz para parede e balcão', spec: '21 × 29,7 cm · PDF', icon: Printer },
+  { id: 'impressao-a5', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: Printer },
 ];
 
 const THEMES = [
-  { id: 'premium', label: 'Premium Dark', colors: ['#0A0A0F', '#1a1a2e', '#4F6EF7'], photoCount: 8 },
-  { id: 'clean', label: 'Clean Minimal', colors: ['#FAFAFA', '#F0F0F0', '#1a1a1a'], photoCount: 5 },
-  { id: 'bold', label: 'Bold Impact', colors: ['#1a0533', '#6B21A8', '#F59E0B'], photoCount: 6 },
-  { id: 'nature', label: 'Natural & Warm', colors: ['#1C1208', '#A16207', '#FEF3C7'], photoCount: 4 },
-  { id: 'ocean', label: 'Ocean Blue', colors: ['#0C1A2E', '#0E4D8A', '#38BDF8'], photoCount: 7 },
-  { id: 'sport', label: 'Sport Energy', colors: ['#0F0F0F', '#16A34A', '#DCFCE7'], photoCount: 6 },
+  { id: 'premium', label: 'Premium Dark', colors: ['#0A0A0F', '#1a1a2e', '#4F6EF7'], photoCount: 8, photo: products[0].image },
+  { id: 'clean', label: 'Clean Minimal', colors: ['#FAFAFA', '#F0F0F0', '#1a1a1a'], photoCount: 5, photo: products[1].image },
+  { id: 'bold', label: 'Bold Impact', colors: ['#1a0533', '#6B21A8', '#F59E0B'], photoCount: 6, photo: campaignPreviewMock },
+  { id: 'nature', label: 'Natural & Warm', colors: ['#1C1208', '#A16207', '#FEF3C7'], photoCount: 4, photo: products[2].image },
+  { id: 'ocean', label: 'Ocean Blue', colors: ['#0C1A2E', '#0E4D8A', '#38BDF8'], photoCount: 7, photo: bannerLimitedEdition },
+  { id: 'sport', label: 'Sport Energy', colors: ['#0F0F0F', '#16A34A', '#DCFCE7'], photoCount: 6, photo: products[3].image },
 ];
 
 const AI_PROMPTS = [
@@ -37,18 +43,54 @@ const AI_PROMPTS = [
   'Descubra a nova linha Tesla Footwear — onde tradição encontra inovação.',
 ];
 
+type ProductTag = 'lançamento' | 'alto giro' | 'estoque parado';
+
+const productMeta: Record<string, { tag: ProductTag; stock: number }> = {
+  'P001': { tag: 'lançamento', stock: 180 },
+  'P002': { tag: 'alto giro', stock: 95 },
+  'P003': { tag: 'estoque parado', stock: 620 },
+  'P004': { tag: 'alto giro', stock: 140 },
+  'P005': { tag: 'alto giro', stock: 210 },
+  'P006': { tag: 'estoque parado', stock: 480 },
+  'P007': { tag: 'estoque parado', stock: 390 },
+  'P008': { tag: 'lançamento', stock: 160 },
+};
+
+const tagColors: Record<ProductTag, string> = {
+  'lançamento': 'text-primary bg-primary/10',
+  'alto giro': 'text-emerald-400 bg-emerald-400/10',
+  'estoque parado': 'text-amber-400 bg-amber-400/10',
+};
+
+function sortProductsForProfile(profile: Profile): Product[] {
+  const priority = (id: string): number => {
+    const tag = productMeta[id]?.tag;
+    if (profile === 'lojista') {
+      if (tag === 'estoque parado') return 0;
+      if (tag === 'alto giro') return 1;
+      if (tag === 'lançamento') return 2;
+      return 3;
+    }
+    if (tag === 'lançamento') return 0;
+    if (tag === 'estoque parado') return 1;
+    return 2;
+  };
+  return [...products].sort((a, b) => priority(a.id) - priority(b.id));
+}
+
 interface HistoryItem {
   id: string;
   image: string;
   formatLabel: string;
+  copy: string;
   createdAt: string;
 }
 
 const initialHistory: HistoryItem[] = [
-  { id: 'hist-1', image: campaignPreviewMock, formatLabel: 'Post Instagram', createdAt: '18 de jun' },
-  { id: 'hist-2', image: bannerLimitedEdition, formatLabel: 'Banner WhatsApp', createdAt: '12 de jun' },
-  { id: 'hist-3', image: campaignPreviewMock, formatLabel: 'Story Instagram', createdAt: '05 de jun' },
-  { id: 'hist-4', image: bannerLimitedEdition, formatLabel: 'Impressão', createdAt: '28 de mai' },
+  { id: 'hist-1', image: campaignPreviewMock, formatLabel: 'Instagram Feed 4:5', copy: AI_PROMPTS[0], createdAt: '18 de jun' },
+  { id: 'hist-2', image: bannerLimitedEdition, formatLabel: 'WhatsApp', copy: AI_PROMPTS[1], createdAt: '12 de jun' },
+  { id: 'hist-3', image: campaignPreviewMock, formatLabel: 'Story 9:16', copy: AI_PROMPTS[2], createdAt: '05 de jun' },
+  { id: 'hist-4', image: bannerLimitedEdition, formatLabel: 'Impressão A4', copy: AI_PROMPTS[0], createdAt: '28 de mai' },
 ];
 
 const WIZARD_STEPS = [
@@ -60,9 +102,16 @@ const WIZARD_STEPS = [
   { n: 6, label: 'Resultado' },
 ];
 
+const clampStyle: CSSProperties = {
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+};
+
 type Mode = 'home' | 'wizard' | 'campaigns';
 
-function MarketingHome({ history, onCreate, onManageCampaigns }: { history: HistoryItem[]; onCreate: () => void; onManageCampaigns: () => void }) {
+function MarketingHome({ history, onCreate, onManageThemes }: { history: HistoryItem[]; onCreate: () => void; onManageThemes: () => void }) {
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       {/* Header */}
@@ -78,11 +127,11 @@ function MarketingHome({ history, onCreate, onManageCampaigns }: { history: Hist
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            onClick={onManageCampaigns}
+            onClick={onManageThemes}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
             style={{ fontSize: '0.82rem', fontWeight: 600 }}
           >
-            <Palette className="w-4 h-4" /> Campanhas
+            <Palette className="w-4 h-4" /> Gerir temas
           </button>
           <button
             onClick={onCreate}
@@ -108,7 +157,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns }: { history: Hist
                 </div>
                 <div className="p-3">
                   <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{item.formatLabel}</p>
-                  <p className="text-muted-foreground mb-2" style={{ fontSize: '0.7rem' }}>{item.createdAt}</p>
+                  <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem', ...clampStyle }}>{item.copy}</p>
                   <button
                     onClick={() => toast.success('Arquivo baixado')}
                     className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
@@ -132,7 +181,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns }: { history: Hist
   );
 }
 
-function CampaignsManager({ onBack }: { onBack: () => void }) {
+function ThemesManager({ onBack }: { onBack: () => void }) {
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       <button
@@ -145,7 +194,7 @@ function CampaignsManager({ onBack }: { onBack: () => void }) {
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Campanhas</h2>
+          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Gerir temas</h2>
           <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Gerencie os temas visuais e sets fotográficos usados nas campanhas</p>
         </div>
         <button
@@ -160,15 +209,8 @@ function CampaignsManager({ onBack }: { onBack: () => void }) {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {THEMES.map(t => (
           <div key={t.id} className="rounded-xl border border-border overflow-hidden bg-card">
-            <div
-              className="h-24 flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${t.colors[0]} 0%, ${t.colors[1]} 100%)` }}
-            >
-              <div className="flex gap-1.5">
-                {t.colors.map((c, i) => (
-                  <div key={i} className="w-5 h-5 rounded-full border-2 border-white/20" style={{ background: c }} />
-                ))}
-              </div>
+            <div className="h-28 bg-secondary/40">
+              <img src={t.photo} alt={t.label} className="w-full h-full object-cover" />
             </div>
             <div className="p-3">
               <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t.label}</p>
@@ -188,22 +230,32 @@ function CampaignsManager({ onBack }: { onBack: () => void }) {
   );
 }
 
-function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (item: HistoryItem) => void }) {
+function CampaignWizard({ profile, onBack, onFinish }: { profile: Profile; onBack: () => void; onFinish: (items: HistoryItem[]) => void }) {
   const [step, setStep] = useState(1);
   const [objective, setObjective] = useState('lancamento');
-  const [format, setFormat] = useState('instagram-post');
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set([products[0].id, products[4].id]));
+  const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set(['instagram-feed']));
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set([products[0].id]));
   const [theme, setTheme] = useState('premium');
   const [prompt, setPrompt] = useState(AI_PROMPTS[0]);
   const [generating, setGenerating] = useState(false);
 
-  const selectedFormat = FORMATS.find(f => f.id === format)!;
+  const sortedProducts = sortProductsForProfile(profile);
+  const selectedFormatList = FORMATS.filter(f => selectedFormats.has(f.id));
+
+  const toggleFormat = (id: string) => {
+    setSelectedFormats(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); }
+      else { next.add(id); }
+      return next;
+    });
+  };
 
   const toggleProduct = (id: string) => {
     setSelectedProducts(prev => {
       const next = new Set(prev);
       if (next.has(id)) { next.delete(id); }
-      else if (next.size < 4) { next.add(id); }
+      else if (next.size < 3) { next.add(id); }
       return next;
     });
   };
@@ -217,13 +269,15 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
   };
 
   const handleFinish = () => {
-    onFinish({
-      id: `hist-${Math.round(Math.random() * 1e6)}`,
+    const items: HistoryItem[] = selectedFormatList.map(f => ({
+      id: `hist-${Math.round(Math.random() * 1e6)}-${f.id}`,
       image: campaignPreviewMock,
-      formatLabel: selectedFormat.label,
+      formatLabel: f.label,
+      copy: prompt,
       createdAt: 'agora',
-    });
-    toast.success('Campanha salva no histórico');
+    }));
+    onFinish(items);
+    toast.success(items.length === 1 ? 'Peça salva no histórico' : `${items.length} peças salvas no histórico`);
     onBack();
   };
 
@@ -289,26 +343,31 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
           </div>
         )}
 
-        {/* Step 2: Formato */}
+        {/* Step 2: Formato (multi-select) */}
         {step === 2 && (
           <div>
-            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Formato da peça</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Onde esta campanha será usada?</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+              <h3 className="text-foreground" style={{ fontWeight: 600 }}>Formato da peça</h3>
+              <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedFormats.size} selecionado(s)</span>
+            </div>
+            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Onde esta campanha será usada? Selecione um ou mais formatos.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {FORMATS.map(f => {
                 const Icon = f.icon;
+                const isSelected = selectedFormats.has(f.id);
                 return (
                   <button
                     key={f.id}
-                    onClick={() => setFormat(f.id)}
-                    className={`rounded-xl border p-4 text-left transition-all ${format === f.id ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
+                    onClick={() => toggleFormat(f.id)}
+                    className={`rounded-xl border p-4 text-left transition-all ${isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
                   >
                     <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="w-5 h-5 text-primary" />
                     </div>
                     <p className="text-foreground mt-2" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{f.label}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{f.dimensions}</p>
-                    {format === f.id && <Check className="w-4 h-4 text-primary mt-2" />}
+                    <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{f.description}</p>
+                    <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.68rem' }}>{f.spec}</p>
+                    {isSelected && <Check className="w-4 h-4 text-primary mt-2" />}
                   </button>
                 );
               })}
@@ -322,13 +381,14 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-foreground" style={{ fontWeight: 600 }}>Selecionar produtos</h3>
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>Escolha até 4 produtos para a campanha</p>
+                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>Escolha até 3 produtos para a campanha</p>
               </div>
-              <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedProducts.size}/4 selecionados</span>
+              <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedProducts.size}/3 selecionados</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {products.map(p => {
+              {sortedProducts.map(p => {
                 const isSelected = selectedProducts.has(p.id);
+                const meta = productMeta[p.id];
                 return (
                   <button
                     key={p.id}
@@ -343,8 +403,14 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
                         </div>
                       )}
                     </div>
+                    {meta && (
+                      <span className={`inline-block px-1.5 py-0.5 rounded-full mb-1 capitalize ${tagColors[meta.tag]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                        {meta.tag}
+                      </span>
+                    )}
                     <p className="text-foreground truncate" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.name}</p>
                     <p className="text-primary mono" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{formatCurrency(p.price)}</p>
+                    {meta && <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Estoque: {meta.stock} pares</p>}
                   </button>
                 );
               })}
@@ -352,11 +418,11 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
           </div>
         )}
 
-        {/* Step 4: Tema */}
+        {/* Step 4: Tema (single-select, photo set from Gerir temas) */}
         {step === 4 && (
           <div>
             <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Tema visual</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Escolha a identidade visual da peça</p>
+            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Escolha um set fotográfico da sua biblioteca de temas</p>
             <div className="grid grid-cols-3 gap-3">
               {THEMES.map(t => (
                 <button
@@ -364,15 +430,8 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
                   onClick={() => setTheme(t.id)}
                   className={`rounded-xl border overflow-hidden transition-all ${theme === t.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
                 >
-                  <div
-                    className="h-20 flex items-center justify-center"
-                    style={{ background: `linear-gradient(135deg, ${t.colors[0]} 0%, ${t.colors[1]} 100%)` }}
-                  >
-                    <div className="flex gap-1.5">
-                      {t.colors.map((c, i) => (
-                        <div key={i} className="w-5 h-5 rounded-full border-2 border-white/20" style={{ background: c }} />
-                      ))}
-                    </div>
+                  <div className="h-20 bg-secondary/40">
+                    <img src={t.photo} alt={t.label} className="w-full h-full object-cover" />
                   </div>
                   <div className="p-3 bg-secondary/20 flex items-center justify-between">
                     <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t.label}</span>
@@ -418,13 +477,15 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
           </div>
         )}
 
-        {/* Step 6: Resultado */}
+        {/* Step 6: Resultado — cards like Histórico, one per selected format */}
         {step === 6 && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-foreground" style={{ fontWeight: 600 }}>Resultado da campanha</h3>
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedFormat.label} · {selectedFormat.dimensions}</p>
+                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>
+                  {selectedFormatList.length} {selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'}
+                </p>
               </div>
               <button
                 onClick={() => setStep(5)}
@@ -435,26 +496,25 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
               </button>
             </div>
 
-            {/* Generated banner mockup */}
-            <div className="rounded-2xl overflow-hidden border border-border mb-5 mx-auto" style={{ maxWidth: 340 }}>
-              <img src={campaignPreviewMock} alt="Preview da campanha" className="w-full h-auto block" />
-            </div>
-
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => toast.success('Arquivo baixado')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                style={{ fontSize: '0.82rem', fontWeight: 500 }}
-              >
-                <Download className="w-4 h-4" /> Baixar
-              </button>
-              <button
-                onClick={() => toast.success('Em breve: compartilhamento direto')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
-                style={{ fontSize: '0.82rem', fontWeight: 600 }}
-              >
-                <Share2 className="w-4 h-4" /> Compartilhar
-              </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {selectedFormatList.map(f => (
+                <div key={f.id} className="bg-card border border-border rounded-xl overflow-hidden">
+                  <div className="aspect-square bg-secondary/40">
+                    <img src={campaignPreviewMock} alt={f.label} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-3">
+                    <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{f.label}</p>
+                    <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem', ...clampStyle }}>{prompt}</p>
+                    <button
+                      onClick={() => toast.success('Arquivo baixado')}
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+                      style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                    >
+                      <Download className="w-3.5 h-3.5" /> Baixar
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -474,7 +534,7 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
         {step < 5 ? (
           <button
             onClick={() => setStep(s => s + 1)}
-            disabled={step === 3 && selectedProducts.size === 0}
+            disabled={(step === 2 && selectedFormats.size === 0) || (step === 3 && selectedProducts.size === 0)}
             className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
             style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
@@ -512,19 +572,20 @@ function CampaignWizard({ onBack, onFinish }: { onBack: () => void; onFinish: (i
   );
 }
 
-export function MarketingStudio() {
+export function MarketingStudio({ profile }: { profile: Profile }) {
   const [mode, setMode] = useState<Mode>('home');
   const [history, setHistory] = useState<HistoryItem[]>(initialHistory);
 
   if (mode === 'campaigns') {
-    return <CampaignsManager onBack={() => setMode('home')} />;
+    return <ThemesManager onBack={() => setMode('home')} />;
   }
 
   if (mode === 'wizard') {
     return (
       <CampaignWizard
+        profile={profile}
         onBack={() => setMode('home')}
-        onFinish={item => setHistory(prev => [item, ...prev])}
+        onFinish={items => setHistory(prev => [...items, ...prev])}
       />
     );
   }
@@ -533,7 +594,7 @@ export function MarketingStudio() {
     <MarketingHome
       history={history}
       onCreate={() => setMode('wizard')}
-      onManageCampaigns={() => setMode('campaigns')}
+      onManageThemes={() => setMode('campaigns')}
     />
   );
 }
