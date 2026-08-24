@@ -53,16 +53,18 @@ function formatDateShort(dateStr: string): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
-function statusSupportText(order: Order): string | null {
+function statusSupportText(order: Order): string {
   switch (order.status) {
+    case 'aprovado':
+      return formatDate(order.date);
+    case 'em análise':
+      return `Aguardando aprovação em ${formatDate(order.date)}`;
     case 'faturado':
       return `Entrega prevista: ${formatDate(shiftDate(order.date, 10))}`;
     case 'entregue':
-      return `Entregue em: ${formatDate(shiftDate(order.date, 6))}`;
-    case 'em análise':
-      return 'Aguardando aprovação';
-    default:
-      return null;
+      return `em ${formatDate(shiftDate(order.date, 6))}`;
+    case 'cancelado':
+      return `em ${formatDate(order.date)}`;
   }
 }
 
@@ -85,9 +87,7 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
               <StatusIcon className="w-3 h-3" />
               {order.status}
             </span>
-            {support && (
-              <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
-            )}
+            <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
           </div>
           <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.72rem' }}>{formatDateShort(order.date)}</p>
           <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
