@@ -3,7 +3,7 @@ import {
   Search, ChevronRight, Clock,
   CheckCircle2, XCircle, FileCheck2, PackageCheck,
 } from "lucide-react";
-import { orders, formatCurrency, formatDate, type Order } from "../data/mockData";
+import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
 
@@ -65,15 +65,16 @@ export function statusSupportText(order: Order): string {
 
 // shared column template so the legend row and every card line up exactly
 function orderGridTemplate(profile: Profile): string {
-  return profile === 'rep'
-    ? 'minmax(0,1fr) 100px 130px 20px'
-    : 'minmax(0,1fr) 150px 100px 130px 20px';
+  if (profile === 'rep') return 'minmax(0,1fr) 160px 100px 130px 20px'; // pedido, cliente, quantidade, total
+  if (profile === 'lojista') return 'minmax(0,1fr) 150px 100px 130px 20px'; // pedido, representante, quantidade, total
+  return 'minmax(0,1fr) 160px 150px 100px 130px 20px'; // admin: pedido, cliente, representante, quantidade, total
 }
 
 function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
   const StatusIcon = statusIcon[order.status];
   const support = statusSupportText(order);
   const productName = orderProductNames[order.id] ?? order.collection;
+  const client = clients.find(c => c.id === order.clientId);
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -96,19 +97,27 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           </p>
         </div>
 
-        {/* column 2: representante */}
+        {/* column 2: cliente (admin/rep only) */}
+        {profile !== 'lojista' && (
+          <div className="min-w-0">
+            <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{client?.name ?? order.client}</p>
+            <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{client?.cnpj}</p>
+          </div>
+        )}
+
+        {/* column 3: representante (hidden for rep, viewing their own orders) */}
         {profile !== 'rep' && (
           <div className="min-w-0">
             <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.rep}</p>
           </div>
         )}
 
-        {/* column 3: quantidade */}
+        {/* column 4: quantidade */}
         <div className="min-w-0">
           <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
         </div>
 
-        {/* column 4: total */}
+        {/* column 5: total */}
         <div className="text-right min-w-0">
           <p className="text-foreground mono truncate" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
         </div>
@@ -186,6 +195,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin' }: O
             }}
           >
             <div className="min-w-0">Pedido</div>
+            {profile !== 'lojista' && <div className="min-w-0">Cliente</div>}
             {profile !== 'rep' && <div className="min-w-0">Representante</div>}
             <div className="min-w-0">Quantidade</div>
             <div className="text-right min-w-0">Total</div>

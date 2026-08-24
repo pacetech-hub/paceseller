@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { ChevronLeft, Download, ArrowRight, Package2 } from "lucide-react";
-import { products, formatCurrency, type Order, type Product } from "../data/mockData";
+import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
 import { statusColors, statusIcon, statusSupportText, orderProductNames } from "./OrderHistory";
 
 type View = 'history' | 'boletos';
@@ -12,6 +12,12 @@ interface OrderDetailPageProps {
   onNavigate: (view: View) => void;
   profile: Profile;
 }
+
+const clientStatusColors: Record<string, string> = {
+  'ativo': 'text-emerald-400 bg-emerald-400/10',
+  'inativo': 'text-red-400 bg-red-400/10',
+  'em aberto': 'text-amber-400 bg-amber-400/10',
+};
 
 // deterministic line-item breakdown per order — quantities sum to order.items
 const orderLineItems: Record<string, Array<{ productId: string; quantity: number }>> = {
@@ -59,6 +65,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
   const support = statusSupportText(order);
   const productName = orderProductNames[order.id] ?? order.collection;
   const lineItems = getOrderLineItems(order);
+  const client = clients.find(c => c.id === order.clientId);
 
   return (
     <div className="p-6 max-w-[1000px] mx-auto w-full space-y-5">
@@ -69,6 +76,23 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
       >
         <ChevronLeft className="w-4 h-4" /> Voltar para Pedidos
       </button>
+
+      {/* Cliente — admin/rep only */}
+      {profile !== 'lojista' && client && (
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-muted-foreground mb-3" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Cliente
+          </p>
+          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+            <p className="text-foreground" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{client.name}</p>
+            <span className={`px-2 py-0.5 rounded-full ${clientStatusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+              {client.status}
+            </span>
+          </div>
+          <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.8rem' }}>{client.cnpj}</p>
+          <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.city} / {client.state}</p>
+        </div>
+      )}
 
       {/* Produtos */}
       <div className="bg-card border border-border rounded-xl p-4">
@@ -124,6 +148,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
               <span className="mono">{order.id}</span> — {productName}
             </p>
+            <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>Representante: {order.rep}</p>
           </div>
 
           {/* column 2: value + payment + link to Pagamentos e Boletos */}
