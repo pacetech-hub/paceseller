@@ -146,13 +146,17 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               NF de compra
             </p>
-            <button
-              onClick={() => toast.success('Nota fiscal baixada')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.78rem', fontWeight: 500 }}
-            >
-              <Download className="w-3.5 h-3.5" /> Baixar NF
-            </button>
+            {order.status === 'faturado' || order.status === 'entregue' ? (
+              <button
+                onClick={() => toast.success('Nota fiscal baixada')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+                style={{ fontSize: '0.78rem', fontWeight: 500 }}
+              >
+                <Download className="w-3.5 h-3.5" /> Baixar NF
+              </button>
+            ) : (
+              <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>NF indisponível</p>
+            )}
           </div>
         </div>
       </div>
