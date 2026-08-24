@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import {
-  Search, ChevronRight, Download, RotateCcw, Clock,
+  Search, ChevronRight, Clock,
   CheckCircle2, XCircle, FileCheck2, PackageCheck,
 } from "lucide-react";
 import { orders, formatCurrency, formatDate, type Order } from "../data/mockData";
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
 interface OrderHistoryProps {
   onNavigate: (view: View) => void;
+  onSelectOrder: (order: Order) => void;
   profile?: Profile;
 }
 
-const statusColors: Record<string, string> = {
+export const statusColors: Record<string, string> = {
   'aprovado': 'text-black bg-black/10',
   'em análise': 'text-amber-400 bg-amber-400/10',
   'faturado': 'text-emerald-400 bg-emerald-400/10',
@@ -23,7 +23,7 @@ const statusColors: Record<string, string> = {
   'entregue': 'text-purple-400 bg-purple-400/10',
 };
 
-const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = {
+export const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = {
   'aprovado': CheckCircle2,
   'em análise': Clock,
   'faturado': FileCheck2,
@@ -31,7 +31,7 @@ const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = 
   'entregue': PackageCheck,
 };
 
-const orderProductNames: Record<string, string> = {
+export const orderProductNames: Record<string, string> = {
   'PED-2026-0412': 'Tênis Casual — Grade Mista',
   'PED-2026-0411': 'Sapatos Sociais — Linha Executiva',
   'PED-2026-0410': 'Botas Impermeáveis — Coleção Verão 26',
@@ -48,7 +48,7 @@ function shiftDate(dateStr: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-function statusSupportText(order: Order): string {
+export function statusSupportText(order: Order): string {
   switch (order.status) {
     case 'aprovado':
       return `em ${formatDate(order.date)}`;
@@ -70,8 +70,7 @@ function orderGridTemplate(profile: Profile): string {
     : 'minmax(0,1fr) 150px 100px 130px 20px';
 }
 
-function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Profile; onNavigate: (view: View) => void }) {
-  const [expanded, setExpanded] = useState(false);
+function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
   const StatusIcon = statusIcon[order.status];
   const support = statusSupportText(order);
   const productName = orderProductNames[order.id] ?? order.collection;
@@ -79,7 +78,7 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div
-        onClick={() => setExpanded(e => !e)}
+        onClick={onOpen}
         className="p-4 cursor-pointer hover:bg-secondary/30 transition-colors"
         style={{ display: 'grid', gridTemplateColumns: orderGridTemplate(profile), columnGap: '1rem', alignItems: 'center' }}
       >
@@ -114,47 +113,13 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
           <p className="text-foreground mono truncate" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
         </div>
 
-        <ChevronRight className={`w-4 h-4 text-muted-foreground justify-self-center transition-transform ${expanded ? 'rotate-90' : ''}`} />
+        <ChevronRight className="w-4 h-4 text-muted-foreground justify-self-center" />
       </div>
-
-      {expanded && (
-        <div className="border-t border-border bg-secondary/20 p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            {[
-              { label: 'Coleção', value: order.collection },
-              { label: 'Pagamento', value: order.paymentCondition },
-              { label: 'Total de pares', value: `${order.items} pares` },
-              { label: 'Ticket médio/par', value: formatCurrency(order.total / order.items) },
-            ].map(detail => (
-              <div key={detail.label}>
-                <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{detail.label}</p>
-                <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{detail.value}</p>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={e => { e.stopPropagation(); onNavigate('cart'); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              style={{ fontSize: '0.78rem', fontWeight: 600 }}
-            >
-              <RotateCcw className="w-3.5 h-3.5" /> Repetir pedido
-            </button>
-            <button
-              onClick={e => { e.stopPropagation(); toast.success('PDF baixado'); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.78rem', fontWeight: 500 }}
-            >
-              <Download className="w-3.5 h-3.5" /> PDF
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProps) {
+export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin' }: OrderHistoryProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
 
@@ -229,7 +194,12 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
         )}
         <div className="space-y-3">
           {filtered.map(order => (
-            <OrderCard key={order.id} order={order} profile={profile} onNavigate={onNavigate} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              profile={profile}
+              onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
+            />
           ))}
 
           {filtered.length === 0 && (

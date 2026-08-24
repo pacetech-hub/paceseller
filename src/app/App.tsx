@@ -3,7 +3,7 @@ import { Toaster } from "./components/ui/sonner";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
-import { clients as clientsList, type Client } from "./data/mockData";
+import { clients as clientsList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
 import { DashboardRep } from "./components/DashboardRep";
 import { DashboardLojista } from "./components/DashboardLojista";
@@ -19,6 +19,7 @@ import { AdminPage } from "./components/AdminPage";
 import { ClientsPage } from "./components/ClientsPage";
 import { ProfilePage } from "./components/ProfilePage";
 import { BoletosPage } from "./components/BoletosPage";
+import { OrderDetailPage } from "./components/OrderDetailPage";
 import { LojistaFiltersSidebar, defaultFilters, type CatalogFilters } from "./components/LojistaFiltersSidebar";
 import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
@@ -42,6 +43,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   stock: { title: 'Meu Estoque', subtitle: 'Cadastre ou integre seu estoque da marca' },
   'industry-stock': { title: 'Estoque', subtitle: 'Estoque industrial e por cliente — somente visualização' },
   permissions: { title: 'Permissões de Acesso', subtitle: 'Controle o que os usuários vinculados à sua conta podem acessar' },
+  'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
 };
 
 export default function App() {
@@ -49,6 +51,7 @@ export default function App() {
   const [profile, setProfile] = useState<Profile>('admin');
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
   const [carts, setCarts] = useState<CartContext[]>(() =>
     mockCarts.map(({ id, clientId, clientName, cartName, createdBy }) => ({ id, clientId, clientName, cartName, createdBy }))
@@ -91,6 +94,12 @@ export default function App() {
     setAuthenticated(false);
     setCurrentView('dashboard');
     setSelectedClient(null);
+    setSelectedOrder(null);
+  };
+
+  const openOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setCurrentView('order-detail');
   };
 
   const navigate = (view: View) => setCurrentView(view);
@@ -103,6 +112,8 @@ export default function App() {
           profile === 'rep' ? 'Sua performance e carteira' :
           'Sua loja em números',
       }
+    : currentView === 'order-detail' && selectedOrder
+    ? { title: selectedOrder.id, subtitle: 'Detalhes do pedido' }
     : viewTitles[currentView];
 
   if (!authenticated) {
@@ -200,7 +211,9 @@ export default function App() {
           />
         );
       case 'history':
-        return <OrderHistory onNavigate={navigate} profile={profile} />;
+        return <OrderHistory onNavigate={navigate} onSelectOrder={openOrder} profile={profile} />;
+      case 'order-detail':
+        return <OrderDetailPage order={selectedOrder} onNavigate={navigate} profile={profile} />;
       case 'marketing':
         return <MarketingStudio />;
       case 'sellout':
