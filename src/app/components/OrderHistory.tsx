@@ -101,7 +101,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
         {profile !== 'lojista' && (
           <div className="min-w-0">
             <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{client?.name ?? order.client}</p>
-            <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{client?.cnpj}</p>
+            <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{client ? `${client.city} / ${client.state}` : ''}</p>
           </div>
         )}
 
