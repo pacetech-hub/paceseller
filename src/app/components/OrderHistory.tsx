@@ -68,6 +68,13 @@ function statusSupportText(order: Order): string {
   }
 }
 
+// shared column template so the legend row and every card line up exactly
+function orderGridTemplate(profile: Profile): string {
+  return profile === 'rep'
+    ? 'minmax(0,1fr) 100px 130px 20px'
+    : 'minmax(0,1fr) 150px 100px 130px 20px';
+}
+
 function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Profile; onNavigate: (view: View) => void }) {
   const [expanded, setExpanded] = useState(false);
   const StatusIcon = statusIcon[order.status];
@@ -78,10 +85,11 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div
         onClick={() => setExpanded(e => !e)}
-        className="p-4 flex items-center gap-4 flex-wrap cursor-pointer hover:bg-secondary/30 transition-colors"
+        className="p-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+        style={{ display: 'grid', gridTemplateColumns: orderGridTemplate(profile), columnGap: '1rem', alignItems: 'center' }}
       >
         {/* column 1: order info */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[order.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
               <StatusIcon className="w-3 h-3" />
@@ -97,22 +105,22 @@ function OrderCard({ order, profile, onNavigate }: { order: Order; profile: Prof
 
         {/* column 2: representante */}
         {profile !== 'rep' && (
-          <div className="flex-shrink-0" style={{ minWidth: '120px' }}>
+          <div className="min-w-0">
             <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.rep}</p>
           </div>
         )}
 
         {/* column 3: quantidade */}
-        <div className="flex-shrink-0" style={{ minWidth: '80px' }}>
-          <p className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
+        <div className="min-w-0">
+          <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
         </div>
 
         {/* column 4: total */}
-        <div className="text-right flex-shrink-0">
-          <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
+        <div className="text-right min-w-0">
+          <p className="text-foreground mono truncate" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
         </div>
 
-        <ChevronRight className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+        <ChevronRight className={`w-4 h-4 text-muted-foreground justify-self-center transition-transform ${expanded ? 'rotate-90' : ''}`} />
       </div>
 
       {expanded && (
@@ -170,25 +178,8 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
     return matchSearch && matchStatus;
   });
 
-  const totalValue = filtered.reduce((acc, o) => acc + o.total, 0);
-
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: 'Pedidos', value: String(filtered.length), sub: 'no período' },
-          { label: 'Total', value: formatCurrency(totalValue), sub: 'em pedidos', mono: true },
-          { label: 'Ticket médio', value: formatCurrency(filtered.length ? totalValue / filtered.length : 0), sub: 'por pedido', mono: true },
-        ].map(stat => (
-          <div key={stat.label} className="bg-card border border-border rounded-xl p-4">
-            <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
-            <p className={`text-foreground ${stat.mono ? 'mono' : ''}`} style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: stat.mono ? '-0.01em' : undefined }}>{stat.value}</p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.sub}</p>
-          </div>
-        ))}
-      </div>
-
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[160px]">
@@ -217,17 +208,26 @@ export function OrderHistory({ onNavigate, profile = 'admin' }: OrderHistoryProp
       </div>
 
       {/* Orders */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {filtered.length > 0 && (
           <div
-            className="flex items-center gap-4 px-4 flex-wrap text-muted-foreground"
-            style={{ fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}
+            className="sticky top-0 z-10 bg-card border border-border rounded-xl px-4 py-2.5 text-muted-foreground"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: orderGridTemplate(profile),
+              columnGap: '1rem',
+              alignItems: 'center',
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}
           >
-            <div className="flex-1 min-w-0">Pedido</div>
-            {profile !== 'rep' && <div className="flex-shrink-0" style={{ minWidth: '120px' }}>Representante</div>}
-            <div className="flex-shrink-0" style={{ minWidth: '80px' }}>Quantidade</div>
-            <div className="text-right flex-shrink-0">Total</div>
-            <div className="w-4 flex-shrink-0" />
+            <div className="min-w-0">Pedido</div>
+            {profile !== 'rep' && <div className="min-w-0">Representante</div>}
+            <div className="min-w-0">Quantidade</div>
+            <div className="text-right min-w-0">Total</div>
+            <div />
           </div>
         )}
         <div className="space-y-3">
