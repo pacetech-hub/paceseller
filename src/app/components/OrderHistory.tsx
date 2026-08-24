@@ -53,9 +53,9 @@ function statusSupportText(order: Order): string {
     case 'aprovado':
       return formatDate(order.date);
     case 'em análise':
-      return `Aguardando aprovação em ${formatDate(order.date)}`;
+      return `Emissão em ${formatDate(order.date)}`;
     case 'faturado':
-      return `Entrega prevista: ${formatDate(shiftDate(order.date, 10))}`;
+      return `Entrega prevista em ${formatDate(shiftDate(order.date, 10))}`;
     case 'entregue':
       return `em ${formatDate(shiftDate(order.date, 6))}`;
     case 'cancelado':
