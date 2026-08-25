@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import {
   Sparkles, Check, ChevronRight, ChevronLeft, Instagram, MessageCircle, Printer,
   Wand2, RefreshCw, Rocket, Tag, Trophy, Zap, Download, Palette, Plus, Image as ImageIcon,
-  Music2, Smartphone,
+  Music2, Smartphone, Trash2,
 } from "lucide-react";
 import { products, formatCurrency, type Product } from "../data/mockData";
 import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
@@ -113,7 +113,7 @@ const clampStyle: CSSProperties = {
 
 type Mode = 'home' | 'wizard' | 'campaigns';
 
-function MarketingHome({ history, onCreate, onManageThemes }: { history: HistoryItem[]; onCreate: () => void; onManageThemes: () => void }) {
+function MarketingHome({ history, onCreate, onManageThemes, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageThemes: () => void; onDelete: (id: string) => void }) {
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       {/* Header */}
@@ -154,8 +154,15 @@ function MarketingHome({ history, onCreate, onManageThemes }: { history: History
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {history.map(item => (
               <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="aspect-square bg-secondary/40">
+                <div className="relative aspect-square bg-secondary/40">
                   <img src={item.image} alt={item.formatLabel} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    aria-label="Excluir"
+                    className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
                 <div className="p-3">
                   <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{item.formatLabel}</p>
@@ -606,6 +613,10 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       history={history}
       onCreate={() => setMode('wizard')}
       onManageThemes={() => setMode('campaigns')}
+      onDelete={id => {
+        setHistory(prev => prev.filter(item => item.id !== id));
+        toast.success('Peça excluída do histórico');
+      }}
     />
   );
 }
