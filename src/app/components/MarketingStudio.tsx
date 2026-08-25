@@ -513,25 +513,27 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Campanha</h3>
             <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Para qual campanha esta peça será criada?</p>
             {campaigns.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {campaigns.map(c => (
                   <button
                     key={c.id}
                     onClick={() => setCampaignId(c.id)}
-                    className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all ${campaignId === c.id ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
+                    className={`rounded-xl border overflow-hidden text-left transition-all ${campaignId === c.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
                   >
-                    <div className="w-11 h-11 rounded-lg bg-secondary/40 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="aspect-[4/5] bg-secondary/40 flex items-center justify-center">
                       {c.photos.length > 0 ? (
                         <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
                       ) : (
-                        <ImageIcon className="w-5 h-5 text-muted-foreground/30" />
+                        <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-foreground truncate" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</p>
-                      <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.description || 'Sem descrição'}</p>
+                    <div className="p-3 bg-secondary/20 flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-foreground truncate" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</p>
+                        <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.description || 'Sem descrição'}</p>
+                      </div>
+                      {campaignId === c.id && <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />}
                     </div>
-                    {campaignId === c.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -637,14 +639,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               Escolha um cenário fotográfico de {selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}
             </p>
             {selectedCampaign && selectedCampaign.photos.length > 0 ? (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {selectedCampaign.photos.map((photo, idx) => (
                   <button
                     key={idx}
                     onClick={() => setScenarioIndex(idx)}
                     className={`rounded-xl border overflow-hidden transition-all ${scenarioIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
                   >
-                    <div className="h-20 bg-secondary/40">
+                    <div className="aspect-[4/5] bg-secondary/40">
                       <img src={photo} alt={`Cenário ${idx + 1}`} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-3 bg-secondary/20 flex items-center justify-between">
