@@ -6,6 +6,8 @@ import {
   Music2, Smartphone, Trash2, Upload,
 } from "lucide-react";
 import { products, formatCurrency, type Product } from "../data/mockData";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "./ui/alert-dialog";
 import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
 import bannerLimitedEdition from "@/assets/banner-edicao-limitada.webp";
 
@@ -33,16 +35,13 @@ const FORMATS = [
 interface Campaign {
   id: string;
   name: string;
+  description: string;
   photos: string[];
 }
 
 const initialCampaigns: Campaign[] = [
-  { id: 'premium', name: 'Premium Dark', photos: [products[0].image] },
-  { id: 'clean', name: 'Clean Minimal', photos: [products[1].image] },
-  { id: 'bold', name: 'Bold Impact', photos: [campaignPreviewMock] },
-  { id: 'nature', name: 'Natural & Warm', photos: [products[2].image] },
-  { id: 'ocean', name: 'Ocean Blue', photos: [bannerLimitedEdition] },
-  { id: 'sport', name: 'Sport Energy', photos: [products[3].image] },
+  { id: 'lancamentos', name: 'Lançamentos', description: 'Peças e materiais para o lançamento de novas coleções.', photos: [campaignPreviewMock] },
+  { id: 'volta-as-aulas', name: 'Volta às Aulas', description: 'Campanha sazonal voltada para o público de volta às aulas.', photos: [bannerLimitedEdition] },
 ];
 
 const AI_PROMPTS = [
@@ -196,26 +195,36 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
   );
 }
 
-function CampaignsManager({ campaigns, onBack, onCreateCampaign, onAddPhotos }: {
+function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCampaign, onAddPhotos, onDeletePhoto, onDeleteCampaign }: {
   campaigns: Campaign[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
   onBack: () => void;
-  onCreateCampaign: (name: string) => void;
+  onCreateCampaign: (name: string, description: string) => void;
   onAddPhotos: (campaignId: string, photos: string[]) => void;
+  onDeletePhoto: (campaignId: string, photoIndex: number) => void;
+  onDeleteCampaign: (id: string) => void;
 }) {
   const [creating, setCreating] = useState(false);
-  const [name, setName] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Campaign | null>(null);
+
+  const selected = campaigns.find(c => c.id === selectedId) ?? null;
 
   const handleCreate = () => {
-    if (!name.trim()) return;
-    onCreateCampaign(name.trim());
-    setName('');
+    if (!newName.trim()) return;
+    onCreateCampaign(newName.trim(), newDescription.trim());
+    setNewName('');
+    setNewDescription('');
     setCreating(false);
   };
 
-  const handleFileChange = (campaignId: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selected) return;
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    onAddPhotos(campaignId, Array.from(files).map(f => URL.createObjectURL(f)));
+    onAddPhotos(selected.id, Array.from(files).map(f => URL.createObjectURL(f)));
     e.target.value = '';
   };
 
@@ -229,75 +238,187 @@ function CampaignsManager({ campaigns, onBack, onCreateCampaign, onAddPhotos }: 
         <ChevronLeft className="w-4 h-4" /> Voltar para Marketing IA
       </button>
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Gerenciar campanhas</h2>
-          <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Crie campanhas e envie os sets de fotos usados como fundo das peças</p>
-        </div>
-        <button
-          onClick={() => setCreating(v => !v)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          style={{ fontSize: '0.85rem', fontWeight: 600 }}
-        >
-          <Plus className="w-4 h-4" /> Nova campanha
-        </button>
+      <div>
+        <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Gerenciar campanhas</h2>
+        <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</p>
       </div>
 
-      {creating && (
-        <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 flex-wrap">
-          <input
-            type="text"
-            autoFocus
-            value={name}
-            onChange={e => setName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleCreate(); }}
-            placeholder="Nome da campanha"
-            className="flex-1 min-w-[200px] px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.85rem' }}
-          />
+      <div className="flex items-start gap-5">
+        {/* Left panel: campaign list */}
+        <div className="w-64 flex-shrink-0 bg-card border border-border rounded-xl p-2">
+          <div className="space-y-0.5">
+            {campaigns.map(c => (
+              <div
+                key={c.id}
+                className={`group flex items-center rounded-lg transition-colors ${selectedId === c.id ? 'bg-primary/15' : 'hover:bg-secondary/60'}`}
+              >
+                <button
+                  onClick={() => onSelect(c.id)}
+                  className="flex-1 min-w-0 text-left px-3 py-2.5"
+                >
+                  <span className={`block truncate ${selectedId === c.id ? 'text-primary' : 'text-foreground'}`} style={{ fontSize: '0.85rem', fontWeight: selectedId === c.id ? 600 : 500 }}>
+                    {c.name}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(c)}
+                  aria-label={`Excluir ${c.name}`}
+                  className="mr-1.5 p-1.5 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
           <button
-            onClick={handleCreate}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            style={{ fontSize: '0.82rem', fontWeight: 600 }}
+            onClick={() => setCreating(true)}
+            className="w-full flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-primary hover:bg-primary/10 transition-colors mt-1"
+            style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
-            Criar campanha
-          </button>
-          <button
-            onClick={() => { setCreating(false); setName(''); }}
-            className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.82rem', fontWeight: 500 }}
-          >
-            Cancelar
+            <Plus className="w-4 h-4" /> Nova campanha
           </button>
         </div>
-      )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {campaigns.map(c => (
-          <div key={c.id} className="rounded-xl border border-border overflow-hidden bg-card">
-            <div className="h-28 bg-secondary/40 flex items-center justify-center">
-              {c.photos.length > 0 ? (
-                <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
-              ) : (
-                <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
-              )}
+        {/* Main content: selected campaign detail */}
+        <div className="flex-1 min-w-0 space-y-4">
+          {selected ? (
+            <>
+              <div className="bg-card border border-border rounded-xl p-4">
+                <h3 className="text-foreground" style={{ fontWeight: 700, fontSize: '0.95rem' }}>{selected.name}</h3>
+                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>
+                  {selected.description || 'Sem descrição.'}
+                </p>
+              </div>
+
+              <div className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {selected.photos.length} {selected.photos.length === 1 ? 'cenário fotográfico' : 'cenários fotográficos'}
+                  </p>
+                  <label
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors cursor-pointer"
+                    style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                  >
+                    <Upload className="w-3.5 h-3.5" /> Enviar cenário
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
+                  </label>
+                </div>
+
+                {selected.photos.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {selected.photos.map((photo, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-secondary/40">
+                        <img src={photo} alt={`${selected.name} — cenário ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => onDeletePhoto(selected.id, idx)}
+                          aria-label="Excluir cenário"
+                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <ImageIcon className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                    <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Nenhum cenário enviado ainda</p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
+              <ImageIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
+              <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhuma campanha selecionada</p>
+              <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Selecione uma campanha à esquerda ou crie uma nova</p>
             </div>
-            <div className="p-3">
-              <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{c.name}</p>
-              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem' }}>
-                {c.photos.length === 0 ? 'Nenhuma foto de fundo' : `${c.photos.length} foto${c.photos.length > 1 ? 's' : ''} de fundo`}
-              </p>
-              <label
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors cursor-pointer"
-                style={{ fontSize: '0.78rem', fontWeight: 500 }}
-              >
-                <Upload className="w-3.5 h-3.5" /> Enviar fotos
-                <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange(c.id)} />
-              </label>
+          )}
+        </div>
+      </div>
+
+      {/* Create campaign dialog */}
+      <Dialog open={creating} onOpenChange={setCreating}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle style={{ fontSize: '0.95rem' }}>Nova campanha</DialogTitle>
+            <DialogDescription style={{ fontSize: '0.78rem' }}>
+              Defina o nome e a descrição deste objetivo de campanha
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Nome</label>
+              <input
+                autoFocus
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                placeholder="Ex.: Dia dos Pais"
+                className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
+                style={{ fontSize: '0.82rem' }}
+              />
+            </div>
+            <div>
+              <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Descrição</label>
+              <textarea
+                value={newDescription}
+                onChange={e => setNewDescription(e.target.value)}
+                rows={3}
+                placeholder="Descreva o objetivo desta campanha"
+                className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary resize-none"
+                style={{ fontSize: '0.82rem' }}
+              />
             </div>
           </div>
-        ))}
-      </div>
+          <DialogFooter>
+            <button
+              onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}
+              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+              style={{ fontSize: '0.82rem', fontWeight: 500 }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleCreate}
+              className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              style={{ fontSize: '0.82rem', fontWeight: 600 }}
+            >
+              Salvar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete campaign confirmation */}
+      <AlertDialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="sm:max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle style={{ fontSize: '0.95rem' }}>Excluir campanha</AlertDialogTitle>
+            <AlertDialogDescription style={{ fontSize: '0.78rem' }}>
+              Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+              style={{ fontSize: '0.82rem', fontWeight: 500 }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => {
+                if (deleteTarget) onDeleteCampaign(deleteTarget.id);
+                setDeleteTarget(null);
+              }}
+              className="px-3 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
+              style={{ fontSize: '0.82rem', fontWeight: 600 }}
+            >
+              Excluir
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -661,20 +782,40 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
   const [mode, setMode] = useState<Mode>('home');
   const [history, setHistory] = useState<HistoryItem[]>(initialHistory);
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(initialCampaigns[0]?.id ?? null);
+
+  const handleDeleteCampaign = (id: string) => {
+    const idx = campaigns.findIndex(c => c.id === id);
+    setCampaigns(prev => prev.filter(c => c.id !== id));
+    if (selectedCampaignId === id) {
+      const fallback = campaigns[idx + 1] ?? campaigns[idx - 1] ?? null;
+      setSelectedCampaignId(fallback ? fallback.id : null);
+    }
+    toast.success('Campanha excluída');
+  };
 
   if (mode === 'campaigns') {
     return (
       <CampaignsManager
         campaigns={campaigns}
+        selectedId={selectedCampaignId}
+        onSelect={setSelectedCampaignId}
         onBack={() => setMode('home')}
-        onCreateCampaign={name => {
-          setCampaigns(prev => [{ id: `camp-${Date.now()}`, name, photos: [] }, ...prev]);
+        onCreateCampaign={(name, description) => {
+          const id = `camp-${Date.now()}`;
+          setCampaigns(prev => [{ id, name, description, photos: [] }, ...prev]);
+          setSelectedCampaignId(id);
           toast.success('Campanha criada');
         }}
         onAddPhotos={(campaignId, photos) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: [...photos, ...c.photos] } : c));
           toast.success(photos.length > 1 ? `${photos.length} fotos adicionadas` : 'Foto adicionada');
         }}
+        onDeletePhoto={(campaignId, photoIndex) => {
+          setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: c.photos.filter((_, i) => i !== photoIndex) } : c));
+          toast.success('Cenário removido');
+        }}
+        onDeleteCampaign={handleDeleteCampaign}
       />
     );
   }
