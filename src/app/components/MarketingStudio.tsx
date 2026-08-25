@@ -2,8 +2,8 @@ import { useState, type CSSProperties } from "react";
 import { toast } from "sonner";
 import {
   Sparkles, Check, ChevronRight, ChevronLeft, Instagram, MessageCircle, Printer,
-  Wand2, RefreshCw, Rocket, Tag, Trophy, Zap, Download, Palette, Plus, Image as ImageIcon,
-  Music2, Smartphone, Trash2,
+  Wand2, RefreshCw, Rocket, Tag, Trophy, Zap, Download, Pencil, Plus, Image as ImageIcon,
+  Music2, Smartphone, Trash2, Upload,
 } from "lucide-react";
 import { products, formatCurrency, type Product } from "../data/mockData";
 import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
@@ -30,13 +30,19 @@ const FORMATS = [
   { id: 'impressao-a5', group: 'Impressão', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: Printer },
 ];
 
-const THEMES = [
-  { id: 'premium', label: 'Premium Dark', colors: ['#0A0A0F', '#1a1a2e', '#4F6EF7'], photoCount: 8, photo: products[0].image },
-  { id: 'clean', label: 'Clean Minimal', colors: ['#FAFAFA', '#F0F0F0', '#1a1a1a'], photoCount: 5, photo: products[1].image },
-  { id: 'bold', label: 'Bold Impact', colors: ['#1a0533', '#6B21A8', '#F59E0B'], photoCount: 6, photo: campaignPreviewMock },
-  { id: 'nature', label: 'Natural & Warm', colors: ['#1C1208', '#A16207', '#FEF3C7'], photoCount: 4, photo: products[2].image },
-  { id: 'ocean', label: 'Ocean Blue', colors: ['#0C1A2E', '#0E4D8A', '#38BDF8'], photoCount: 7, photo: bannerLimitedEdition },
-  { id: 'sport', label: 'Sport Energy', colors: ['#0F0F0F', '#16A34A', '#DCFCE7'], photoCount: 6, photo: products[3].image },
+interface Campaign {
+  id: string;
+  name: string;
+  photos: string[];
+}
+
+const initialCampaigns: Campaign[] = [
+  { id: 'premium', name: 'Premium Dark', photos: [products[0].image] },
+  { id: 'clean', name: 'Clean Minimal', photos: [products[1].image] },
+  { id: 'bold', name: 'Bold Impact', photos: [campaignPreviewMock] },
+  { id: 'nature', name: 'Natural & Warm', photos: [products[2].image] },
+  { id: 'ocean', name: 'Ocean Blue', photos: [bannerLimitedEdition] },
+  { id: 'sport', name: 'Sport Energy', photos: [products[3].image] },
 ];
 
 const AI_PROMPTS = [
@@ -113,7 +119,7 @@ const clampStyle: CSSProperties = {
 
 type Mode = 'home' | 'wizard' | 'campaigns';
 
-function MarketingHome({ history, onCreate, onManageThemes, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageThemes: () => void; onDelete: (id: string) => void }) {
+function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       {/* Header */}
@@ -129,11 +135,11 @@ function MarketingHome({ history, onCreate, onManageThemes, onDelete }: { histor
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            onClick={onManageThemes}
+            onClick={onManageCampaigns}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
             style={{ fontSize: '0.82rem', fontWeight: 600 }}
           >
-            <Palette className="w-4 h-4" /> Gerir temas
+            <Pencil className="w-4 h-4" /> Gerenciar campanhas
           </button>
           <button
             onClick={onCreate}
@@ -190,7 +196,29 @@ function MarketingHome({ history, onCreate, onManageThemes, onDelete }: { histor
   );
 }
 
-function ThemesManager({ onBack }: { onBack: () => void }) {
+function CampaignsManager({ campaigns, onBack, onCreateCampaign, onAddPhotos }: {
+  campaigns: Campaign[];
+  onBack: () => void;
+  onCreateCampaign: (name: string) => void;
+  onAddPhotos: (campaignId: string, photos: string[]) => void;
+}) {
+  const [creating, setCreating] = useState(false);
+  const [name, setName] = useState('');
+
+  const handleCreate = () => {
+    if (!name.trim()) return;
+    onCreateCampaign(name.trim());
+    setName('');
+    setCreating(false);
+  };
+
+  const handleFileChange = (campaignId: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    onAddPhotos(campaignId, Array.from(files).map(f => URL.createObjectURL(f)));
+    e.target.value = '';
+  };
+
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       <button
@@ -203,34 +231,69 @@ function ThemesManager({ onBack }: { onBack: () => void }) {
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Gerir temas</h2>
-          <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Gerencie os temas visuais e sets fotográficos usados nas campanhas</p>
+          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Gerenciar campanhas</h2>
+          <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Crie campanhas e envie os sets de fotos usados como fundo das peças</p>
         </div>
         <button
-          onClick={() => toast.success('Em breve: criação de novos temas')}
+          onClick={() => setCreating(v => !v)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           style={{ fontSize: '0.85rem', fontWeight: 600 }}
         >
-          <Plus className="w-4 h-4" /> Novo tema
+          <Plus className="w-4 h-4" /> Nova campanha
         </button>
       </div>
 
+      {creating && (
+        <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 flex-wrap">
+          <input
+            type="text"
+            autoFocus
+            value={name}
+            onChange={e => setName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleCreate(); }}
+            placeholder="Nome da campanha"
+            className="flex-1 min-w-[200px] px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
+            style={{ fontSize: '0.85rem' }}
+          />
+          <button
+            onClick={handleCreate}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            style={{ fontSize: '0.82rem', fontWeight: 600 }}
+          >
+            Criar campanha
+          </button>
+          <button
+            onClick={() => { setCreating(false); setName(''); }}
+            className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+            style={{ fontSize: '0.82rem', fontWeight: 500 }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {THEMES.map(t => (
-          <div key={t.id} className="rounded-xl border border-border overflow-hidden bg-card">
-            <div className="h-28 bg-secondary/40">
-              <img src={t.photo} alt={t.label} className="w-full h-full object-cover" />
+        {campaigns.map(c => (
+          <div key={c.id} className="rounded-xl border border-border overflow-hidden bg-card">
+            <div className="h-28 bg-secondary/40 flex items-center justify-center">
+              {c.photos.length > 0 ? (
+                <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
+              ) : (
+                <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
+              )}
             </div>
             <div className="p-3">
-              <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t.label}</p>
-              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem' }}>Set fotográfico · {t.photoCount} fotos</p>
-              <button
-                onClick={() => toast.success('Em breve: edição de temas')}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+              <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{c.name}</p>
+              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem' }}>
+                {c.photos.length === 0 ? 'Nenhuma foto de fundo' : `${c.photos.length} foto${c.photos.length > 1 ? 's' : ''} de fundo`}
+              </p>
+              <label
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors cursor-pointer"
                 style={{ fontSize: '0.78rem', fontWeight: 500 }}
               >
-                Editar
-              </button>
+                <Upload className="w-3.5 h-3.5" /> Enviar fotos
+                <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange(c.id)} />
+              </label>
             </div>
           </div>
         ))}
@@ -239,12 +302,12 @@ function ThemesManager({ onBack }: { onBack: () => void }) {
   );
 }
 
-function CampaignWizard({ profile, onBack, onFinish }: { profile: Profile; onBack: () => void; onFinish: (items: HistoryItem[]) => void }) {
+function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Profile; campaigns: Campaign[]; onBack: () => void; onFinish: (items: HistoryItem[]) => void }) {
   const [step, setStep] = useState(1);
   const [objective, setObjective] = useState('lancamento');
   const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set(['instagram-feed']));
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set([products[0].id]));
-  const [theme, setTheme] = useState('premium');
+  const [theme, setTheme] = useState(campaigns[0]?.id ?? '');
   const [prompt, setPrompt] = useState(AI_PROMPTS[0]);
   const [generating, setGenerating] = useState(false);
 
@@ -436,24 +499,28 @@ function CampaignWizard({ profile, onBack, onFinish }: { profile: Profile; onBac
           </div>
         )}
 
-        {/* Step 4: Tema (single-select, photo set from Gerir temas) */}
+        {/* Step 4: Tema (single-select, background set from Gerenciar campanhas) */}
         {step === 4 && (
           <div>
             <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Tema visual</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Escolha um set fotográfico da sua biblioteca de temas</p>
+            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Escolha o set de fotos de fundo de uma campanha</p>
             <div className="grid grid-cols-3 gap-3">
-              {THEMES.map(t => (
+              {campaigns.map(c => (
                 <button
-                  key={t.id}
-                  onClick={() => setTheme(t.id)}
-                  className={`rounded-xl border overflow-hidden transition-all ${theme === t.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
+                  key={c.id}
+                  onClick={() => setTheme(c.id)}
+                  className={`rounded-xl border overflow-hidden transition-all ${theme === c.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
                 >
-                  <div className="h-20 bg-secondary/40">
-                    <img src={t.photo} alt={t.label} className="w-full h-full object-cover" />
+                  <div className="h-20 bg-secondary/40 flex items-center justify-center">
+                    {c.photos.length > 0 ? (
+                      <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon className="w-5 h-5 text-muted-foreground/30" />
+                    )}
                   </div>
                   <div className="p-3 bg-secondary/20 flex items-center justify-between">
-                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t.label}</span>
-                    {theme === t.id && <Check className="w-3.5 h-3.5 text-primary" />}
+                    <span className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{c.name}</span>
+                    {theme === c.id && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
                   </div>
                 </button>
               ))}
@@ -593,15 +660,30 @@ function CampaignWizard({ profile, onBack, onFinish }: { profile: Profile; onBac
 export function MarketingStudio({ profile }: { profile: Profile }) {
   const [mode, setMode] = useState<Mode>('home');
   const [history, setHistory] = useState<HistoryItem[]>(initialHistory);
+  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
 
   if (mode === 'campaigns') {
-    return <ThemesManager onBack={() => setMode('home')} />;
+    return (
+      <CampaignsManager
+        campaigns={campaigns}
+        onBack={() => setMode('home')}
+        onCreateCampaign={name => {
+          setCampaigns(prev => [{ id: `camp-${Date.now()}`, name, photos: [] }, ...prev]);
+          toast.success('Campanha criada');
+        }}
+        onAddPhotos={(campaignId, photos) => {
+          setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: [...photos, ...c.photos] } : c));
+          toast.success(photos.length > 1 ? `${photos.length} fotos adicionadas` : 'Foto adicionada');
+        }}
+      />
+    );
   }
 
   if (mode === 'wizard') {
     return (
       <CampaignWizard
         profile={profile}
+        campaigns={campaigns}
         onBack={() => setMode('home')}
         onFinish={items => setHistory(prev => [...items, ...prev])}
       />
@@ -612,7 +694,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
     <MarketingHome
       history={history}
       onCreate={() => setMode('wizard')}
-      onManageThemes={() => setMode('campaigns')}
+      onManageCampaigns={() => setMode('campaigns')}
       onDelete={id => {
         setHistory(prev => prev.filter(item => item.id !== id));
         toast.success('Peça excluída do histórico');
