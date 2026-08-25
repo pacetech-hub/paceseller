@@ -1,8 +1,8 @@
-import { useState, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { toast } from "sonner";
 import {
   Sparkles, Check, ChevronRight, ChevronLeft, Instagram, MessageCircle, Printer,
-  Wand2, RefreshCw, Rocket, Tag, Trophy, Zap, Download, Pencil, Plus, Image as ImageIcon,
+  Wand2, RefreshCw, Download, Pencil, Plus, Image as ImageIcon,
   Music2, Smartphone, Trash2, Upload,
 } from "lucide-react";
 import { products, formatCurrency, type Product } from "../data/mockData";
@@ -12,13 +12,6 @@ import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
 import bannerLimitedEdition from "@/assets/banner-edicao-limitada.webp";
 
 type Profile = 'admin' | 'rep' | 'lojista';
-
-const OBJECTIVES = [
-  { id: 'lancamento', label: 'Lançamento de coleção', icon: Rocket, description: 'Apresente novidades com destaque' },
-  { id: 'promocao', label: 'Promoção / Liquidação', icon: Tag, description: 'Ofertas e descontos especiais' },
-  { id: 'reposicao', label: 'Reposição rápida', icon: Zap, description: 'Destaque produtos disponíveis' },
-  { id: 'institucional', label: 'Institucional de marca', icon: Trophy, description: 'Fortalecimento de brand' },
-];
 
 const FORMAT_GROUPS = ['WhatsApp', 'Instagram', 'TikTok', 'Impressão'] as const;
 
@@ -425,15 +418,20 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
 
 function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Profile; campaigns: Campaign[]; onBack: () => void; onFinish: (items: HistoryItem[]) => void }) {
   const [step, setStep] = useState(1);
-  const [objective, setObjective] = useState('lancamento');
+  const [campaignId, setCampaignId] = useState(campaigns[0]?.id ?? '');
   const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set(['instagram-feed']));
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set([products[0].id]));
-  const [theme, setTheme] = useState(campaigns[0]?.id ?? '');
+  const [scenarioIndex, setScenarioIndex] = useState(0);
   const [prompt, setPrompt] = useState(AI_PROMPTS[0]);
   const [generating, setGenerating] = useState(false);
 
   const sortedProducts = sortProductsForProfile(profile);
   const selectedFormatList = FORMATS.filter(f => selectedFormats.has(f.id));
+  const selectedCampaign = campaigns.find(c => c.id === campaignId) ?? null;
+
+  useEffect(() => {
+    setScenarioIndex(0);
+  }, [campaignId]);
 
   const toggleFormat = (id: string) => {
     setSelectedFormats(prev => {
@@ -509,30 +507,41 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
 
       {/* Step Content */}
       <div className="bg-card border border-border rounded-xl p-5">
-        {/* Step 1: Campanha (Objetivo) */}
+        {/* Step 1: Campanha */}
         {step === 1 && (
           <div>
-            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Objetivo da campanha</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Qual é o propósito desta peça?</p>
-            <div className="grid grid-cols-2 gap-3">
-              {OBJECTIVES.map(obj => {
-                const Icon = obj.icon;
-                return (
+            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Campanha</h3>
+            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Para qual campanha esta peça será criada?</p>
+            {campaigns.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {campaigns.map(c => (
                   <button
-                    key={obj.id}
-                    onClick={() => setObjective(obj.id)}
-                    className={`rounded-xl border p-4 text-left transition-all ${objective === obj.id ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
+                    key={c.id}
+                    onClick={() => setCampaignId(c.id)}
+                    className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all ${campaignId === c.id ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
                   >
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-primary" />
+                    <div className="w-11 h-11 rounded-lg bg-secondary/40 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {c.photos.length > 0 ? (
+                        <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-muted-foreground/30" />
+                      )}
                     </div>
-                    <p className="text-foreground mt-2" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{obj.label}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{obj.description}</p>
-                    {objective === obj.id && <Check className="w-4 h-4 text-primary mt-2" />}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-foreground truncate" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</p>
+                      <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.description || 'Sem descrição'}</p>
+                    </div>
+                    {campaignId === c.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
                   </button>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <ImageIcon className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Nenhuma campanha cadastrada</p>
+                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.72rem' }}>Crie uma em Gerenciar campanhas</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -620,32 +629,38 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
           </div>
         )}
 
-        {/* Step 4: Tema (single-select, background set from Gerenciar campanhas) */}
+        {/* Step 4: Tema (cenário fotográfico da campanha escolhida na Etapa 1) */}
         {step === 4 && (
           <div>
             <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Tema visual</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Escolha o set de fotos de fundo de uma campanha</p>
-            <div className="grid grid-cols-3 gap-3">
-              {campaigns.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setTheme(c.id)}
-                  className={`rounded-xl border overflow-hidden transition-all ${theme === c.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
-                >
-                  <div className="h-20 bg-secondary/40 flex items-center justify-center">
-                    {c.photos.length > 0 ? (
-                      <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <ImageIcon className="w-5 h-5 text-muted-foreground/30" />
-                    )}
-                  </div>
-                  <div className="p-3 bg-secondary/20 flex items-center justify-between">
-                    <span className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{c.name}</span>
-                    {theme === c.id && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
-                  </div>
-                </button>
-              ))}
-            </div>
+            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>
+              Escolha um cenário fotográfico de {selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}
+            </p>
+            {selectedCampaign && selectedCampaign.photos.length > 0 ? (
+              <div className="grid grid-cols-3 gap-3">
+                {selectedCampaign.photos.map((photo, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setScenarioIndex(idx)}
+                    className={`rounded-xl border overflow-hidden transition-all ${scenarioIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
+                  >
+                    <div className="h-20 bg-secondary/40">
+                      <img src={photo} alt={`Cenário ${idx + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="p-3 bg-secondary/20 flex items-center justify-between">
+                      <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>Cenário {idx + 1}</span>
+                      {scenarioIndex === idx && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <ImageIcon className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Nenhum cenário disponível para esta campanha</p>
+                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.72rem' }}>Adicione cenários em Gerenciar campanhas</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -740,7 +755,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         {step < 5 ? (
           <button
             onClick={() => setStep(s => s + 1)}
-            disabled={(step === 2 && selectedFormats.size === 0) || (step === 3 && selectedProducts.size === 0)}
+            disabled={
+              (step === 1 && !campaignId) ||
+              (step === 2 && selectedFormats.size === 0) ||
+              (step === 3 && selectedProducts.size === 0) ||
+              (step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0))
+            }
             className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
             style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
