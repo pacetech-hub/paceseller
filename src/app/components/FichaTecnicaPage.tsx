@@ -13,6 +13,10 @@ const availabilityColors: Record<Product['availability'], string> = {
   'esgotado': 'text-red-400 bg-red-400/10',
 };
 
+// produtos descontinuados — não fazem mais parte do sortimento vendável
+const discontinuedIds = new Set(['P003', 'P006']);
+const isDiscontinued = (product: Product) => discontinuedIds.has(product.id);
+
 const technicalSpecs: Record<string, { cabedal: string; solado: string; forro: string; fechamento: string; peso: string }> = {
   P001: { cabedal: 'Lona premium', solado: 'Borracha EVA injetada', forro: 'Tecido respirável', fechamento: 'Cadarço', peso: '210 g (par 33)' },
   P002: { cabedal: 'Sintético texturizado', solado: 'Borracha EVA', forro: 'Forração em tecido', fechamento: 'Velcro', peso: '195 g (par 33)' },
@@ -135,11 +139,18 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
                 <img src={p.image} alt={p.name} className="w-full h-full object-contain p-3" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
               <div className="p-3 border-t border-border">
-                <span className={`inline-block px-2 py-0.5 rounded-full mb-1.5 ${availabilityColors[p.availability]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
-                  {p.availability}
-                </span>
-                <p className="text-muted-foreground" style={{ fontSize: '0.68rem', textTransform: 'uppercase' }}>{p.line} · {p.reference}</p>
-                <p className="text-foreground truncate mt-0.5" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.name}</p>
+                <p className="text-muted-foreground" style={{ fontSize: '0.68rem', textTransform: 'uppercase' }}>Ref. {p.reference}</p>
+                <p className="text-foreground truncate mt-0.5 mb-1.5" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.name}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`inline-block px-2 py-0.5 rounded-full ${availabilityColors[p.availability]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                    {p.availability}
+                  </span>
+                  {isDiscontinued(p) && (
+                    <span className="inline-block px-2 py-0.5 rounded-full text-muted-foreground bg-secondary" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                      Fora de linha
+                    </span>
+                  )}
+                </div>
               </div>
             </button>
           ))}
@@ -186,13 +197,18 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
+          <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>Ref. {product.reference}</p>
+          <h2 className="text-foreground mb-1.5" style={{ fontWeight: 700, fontSize: '1.1rem' }}>{product.name}</h2>
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`px-2 py-0.5 rounded-full ${availabilityColors[product.availability]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
               {product.availability}
             </span>
-            <span className="text-muted-foreground" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>{product.line} · Ref. {product.reference}</span>
+            {isDiscontinued(product) && (
+              <span className="px-2 py-0.5 rounded-full text-muted-foreground bg-secondary" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                Fora de linha
+              </span>
+            )}
           </div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.1rem' }}>{product.name}</h2>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
@@ -348,8 +364,13 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
                   <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 </div>
                 <div className="p-2.5 border-t border-border">
-                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem', textTransform: 'uppercase' }}>{p.reference}</p>
+                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem', textTransform: 'uppercase' }}>Ref. {p.reference}</p>
                   <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{p.name}</p>
+                  {isDiscontinued(p) && (
+                    <span className="inline-block px-1.5 py-0.5 rounded-full text-muted-foreground bg-secondary mt-1" style={{ fontSize: '0.6rem', fontWeight: 600 }}>
+                      Fora de linha
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
