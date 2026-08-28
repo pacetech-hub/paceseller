@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package2, ShoppingBag, ShoppingBasket, Clock,
   Sparkles, BarChart3, Settings, Users, Store, ChevronDown, ChevronRight,
   Bell, Search, Menu, X, Building2, LogOut, ChevronLeft,
-  UserCheck, Tag, Shield, Boxes, Receipt,
+  UserCheck, Tag, Shield, Boxes, Receipt, FileText,
 } from "lucide-react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
@@ -12,7 +12,7 @@ import teslaLogo from "../../assets/tesla-footwear-logo.png";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail';
+  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -266,18 +266,21 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
           { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
+          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : profile === 'rep'
       ? [
           { icon: Clock, label: 'Pedidos', view: 'history' },
+          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ]
       : [
           { icon: ShoppingBag, label: 'Pedidos', view: 'history' },
           { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
+          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: Users, label: 'Meu Perfil', view: 'profile' },
           { icon: LogOut, label: 'Sair', action: onLogout },
         ];

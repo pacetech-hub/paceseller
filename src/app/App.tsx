@@ -20,6 +20,7 @@ import { ClientsPage } from "./components/ClientsPage";
 import { ProfilePage } from "./components/ProfilePage";
 import { BoletosPage } from "./components/BoletosPage";
 import { OrderDetailPage } from "./components/OrderDetailPage";
+import { FichaTecnicaPage } from "./components/FichaTecnicaPage";
 import { LojistaFiltersSidebar, defaultFilters, type CatalogFilters } from "./components/LojistaFiltersSidebar";
 import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
@@ -44,6 +45,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   'industry-stock': { title: 'Estoque', subtitle: 'Estoque industrial e por cliente — somente visualização' },
   permissions: { title: 'Permissões de Acesso', subtitle: 'Controle o que os usuários vinculados à sua conta podem acessar' },
   'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
+  'ficha-tecnica': { title: 'Ficha Técnica', subtitle: 'Informações completas, imagens e medidas dos produtos' },
 };
 
 export default function App() {
@@ -226,6 +228,8 @@ export default function App() {
         return <ProfilePage profile={profile} />;
       case 'boletos':
         return <BoletosPage profile={profile} />;
+      case 'ficha-tecnica':
+        return <FichaTecnicaPage />;
       case 'stock':
         return <StockPage />;
       case 'industry-stock':
