@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  Search, ChevronLeft, Download, Printer, Share2, ZoomIn,
+  Search, ChevronLeft, Download, ZoomIn,
   FileText, Package2, CheckCircle2,
 } from "lucide-react";
 import { products, type Product } from "../data/mockData";
@@ -300,16 +300,6 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
     setZoomOpen(true);
   };
 
-  const handleShare = async () => {
-    const url = `${window.location.origin}/ficha-tecnica/${product.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // clipboard permission unavailable — still confirm to the user
-    }
-    toast.success('Link copiado para a área de transferência');
-  };
-
   return (
     <div className="p-6 max-w-[1200px] mx-auto w-full space-y-5">
       <button
@@ -330,40 +320,33 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </button>
         <button
           onClick={() => toast.success('PDF gerado')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-          style={{ fontSize: '0.78rem', fontWeight: 500 }}
-        >
-          <FileText className="w-3.5 h-3.5" /> Gerar PDF
-        </button>
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-          style={{ fontSize: '0.78rem', fontWeight: 500 }}
-        >
-          <Printer className="w-3.5 h-3.5" /> Imprimir
-        </button>
-        <button
-          onClick={handleShare}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           style={{ fontSize: '0.78rem', fontWeight: 600 }}
         >
-          <Share2 className="w-3.5 h-3.5" /> Compartilhar
+          <FileText className="w-3.5 h-3.5" /> Baixar PDF
         </button>
       </div>
 
       {/* Bento grid — todas as imagens do produto */}
       <div className="grid grid-cols-4 grid-rows-2 gap-2 aspect-[16/9] rounded-xl overflow-hidden">
         {gallery.map((img, idx) => (
-          <button
+          <div
             key={idx}
             onClick={() => openZoom(idx)}
-            className={`relative overflow-hidden bg-white border border-border group ${bentoSpanClasses(idx, gallery.length)}`}
+            className={`relative overflow-hidden bg-white border border-border group cursor-pointer ${bentoSpanClasses(idx, gallery.length)}`}
           >
             <img src={img} alt={`${product.name} — foto ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
               <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-          </button>
+            <button
+              onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
+              aria-label="Baixar imagem"
+              className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </button>
+          </div>
         ))}
       </div>
 
