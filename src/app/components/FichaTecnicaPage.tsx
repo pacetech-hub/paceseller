@@ -24,9 +24,57 @@ interface Highlight {
   description: string;
 }
 
-// destaques relacionando cada característica do produto ao seu diferencial — por enquanto
-// cadastrado apenas para o Flow Preto (Tesla Flow All Black Reflect), que usa esta ficha real
+// destaques relacionando cada característica do produto ao seu diferencial — mock para todo o
+// catálogo, usando o texto real do Flow Preto (Tesla Flow All Black Reflect) como referência de estilo
 const productHighlights: Record<string, { items: Highlight[]; tagline: string }> = {
+  P001: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual moderno com linhas marcantes inspiradas na cultura urbana.' },
+      { title: 'Cabedal Premium', description: 'Confeccionado em lona resistente com acabamento denim e recortes exclusivos para maior durabilidade e estilo.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Fat Lace', description: 'Ajuste firme, confortável e com estilo marcante.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Acabamento limpo e recortes em azul que valorizam o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Flow XL Denim é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+  P002: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual clean e versátil, com linhas minimalistas que combinam com qualquer produção.' },
+      { title: 'Cabedal Premium', description: 'Material sintético de alta qualidade, com costuras reforçadas para maior durabilidade.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Resistente', description: 'Ajuste firme e confortável, ideal para o uso diário.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Acabamento branco impecável que valoriza o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Coil Branco é ideal para quem busca praticidade sem abrir mão do estilo — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+  P003: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual arrojado, com contraste vermelho e branco que chama atenção nas ruas.' },
+      { title: 'Cabedal Premium', description: 'Material sintético resistente, com recortes exclusivos da linha Hertz Art.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Resistente', description: 'Ajuste firme, confortável e com estilo marcante.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Combinação vermelho e branco que valoriza o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Hertz Art Vermelho é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+  P004: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual sofisticado, com tom marrom que une estilo urbano e versatilidade.' },
+      { title: 'Cabedal Premium', description: 'Material sintético de alta qualidade, com costuras reforçadas para maior durabilidade.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Resistente', description: 'Ajuste firme e confortável, ideal para o uso diário.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Acabamento em tom marrom que valoriza o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Hertz Marrom é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
   P005: {
     items: [
       { title: 'Design Streetwear Autêntico', description: 'Visual moderno com linhas marcantes inspiradas na cultura urbana.' },
@@ -38,6 +86,42 @@ const productHighlights: Record<string, { items: Highlight[]; tagline: string }>
       { title: 'Detalhes Urbanos', description: 'Cadarços resistentes e acabamento limpo que valorizam o estilo urbano.' },
     ],
     tagline: 'Tênis Tesla Flow All Black Reflect é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+  P006: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual moderno, com contraste navy e branco inspirado na cultura urbana.' },
+      { title: 'Cabedal Premium', description: 'Material sintético de alta qualidade, com costuras reforçadas para maior durabilidade.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Resistente', description: 'Ajuste firme e confortável, ideal para o uso diário.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Combinação navy e branco que valoriza o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Coil Navy é ideal para quem busca praticidade sem abrir mão do estilo — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+  P007: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual arrojado, com contraste azul e branco que chama atenção nas ruas.' },
+      { title: 'Cabedal Premium', description: 'Material sintético resistente, com recortes exclusivos da linha Hertz Art.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Resistente', description: 'Ajuste firme, confortável e com estilo marcante.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Combinação azul e branco que valoriza o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Hertz Art Azul é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+  P008: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual moderno com linhas marcantes inspiradas na cultura urbana.' },
+      { title: 'Cabedal Premium', description: 'Confeccionado em lona resistente, com costuras reforçadas e recortes exclusivos para maior durabilidade e estilo.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Fat Lace', description: 'Ajuste firme, confortável e com estilo marcante.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Acabamento all black que valoriza o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Flow XL Preto é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
   },
 };
 
