@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   Search, ChevronLeft, Download, Printer, Share2, ZoomIn,
-  FileText, Package2,
+  FileText, Package2, CheckCircle2,
 } from "lucide-react";
 import { products, type Product } from "../data/mockData";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -18,6 +18,28 @@ const availabilityColors: Record<Product['availability'], string> = {
 // produtos descontinuados — não fazem mais parte do sortimento vendável
 const discontinuedIds = new Set(['P003', 'P006']);
 const isDiscontinued = (product: Product) => discontinuedIds.has(product.id);
+
+interface Highlight {
+  title: string;
+  description: string;
+}
+
+// destaques relacionando cada característica do produto ao seu diferencial — por enquanto
+// cadastrado apenas para o Flow Preto (Tesla Flow All Black Reflect), que usa esta ficha real
+const productHighlights: Record<string, { items: Highlight[]; tagline: string }> = {
+  P005: {
+    items: [
+      { title: 'Design Streetwear Autêntico', description: 'Visual moderno com linhas marcantes inspiradas na cultura urbana.' },
+      { title: 'Cabedal Premium', description: 'Combinação de lona resistente e camurça natural, com costuras reforçadas e recortes exclusivos para maior durabilidade e estilo.' },
+      { title: 'Identidade Tesla', description: 'Logo aplicado em destaque na lateral, reforçando a autenticidade do modelo.' },
+      { title: 'Cadarço Fat Lace', description: 'Ajuste firme, confortável e com estilo marcante.' },
+      { title: 'Solado de Alta Performance', description: 'Produzido em borracha de alta resistência, garante firmeza ao caminhar, aderência superior em diferentes superfícies e longa durabilidade. O design exclusivo traz cores vibrantes que unem funcionalidade e personalidade em cada passo.' },
+      { title: 'Conforto Avançado', description: 'Palmilha em PU com tecnologia de amortecimento para absorção de impacto.' },
+      { title: 'Detalhes Urbanos', description: 'Cadarços resistentes e acabamento limpo que valorizam o estilo urbano.' },
+    ],
+    tagline: 'Tênis Tesla Flow All Black Reflect é ideal para quem quer se expressar com atitude e originalidade — seja nas ruas, no rolê com os amigos ou no dia a dia.',
+  },
+};
 
 function getGallery(product: Product): string[] {
   const sameLine = products.filter(p => p.line === product.line).map(p => p.image);
@@ -187,6 +209,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
   const related = getColorVariants(product);
   const sizes = Object.keys(product.grades);
   const storeStock = getStoreStock(product);
+  const highlights = productHighlights[product.id];
 
   const openZoom = (idx: number) => {
     setActiveImage(idx);
@@ -281,6 +304,26 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           <p className="text-muted-foreground mb-1.5" style={labelStyle}>Descrição</p>
           <p className="text-foreground" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{product.description}</p>
         </div>
+
+        {highlights && (
+          <div>
+            <p className="text-muted-foreground mb-2" style={labelStyle}>Destaques do produto</p>
+            <ul className="space-y-2.5">
+              {highlights.items.map((h, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-foreground" style={{ fontSize: '0.82rem', lineHeight: 1.5 }}>
+                    <span style={{ fontWeight: 600 }}>{h.title}: </span>
+                    {h.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <p className="text-muted-foreground mt-3" style={{ fontSize: '0.8rem', fontStyle: 'italic', lineHeight: 1.5 }}>
+              {highlights.tagline}
+            </p>
+          </div>
+        )}
 
         <div>
           <p className="text-muted-foreground mb-2" style={labelStyle}>
