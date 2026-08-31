@@ -94,8 +94,8 @@ export const products: Product[] = [
     isFavorite: true,
     rating: 4.8,
     soldUnits: 1400,
-    description: 'Tênis infantil linha Flow XL, modelo Denim. Grade 90-120-150-180-210.',
-    grades: { '90': 240, '120': 180, '150': 320, '180': 60, '210': 120 },
+    description: 'Tênis infantil linha Flow XL, modelo Denim. Grade 34 ao 44.',
+    grades: { '34': 35, '35': 65, '36': 90, '37': 120, '38': 140, '39': 140, '40': 120, '41': 90, '42': 65, '43': 35, '44': 20 },
   },
   {
     id: 'P002',
@@ -114,7 +114,7 @@ export const products: Product[] = [
     rating: 4.6,
     soldUnits: 1200,
     description: 'Tênis infantil linha Coil, modelo Branco.',
-    grades: { '90': 180, '120': 220, '150': 300, '180': 140, '210': 80 },
+    grades: { '34': 35, '35': 65, '36': 90, '37': 120, '38': 140, '39': 140, '40': 120, '41': 90, '42': 65, '43': 35, '44': 20 },
   },
   {
     id: 'P003',
@@ -133,7 +133,7 @@ export const products: Product[] = [
     rating: 4.2,
     soldUnits: 480,
     description: 'Tênis infantil linha Hertz Art, modelo Vermelho.',
-    grades: { '90': 20, '120': 30, '150': 40, '180': 15, '210': 10 },
+    grades: { '34': 5, '35': 8, '36': 12, '37': 15, '38': 17, '39': 18, '40': 15, '41': 11, '42': 8, '43': 4, '44': 2 },
   },
   {
     id: 'P004',
@@ -152,7 +152,7 @@ export const products: Product[] = [
     rating: 4.5,
     soldUnits: 920,
     description: 'Tênis infantil linha Hertz, modelo Marrom.',
-    grades: { '90': 160, '120': 200, '150': 260, '180': 120, '210': 60 },
+    grades: { '34': 32, '35': 56, '36': 80, '37': 104, '38': 120, '39': 120, '40': 104, '41': 80, '42': 56, '43': 32, '44': 16 },
   },
   {
     id: 'P005',
@@ -171,7 +171,7 @@ export const products: Product[] = [
     rating: 4.6,
     soldUnits: 1060,
     description: 'Tênis infantil linha Flow, modelo Preto.',
-    grades: { '90': 200, '120': 240, '150': 280, '180': 100, '210': 60 },
+    grades: { '34': 35, '35': 62, '36': 88, '37': 114, '38': 132, '39': 133, '40': 114, '41': 88, '42': 62, '43': 35, '44': 17 },
   },
   {
     id: 'P006',
@@ -190,7 +190,7 @@ export const products: Product[] = [
     rating: 4.4,
     soldUnits: 840,
     description: 'Tênis infantil linha Coil, modelo Navy.',
-    grades: { '90': 140, '120': 180, '150': 220, '180': 100, '210': 50 },
+    grades: { '34': 28, '35': 48, '36': 69, '37': 90, '38': 104, '39': 103, '40': 90, '41': 68, '42': 48, '43': 28, '44': 14 },
   },
   {
     id: 'P007',
@@ -209,7 +209,7 @@ export const products: Product[] = [
     rating: 4.3,
     soldUnits: 560,
     description: 'Tênis infantil linha Hertz Art, modelo Azul.',
-    grades: { '90': 100, '120': 140, '150': 180, '180': 80, '210': 40 },
+    grades: { '34': 22, '35': 38, '36': 54, '37': 70, '38': 81, '39': 81, '40': 70, '41': 54, '42': 38, '43': 21, '44': 11 },
   },
   {
     id: 'P008',
@@ -228,7 +228,7 @@ export const products: Product[] = [
     rating: 4.7,
     soldUnits: 1100,
     description: 'Tênis infantil linha Flow XL, modelo Preto.',
-    grades: { '90': 200, '120': 250, '150': 300, '180': 120, '210': 70 },
+    grades: { '34': 38, '35': 66, '36': 94, '37': 122, '38': 141, '39': 141, '40': 122, '41': 93, '42': 66, '43': 38, '44': 19 },
   },
 ];
 

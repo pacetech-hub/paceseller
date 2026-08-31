@@ -9,7 +9,7 @@ interface OrderGradeProps {
   selectedClient: Client | null;
 }
 
-const SIZES = ['90', '120', '150', '180', '210'];
+const SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44'];
 
 type GradeMap = Record<string, Record<string, number>>;
 

@@ -229,7 +229,7 @@ export default function App() {
       case 'boletos':
         return <BoletosPage profile={profile} />;
       case 'ficha-tecnica':
-        return <FichaTecnicaPage />;
+        return <FichaTecnicaPage profile={profile} />;
       case 'stock':
         return <StockPage />;
       case 'industry-stock':

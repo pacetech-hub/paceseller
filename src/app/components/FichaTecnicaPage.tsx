@@ -7,6 +7,8 @@ import {
 import { products, type Product } from "../data/mockData";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
+type Profile = 'admin' | 'rep' | 'lojista';
+
 const availabilityColors: Record<Product['availability'], string> = {
   'disponível': 'text-emerald-400 bg-emerald-400/10',
   'baixo estoque': 'text-amber-400 bg-amber-400/10',
@@ -52,6 +54,20 @@ function getColorVariants(product: Product): Product[] {
       colors: [color],
     };
   });
+}
+
+// estoque da loja — fração pequena e determinística do estoque de fábrica por tamanho
+// (não existe um dado real de estoque por loja no mock; cada loja mantém pouca profundidade de grade)
+function getStoreStock(product: Product): Record<string, number> {
+  const sizes = Object.keys(product.grades);
+  const ratios = [0.08, 0.05, 0.12, 0.03, 0.15, 0.07];
+  const result: Record<string, number> = {};
+  sizes.forEach((s, i) => {
+    const factory = product.grades[s] ?? 0;
+    const seed = (product.id.charCodeAt(product.id.length - 1) + i) % ratios.length;
+    result[s] = Math.round(factory * ratios[seed]);
+  });
+  return result;
 }
 
 const lineOptions = ['Todos', ...Array.from(new Set(products.map(p => p.line)))];
@@ -164,12 +180,13 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   );
 }
 
-function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product; onBack: () => void; onOpenRelated: (p: Product) => void }) {
+function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product: Product; profile: Profile; onBack: () => void; onOpenRelated: (p: Product) => void }) {
   const gallery = getGallery(product);
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const related = getColorVariants(product);
   const sizes = Object.keys(product.grades);
+  const storeStock = getStoreStock(product);
 
   const openZoom = (idx: number) => {
     setActiveImage(idx);
@@ -266,20 +283,48 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
         </div>
 
         <div>
-          <p className="text-muted-foreground mb-2" style={labelStyle}>Tamanhos disponíveis</p>
-          <div className="flex flex-wrap gap-1.5">
-            {sizes.map(s => {
-              const stock = product.grades[s] ?? 0;
-              return (
-                <span
-                  key={s}
-                  className={`px-3 py-1 rounded-full border ${stock === 0 ? 'border-border text-muted-foreground/50' : 'border-border text-foreground'}`}
-                  style={{ fontSize: '0.8rem', fontWeight: 600 }}
-                >
-                  {s}
-                </span>
-              );
-            })}
+          <p className="text-muted-foreground mb-2" style={labelStyle}>
+            {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-muted-foreground text-left" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <th className="pb-2 pr-4 font-normal">Contexto</th>
+                  {sizes.map(s => (
+                    <th key={s} className="pb-2 px-2 font-normal text-center">{s}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t border-border">
+                  <td className="py-2 pr-4 text-foreground whitespace-nowrap" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Fábrica</td>
+                  {sizes.map(s => {
+                    const stock = product.grades[s] ?? 0;
+                    const color = stock === 0 ? 'text-red-400' : stock < 20 ? 'text-amber-400' : 'text-emerald-400';
+                    return (
+                      <td key={s} className={`py-2 px-2 text-center mono ${color}`} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+                        {stock}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {profile === 'lojista' && (
+                  <tr className="border-t border-border">
+                    <td className="py-2 pr-4 text-foreground whitespace-nowrap" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Loja</td>
+                    {sizes.map(s => {
+                      const stock = storeStock[s] ?? 0;
+                      const color = stock === 0 ? 'text-red-400' : stock < 3 ? 'text-amber-400' : 'text-emerald-400';
+                      return (
+                        <td key={s} className={`py-2 px-2 text-center mono ${color}`} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+                          {stock}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -324,11 +369,11 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
   );
 }
 
-export function FichaTecnicaPage() {
+export function FichaTecnicaPage({ profile }: { profile: Profile }) {
   const [selected, setSelected] = useState<Product | null>(null);
 
   if (selected) {
-    return <ProductSpecSheet product={selected} onBack={() => setSelected(null)} onOpenRelated={setSelected} />;
+    return <ProductSpecSheet product={selected} profile={profile} onBack={() => setSelected(null)} onOpenRelated={setSelected} />;
   }
 
   return <ProductGrid onOpen={setSelected} />;
