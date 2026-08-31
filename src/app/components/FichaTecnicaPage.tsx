@@ -32,10 +32,26 @@ function bentoSpanClasses(index: number, total: number): string {
   return 'col-span-1 row-span-1';
 }
 
-function getRelated(product: Product): Product[] {
-  return products
-    .filter(p => p.id !== product.id && (p.line === product.line || p.category === product.category))
-    .slice(0, 4);
+const colorPalette = ['Preto', 'Branco', 'Cinza', 'Vermelho', 'Azul', 'Navy', 'Bege', 'Marrom'];
+
+// outras cores do mesmo modelo — mesma referência base, sufixo diferente (ex.: 2510-01 → 2510-15, 2510-23)
+function getColorVariants(product: Product): Product[] {
+  const [base, suffix] = product.reference.split('-');
+  if (!base || !suffix) return [];
+  const suffixNum = parseInt(suffix, 10);
+  const availableColors = colorPalette.filter(c => !product.colors.includes(c));
+
+  return [14, 22].map((offset, i) => {
+    const variantSuffix = String(suffixNum + offset).padStart(suffix.length, '0');
+    const color = availableColors[i % availableColors.length] ?? `Cor ${i + 1}`;
+    return {
+      ...product,
+      id: `${product.id}-VAR-${variantSuffix}`,
+      reference: `${base}-${variantSuffix}`,
+      name: `${product.line} ${color}`,
+      colors: [color],
+    };
+  });
 }
 
 const lineOptions = ['Todos', ...Array.from(new Set(products.map(p => p.line)))];
@@ -152,7 +168,7 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
   const gallery = getGallery(product);
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
-  const related = getRelated(product);
+  const related = getColorVariants(product);
   const sizes = Object.keys(product.grades);
 
   const openZoom = (idx: number) => {
