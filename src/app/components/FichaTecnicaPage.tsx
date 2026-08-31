@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   Search, ChevronLeft, Download, Printer, Share2, ZoomIn,
-  FileText, CheckCircle2, Package2,
+  FileText, Package2,
 } from "lucide-react";
 import { products, type Product } from "../data/mockData";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -17,28 +17,19 @@ const availabilityColors: Record<Product['availability'], string> = {
 const discontinuedIds = new Set(['P003', 'P006']);
 const isDiscontinued = (product: Product) => discontinuedIds.has(product.id);
 
-const technicalSpecs: Record<string, { cabedal: string; solado: string; forro: string; fechamento: string; peso: string }> = {
-  P001: { cabedal: 'Lona premium', solado: 'Borracha EVA injetada', forro: 'Tecido respirável', fechamento: 'Cadarço', peso: '210 g (par 33)' },
-  P002: { cabedal: 'Sintético texturizado', solado: 'Borracha EVA', forro: 'Forração em tecido', fechamento: 'Velcro', peso: '195 g (par 33)' },
-  P003: { cabedal: 'Sintético fosco', solado: 'Borracha EVA', forro: 'Tecido macio', fechamento: 'Cadarço elástico', peso: '190 g (par 33)' },
-  P004: { cabedal: 'Sintético premium', solado: 'Borracha EVA', forro: 'Forração acolchoada', fechamento: 'Velcro duplo', peso: '200 g (par 33)' },
-  P005: { cabedal: 'Sintético texturizado', solado: 'Borracha EVA', forro: 'Tecido respirável', fechamento: 'Cadarço elástico', peso: '195 g (par 33)' },
-  P006: { cabedal: 'Sintético fosco', solado: 'Borracha EVA', forro: 'Forração em tecido', fechamento: 'Velcro', peso: '190 g (par 33)' },
-  P007: { cabedal: 'Sintético premium', solado: 'Borracha EVA', forro: 'Tecido macio', fechamento: 'Cadarço', peso: '198 g (par 33)' },
-  P008: { cabedal: 'Lona premium', solado: 'Borracha EVA injetada', forro: 'Forração acolchoada', fechamento: 'Cadarço', peso: '212 g (par 33)' },
-};
-
 function getGallery(product: Product): string[] {
   const sameLine = products.filter(p => p.line === product.line).map(p => p.image);
   return Array.from(new Set([product.image, ...sameLine])).slice(0, 4);
 }
 
-function getHighlights(product: Product): string[] {
-  return [
-    `Cabedal em ${product.material.toLowerCase()}, resistente para o uso diário`,
-    'Solado em borracha EVA com boa aderência',
-    `Parte da ${product.collection}`,
-  ];
+// classes de span para montar um bento grid (4 colunas x 2 linhas) a partir de 1-4 imagens
+function bentoSpanClasses(index: number, total: number): string {
+  if (total === 1) return 'col-span-4 row-span-2';
+  if (total === 2) return 'col-span-2 row-span-2';
+  if (total === 3) return index === 0 ? 'col-span-2 row-span-2' : 'col-span-1 row-span-2';
+  if (index === 0) return 'col-span-2 row-span-2';
+  if (index === 1) return 'col-span-1 row-span-2';
+  return 'col-span-1 row-span-1';
 }
 
 function getRelated(product: Product): Product[] {
@@ -51,15 +42,6 @@ const lineOptions = ['Todos', ...Array.from(new Set(products.map(p => p.line)))]
 const categoryOptions = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
 
 const labelStyle = { fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
-
-function SpecRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0">
-      <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>{label}</p>
-      <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{value}</p>
-    </div>
-  );
-}
 
 function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   const [search, setSearch] = useState('');
@@ -170,10 +152,13 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
   const gallery = getGallery(product);
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
-  const specs = technicalSpecs[product.id];
-  const highlights = getHighlights(product);
   const related = getRelated(product);
   const sizes = Object.keys(product.grades);
+
+  const openZoom = (idx: number) => {
+    setActiveImage(idx);
+    setZoomOpen(true);
+  };
 
   const handleShare = async () => {
     const url = `${window.location.origin}/ficha-tecnica/${product.id}`;
@@ -195,10 +180,58 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
         <ChevronLeft className="w-4 h-4" /> Voltar para Ficha Técnica
       </button>
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-end gap-2 flex-wrap">
+        <button
+          onClick={() => toast.success('Imagens baixadas (ZIP)')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+          style={{ fontSize: '0.78rem', fontWeight: 500 }}
+        >
+          <Download className="w-3.5 h-3.5" /> Baixar imagens
+        </button>
+        <button
+          onClick={() => toast.success('PDF gerado')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+          style={{ fontSize: '0.78rem', fontWeight: 500 }}
+        >
+          <FileText className="w-3.5 h-3.5" /> Gerar PDF
+        </button>
+        <button
+          onClick={() => window.print()}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
+          style={{ fontSize: '0.78rem', fontWeight: 500 }}
+        >
+          <Printer className="w-3.5 h-3.5" /> Imprimir
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          style={{ fontSize: '0.78rem', fontWeight: 600 }}
+        >
+          <Share2 className="w-3.5 h-3.5" /> Compartilhar
+        </button>
+      </div>
+
+      {/* Bento grid — todas as imagens do produto */}
+      <div className="grid grid-cols-4 grid-rows-2 gap-2 aspect-[16/9] rounded-xl overflow-hidden">
+        {gallery.map((img, idx) => (
+          <button
+            key={idx}
+            onClick={() => openZoom(idx)}
+            className={`relative overflow-hidden bg-white border border-border group ${bentoSpanClasses(idx, gallery.length)}`}
+          >
+            <img src={img} alt={`${product.name} — foto ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
+              <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Informações do produto */}
+      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
         <div>
           <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>Ref. {product.reference}</p>
-          <h2 className="text-foreground mb-1.5" style={{ fontWeight: 700, fontSize: '1.1rem' }}>{product.name}</h2>
+          <h2 className="text-foreground mb-1.5" style={{ fontWeight: 700, fontSize: '1.15rem' }}>{product.name}</h2>
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`px-2 py-0.5 rounded-full ${availabilityColors[product.availability]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
               {product.availability}
@@ -210,142 +243,28 @@ function ProductSpecSheet({ product, onBack, onOpenRelated }: { product: Product
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => toast.success('Imagens baixadas (ZIP)')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 500 }}
-          >
-            <Download className="w-3.5 h-3.5" /> Baixar imagens
-          </button>
-          <button
-            onClick={() => toast.success('PDF gerado')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 500 }}
-          >
-            <FileText className="w-3.5 h-3.5" /> Gerar PDF
-          </button>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 500 }}
-          >
-            <Printer className="w-3.5 h-3.5" /> Imprimir
-          </button>
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 600 }}
-          >
-            <Share2 className="w-3.5 h-3.5" /> Compartilhar
-          </button>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Galeria */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <button
-            onClick={() => setZoomOpen(true)}
-            className="relative w-full aspect-square bg-white rounded-lg overflow-hidden border border-border mb-3 group"
-          >
-            <img src={gallery[activeImage]} alt={product.name} className="w-full h-full object-contain p-4" />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-              <ZoomIn className="w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </button>
-          {gallery.length > 1 && (
-            <div className="grid grid-cols-4 gap-2 mb-3">
-              {gallery.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImage(idx)}
-                  className={`aspect-square rounded-lg overflow-hidden border bg-white transition-colors ${activeImage === idx ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
+        <div>
+          <p className="text-muted-foreground mb-1.5" style={labelStyle}>Descrição</p>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{product.description}</p>
+        </div>
+
+        <div>
+          <p className="text-muted-foreground mb-2" style={labelStyle}>Tamanhos disponíveis</p>
+          <div className="flex flex-wrap gap-1.5">
+            {sizes.map(s => {
+              const stock = product.grades[s] ?? 0;
+              return (
+                <span
+                  key={s}
+                  className={`px-3 py-1 rounded-full border ${stock === 0 ? 'border-border text-muted-foreground/50' : 'border-border text-foreground'}`}
+                  style={{ fontSize: '0.8rem', fontWeight: 600 }}
                 >
-                  <img src={img} alt={`${product.name} — foto ${idx + 1}`} className="w-full h-full object-contain p-1" />
-                </button>
-              ))}
-            </div>
-          )}
-          <button
-            onClick={() => toast.success('Imagem baixada')}
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 500 }}
-          >
-            <Download className="w-3.5 h-3.5" /> Baixar esta imagem
-          </button>
-        </div>
-
-        {/* Informações */}
-        <div className="space-y-4">
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-muted-foreground mb-2" style={labelStyle}>Descrição</p>
-            <p className="text-foreground" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{product.description}</p>
+                  {s}
+                </span>
+              );
+            })}
           </div>
-
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-muted-foreground mb-2" style={labelStyle}>Destaques</p>
-            <ul className="space-y-1.5">
-              {highlights.map((h, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-foreground" style={{ fontSize: '0.82rem' }}>{h}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {specs && (
-            <div className="bg-card border border-border rounded-xl p-4">
-              <p className="text-muted-foreground mb-3" style={labelStyle}>Especificações técnicas</p>
-              <div className="grid grid-cols-2 gap-3">
-                <SpecRow label="Cabedal" value={specs.cabedal} />
-                <SpecRow label="Solado" value={specs.solado} />
-                <SpecRow label="Forro" value={specs.forro} />
-                <SpecRow label="Fechamento" value={specs.fechamento} />
-                <SpecRow label="Peso aproximado" value={specs.peso} />
-                <SpecRow label="Material" value={product.material} />
-              </div>
-            </div>
-          )}
-
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-muted-foreground mb-2" style={labelStyle}>Cores disponíveis</p>
-            <div className="flex flex-wrap gap-1.5">
-              {product.colors.map(c => (
-                <span key={c} className="px-2.5 py-1 rounded-full bg-secondary/60 text-foreground" style={{ fontSize: '0.75rem' }}>{c}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tamanhos e tabela de medidas */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <p className="text-muted-foreground mb-3" style={labelStyle}>Tamanhos e tabela de medidas</p>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-muted-foreground text-left" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                <th className="pb-2 pr-6 font-normal">Tamanho</th>
-                <th className="pb-2 pr-6 font-normal">Comprimento interno</th>
-                <th className="pb-2 font-normal">Estoque</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sizes.map(s => {
-                const stock = product.grades[s] ?? 0;
-                const stockColor = stock === 0 ? 'text-red-400' : stock < 50 ? 'text-amber-400' : 'text-emerald-400';
-                return (
-                  <tr key={s} className="border-t border-border">
-                    <td className="py-2 pr-6 mono text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{s}</td>
-                    <td className="py-2 pr-6 text-muted-foreground" style={{ fontSize: '0.82rem' }}>{(parseInt(s, 10) / 10).toFixed(1)} cm</td>
-                    <td className={`py-2 mono ${stockColor}`} style={{ fontSize: '0.82rem', fontWeight: 600 }}>{stock} pares</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
 
