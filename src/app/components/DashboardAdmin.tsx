@@ -3,6 +3,7 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   BarChart, Bar, ReferenceLine, Cell,
 } from "recharts";
+import { SalesRankingSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesRankingSection";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
 
@@ -300,6 +301,10 @@ export function DashboardAdmin({ onNavigate: _onNavigate }: DashboardAdminProps)
           </div>
         </Card>
       </div>
+
+      {/* VENDAS: REPRESENTANTES E PREPOSTOS */}
+      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Vendas por representante e preposto</div>
+      <SalesRankingSection scope="network" entities={getNetworkEntities()} totalMonthlyBase={getNetworkMonthlyTotal()} />
 
       {/* CATÁLOGO E ESTOQUE */}
       <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Catálogo e estoque</div>

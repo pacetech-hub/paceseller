@@ -5,6 +5,9 @@ import {
   BarChart, Bar, ReferenceLine, Cell,
 } from "recharts";
 import { Client } from "../data/mockData";
+import { SalesRankingSection, getRepEntities, getRepMonthlyTotal } from "./SalesRankingSection";
+
+const CURRENT_REP_NAME = 'Marcos Andrade';
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
 
@@ -164,7 +167,7 @@ export function DashboardRep({ onNavigate, selectedClient }: DashboardRepProps) 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-foreground" style={{ fontSize: '1.3rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Meus indicadores</h2>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>Representante · Marcos Andrade{selectedClient ? ` · cliente ativo: ${selectedClient.name}` : ''}</p>
+          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>Representante · {CURRENT_REP_NAME}{selectedClient ? ` · cliente ativo: ${selectedClient.name}` : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {['Período: Semana atual', 'Região: Todas', 'Coleção: Verão 26'].map(c => (
@@ -209,6 +212,10 @@ export function DashboardRep({ onNavigate, selectedClient }: DashboardRepProps) 
           </div>
         </div>
       </Card>
+
+      {/* VENDAS: MEUS PREPOSTOS */}
+      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Vendas e prepostos</div>
+      <SalesRankingSection scope="own" entities={getRepEntities(CURRENT_REP_NAME)} totalMonthlyBase={getRepMonthlyTotal(CURRENT_REP_NAME)} />
 
       {/* PEDIDOS E TICKET */}
       <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Pedidos e ticket</div>
