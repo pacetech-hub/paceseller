@@ -125,19 +125,19 @@ const productHighlights: Record<string, { items: Highlight[]; tagline: string }>
   },
 };
 
+// sempre 6 fotos — cicla pelas imagens disponíveis na linha do produto quando há menos de 6 únicas
 function getGallery(product: Product): string[] {
   const sameLine = products.filter(p => p.line === product.line).map(p => p.image);
-  return Array.from(new Set([product.image, ...sameLine])).slice(0, 4);
+  const unique = Array.from(new Set([product.image, ...sameLine]));
+  return Array.from({ length: 6 }, (_, i) => unique[i % unique.length]);
 }
 
-// classes de span para montar um bento grid (4 colunas x 2 linhas) a partir de 1-4 imagens
-function bentoSpanClasses(index: number, total: number): string {
-  if (total === 1) return 'col-span-4 row-span-2';
-  if (total === 2) return 'col-span-2 row-span-2';
-  if (total === 3) return index === 0 ? 'col-span-2 row-span-2' : 'col-span-1 row-span-2';
+// classes de span para montar um bento grid (4 colunas x 3 linhas) com as 6 imagens do produto
+function bentoSpanClasses(index: number): string {
   if (index === 0) return 'col-span-2 row-span-2';
-  if (index === 1) return 'col-span-1 row-span-2';
-  return 'col-span-1 row-span-1';
+  if (index === 1) return 'col-span-2 row-span-1';
+  if (index === 2 || index === 3) return 'col-span-1 row-span-1';
+  return 'col-span-2 row-span-1';
 }
 
 const colorPalette = ['Preto', 'Branco', 'Cinza', 'Vermelho', 'Azul', 'Navy', 'Bege', 'Marrom'];
@@ -327,13 +327,13 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </button>
       </div>
 
-      {/* Bento grid — todas as imagens do produto */}
-      <div className="grid grid-cols-4 grid-rows-2 gap-2 aspect-[16/9] rounded-xl overflow-hidden">
+      {/* Bento grid — 6 imagens do produto */}
+      <div className="grid grid-cols-4 grid-rows-3 gap-2 aspect-[4/3] rounded-xl overflow-hidden">
         {gallery.map((img, idx) => (
           <div
             key={idx}
             onClick={() => openZoom(idx)}
-            className={`relative overflow-hidden bg-white border border-border group cursor-pointer ${bentoSpanClasses(idx, gallery.length)}`}
+            className={`relative overflow-hidden bg-white border border-border group cursor-pointer ${bentoSpanClasses(idx)}`}
           >
             <img src={img} alt={`${product.name} — foto ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
