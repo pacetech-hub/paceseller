@@ -391,7 +391,10 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             </p>
           </div>
         )}
+      </div>
 
+      {/* Estoque */}
+      <div className="bg-card border border-border rounded-xl p-5">
         <div>
           <p className="text-muted-foreground mb-2" style={labelStyle}>
             {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
