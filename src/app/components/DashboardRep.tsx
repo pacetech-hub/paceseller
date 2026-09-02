@@ -166,7 +166,7 @@ export function DashboardRep({ onNavigate, selectedClient }: DashboardRepProps) 
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-foreground" style={{ fontSize: '1.3rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Meus indicadores</h2>
+          <h2 className="text-foreground" style={{ fontSize: '1.3rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Indicadores</h2>
           <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>Representante · {CURRENT_REP_NAME}{selectedClient ? ` · cliente ativo: ${selectedClient.name}` : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
