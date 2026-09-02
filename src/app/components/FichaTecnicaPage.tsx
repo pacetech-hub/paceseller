@@ -403,7 +403,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             <table className="w-full">
               <thead>
                 <tr className="text-muted-foreground text-left" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <th className="pb-2 pr-4 font-normal">Contexto</th>
+                  <th className="pb-2 pr-4 font-normal">Tamanhos</th>
                   {sizes.map(s => (
                     <th key={s} className="pb-2 px-2 font-normal text-center">{s}</th>
                   ))}
