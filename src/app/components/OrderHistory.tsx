@@ -13,6 +13,7 @@ interface OrderHistoryProps {
   onNavigate: (view: View) => void;
   onSelectOrder: (order: Order) => void;
   profile?: Profile;
+  initialSearch?: string;
 }
 
 export const statusColors: Record<string, string> = {
@@ -128,8 +129,8 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
   );
 }
 
-export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin' }: OrderHistoryProps) {
-  const [search, setSearch] = useState('');
+export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', initialSearch = '' }: OrderHistoryProps) {
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState('todos');
 
   const statuses = ['todos', 'em análise', 'aprovado', 'faturado', 'entregue', 'cancelado'];

@@ -17,6 +17,7 @@ import { MarketingStudio } from "./components/MarketingStudio";
 import { SelloutDashboard } from "./components/SelloutDashboard";
 import { AdminPage } from "./components/AdminPage";
 import { ClientsPage } from "./components/ClientsPage";
+import { ClientDetailPage } from "./components/ClientDetailPage";
 import { ProfilePage } from "./components/ProfilePage";
 import { BoletosPage } from "./components/BoletosPage";
 import { OrderDetailPage } from "./components/OrderDetailPage";
@@ -39,6 +40,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   sellout: { title: 'Sell-out Intelligence', subtitle: 'Análise de performance comercial' },
   admin: { title: 'Gestão', subtitle: 'Usuários, produtos, políticas e configurações' },
   clients: { title: 'Clientes', subtitle: 'Sua carteira de clientes' },
+  'client-detail': { title: 'Cliente', subtitle: 'Informações e ações rápidas' },
   profile: { title: 'Meu Perfil', subtitle: 'Seus dados, preferências e acesso' },
   boletos: { title: 'Pagamentos e Boletos', subtitle: 'Suas faturas, boletos e histórico de pagamentos' },
   stock: { title: 'Meu Estoque', subtitle: 'Cadastre ou integre seu estoque da marca' },
@@ -116,6 +118,8 @@ export default function App() {
       }
     : currentView === 'order-detail' && selectedOrder
     ? { title: selectedOrder.id, subtitle: 'Detalhes do pedido' }
+    : currentView === 'client-detail' && selectedClient
+    ? { title: selectedClient.name, subtitle: 'Informações e ações rápidas' }
     : viewTitles[currentView];
 
   if (!authenticated) {
@@ -213,7 +217,14 @@ export default function App() {
           />
         );
       case 'history':
-        return <OrderHistory onNavigate={navigate} onSelectOrder={openOrder} profile={profile} />;
+        return (
+          <OrderHistory
+            onNavigate={navigate}
+            onSelectOrder={openOrder}
+            profile={profile}
+            initialSearch={profile !== 'lojista' && selectedClient ? selectedClient.name : ''}
+          />
+        );
       case 'order-detail':
         return <OrderDetailPage order={selectedOrder} onNavigate={navigate} profile={profile} />;
       case 'marketing':
@@ -224,10 +235,17 @@ export default function App() {
         return <AdminPage />;
       case 'clients':
         return <ClientsPage onNavigate={navigate} selectedClient={selectedClient} setSelectedClient={setSelectedClient} />;
+      case 'client-detail':
+        return <ClientDetailPage client={selectedClient} onNavigate={navigate} />;
       case 'profile':
         return <ProfilePage profile={profile} />;
       case 'boletos':
-        return <BoletosPage profile={profile} />;
+        return (
+          <BoletosPage
+            profile={profile}
+            initialSearch={profile !== 'lojista' && selectedClient ? selectedClient.name : ''}
+          />
+        );
       case 'ficha-tecnica':
         return <FichaTecnicaPage profile={profile} />;
       case 'stock':

@@ -11,7 +11,7 @@ import teslaLogo from "../../assets/tesla-footwear-logo.png";
 
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
-  | 'marketing' | 'sellout' | 'admin' | 'clients' | 'profile' | 'stock'
+  | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'profile' | 'stock'
   | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica';
 
 type Profile = 'admin' | 'rep' | 'lojista';

@@ -16,7 +16,6 @@ interface OrderDetailPageProps {
 const clientStatusColors: Record<string, string> = {
   'ativo': 'text-emerald-400 bg-emerald-400/10',
   'inativo': 'text-red-400 bg-red-400/10',
-  'inadimplente': 'text-amber-400 bg-amber-400/10',
 };
 
 // deterministic line-item breakdown per order — quantities sum to order.items
@@ -88,6 +87,11 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             <span className={`px-2 py-0.5 rounded-full ${clientStatusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
               {client.status}
             </span>
+            {client.inadimplente && (
+              <span className="px-2 py-0.5 rounded-full text-amber-400 bg-amber-400/10" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                inadimplente
+              </span>
+            )}
           </div>
           <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.8rem' }}>{client.cnpj}</p>
           <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.city} / {client.state}</p>

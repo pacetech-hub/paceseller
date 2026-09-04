@@ -10,6 +10,7 @@ type Profile = 'admin' | 'rep' | 'lojista';
 
 interface BoletosPageProps {
   profile: Profile;
+  initialSearch?: string;
 }
 
 type PaymentStatus = 'pago' | 'pendente' | 'atrasado';
@@ -338,8 +339,8 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   );
 }
 
-export function BoletosPage({ profile }: BoletosPageProps) {
-  const [search, setSearch] = useState('');
+export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'todos' | PaymentStatus>('todos');
 
   const isLojista = profile === 'lojista';

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Search, MapPin, Users, BarChart3, Sparkles } from "lucide-react";
 import { clients, Client, formatCurrency } from "../data/mockData";
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
 
 interface ClientsPageProps {
   onNavigate: (view: View) => void;
@@ -13,7 +13,6 @@ interface ClientsPageProps {
 const statusColors: Record<string, string> = {
   'ativo': 'text-emerald-400 bg-emerald-400/10',
   'inativo': 'text-red-400 bg-red-400/10',
-  'inadimplente': 'text-amber-400 bg-amber-400/10',
 };
 
 const formatOrderDate = (dateStr: string) =>
@@ -47,7 +46,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
   const handleSelectClient = (client: Client) => {
     setSelectedClient(client);
-    onNavigate('catalog');
+    onNavigate('client-detail');
   };
 
   return (
@@ -150,6 +149,11 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                           <span className={`px-1.5 py-0.5 rounded-full flex-shrink-0 ${statusColors[client.status]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
                             {client.status}
                           </span>
+                          {client.inadimplente && (
+                            <span className="px-1.5 py-0.5 rounded-full flex-shrink-0 text-amber-400 bg-amber-400/10" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                              inadimplente
+                            </span>
+                          )}
                           {isSelected && (
                             <span className="px-1.5 py-0.5 rounded-full flex-shrink-0 bg-primary/15 text-primary" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
                               selecionado
