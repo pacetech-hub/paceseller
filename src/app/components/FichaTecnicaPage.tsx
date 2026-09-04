@@ -416,18 +416,8 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                     const stock = product.grades[s] ?? 0;
                     const color = stock === 0 ? 'text-red-400' : stock < 20 ? 'text-amber-400' : 'text-emerald-400';
                     return (
-                      <td key={s} className="py-2 px-2 text-center">
-                        <div className={`mono ${color}`} style={{ fontSize: '0.78rem', fontWeight: 600 }}>{stock}</div>
-                        {stock > 0 && (
-                          <button
-                            onClick={() => toast.success(`Tamanho ${s} adicionado para reposição rápida`)}
-                            title="Comprar"
-                            aria-label={`Comprar tamanho ${s} — estoque fábrica`}
-                            className="mt-1 inline-flex items-center justify-center w-5 h-5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                          >
-                            <ShoppingCart className="w-3 h-3" />
-                          </button>
-                        )}
+                      <td key={s} className={`py-2 px-2 text-center mono ${color}`} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+                        {stock}
                       </td>
                     );
                   })}
