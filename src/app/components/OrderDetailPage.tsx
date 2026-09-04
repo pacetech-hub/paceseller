@@ -16,7 +16,7 @@ interface OrderDetailPageProps {
 const clientStatusColors: Record<string, string> = {
   'ativo': 'text-emerald-400 bg-emerald-400/10',
   'inativo': 'text-red-400 bg-red-400/10',
-  'em aberto': 'text-amber-400 bg-amber-400/10',
+  'inadimplente': 'text-amber-400 bg-amber-400/10',
 };
 
 // deterministic line-item breakdown per order — quantities sum to order.items

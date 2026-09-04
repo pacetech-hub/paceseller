@@ -13,8 +13,11 @@ interface ClientsPageProps {
 const statusColors: Record<string, string> = {
   'ativo': 'text-emerald-400 bg-emerald-400/10',
   'inativo': 'text-red-400 bg-red-400/10',
-  'em aberto': 'text-amber-400 bg-amber-400/10',
+  'inadimplente': 'text-amber-400 bg-amber-400/10',
 };
+
+const formatOrderDate = (dateStr: string) =>
+  new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 // Carteira sugerida do dia: clientes do rep "Marcos Andrade" priorizados (ativos + maior volume)
 const SUGGESTED_REP = 'Marcos Andrade';
@@ -122,11 +125,9 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         <table className="w-full text-left" style={{ fontSize: '0.82rem' }}>
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '40%' }}>Cliente</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Região</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Status</th>
+              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '55%' }}>Cliente</th>
+              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Representante</th>
               <th className="px-4 py-2.5 font-semibold text-muted-foreground">Último pedido</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground text-right">Volume histórico</th>
             </tr>
           </thead>
           <tbody>
@@ -146,6 +147,9 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{client.name}</p>
+                          <span className={`px-1.5 py-0.5 rounded-full flex-shrink-0 ${statusColors[client.status]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                            {client.status}
+                          </span>
                           {isSelected && (
                             <span className="px-1.5 py-0.5 rounded-full flex-shrink-0 bg-primary/15 text-primary" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
                               selecionado
@@ -153,21 +157,13 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                           )}
                         </div>
                         <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.72rem' }}>
-                          <MapPin className="w-3 h-3" /> {client.city}, {client.state}
+                          <MapPin className="w-3 h-3" /> {client.city}/{client.state}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.region}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full ${statusColors[client.status]}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                      {client.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.lastOrder}</td>
-                  <td className="px-4 py-3 text-right">
-                    <p className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(client.totalPurchased)}</p>
-                  </td>
+                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.rep}</td>
+                  <td className="px-4 py-3 text-muted-foreground mono" style={{ fontSize: '0.8rem' }}>{formatOrderDate(client.lastOrder)}</td>
                 </tr>
               );
             })}
