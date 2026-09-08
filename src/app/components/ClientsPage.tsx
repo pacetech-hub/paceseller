@@ -31,11 +31,13 @@ const STATUS_OPTIONS: Array<{ value: StatusFilterValue; label: string }> = [
   { value: 'inadimplente', label: 'inadimplente' },
 ];
 
-type SortOrder = 'padrao' | 'az' | 'za' | 'ultimo-pedido';
+type SortOrder = 'az' | 'za' | 'ultimo-pedido' | 'ultimo-pedido-desc';
+const DEFAULT_SORT: SortOrder = 'ultimo-pedido';
 const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
   { value: 'az', label: 'A a Z' },
   { value: 'za', label: 'Z a A' },
   { value: 'ultimo-pedido', label: 'Pedido mais antigo para mais recente' },
+  { value: 'ultimo-pedido-desc', label: 'Pedido mais recentes para mais antigos' },
 ];
 
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
@@ -44,7 +46,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
   const [search, setSearch] = useState('');
   const [regionFilters, setRegionFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<StatusFilterValue[]>([]);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('padrao');
+  const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT);
 
   const toggleRegion = (region: string) => {
     setRegionFilters(prev => prev.includes(region) ? prev.filter(r => r !== region) : [...prev, region]);
@@ -60,7 +62,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
   };
 
   const activeFilterCount = regionFilters.length + statusFilters.length;
-  const sortActive = sortOrder !== 'padrao';
+  const sortActive = sortOrder !== DEFAULT_SORT;
 
   const baseList = mode === 'sugerida'
     ? clients.filter(c => c.rep === SUGGESTED_REP)
@@ -79,6 +81,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
     if (sortOrder === 'az') return a.name.localeCompare(b.name, 'pt-BR');
     if (sortOrder === 'za') return b.name.localeCompare(a.name, 'pt-BR');
     if (sortOrder === 'ultimo-pedido') return a.lastOrder.localeCompare(b.lastOrder);
+    if (sortOrder === 'ultimo-pedido-desc') return b.lastOrder.localeCompare(a.lastOrder);
     return 0;
   });
 
@@ -225,7 +228,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 {SORT_OPTIONS.map(opt => (
                   <button
                     key={opt.value}
-                    onClick={() => setSortOrder(prev => prev === opt.value ? 'padrao' : opt.value)}
+                    onClick={() => setSortOrder(opt.value)}
                     className={`w-full text-left px-2.5 py-1.5 rounded-lg transition-colors ${sortOrder === opt.value ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-secondary'}`}
                     style={{ fontSize: '0.78rem', fontWeight: 500 }}
                   >
@@ -237,11 +240,11 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
             {sortActive && (
               <button
-                onClick={() => setSortOrder('padrao')}
+                onClick={() => setSortOrder(DEFAULT_SORT)}
                 className="text-muted-foreground hover:text-foreground underline"
                 style={{ fontSize: '0.75rem', fontWeight: 500 }}
               >
-                Limpar ordenação
+                Restaurar ordenação padrão
               </button>
             )}
           </PopoverContent>
