@@ -35,7 +35,7 @@ type SortOrder = 'padrao' | 'az' | 'za' | 'ultimo-pedido';
 const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
   { value: 'az', label: 'A a Z' },
   { value: 'za', label: 'Z a A' },
-  { value: 'ultimo-pedido', label: 'Último pedido (mais antigo para mais recente)' },
+  { value: 'ultimo-pedido', label: 'Pedido mais antigo para mais recente' },
 ];
 
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
