@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, MapPin, Users, BarChart3, Sparkles } from "lucide-react";
-import { clients, Client, formatCurrency } from "../data/mockData";
+import { clients, Client } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
 
@@ -41,8 +41,8 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
     return matchSearch && matchRegion;
   });
 
-  const totalPortfolio = filtered.reduce((acc, c) => acc + c.totalPurchased, 0);
   const activeCount = filtered.filter(c => c.status === 'ativo').length;
+  const inactiveCount = filtered.filter(c => c.status === 'inativo').length;
 
   const handleSelectClient = (client: Client) => {
     setSelectedClient(client);
@@ -57,14 +57,15 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total de clientes', value: String(filtered.length), sub: 'na carteira filtrada' },
-          { label: 'Clientes ativos', value: String(activeCount), sub: `de ${filtered.length} total` },
-          { label: 'Volume total', value: formatCurrency(totalPortfolio), sub: 'compras históricas', mono: true },
+          { count: activeCount, suffix: 'clientes ativos' },
+          { count: inactiveCount, suffix: 'clientes inativos' },
+          { count: filtered.length, suffix: 'total de clientes' },
         ].map(stat => (
-          <div key={stat.label} className="bg-card border border-border rounded-xl p-4">
-            <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
-            <p className={`text-foreground ${stat.mono ? 'mono' : ''}`} style={{ fontSize: '1.15rem', fontWeight: 700 }}>{stat.value}</p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.sub}</p>
+          <div key={stat.suffix} className="bg-card border border-border rounded-xl p-4">
+            <p className="text-foreground" style={{ fontSize: '1.15rem', fontWeight: 700 }}>
+              <span className="mono">{stat.count}</span> {stat.suffix}
+            </p>
+            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>na carteira filtrada</p>
           </div>
         ))}
       </div>
