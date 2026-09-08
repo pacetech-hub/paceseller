@@ -236,7 +236,7 @@ export default function App() {
       case 'clients':
         return <ClientsPage onNavigate={navigate} selectedClient={selectedClient} setSelectedClient={setSelectedClient} />;
       case 'client-detail':
-        return <ClientDetailPage client={selectedClient} onNavigate={navigate} />;
+        return <ClientDetailPage client={selectedClient} onNavigate={navigate} cartCount={clientCarts.length} />;
       case 'profile':
         return <ProfilePage profile={profile} />;
       case 'boletos':

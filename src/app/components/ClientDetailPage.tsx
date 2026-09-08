@@ -1,14 +1,14 @@
 import { useState } from "react";
 import {
-  ChevronLeft, ChevronDown, MapPin, Building2, Users, BarChart3,
-  LayoutGrid, Package2, ShoppingCart, Clock, Receipt, Plus,
+  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Plus,
 } from "lucide-react";
-import { commercialPolicies, formatCurrency, type Client } from "../data/mockData";
+import { formatCurrency, type Client } from "../data/mockData";
 import type { View } from "./Sidebar";
 
 interface ClientDetailPageProps {
   client: Client | null;
   onNavigate: (view: View) => void;
+  cartCount: number;
 }
 
 const statusColors: Record<Client['status'], string> = {
@@ -19,7 +19,14 @@ const statusColors: Record<Client['status'], string> = {
 const formatOrderDate = (dateStr: string) =>
   new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-export function ClientDetailPage({ client, onNavigate }: ClientDetailPageProps) {
+// mock: número de pedidos históricos determinístico por cliente, usado para estimar o ticket médio
+function seededOrderCount(clientId: string): number {
+  let h = 0;
+  for (let i = 0; i < clientId.length; i++) h = (h * 31 + clientId.charCodeAt(i)) >>> 0;
+  return 3 + (h % 8);
+}
+
+export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetailPageProps) {
   const [expanded, setExpanded] = useState(false);
 
   if (!client) {
@@ -37,44 +44,7 @@ export function ClientDetailPage({ client, onNavigate }: ClientDetailPageProps) 
     );
   }
 
-  const policy = commercialPolicies.find(p => p.id === client.policyId);
-
-  const infoCards = [
-    {
-      title: 'Dados cadastrais',
-      icon: Building2,
-      rows: [
-        { label: 'CNPJ', value: client.cnpj },
-        { label: 'Cidade/Estado', value: `${client.city}/${client.state}` },
-        { label: 'Região', value: client.region },
-      ],
-    },
-    {
-      title: 'Comercial',
-      icon: Users,
-      rows: [
-        { label: 'Representante', value: client.rep },
-        { label: 'Tabela de preço', value: policy?.name ?? client.policyId },
-        { label: 'Condição de pagamento', value: policy?.paymentCondition ?? '—' },
-      ],
-    },
-    {
-      title: 'Histórico de compras',
-      icon: BarChart3,
-      rows: [
-        { label: 'Volume total comprado', value: formatCurrency(client.totalPurchased), mono: true },
-        { label: 'Último pedido', value: formatOrderDate(client.lastOrder) },
-      ],
-    },
-  ];
-
-  const actions: Array<{ label: string; description: string; icon: React.ComponentType<{ className?: string }>; view: View }> = [
-    { label: 'Novo pedido por grade', description: 'Montar pedido rápido em minutos', icon: LayoutGrid, view: 'order-grade' },
-    { label: 'Ver catálogo', description: 'Navegar pelo catálogo com a tabela deste cliente', icon: Package2, view: 'catalog' },
-    { label: 'Carrinhos', description: 'Ver carrinhos em aberto deste cliente', icon: ShoppingCart, view: 'carts' },
-    { label: 'Histórico de pedidos', description: 'Pedidos anteriores deste cliente', icon: Clock, view: 'history' },
-    { label: 'Pagamentos e boletos', description: 'Faturas e boletos deste cliente', icon: Receipt, view: 'boletos' },
-  ];
+  const avgTicket = client.totalPurchased / seededOrderCount(client.id);
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-5">
@@ -148,46 +118,41 @@ export function ClientDetailPage({ client, onNavigate }: ClientDetailPageProps) 
         )}
       </div>
 
-      {/* Info cards */}
-      <div>
-        <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Informações</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {infoCards.map(card => (
-            <div key={card.title} className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <card.icon className="w-4 h-4 text-muted-foreground" />
-                <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{card.title}</p>
-              </div>
-              <div className="space-y-2">
-                {card.rows.map(row => (
-                  <div key={row.label} className="flex items-center justify-between gap-2">
-                    <span className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>{row.label}</span>
-                    <span className={`text-foreground text-right ${row.mono ? 'mono' : ''}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Main cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <button
+          onClick={() => onNavigate('order-grade')}
+          className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+            <LayoutGrid className="w-4 h-4 text-primary" />
+          </div>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Novo pedido</p>
+          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Montar pedido por grade para este cliente</p>
+        </button>
 
-      {/* Quick actions */}
-      <div>
-        <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Ações rápidas</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {actions.map(action => (
-            <button
-              key={action.label}
-              onClick={() => onNavigate(action.view)}
-              className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
-            >
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                <action.icon className="w-4 h-4 text-primary" />
-              </div>
-              <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{action.label}</p>
-              <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>{action.description}</p>
-            </button>
-          ))}
+        <button
+          onClick={() => onNavigate('carts')}
+          className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+            <ShoppingCart className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Carrinhos</p>
+            <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.68rem', fontWeight: 700 }}>{cartCount}</span>
+          </div>
+          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>
+            {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
+          </p>
+        </button>
+
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+            <BarChart3 className="w-4 h-4 text-primary" />
+          </div>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
+          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
         </div>
       </div>
     </div>
