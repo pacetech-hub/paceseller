@@ -61,11 +61,9 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
           { count: inactiveCount, suffix: 'clientes inativos' },
           { count: filtered.length, suffix: 'total de clientes' },
         ].map(stat => (
-          <div key={stat.suffix} className="bg-card border border-border rounded-xl p-4">
-            <p className="text-foreground" style={{ fontSize: '1.15rem', fontWeight: 700 }}>
-              <span className="mono">{stat.count}</span> {stat.suffix}
-            </p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>na carteira filtrada</p>
+          <div key={stat.suffix} className="bg-card border border-border rounded-xl p-4 flex items-baseline gap-2">
+            <span className="text-foreground mono" style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1 }}>{stat.count}</span>
+            <span className="text-muted-foreground" style={{ fontSize: '0.78rem', fontWeight: 500 }}>{stat.suffix}</span>
           </div>
         ))}
       </div>
