@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, Users, BarChart3, Sparkles, Filter, ArrowUpDown } from "lucide-react";
+import { Search, MapPin, Users, BarChart3, Sparkles, Filter, ArrowUpDown, ChevronRight } from "lucide-react";
 import { clients, Client } from "../data/mockData";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 
@@ -256,8 +256,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         <table className="w-full text-left" style={{ fontSize: '0.82rem' }}>
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '70%' }}>Cliente</th>
+              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '50%' }}>Cliente</th>
+              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Cidade/Estado</th>
               <th className="px-4 py-2.5 font-semibold text-muted-foreground">Representante</th>
+              <th className="px-4 py-2.5" style={{ width: '2.5rem' }}></th>
             </tr>
           </thead>
           <tbody>
@@ -291,14 +293,19 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                           )}
                         </div>
                         <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{client.name}</p>
-                        <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.72rem' }}>
-                          <MapPin className="w-3 h-3" /> {client.city}/{client.state}
-                        </p>
-                        <p className="text-muted-foreground mono" style={{ fontSize: '0.72rem' }}>{formatOrderDate(client.lastOrder)}</p>
+                        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Último pedido em {formatOrderDate(client.lastOrder)}</p>
                       </div>
                     </div>
                   </td>
+                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {client.city}/{client.state}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.rep}</td>
+                  <td className="px-4 py-3 text-right">
+                    <ChevronRight className="w-4 h-4 text-muted-foreground inline-block" />
+                  </td>
                 </tr>
               );
             })}
