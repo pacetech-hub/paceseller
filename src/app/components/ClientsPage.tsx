@@ -256,9 +256,8 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         <table className="w-full text-left" style={{ fontSize: '0.82rem' }}>
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '55%' }}>Cliente</th>
+              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '70%' }}>Cliente</th>
               <th className="px-4 py-2.5 font-semibold text-muted-foreground">Representante</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Último pedido</th>
             </tr>
           </thead>
           <tbody>
@@ -276,8 +275,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                         <span className="text-primary" style={{ fontSize: '0.7rem', fontWeight: 700 }}>{client.avatar}</span>
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{client.name}</p>
+                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
                           <span className={`px-1.5 py-0.5 rounded-full flex-shrink-0 ${statusColors[client.status]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
                             {client.status}
                           </span>
@@ -292,14 +290,15 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                             </span>
                           )}
                         </div>
+                        <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{client.name}</p>
                         <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.72rem' }}>
                           <MapPin className="w-3 h-3" /> {client.city}/{client.state}
                         </p>
+                        <p className="text-muted-foreground mono" style={{ fontSize: '0.72rem' }}>{formatOrderDate(client.lastOrder)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.rep}</td>
-                  <td className="px-4 py-3 text-muted-foreground mono" style={{ fontSize: '0.8rem' }}>{formatOrderDate(client.lastOrder)}</td>
                 </tr>
               );
             })}
