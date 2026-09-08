@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Search, MapPin, Users, BarChart3, Sparkles } from "lucide-react";
+import { Search, MapPin, Users, BarChart3, Sparkles, Filter } from "lucide-react";
 import { clients, Client } from "../data/mockData";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
 
@@ -21,13 +22,45 @@ const formatOrderDate = (dateStr: string) =>
 // Carteira sugerida do dia: clientes do rep "Marcos Andrade" priorizados (ativos + maior volume)
 const SUGGESTED_REP = 'Marcos Andrade';
 
+const REGIONS = ['Centro-Oeste', 'Norte', 'Nordeste', 'Sudeste', 'Sul'];
+
+type StatusFilterValue = 'ativo' | 'inativo' | 'inadimplente';
+const STATUS_OPTIONS: Array<{ value: StatusFilterValue; label: string }> = [
+  { value: 'ativo', label: 'ativo' },
+  { value: 'inativo', label: 'inativo' },
+  { value: 'inadimplente', label: 'inadimplente' },
+];
+
+type SortOrder = 'padrao' | 'az' | 'za' | 'ultimo-pedido';
+const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
+  { value: 'az', label: 'A a Z' },
+  { value: 'za', label: 'Z a A' },
+  { value: 'ultimo-pedido', label: 'Último pedido (mais antigo para mais recente)' },
+];
+
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
-  
+
   const [mode, setMode] = useState<'sugerida' | 'todos'>('sugerida');
   const [search, setSearch] = useState('');
-  const [regionFilter, setRegionFilter] = useState('Todos');
+  const [regionFilters, setRegionFilters] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<StatusFilterValue[]>([]);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('padrao');
 
-  const regions = ['Todos', 'Sudeste', 'Sul', 'Nordeste', 'Centro-Oeste', 'Norte'];
+  const toggleRegion = (region: string) => {
+    setRegionFilters(prev => prev.includes(region) ? prev.filter(r => r !== region) : [...prev, region]);
+  };
+
+  const toggleStatus = (status: StatusFilterValue) => {
+    setStatusFilters(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]);
+  };
+
+  const clearFilters = () => {
+    setRegionFilters([]);
+    setStatusFilters([]);
+    setSortOrder('padrao');
+  };
+
+  const activeFilterCount = regionFilters.length + statusFilters.length + (sortOrder !== 'padrao' ? 1 : 0);
 
   const baseList = mode === 'sugerida'
     ? clients.filter(c => c.rep === SUGGESTED_REP)
@@ -37,8 +70,16 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.city.toLowerCase().includes(search.toLowerCase()) ||
       c.rep.toLowerCase().includes(search.toLowerCase());
-    const matchRegion = regionFilter === 'Todos' || c.region === regionFilter;
-    return matchSearch && matchRegion;
+    const matchRegion = regionFilters.length === 0 || regionFilters.includes(c.region);
+    const matchStatus = statusFilters.length === 0 || statusFilters.some(s => s === 'inadimplente' ? c.inadimplente : c.status === s);
+    return matchSearch && matchRegion && matchStatus;
+  });
+
+  const sortedClients = [...filtered].sort((a, b) => {
+    if (sortOrder === 'az') return a.name.localeCompare(b.name, 'pt-BR');
+    if (sortOrder === 'za') return b.name.localeCompare(a.name, 'pt-BR');
+    if (sortOrder === 'ultimo-pedido') return a.lastOrder.localeCompare(b.lastOrder);
+    return 0;
   });
 
   const activeCount = filtered.filter(c => c.status === 'ativo').length;
@@ -104,18 +145,80 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             style={{ fontSize: '0.82rem' }}
           />
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {regions.map(r => (
+        <Popover>
+          <PopoverTrigger asChild>
             <button
-              key={r}
-              onClick={() => setRegionFilter(r)}
-              className={`px-3 py-1.5 rounded-full transition-colors ${regionFilter === r ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.75rem', fontWeight: 500 }}
+              className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg border transition-colors ${activeFilterCount > 0 ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
+              style={{ fontSize: '0.8rem', fontWeight: 600 }}
             >
-              {r}
+              <Filter className="w-3.5 h-3.5" /> Filtros
+              {activeFilterCount > 0 && (
+                <span className="flex items-center justify-center rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.62rem', fontWeight: 700, width: '1.1rem', height: '1.1rem' }}>
+                  {activeFilterCount}
+                </span>
+              )}
             </button>
-          ))}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 space-y-4">
+            <div>
+              <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Região</p>
+              <div className="flex flex-wrap gap-1.5">
+                {REGIONS.map(r => (
+                  <button
+                    key={r}
+                    onClick={() => toggleRegion(r)}
+                    className={`px-3 py-1.5 rounded-full transition-colors ${regionFilters.includes(r) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Status</p>
+              <div className="flex flex-wrap gap-1.5">
+                {STATUS_OPTIONS.map(s => (
+                  <button
+                    key={s.value}
+                    onClick={() => toggleStatus(s.value)}
+                    className={`px-3 py-1.5 rounded-full transition-colors ${statusFilters.includes(s.value) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Ordenar por</p>
+              <div className="space-y-1">
+                {SORT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSortOrder(prev => prev === opt.value ? 'padrao' : opt.value)}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg transition-colors ${sortOrder === opt.value ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-secondary'}`}
+                    style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearFilters}
+                className="text-muted-foreground hover:text-foreground underline"
+                style={{ fontSize: '0.75rem', fontWeight: 500 }}
+              >
+                Limpar filtros
+              </button>
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Client table */}
@@ -129,7 +232,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             </tr>
           </thead>
           <tbody>
-            {filtered.map(client => {
+            {sortedClients.map(client => {
               const isSelected = selectedClient?.id === client.id;
               return (
                 <tr
