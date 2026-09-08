@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, Users, BarChart3, Sparkles, Filter } from "lucide-react";
+import { Search, MapPin, Users, BarChart3, Sparkles, Filter, ArrowUpDown } from "lucide-react";
 import { clients, Client } from "../data/mockData";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 
@@ -57,10 +57,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
   const clearFilters = () => {
     setRegionFilters([]);
     setStatusFilters([]);
-    setSortOrder('padrao');
   };
 
-  const activeFilterCount = regionFilters.length + statusFilters.length + (sortOrder !== 'padrao' ? 1 : 0);
+  const activeFilterCount = regionFilters.length + statusFilters.length;
+  const sortActive = sortOrder !== 'padrao';
 
   const baseList = mode === 'sugerida'
     ? clients.filter(c => c.rep === SUGGESTED_REP)
@@ -192,6 +192,33 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               </div>
             </div>
 
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearFilters}
+                className="text-muted-foreground hover:text-foreground underline"
+                style={{ fontSize: '0.75rem', fontWeight: 500 }}
+              >
+                Limpar filtros
+              </button>
+            )}
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg border transition-colors ${sortActive ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
+              style={{ fontSize: '0.8rem', fontWeight: 600 }}
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" /> Ordenar
+              {sortActive && (
+                <span className="flex items-center justify-center rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.62rem', fontWeight: 700, width: '1.1rem', height: '1.1rem' }}>
+                  1
+                </span>
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-72 space-y-3">
             <div>
               <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Ordenar por</p>
               <div className="space-y-1">
@@ -208,13 +235,13 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               </div>
             </div>
 
-            {activeFilterCount > 0 && (
+            {sortActive && (
               <button
-                onClick={clearFilters}
+                onClick={() => setSortOrder('padrao')}
                 className="text-muted-foreground hover:text-foreground underline"
                 style={{ fontSize: '0.75rem', fontWeight: 500 }}
               >
-                Limpar filtros
+                Limpar ordenação
               </button>
             )}
           </PopoverContent>
