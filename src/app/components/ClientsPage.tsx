@@ -57,9 +57,9 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { count: activeCount, suffix: 'clientes ativos' },
-          { count: inactiveCount, suffix: 'clientes inativos' },
-          { count: filtered.length, suffix: 'total de clientes' },
+          { count: activeCount, suffix: 'ativos' },
+          { count: inactiveCount, suffix: 'inativos' },
+          { count: filtered.length, suffix: 'clientes no total' },
         ].map(stat => (
           <div key={stat.suffix} className="bg-card border border-border rounded-xl p-4 flex items-baseline gap-2">
             <span className="text-foreground mono" style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1 }}>{stat.count}</span>
