@@ -1,7 +1,6 @@
-import { useState } from "react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  BarChart, Bar, ReferenceLine, Cell,
+  BarChart, Bar,
 } from "recharts";
 import { SalesIndicatorsSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesIndicatorsSection";
 import type { Client } from "../data/mockData";
@@ -91,40 +90,6 @@ function Rank({ rows, formatV }: { rows: { n: string; v: number }[]; formatV?: (
 }
 
 const TICKET = 4030;
-const metaData: Record<string, any> = {
-  mes: {
-    hint: 'Meta consolidada · barras por semana (% da meta semanal)',
-    sub: { title: 'Meta semanal (atual)', meta: 1100000, vend: 1060000, counts: ['255 pedidos', '7.500 pares', '480 clientes'] },
-    main: { title: 'Meta mensal da rede', meta: 4500000, vend: 4280000, delta: '▲ +7% vs mês passado' },
-    bars: [{ lb: 'Sem 1', p: 106 }, { lb: 'Sem 2', p: 97 }, { lb: 'Sem 3', p: 100 }, { lb: 'Atual', p: 96, cur: true }],
-  },
-  ano: {
-    hint: 'Meta consolidada · barras por mês (% da meta mensal)',
-    sub: { title: 'Meta mensal (jul)', meta: 4500000, vend: 4280000, counts: ['1.062 pedidos', '31.400 pares', '812 clientes'] },
-    main: { title: 'Meta acumulada (jan–jul)', meta: 31000000, vend: 30200000, delta: '▲ +8% vs mesmo período do ano passado' },
-    bars: [{ lb: 'Jan', p: 96 }, { lb: 'Fev', p: 103 }, { lb: 'Mar', p: 100 }, { lb: 'Abr', p: 94 }, { lb: 'Mai', p: 107 }, { lb: 'Jun', p: 102 }, { lb: 'Jul', p: 95, cur: true }],
-  },
-};
-
-function MetaPanel({ v }: { v: any }) {
-  const pct = Math.round(v.vend / v.meta * 100);
-  const falta = Math.max(0, v.meta - v.vend);
-  const nped = Math.max(1, Math.round(falta / TICKET));
-  return (
-    <div className="rounded-lg border border-border/60 bg-secondary/30 p-4">
-      <div className="text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{v.title}</div>
-      <div className="text-foreground mono" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{brl(v.meta)}</div>
-      <div className="text-muted-foreground mt-2" style={{ fontSize: '0.7rem' }}>Vendido</div>
-      <div className="flex items-center gap-2">
-        <span className="text-foreground mono" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{brl(v.vend)}</span>
-        <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary" style={{ fontSize: '0.7rem', fontWeight: 700 }}>{pct}%</span>
-      </div>
-      {v.delta && <div className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{v.delta}</div>}
-      {v.counts && <div className="flex flex-wrap gap-2 mt-2 text-muted-foreground" style={{ fontSize: '0.7rem' }}>{v.counts.map((c: string) => <span key={c} className="px-1.5 py-0.5 rounded bg-secondary">{c}</span>)}</div>}
-      <div className="text-muted-foreground mt-2" style={{ fontSize: '0.72rem' }}>Falta {brl(falta)} · ≈ {nped} pedido{nped > 1 ? 's' : ''} médio{nped > 1 ? 's' : ''}</div>
-    </div>
-  );
-}
 
 const redeData = [
   { m: 'Fev', v: 3.4 }, { m: 'Mar', v: 3.7 }, { m: 'Abr', v: 3.5 },
@@ -155,9 +120,6 @@ const colecoes = [
 ];
 
 export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminProps) {
-  const [gran, setGran] = useState<'mes' | 'ano'>('mes');
-  const d = metaData[gran];
-
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -171,43 +133,6 @@ export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminPro
           ))}
         </div>
       </div>
-
-      {/* META GERAL */}
-      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Meta geral dos representantes</div>
-      <Card
-        title="Meta geral — rede consolidada"
-        hint={d.hint}
-        right={
-          <div className="inline-flex rounded-lg bg-secondary p-1">
-            {(['mes', 'ano'] as const).map(k => (
-              <button key={k} onClick={() => setGran(k)} className={`px-3 py-1 rounded-md ${gran === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                {k === 'mes' ? 'Mês' : k[0].toUpperCase() + k.slice(1)}
-              </button>
-            ))}
-          </div>
-        }
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <MetaPanel v={d.sub} />
-          <MetaPanel v={d.main} />
-          <div>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={d.bars}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis dataKey="lb" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v: any) => [`${v}%`, 'da meta']} />
-                <ReferenceLine y={100} stroke="#10b981" strokeDasharray="4 4" />
-                <Bar dataKey="p" radius={[6, 6, 0, 0]}>
-                  {d.bars.map((b: any, i: number) => (
-                    <Cell key={i} fill="#111" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </Card>
 
       {/* VISÃO GERAL */}
       <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Visão geral da rede</div>
