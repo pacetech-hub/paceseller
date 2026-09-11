@@ -92,12 +92,6 @@ function Rank({ rows, formatV }: { rows: { n: string; v: number }[]; formatV?: (
 
 const TICKET = 4030;
 const metaData: Record<string, any> = {
-  semana: {
-    hint: 'Meta consolidada · barras por dia (% da meta diária)',
-    sub: { title: 'Meta diária da rede (hoje)', meta: 220000, vend: 205000, counts: ['42 pedidos', '1.250 pares', '96 clientes'] },
-    main: { title: 'Meta semanal da rede', meta: 1100000, vend: 1060000, delta: '▲ +5% vs semana passada' },
-    bars: [{ lb: 'Seg', p: 98 }, { lb: 'Ter', p: 104 }, { lb: 'Qua', p: 96 }, { lb: 'Qui', p: 101 }, { lb: 'Sex', p: 93, cur: true }],
-  },
   mes: {
     hint: 'Meta consolidada · barras por semana (% da meta semanal)',
     sub: { title: 'Meta semanal (atual)', meta: 1100000, vend: 1060000, counts: ['255 pedidos', '7.500 pares', '480 clientes'] },
@@ -161,7 +155,7 @@ const colecoes = [
 ];
 
 export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminProps) {
-  const [gran, setGran] = useState<'semana' | 'mes' | 'ano'>('mes');
+  const [gran, setGran] = useState<'mes' | 'ano'>('mes');
   const d = metaData[gran];
 
   return (
@@ -185,7 +179,7 @@ export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminPro
         hint={d.hint}
         right={
           <div className="inline-flex rounded-lg bg-secondary p-1">
-            {(['semana', 'mes', 'ano'] as const).map(k => (
+            {(['mes', 'ano'] as const).map(k => (
               <button key={k} onClick={() => setGran(k)} className={`px-3 py-1 rounded-md ${gran === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
                 {k === 'mes' ? 'Mês' : k[0].toUpperCase() + k.slice(1)}
               </button>

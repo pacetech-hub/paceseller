@@ -97,12 +97,6 @@ function Rank({ rows }: { rows: { n: string; v: number }[] }) {
 
 const TICKET = 5000;
 const metaData: Record<string, any> = {
-  semana: {
-    hint: 'Visão semana · barras por dia (% da meta diária)',
-    sub: { title: 'Meta diária (hoje)', meta: 50000, vend: 45000, counts: ['6 pedidos', '350 pares', '5 clientes'] },
-    main: { title: 'Meta semanal', meta: 250000, vend: 245000, delta: '▲ +10% vs semana passada' },
-    bars: [{ lb: 'Seg', p: 95 }, { lb: 'Ter', p: 110 }, { lb: 'Qua', p: 95 }, { lb: 'Qui', p: 100 }, { lb: 'Sex', p: 90, cur: true }],
-  },
   mes: {
     hint: 'Visão mês · barras por semana (% da meta semanal)',
     sub: { title: 'Meta semanal (atual)', meta: 250000, vend: 245000, counts: ['24 pedidos', '1.400 pares', '18 clientes'] },
@@ -160,7 +154,7 @@ const cidRank = [
 ];
 
 export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: DashboardRepProps) {
-  const [gran, setGran] = useState<'semana' | 'mes' | 'ano'>('semana');
+  const [gran, setGran] = useState<'mes' | 'ano'>('mes');
   const d = metaData[gran];
 
   return (
@@ -171,7 +165,7 @@ export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: Das
           <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>Representante · {CURRENT_REP_NAME}{selectedClient ? ` · cliente ativo: ${selectedClient.name}` : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {['Período: Semana atual', 'Região: Todas', 'Coleção: Verão 26'].map(c => (
+          {['Período: Mês atual', 'Região: Todas', 'Coleção: Verão 26'].map(c => (
             <span key={c} className="px-2.5 py-1 rounded-full bg-secondary text-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{c}</span>
           ))}
         </div>
@@ -184,7 +178,7 @@ export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: Das
         hint={d.hint}
         right={
           <div className="inline-flex rounded-lg bg-secondary p-1">
-            {(['semana', 'mes', 'ano'] as const).map(k => (
+            {(['mes', 'ano'] as const).map(k => (
               <button key={k} onClick={() => setGran(k)} className={`px-3 py-1 rounded-md capitalize ${gran === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
                 {k === 'mes' ? 'Mês' : k[0].toUpperCase() + k.slice(1)}
               </button>

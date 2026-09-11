@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { clients as allClients, type Client } from "../data/mockData";
 
-type Period = 'dia' | 'semana' | 'mes' | 'trimestre' | 'ano';
+type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
 
 interface SalesEntity {
   id: string;
@@ -50,7 +50,6 @@ export function getRepMonthlyTotal(repName: string): number {
 
 const PERIOD_OPTIONS: { id: Period; label: string }[] = [
   { id: 'dia', label: 'Dia' },
-  { id: 'semana', label: 'Semana' },
   { id: 'mes', label: 'Mês' },
   { id: 'trimestre', label: 'Trimestre' },
   { id: 'ano', label: 'Ano' },
@@ -58,7 +57,6 @@ const PERIOD_OPTIONS: { id: Period; label: string }[] = [
 
 const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
   dia: { multiplier: 1 / 22, labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] },
-  semana: { multiplier: 1 / 4.3, labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'] },
   mes: { multiplier: 1, labels: ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'] },
   trimestre: { multiplier: 3, labels: ['T1', 'T2', 'T3', 'T4'] },
   ano: { multiplier: 12, labels: ['2023', '2024', '2025', '2026'] },
