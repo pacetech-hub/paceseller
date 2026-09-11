@@ -1,5 +1,5 @@
 import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip,
   BarChart, Bar,
 } from "recharts";
 import { SalesIndicatorsSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesIndicatorsSection";
@@ -12,7 +12,6 @@ interface DashboardAdminProps {
   onSelectClient: (client: Client) => void;
 }
 
-const brl = (n: number) => 'R$ ' + n.toLocaleString('pt-BR');
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 
 function Card({ title, hint, span = 12, children, right }: { title?: string; hint?: string; span?: number; children: React.ReactNode; right?: React.ReactNode }) {
@@ -49,29 +48,6 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
   );
 }
 
-function StatusStack({ segs }: { segs: { n: string; q: number; color: string; action?: boolean }[] }) {
-  const tot = segs.reduce((a, b) => a + b.q, 0);
-  return (
-    <>
-      <div className="flex w-full h-6 rounded-md overflow-hidden">
-        {segs.map(s => (
-          <div key={s.n} className="flex items-center justify-center text-white" style={{ flex: s.q, background: s.color, fontSize: '0.7rem', fontWeight: 600 }} title={`${s.n}: ${s.q}`}>
-            {s.q / tot >= 0.06 ? s.q : ''}
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-3 mt-3">
-        {segs.map(s => (
-          <span key={s.n} className="flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-            <span className="w-2.5 h-2.5 rounded-sm" style={{ background: s.color }} /> {s.n} · {s.q}
-            {s.action && <span className="ml-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600" style={{ fontSize: '0.62rem', fontWeight: 600 }}>ação</span>}
-          </span>
-        ))}
-      </div>
-    </>
-  );
-}
-
 function Rank({ rows, formatV }: { rows: { n: string; v: number }[]; formatV?: (n: number) => string }) {
   const max = Math.max(...rows.map(r => r.v));
   return (
@@ -91,29 +67,6 @@ function Rank({ rows, formatV }: { rows: { n: string; v: number }[]; formatV?: (
 
 const TICKET = 4030;
 
-const redeData = [
-  { m: 'Fev', v: 3.4 }, { m: 'Mar', v: 3.7 }, { m: 'Abr', v: 3.5 },
-  { m: 'Mai', v: 3.9 }, { m: 'Jun', v: 4.0 }, { m: 'Jul', v: 4.28 },
-];
-
-const repPerf = [
-  { n: 'Marcos Andrade', cli: 92, cov: '65%', v: 425000, meta: 102, tm: 3900, delta: '+8%', low: false },
-  { n: 'Larissa Prado', cli: 88, cov: '61%', v: 398000, meta: 96, tm: 3720, delta: '+3%', low: false },
-  { n: 'Rafael Neves', cli: 76, cov: '48%', v: 268000, meta: 82, tm: 2980, delta: '-4%', low: true },
-  { n: 'Juliana Costa', cli: 104, cov: '72%', v: 512000, meta: 108, tm: 4300, delta: '+11%', low: false },
-  { n: 'Pedro Alves', cli: 62, cov: '41%', v: 214000, meta: 74, tm: 2710, delta: '-6%', low: true },
-];
-
-const ufRankAdm = [
-  { n: 'SP', v: 1250000 }, { n: 'MG', v: 720000 }, { n: 'RJ', v: 640000 },
-  { n: 'RS', v: 520000 }, { n: 'PR', v: 430000 }, { n: 'SC', v: 380000 },
-];
-
-const slaRank = [
-  { n: 'Marcos Andrade', v: 1.2 }, { n: 'Larissa Prado', v: 1.5 },
-  { n: 'Juliana Costa', v: 1.7 }, { n: 'Rafael Neves', v: 2.4 }, { n: 'Pedro Alves', v: 2.8 },
-];
-
 const colecoes = [
   { c: 'Inverno 24', v: 12.8 }, { c: 'Verão 25', v: 15.2 },
   { c: 'Inverno 25', v: 14.5 }, { c: 'Verão 26', v: 17.2 }, { c: 'Inverno 26', v: 9.6 },
@@ -132,95 +85,6 @@ export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminPro
             <span key={c} className="px-2.5 py-1 rounded-full bg-secondary text-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{c}</span>
           ))}
         </div>
-      </div>
-
-      {/* VISÃO GERAL */}
-      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Visão geral da rede</div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <Card title="Venda consolidada da rede" hint="Pedidos confirmados · últimos 6 meses (R$ mi)" span={8}>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={redeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis dataKey="m" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `R$ ${v}mi`} />
-              <Tooltip formatter={(v: any) => [`R$ ${v} mi`, 'Rede']} />
-              <Line type="monotone" dataKey="v" stroke="#111" strokeWidth={2} dot={{ r: 3, fill: '#111' }} />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="flex flex-wrap gap-3 mt-3">
-            <span className="text-emerald-600" style={{ fontSize: '0.75rem', fontWeight: 600 }}>▲ 7% jul vs jun · ▲ 26% vs fev</span>
-            <Tile lab="Pedidos" val="1.062" />
-            <Tile lab="Pares" val="31.400" />
-            <Tile lab="Ticket médio" val={brl(4030)} />
-          </div>
-        </Card>
-
-        <Card title="Cobertura e clientes" hint="Base ativa da rede no período" span={4}>
-          <div>
-            <div className="flex justify-between mb-1"><span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Cobertura de carteira (rede)</span><b style={{ fontSize: '0.85rem' }}>63%</b></div>
-            <div className="w-full h-2 bg-secondary rounded-full"><div className="h-full bg-primary rounded-full" style={{ width: '63%' }} /></div>
-            <div className="flex justify-between mt-1 text-muted-foreground" style={{ fontSize: '0.68rem' }}><span>812 de 1.290 clientes</span><span>alvo 70%</span></div>
-          </div>
-          <div className="mt-3 space-y-2">
-            <Tile lab="Frequência de clientes" val="1,8 pedidos/mês" sub="média por cliente ativo" />
-            <Tile lab="Prazo médio dos clientes" val="42 dias" sub="definição do cálculo a confirmar" tone="amber" />
-          </div>
-        </Card>
-
-        <Card title="Pedidos por status — rede" hint="1.062 pedidos no período · barra 100% empilhada" span={12}>
-          <StatusStack segs={[
-            { n: 'Aprovado', q: 480, color: '#111' },
-            { n: 'Faturado', q: 280, color: '#3b82f6' },
-            { n: 'Em transporte', q: 150, color: '#8b5cf6' },
-            { n: 'Aguardando aprovação', q: 96, color: '#f59e0b', action: true },
-            { n: 'Cancelado', q: 56, color: '#f59e0b' },
-          ]} />
-        </Card>
-      </div>
-
-      {/* REDE DE REPRESENTANTES */}
-      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Rede de representantes</div>
-      <Card title="Carteira ativa e performance de representantes" hint="14 reps ativos · vermelho para rep abaixo da meta">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left" style={{ fontSize: '0.78rem' }}>
-            <thead className="text-muted-foreground border-b border-border">
-              <tr><th className="py-2 pr-2 font-medium">Representante</th><th className="py-2 pr-2 font-medium">Clientes</th><th className="py-2 pr-2 font-medium">Cobertura</th><th className="py-2 pr-2 font-medium">Venda</th><th className="py-2 pr-2 font-medium">% da meta</th><th className="py-2 pr-2 font-medium">Ticket médio</th><th className="py-2 pr-2 font-medium">Δ vs mês ant.</th></tr>
-            </thead>
-            <tbody>
-              {repPerf.map(r => (
-                <tr key={r.n} className={`border-b border-border/40 ${r.low ? 'text-amber-600' : ''}`}>
-                  <td className="py-2 pr-2 text-foreground">{r.n}</td>
-                  <td className="py-2 pr-2">{r.cli}</td>
-                  <td className="py-2 pr-2">{r.cov}</td>
-                  <td className="py-2 pr-2 mono">{brl(r.v)}</td>
-                  <td className={`py-2 pr-2 ${r.meta < 100 ? 'text-amber-600 font-semibold' : 'text-emerald-600 font-semibold'}`}>{r.meta}%</td>
-                  <td className="py-2 pr-2 mono">{brl(r.tm)}</td>
-                  <td className={`py-2 pr-2 ${r.delta.startsWith('+') ? 'text-emerald-600' : 'text-amber-600'} font-semibold`}>{r.delta}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <Card title="Venda por representante / região" hint="Consolidado por estado" span={7}>
-          <Rank rows={ufRankAdm} formatV={brl} />
-          <div className="mt-3"><Tile lab="Total da rede" val="R$ 4,28 mi" sub="▲ 7% vs mês anterior" tone="pos" /></div>
-        </Card>
-
-        <Card title="Tempo até aprovação do representante" hint="Média entre pedido e aprovação · vermelho acima do SLA (2 dias)" span={5}>
-          <div className="mb-3"><Tile lab="Média da rede" val="1,8 dia" /></div>
-          <div className="space-y-2">
-            {slaRank.map(r => (
-              <div key={r.n} className="flex items-center gap-3">
-                <span className="text-foreground flex-1 truncate" style={{ fontSize: '0.8rem' }}>{r.n}</span>
-                <div className="flex-1 h-1.5 rounded-full bg-secondary"><div className={`h-full rounded-full ${r.v > 2 ? 'bg-amber-500' : 'bg-primary'}`} style={{ width: `${Math.min(r.v / 3 * 100, 100).toFixed(0)}%` }} /></div>
-                <span className={`w-14 text-right mono ${r.v > 2 ? 'text-amber-600 font-semibold' : 'text-foreground'}`} style={{ fontSize: '0.75rem', fontWeight: 600 }}>{r.v} d</span>
-              </div>
-            ))}
-          </div>
-        </Card>
       </div>
 
       {/* VENDAS */}
