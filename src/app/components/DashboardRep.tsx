@@ -5,15 +5,16 @@ import {
   BarChart, Bar, ReferenceLine, Cell,
 } from "recharts";
 import { Client } from "../data/mockData";
-import { SalesRankingSection, getRepEntities, getRepMonthlyTotal } from "./SalesRankingSection";
+import { SalesIndicatorsSection, getRepTeamEntities, getRepMonthlyTotal } from "./SalesIndicatorsSection";
 
 const CURRENT_REP_NAME = 'Marcos Andrade';
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'stock';
 
 interface DashboardRepProps {
   onNavigate: (view: View) => void;
   selectedClient: Client | null;
+  onSelectClient: (client: Client) => void;
   embedded?: boolean;
 }
 
@@ -158,7 +159,7 @@ const cidRank = [
   { n: 'Porto Alegre', v: 15000 }, { n: 'Curitiba', v: 12000 },
 ];
 
-export function DashboardRep({ onNavigate, selectedClient }: DashboardRepProps) {
+export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: DashboardRepProps) {
   const [gran, setGran] = useState<'semana' | 'mes' | 'ano'>('semana');
   const d = metaData[gran];
 
@@ -213,36 +214,16 @@ export function DashboardRep({ onNavigate, selectedClient }: DashboardRepProps) 
         </div>
       </Card>
 
-      {/* VENDAS: MEUS PREPOSTOS */}
-      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Vendas e prepostos</div>
-      <SalesRankingSection scope="own" entities={getRepEntities(CURRENT_REP_NAME)} totalMonthlyBase={getRepMonthlyTotal(CURRENT_REP_NAME)} />
-
-      {/* PEDIDOS E TICKET */}
-      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Pedidos e ticket</div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <Card title="Pedidos por status" hint="Distribuição de 47 pedidos · barra 100% empilhada" span={8}>
-          <StatusStack segs={[
-            { n: 'Aprovado', q: 22, color: '#111' },
-            { n: 'Faturado', q: 12, color: '#3b82f6' },
-            { n: 'Em transporte', q: 5, color: '#8b5cf6' },
-            { n: 'Aguardando aprovação', q: 6, color: '#f59e0b', action: true },
-            { n: 'Cancelado', q: 2, color: '#f59e0b' },
-          ]} />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-            <Tile lab="Total de pedidos" val="47" />
-            <Tile lab="Pares" val="1.284" />
-            <Tile lab="Valor" val={brl(86500)} />
-            <Tile lab="Aguardando sua ação" val="6" tone="amber" />
-          </div>
-        </Card>
-
-        <Card title="Ticket médio" hint="Valor médio por pedido" span={4}>
-          <div className="space-y-3">
-            <Tile lab="Atual (semana)" val={brl(1840)} sub="▲ 7% vs semana anterior" tone="pos" />
-            <Tile lab="Acumulado (ano)" val={brl(1720)} sub="— referência" />
-          </div>
-        </Card>
-      </div>
+      {/* VENDAS */}
+      <SalesIndicatorsSection
+        scope="own"
+        entities={getRepTeamEntities(CURRENT_REP_NAME)}
+        totalMonthlyBase={getRepMonthlyTotal(CURRENT_REP_NAME)}
+        avgTicket={TICKET}
+        repName={CURRENT_REP_NAME}
+        onNavigateClients={() => onNavigate('clients')}
+        onOpenClient={onSelectClient}
+      />
 
       {/* CARTEIRA */}
       <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Carteira de clientes</div>

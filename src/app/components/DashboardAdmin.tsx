@@ -3,12 +3,14 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   BarChart, Bar, ReferenceLine, Cell,
 } from "recharts";
-import { SalesRankingSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesRankingSection";
+import { SalesIndicatorsSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesIndicatorsSection";
+import type { Client } from "../data/mockData";
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'stock';
 
 interface DashboardAdminProps {
   onNavigate: (view: View) => void;
+  onSelectClient: (client: Client) => void;
 }
 
 const brl = (n: number) => 'R$ ' + n.toLocaleString('pt-BR');
@@ -158,7 +160,7 @@ const colecoes = [
   { c: 'Inverno 25', v: 14.5 }, { c: 'Verão 26', v: 17.2 }, { c: 'Inverno 26', v: 9.6 },
 ];
 
-export function DashboardAdmin({ onNavigate: _onNavigate }: DashboardAdminProps) {
+export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminProps) {
   const [gran, setGran] = useState<'semana' | 'mes' | 'ano'>('mes');
   const d = metaData[gran];
 
@@ -302,9 +304,15 @@ export function DashboardAdmin({ onNavigate: _onNavigate }: DashboardAdminProps)
         </Card>
       </div>
 
-      {/* VENDAS: REPRESENTANTES E PREPOSTOS */}
-      <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Vendas por representante e preposto</div>
-      <SalesRankingSection scope="network" entities={getNetworkEntities()} totalMonthlyBase={getNetworkMonthlyTotal()} />
+      {/* VENDAS */}
+      <SalesIndicatorsSection
+        scope="network"
+        entities={getNetworkEntities()}
+        totalMonthlyBase={getNetworkMonthlyTotal()}
+        avgTicket={TICKET}
+        onNavigateClients={() => onNavigate('clients')}
+        onOpenClient={onSelectClient}
+      />
 
       {/* CATÁLOGO E ESTOQUE */}
       <div className="text-muted-foreground uppercase tracking-wider" style={{ fontSize: '0.7rem', fontWeight: 600 }}>Catálogo e estoque</div>

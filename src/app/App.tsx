@@ -133,10 +133,12 @@ export default function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'dashboard':
-        if (profile === 'admin') return <DashboardAdmin onNavigate={navigate} />;
-        if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} />;
+      case 'dashboard': {
+        const openClientDetail = (client: Client) => { setSelectedClient(client); navigate('client-detail'); };
+        if (profile === 'admin') return <DashboardAdmin onNavigate={navigate} onSelectClient={openClientDetail} />;
+        if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} onSelectClient={openClientDetail} />;
         return <DashboardLojista onNavigate={navigate} />;
+      }
       case 'catalog': {
         const useFilters = true;
         return (
@@ -255,7 +257,7 @@ export default function App() {
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:
-        return <DashboardAdmin onNavigate={navigate} />;
+        return <DashboardAdmin onNavigate={navigate} onSelectClient={(client) => { setSelectedClient(client); navigate('client-detail'); }} />;
     }
   };
 
