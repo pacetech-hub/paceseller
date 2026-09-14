@@ -1,9 +1,9 @@
 import { Client } from "../data/mockData";
 import { SalesIndicatorsSection, getRepTeamEntities, getRepMonthlyTotal } from "./SalesIndicatorsSection";
 
-const CURRENT_REP_NAME = 'Marcos Andrade';
+export const CURRENT_REP_NAME = 'Marcos Andrade';
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'stock';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'sales-team' | 'stock';
 
 interface DashboardRepProps {
   onNavigate: (view: View) => void;
@@ -26,6 +26,7 @@ export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: Das
         repName={CURRENT_REP_NAME}
         onNavigateClients={() => onNavigate('clients')}
         onOpenClient={onSelectClient}
+        onOpenSalesTeam={() => onNavigate('sales-team')}
       />
     </div>
   );

@@ -5,9 +5,9 @@ import {
 } from "recharts";
 import { clients as allClients, type Client } from "../data/mockData";
 
-type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
+export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
 
-interface SalesEntity {
+export interface SalesEntity {
   id: string;
   name: string;
   role: 'representante' | 'preposto';
@@ -48,7 +48,7 @@ export function getRepMonthlyTotal(repName: string): number {
   return salesEntities.find(e => e.role === 'representante' && e.name === repName)?.monthlySales ?? 0;
 }
 
-const PERIOD_OPTIONS: { id: Period; label: string }[] = [
+export const PERIOD_OPTIONS: { id: Period; label: string }[] = [
   { id: 'dia', label: 'Dia' },
   { id: 'mes', label: 'Mês' },
   { id: 'trimestre', label: 'Trimestre' },
@@ -62,7 +62,7 @@ const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
   ano: { multiplier: 12, labels: ['2023', '2024', '2025', '2026'] },
 };
 
-const brl = (n: number) => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
+export const brl = (n: number) => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
 
 function formatAxisValue(v: number): string {
   if (v >= 1e6) return `${(v / 1e6).toFixed(1)}mi`;
@@ -70,7 +70,7 @@ function formatAxisValue(v: number): string {
   return `${v}`;
 }
 
-function scaleValue(monthlyBase: number, period: Period): number {
+export function scaleValue(monthlyBase: number, period: Period): number {
   return Math.round(monthlyBase * periodConfig[period].multiplier);
 }
 
@@ -141,10 +141,11 @@ interface SalesIndicatorsSectionProps {
   repName?: string;
   onNavigateClients: () => void;
   onOpenClient: (client: Client) => void;
+  onOpenSalesTeam: () => void;
 }
 
 export function SalesIndicatorsSection({
-  scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient,
+  scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient, onOpenSalesTeam,
 }: SalesIndicatorsSectionProps) {
   const [period, setPeriod] = useState<Period>('dia');
 
@@ -225,7 +226,12 @@ export function SalesIndicatorsSection({
 
       {/* D: top 10 vendedores */}
       <div className="bg-card border border-border rounded-xl p-5">
-        <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas por representante</h4>
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas por representante</h4>
+          <button onClick={onOpenSalesTeam} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+            Ver mais →
+          </button>
+        </div>
         <div className="space-y-2">
           {ranked.map((e, i) => (
             <div key={e.id} className="flex items-center gap-3">
@@ -250,7 +256,7 @@ export function SalesIndicatorsSection({
         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
           <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Prioridade de contato</h4>
           <button onClick={onNavigateClients} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-            Ver todos os clientes →
+            Ver mais →
           </button>
         </div>
         <div className="mt-2 divide-y divide-border">

@@ -1,7 +1,7 @@
 import { SalesIndicatorsSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesIndicatorsSection";
 import type { Client } from "../data/mockData";
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'stock';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'sales-team' | 'stock';
 
 interface DashboardAdminProps {
   onNavigate: (view: View) => void;
@@ -21,6 +21,7 @@ export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminPro
         avgTicket={TICKET}
         onNavigateClients={() => onNavigate('clients')}
         onOpenClient={onSelectClient}
+        onOpenSalesTeam={() => onNavigate('sales-team')}
       />
 
     </div>

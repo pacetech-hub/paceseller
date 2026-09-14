@@ -5,7 +5,9 @@ import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
 import { clients as clientsList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
-import { DashboardRep } from "./components/DashboardRep";
+import { DashboardRep, CURRENT_REP_NAME } from "./components/DashboardRep";
+import { SalesTeamPage } from "./components/SalesTeamPage";
+import { getNetworkEntities, getRepTeamEntities } from "./components/SalesIndicatorsSection";
 import { DashboardLojista } from "./components/DashboardLojista";
 import { CatalogPage } from "./components/CatalogPage";
 import { OrderGrade } from "./components/OrderGrade";
@@ -48,6 +50,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   permissions: { title: 'Permissões de Acesso', subtitle: 'Controle o que os usuários vinculados à sua conta podem acessar' },
   'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
   'ficha-tecnica': { title: 'Ficha Técnica', subtitle: 'Informações completas, imagens e medidas dos produtos' },
+  'sales-team': { title: 'Vendedores', subtitle: 'Representantes e prepostos' },
 };
 
 export default function App() {
@@ -239,6 +242,14 @@ export default function App() {
         return <ClientsPage onNavigate={navigate} selectedClient={selectedClient} setSelectedClient={setSelectedClient} />;
       case 'client-detail':
         return <ClientDetailPage client={selectedClient} onNavigate={navigate} cartCount={clientCarts.length} />;
+      case 'sales-team':
+        return (
+          <SalesTeamPage
+            scope={profile === 'admin' ? 'network' : 'own'}
+            entities={profile === 'admin' ? getNetworkEntities() : getRepTeamEntities(CURRENT_REP_NAME)}
+            onBack={() => navigate('dashboard')}
+          />
+        );
       case 'profile':
         return <ProfilePage profile={profile} />;
       case 'boletos':
