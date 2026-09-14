@@ -55,8 +55,6 @@ const PERIOD_OPTIONS: { id: Period; label: string }[] = [
   { id: 'ano', label: 'Ano' },
 ];
 
-const REGION_OPTIONS = ['Todas', 'Centro-Oeste', 'Norte', 'Nordeste', 'Sudeste', 'Sul'];
-
 const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
   dia: { multiplier: 1 / 22, labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] },
   mes: { multiplier: 1, labels: ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'] },
@@ -149,7 +147,6 @@ export function SalesIndicatorsSection({
   scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient,
 }: SalesIndicatorsSectionProps) {
   const [period, setPeriod] = useState<Period>('dia');
-  const [region, setRegion] = useState<string>('Todas');
 
   const periodValue = scaleValue(totalMonthlyBase, period);
   const periodOrders = Math.max(1, Math.round(periodValue / avgTicket));
@@ -161,8 +158,7 @@ export function SalesIndicatorsSection({
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
 
-  const clientPool = (scope === 'network' ? allClients : allClients.filter(c => c.rep === repName))
-    .filter(c => region === 'Todas' || c.region === region);
+  const clientPool = scope === 'network' ? allClients : allClients.filter(c => c.rep === repName);
   const priorityClients = buildPriorityClients(clientPool);
 
   return (
@@ -180,16 +176,6 @@ export function SalesIndicatorsSection({
             </button>
           ))}
         </div>
-        <select
-          value={region}
-          onChange={e => setRegion(e.target.value)}
-          className="rounded-lg border border-border bg-card text-foreground px-2.5 py-1.5 outline-none focus:border-primary"
-          style={{ fontSize: '0.7rem', fontWeight: 600 }}
-        >
-          {REGION_OPTIONS.map(r => (
-            <option key={r} value={r}>{r === 'Todas' ? 'Região: Todas' : r}</option>
-          ))}
-        </select>
       </div>
 
       {/* A + B */}
