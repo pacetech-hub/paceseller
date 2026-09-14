@@ -115,10 +115,6 @@ function seededPercent(seed: string, min: number, max: number): string {
   return `+${v.toFixed(1).replace('.', ',')}%`;
 }
 
-function seededIntDelta(seed: string, min: number, max: number): number {
-  return min + Math.round(seededFraction(seed) * (max - min));
-}
-
 function formatCompactCurrency(v: number): string {
   if (v >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} mi`;
   if (v >= 1e3) return `R$ ${Math.round(v / 1e3)} mil`;
@@ -185,8 +181,6 @@ export function SalesIndicatorsSection({
 
   const ordersDelta = seededPercent(`orders-${scope}-${period}`, 5, 18);
   const financeDelta = seededPercent(`finance-${scope}-${period}`, 4, 15);
-  const activeAccounts = clientPool.filter(c => c.status === 'ativo').length;
-  const activeAccountsDelta = seededIntDelta(`active-${scope}-${period}`, -6, 4);
 
   return (
     <div className="space-y-4">
@@ -205,8 +199,8 @@ export function SalesIndicatorsSection({
         </div>
       </div>
 
-      {/* A + B + contas ativas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* A + B */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Pedidos no período</p>
           <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{periodOrders.toLocaleString('pt-BR')}</p>
@@ -216,13 +210,6 @@ export function SalesIndicatorsSection({
           <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Faturamento</p>
           <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{formatCompactCurrency(periodValue)}</p>
           <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{financeDelta}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Contas ativas</p>
-          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{activeAccounts}</p>
-          <p className={`mt-1 ${activeAccountsDelta < 0 ? 'text-amber-600' : 'text-emerald-600'}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-            {activeAccountsDelta >= 0 ? `+${activeAccountsDelta}` : activeAccountsDelta} vs. período anterior
-          </p>
         </div>
       </div>
 
