@@ -146,7 +146,7 @@ interface SalesIndicatorsSectionProps {
 export function SalesIndicatorsSection({
   scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient,
 }: SalesIndicatorsSectionProps) {
-  const [period, setPeriod] = useState<Period>('mes');
+  const [period, setPeriod] = useState<Period>('dia');
 
   const periodValue = scaleValue(totalMonthlyBase, period);
   const periodOrders = Math.max(1, Math.round(periodValue / avgTicket));
