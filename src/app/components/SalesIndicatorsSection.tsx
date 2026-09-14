@@ -233,10 +233,7 @@ export function SalesIndicatorsSection({
 
       {/* D: top 10 vendedores */}
       <div className="bg-card border border-border rounded-xl p-5">
-        <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-          {scope === 'network' ? 'Top 10 vendedores' : 'Top 10 vendedores do time'}
-        </h4>
-        <p className="text-muted-foreground mt-0.5 mb-3" style={{ fontSize: '0.72rem' }}>Maior para menor no período selecionado</p>
+        <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas por representante</h4>
         <div className="space-y-2">
           {ranked.map((e, i) => (
             <div key={e.id} className="flex items-center gap-3">
@@ -259,10 +256,7 @@ export function SalesIndicatorsSection({
       {/* E: top 10 clientes prioritários */}
       <div className="bg-card border border-border rounded-xl p-5">
         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
-          <div>
-            <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Top 10 clientes prioritários</h4>
-            <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>Precisam de contato, venda ou reposição</p>
-          </div>
+          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Prioridade de contato</h4>
           <button onClick={onNavigateClients} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
             Ver todos os clientes →
           </button>
