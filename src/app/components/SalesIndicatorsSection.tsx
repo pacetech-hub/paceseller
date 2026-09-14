@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -104,6 +104,27 @@ function daysSince(dateStr: string): number {
   return Math.round((TODAY.getTime() - d.getTime()) / 86400000);
 }
 
+function seededFraction(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return (h % 1000) / 1000;
+}
+
+function seededPercent(seed: string, min: number, max: number): string {
+  const v = min + seededFraction(seed) * (max - min);
+  return `+${v.toFixed(1).replace('.', ',')}%`;
+}
+
+function seededIntDelta(seed: string, min: number, max: number): number {
+  return min + Math.round(seededFraction(seed) * (max - min));
+}
+
+function formatCompactCurrency(v: number): string {
+  if (v >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} mi`;
+  if (v >= 1e3) return `R$ ${Math.round(v / 1e3)} mil`;
+  return brl(v);
+}
+
 interface PriorityClient extends Client {
   reason: string;
 }
@@ -162,6 +183,15 @@ export function SalesIndicatorsSection({
   const clientPool = scope === 'network' ? allClients : allClients.filter(c => c.rep === repName);
   const priorityClients = buildPriorityClients(clientPool);
 
+  const ordersDelta = seededPercent(`orders-${scope}-${period}`, 5, 18);
+  const financeDelta = seededPercent(`finance-${scope}-${period}`, 4, 15);
+  const activeAccounts = clientPool.filter(c => c.status === 'ativo').length;
+  const activeAccountsDelta = seededIntDelta(`active-${scope}-${period}`, -6, 4);
+  const noContact30d = clientPool.filter(c => daysSince(c.lastOrder) >= 30).length;
+
+  const priorityRef = useRef<HTMLDivElement>(null);
+  const scrollToPriority = () => priorityRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-end flex-wrap gap-2">
@@ -179,15 +209,31 @@ export function SalesIndicatorsSection({
         </div>
       </div>
 
-      {/* A + B */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* A + B + contas ativas + sem contato */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Número de pedidos</p>
-          <p className="text-foreground mono" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{periodOrders.toLocaleString('pt-BR')}</p>
+          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Pedidos no período</p>
+          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{periodOrders.toLocaleString('pt-BR')}</p>
+          <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{ordersDelta}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Valor financeiro das vendas</p>
-          <p className="text-foreground mono" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{brl(periodValue)}</p>
+          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Faturamento</p>
+          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{formatCompactCurrency(periodValue)}</p>
+          <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{financeDelta}</p>
+        </div>
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Contas ativas</p>
+          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{activeAccounts}</p>
+          <p className={`mt-1 ${activeAccountsDelta < 0 ? 'text-amber-600' : 'text-emerald-600'}`} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+            {activeAccountsDelta >= 0 ? `+${activeAccountsDelta}` : activeAccountsDelta} vs. período anterior
+          </p>
+        </div>
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Sem contato 30d+</p>
+          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{noContact30d}</p>
+          <button onClick={scrollToPriority} className="text-muted-foreground hover:text-primary mt-1 transition-colors" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+            ver prioridades
+          </button>
         </div>
       </div>
 
@@ -252,7 +298,7 @@ export function SalesIndicatorsSection({
       </div>
 
       {/* E: top 10 clientes prioritários */}
-      <div className="bg-card border border-border rounded-xl p-5">
+      <div ref={priorityRef} className="bg-card border border-border rounded-xl p-5">
         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
           <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Prioridade de contato</h4>
           <button onClick={onNavigateClients} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
