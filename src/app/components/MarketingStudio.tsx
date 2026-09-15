@@ -115,10 +115,10 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
   return (
     <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
       {/* Header */}
-      <div className="rounded-xl bg-gradient-to-r from-purple-500/10 via-primary/5 to-transparent border border-purple-500/20 p-5 flex items-center justify-between flex-wrap gap-4">
+      <div className="rounded-xl bg-secondary/40 border border-border p-5 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Estúdio de Marketing com IA</h2>
