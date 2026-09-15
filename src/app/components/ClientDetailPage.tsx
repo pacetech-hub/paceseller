@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Plus,
+  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Plus, Clock,
 } from "lucide-react";
 import { formatCurrency, type Client } from "../data/mockData";
 import type { View } from "./Sidebar";
@@ -74,12 +74,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h2 className="text-foreground" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
-                <span className="text-muted-foreground" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
-                  Último pedido em {formatOrderDate(client.lastOrder)}
-                </span>
-              </div>
+              <h2 className="text-foreground mb-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
               <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.8rem' }}>
                 <MapPin className="w-3.5 h-3.5" /> {client.city}/{client.state}
               </p>
@@ -105,7 +100,11 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         </button>
 
         {expanded && (
-          <div className="mt-3 pt-3 border-t border-border grid grid-cols-2 gap-4 max-w-sm">
+          <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Endereço</p>
+              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.address}</p>
+            </div>
             <div>
               <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>CNPJ</p>
               <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.cnpj}</p>
@@ -119,7 +118,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       </div>
 
       {/* Main cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={() => onNavigate('order-grade')}
           className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
@@ -146,6 +145,14 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
           </p>
         </button>
+
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+            <Clock className="w-4 h-4 text-primary" />
+          </div>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Último pedido</p>
+          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatOrderDate(client.lastOrder)}</p>
+        </div>
 
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
