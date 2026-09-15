@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   Search, ChevronLeft, Download, ZoomIn,
-  FileText, Package2, CheckCircle2, ShoppingCart,
+  FileText, Package2, CheckCircle2, RefreshCw,
 } from "lucide-react";
 import { products, type Product } from "../data/mockData";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -402,50 +402,44 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-muted-foreground text-left" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <th className="pb-2 pr-4 font-normal">Tamanhos</th>
-                  {sizes.map(s => (
-                    <th key={s} className="pb-2 px-2 font-normal text-center">{s}</th>
-                  ))}
+                <tr className="text-muted-foreground text-left border-b border-border" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <th className="py-2 pr-4 font-normal">Tamanho</th>
+                  <th className="py-2 px-4 font-normal text-center">Estoque fábrica</th>
+                  {profile === 'lojista' && <th className="py-2 pl-4 font-normal text-center">Estoque loja</th>}
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-t border-border">
-                  <td className="py-2 pr-4 text-foreground whitespace-nowrap" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Fábrica</td>
-                  {sizes.map(s => {
-                    const stock = product.grades[s] ?? 0;
-                    const color = stock === 0 ? 'text-red-400' : stock < 20 ? 'text-amber-400' : 'text-emerald-400';
-                    return (
-                      <td key={s} className={`py-2 px-2 text-center mono ${color}`} style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-                        {stock}
+                {sizes.map(s => {
+                  const factoryStock = product.grades[s] ?? 0;
+                  const factoryColor = factoryStock === 0 ? 'text-red-400' : factoryStock < 20 ? 'text-amber-400' : 'text-emerald-400';
+                  const storeQty = storeStock[s] ?? 0;
+                  const storeColor = storeQty === 0 ? 'text-red-400' : storeQty < 3 ? 'text-amber-400' : 'text-emerald-400';
+                  const storeLow = storeQty < 3;
+                  return (
+                    <tr key={s} className="border-b border-border/60 last:border-0">
+                      <td className="py-2.5 pr-4 text-foreground whitespace-nowrap" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Nº {s}</td>
+                      <td className={`py-2.5 px-4 text-center mono ${factoryColor}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                        {factoryStock}
                       </td>
-                    );
-                  })}
-                </tr>
-                {profile === 'lojista' && (
-                  <tr className="border-t border-border">
-                    <td className="py-2 pr-4 text-foreground whitespace-nowrap" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Loja</td>
-                    {sizes.map(s => {
-                      const stock = storeStock[s] ?? 0;
-                      const color = stock === 0 ? 'text-red-400' : stock < 3 ? 'text-amber-400' : 'text-emerald-400';
-                      return (
-                        <td key={s} className="py-2 px-2 text-center">
-                          <div className={`mono ${color}`} style={{ fontSize: '0.78rem', fontWeight: 600 }}>{stock}</div>
-                          {stock > 0 && (
-                            <button
-                              onClick={() => toast.success(`Tamanho ${s} adicionado para reposição rápida`)}
-                              title="Comprar"
-                              aria-label={`Comprar tamanho ${s} — estoque loja`}
-                              className="mt-1 inline-flex items-center justify-center w-5 h-5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                            >
-                              <ShoppingCart className="w-3 h-3" />
-                            </button>
-                          )}
+                      {profile === 'lojista' && (
+                        <td className="py-2.5 pl-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <span className={`mono ${storeColor}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>{storeQty}</span>
+                            {storeLow && (
+                              <button
+                                onClick={() => toast.success(`Reposição rápida solicitada — Nº ${s}`)}
+                                className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex-shrink-0"
+                                style={{ fontSize: '0.65rem', fontWeight: 600 }}
+                              >
+                                <RefreshCw className="w-3 h-3" /> Reposição rápida
+                              </button>
+                            )}
+                          </div>
                         </td>
-                      );
-                    })}
-                  </tr>
-                )}
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
