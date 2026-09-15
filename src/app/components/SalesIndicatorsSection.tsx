@@ -130,24 +130,20 @@ function buildPriorityClients(pool: Client[]): PriorityClient[] {
     .map(c => {
       const days = daysSince(c.lastOrder);
       let reason: string;
-      let score: number;
-      if (c.inadimplente) {
+      if (days > 30) {
+        reason = `Sem pedido há ${days} dias — oportunidade de reposição`;
+      } else if (c.inadimplente) {
         reason = 'Pagamento em atraso — cobrar antes de novo pedido';
-        score = days + 120;
       } else if (c.status === 'inativo') {
         reason = 'Cliente inativo — retomar contato';
-        score = days + 80;
-      } else if (days > 45) {
-        reason = `Sem pedido há ${days} dias — oportunidade de reposição`;
-        score = days;
       } else {
         reason = 'Sem pedido recente — bom momento para nova oferta';
-        score = days;
       }
-      return { ...c, reason, score };
+      // prioriza recência: quanto mais dias sem pedido, maior a prioridade de contato
+      return { ...c, reason, score: days };
     })
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+    .slice(0, 5);
 }
 
 interface SalesIndicatorsSectionProps {
@@ -273,7 +269,7 @@ export function SalesIndicatorsSection({
         </div>
       </div>
 
-      {/* E: top 10 clientes prioritários */}
+      {/* E: 5 clientes prioritários */}
       <div className="bg-card border border-border rounded-xl p-5">
         <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
           <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Prioridade de contato</h4>
