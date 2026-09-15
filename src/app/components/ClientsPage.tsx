@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, Users, BarChart3, Sparkles, Filter, ArrowUpDown, ChevronRight } from "lucide-react";
+import { Search, MapPin, Users, BarChart3, Filter, ArrowUpDown, ChevronRight } from "lucide-react";
 import { clients, Client } from "../data/mockData";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 
@@ -18,9 +18,6 @@ const statusColors: Record<string, string> = {
 
 const formatOrderDate = (dateStr: string) =>
   new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-// Carteira sugerida do dia: clientes do rep "Marcos Andrade" priorizados (ativos + maior volume)
-const SUGGESTED_REP = 'Marcos Andrade';
 
 const REGIONS = ['Centro-Oeste', 'Norte', 'Nordeste', 'Sudeste', 'Sul'];
 
@@ -42,7 +39,6 @@ const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
 
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
 
-  const [mode, setMode] = useState<'sugerida' | 'todos'>('sugerida');
   const [search, setSearch] = useState('');
   const [regionFilters, setRegionFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<StatusFilterValue[]>([]);
@@ -64,11 +60,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
   const activeFilterCount = regionFilters.length + statusFilters.length;
   const sortActive = sortOrder !== DEFAULT_SORT;
 
-  const baseList = mode === 'sugerida'
-    ? clients.filter(c => c.rep === SUGGESTED_REP)
-    : clients;
-
-  const filtered = baseList.filter(c => {
+  const filtered = clients.filter(c => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.city.toLowerCase().includes(search.toLowerCase()) ||
       c.rep.toLowerCase().includes(search.toLowerCase());
@@ -110,29 +102,6 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <span className="text-muted-foreground" style={{ fontSize: '0.78rem', fontWeight: 500 }}>{stat.suffix}</span>
           </div>
         ))}
-      </div>
-
-      {/* Mode toggle: Carteira do dia / Todos */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setMode('sugerida')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg border transition-colors ${mode === 'sugerida' ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
-          style={{ fontSize: '0.8rem', fontWeight: 600 }}
-        >
-          <Sparkles className="w-3.5 h-3.5" /> Carteira sugerida do dia
-        </button>
-        <button
-          onClick={() => setMode('todos')}
-          className={`px-3.5 py-2 rounded-lg border transition-colors ${mode === 'todos' ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
-          style={{ fontSize: '0.8rem', fontWeight: 600 }}
-        >
-          Todos os clientes
-        </button>
-        {mode === 'sugerida' && (
-          <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-            Selecionados com base em prioridade comercial e visitas do dia
-          </span>
-        )}
       </div>
 
       {/* Filters */}
