@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Plus, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
+  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
 } from "lucide-react";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
@@ -83,36 +83,26 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
       {/* Header */}
       <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary" style={{ fontSize: '1rem', fontWeight: 700 }}>{client.avatar}</span>
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className={`px-2 py-0.5 rounded-full ${statusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                  {client.status}
-                </span>
-                {client.inadimplente && (
-                  <span className="px-2 py-0.5 rounded-full text-amber-400 bg-amber-400/10" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                    inadimplente
-                  </span>
-                )}
-              </div>
-              <h2 className="text-foreground mb-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
-              <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.8rem' }}>
-                <MapPin className="w-3.5 h-3.5" /> {client.city}/{client.state}
-              </p>
-            </div>
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-primary" style={{ fontSize: '1rem', fontWeight: 700 }}>{client.avatar}</span>
           </div>
-
-          <button
-            onClick={() => onNavigate('order-grade')}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex-shrink-0"
-            style={{ fontSize: '0.82rem', fontWeight: 600 }}
-          >
-            <Plus className="w-4 h-4" /> Novo pedido
-          </button>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className={`px-2 py-0.5 rounded-full ${statusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                {client.status}
+              </span>
+              {client.inadimplente && (
+                <span className="px-2 py-0.5 rounded-full text-amber-400 bg-amber-400/10" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                  inadimplente
+                </span>
+              )}
+            </div>
+            <h2 className="text-foreground mb-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
+            <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.8rem' }}>
+              <MapPin className="w-3.5 h-3.5" /> {client.city}/{client.state}
+            </p>
+          </div>
         </div>
 
         <button
