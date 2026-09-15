@@ -53,6 +53,7 @@ function seededScore(seed: string): number {
 type RankItem = { key: string; label: string; sub?: string; pct: number };
 
 const PRODUCT_COLORS = Array.from(new Set(products.flatMap(p => p.colors)));
+const PRODUCT_LINES = Array.from(new Set(products.map(p => p.line)));
 
 const COLOR_SWATCH: Record<string, string> = {
   'Denim': '#4a6fa5',
@@ -86,13 +87,13 @@ function colorRanking(clientId: string): RankItem[] {
     .map((x, i) => ({ key: x.color, label: x.color, pct: RANK_DECAY[i] }));
 }
 
-// mock: ranking determinístico de produtos mais vendidos para este cliente, priorizando o giro real (soldUnits)
-function productRanking(clientId: string): RankItem[] {
-  return products
-    .map(p => ({ p, raw: seededScore(`${clientId}-prod-${p.id}`) * (0.6 + (p.soldUnits / 1400) * 0.4) }))
+// mock: ranking determinístico de tipos (linhas) mais vendidos para este cliente
+function typeRanking(clientId: string): RankItem[] {
+  return PRODUCT_LINES
+    .map(line => ({ line, raw: seededScore(`${clientId}-line-${line}`) }))
     .sort((a, b) => b.raw - a.raw)
     .slice(0, 5)
-    .map((x, i) => ({ key: x.p.id, label: x.p.name, sub: x.p.line, pct: RANK_DECAY[i] }));
+    .map((x, i) => ({ key: x.line, label: x.line, pct: RANK_DECAY[i] }));
 }
 
 export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetailPageProps) {
@@ -123,7 +124,8 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   const avgTicket = client.totalPurchased / seededOrderCount(client.id);
   const sizeRanks = sizeRanking(client.id);
   const colorRanks = colorRanking(client.id);
-  const productRanks = productRanking(client.id);
+  const typeRanks = typeRanking(client.id);
+  const stuckProducts = products.filter(p => stockStatusOf(p) === 'parado');
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-5">
@@ -232,66 +234,103 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         </div>
       </div>
 
-      {/* Vendas por perfil do cliente */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Números com mais vendas</h4>
-          <div className="space-y-3">
-            {sizeRanks.map(s => (
-              <div key={s.key}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{s.label}</span>
-                  <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{s.pct}%</span>
+      {/* Desempenho de vendas e estoque */}
+      <div className="space-y-4">
+        <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Desempenho de vendas e estoque</h3>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Números com mais vendas</h4>
+            <div className="space-y-3">
+              {sizeRanks.map(s => (
+                <div key={s.key}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{s.label}</span>
+                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{s.pct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-secondary">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${s.pct}%` }} />
+                  </div>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${s.pct}%` }} />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Cores com mais vendas</h4>
+            <div className="space-y-3">
+              {colorRanks.map(c => (
+                <div key={c.key}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                      <span className="w-2.5 h-2.5 rounded-full border border-border/60 flex-shrink-0" style={{ background: COLOR_SWATCH[c.key] ?? '#999' }} />
+                      {c.label}
+                    </span>
+                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{c.pct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-secondary">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${c.pct}%` }} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Tipo com mais vendas</h4>
+            <div className="space-y-3">
+              {typeRanks.map(t => (
+                <div key={t.key}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{t.label}</span>
+                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{t.pct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-secondary">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${t.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-5">
-          <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Cores com mais vendas</h4>
-          <div className="space-y-3">
-            {colorRanks.map(c => (
-              <div key={c.key}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                    <span className="w-2.5 h-2.5 rounded-full border border-border/60 flex-shrink-0" style={{ background: COLOR_SWATCH[c.key] ?? '#999' }} />
-                    {c.label}
-                  </span>
-                  <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{c.pct}%</span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${c.pct}%` }} />
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <PackageSearch className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Produtos parados no estoque</h4>
+              <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Baixo giro nos últimos meses — considere oferecer com condição especial</p>
+            </div>
           </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Produtos com mais vendas</h4>
-          <div className="space-y-2.5">
-            {productRanks.map((p, i) => (
-              <div key={p.key} className="flex items-center gap-2.5">
-                <span className="text-muted-foreground flex-shrink-0 text-center" style={{ fontSize: '0.72rem', fontWeight: 700, width: '1rem' }}>{i + 1}</span>
+          <div className="space-y-2">
+            {stuckProducts.map(p => (
+              <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/60">
+                <ProductThumb src={p.image} alt={p.name} className="w-10 h-10 rounded-lg flex-shrink-0" iconClassName="w-4 h-4" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{p.label}</p>
-                  <p className="text-muted-foreground truncate" style={{ fontSize: '0.68rem' }}>{p.sub}</p>
+                  <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{p.name}</p>
+                  <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{p.line} · {p.reference}</p>
                 </div>
-                <span className="text-foreground mono flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{p.pct}%</span>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{p.soldUnits} un.</p>
+                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>vendidas · giro baixo</p>
+                </div>
               </div>
             ))}
+            {stuckProducts.length === 0 && (
+              <p className="text-muted-foreground text-center py-4" style={{ fontSize: '0.8rem' }}>
+                Nenhum produto parado no estoque no momento.
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Produtos para comprar */}
+      {/* Sugestões de venda */}
       <div className="bg-card border border-border rounded-xl p-5">
         <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-          <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Produtos para comprar</h3>
+          <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Sugestões de venda</h3>
         </div>
 
         <div className="flex items-center gap-1.5 flex-wrap mb-4">
@@ -332,21 +371,30 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   );
 }
 
-function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: StockStatusKey }; onBuy: () => void }) {
+function ProductThumb({ src, alt, className, iconClassName, bordered = true }: { src: string; alt: string; className?: string; iconClassName?: string; bordered?: boolean }) {
   const [imgError, setImgError] = useState(false);
+
+  return (
+    <div className={`bg-white overflow-hidden ${bordered ? 'border border-border/60' : ''} ${className ?? ''}`}>
+      {!imgError ? (
+        <img src={src} alt={alt} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <Package2 className={`text-muted-foreground/30 ${iconClassName ?? 'w-8 h-8'}`} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: StockStatusKey }; onBuy: () => void }) {
   const cfg = STOCK_STATUS_CONFIG[product.stockStatus];
   const Icon = cfg.icon;
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
-      <div className="aspect-square bg-white relative">
-        {!imgError ? (
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package2 className="w-8 h-8 text-muted-foreground/30" />
-          </div>
-        )}
+      <div className="aspect-square relative">
+        <ProductThumb src={product.image} alt={product.name} className="w-full h-full" iconClassName="w-8 h-8" bordered={false} />
         <span className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full ${cfg.cls}`} style={{ fontSize: '0.62rem', fontWeight: 700 }}>
           <Icon className="w-3 h-3" /> {cfg.label}
         </span>
