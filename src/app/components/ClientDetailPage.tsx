@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
+  ChevronLeft, ChevronDown, MapPin, Plus, ShoppingCart, BarChart3, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
 } from "lucide-react";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
@@ -188,17 +188,36 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         )}
       </div>
 
-      {/* Main cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Último pedido e ticket médio */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+            <Clock className="w-4 h-4 text-primary" />
+          </div>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Último pedido</p>
+          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatOrderDate(client.lastOrder)}</p>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+            <BarChart3 className="w-4 h-4 text-primary" />
+          </div>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
+          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
+        </div>
+      </div>
+
+      {/* Ações de carrinho */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <button
-          onClick={() => onNavigate('order-grade')}
+          onClick={() => onNavigate('carts')}
           className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
         >
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <LayoutGrid className="w-4 h-4 text-primary" />
+            <Plus className="w-4 h-4 text-primary" />
           </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Novo pedido</p>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Montar pedido por grade para este cliente</p>
+          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Novo carrinho</p>
+          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Criar um novo carrinho para este cliente</p>
         </button>
 
         <button
@@ -216,22 +235,6 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
           </p>
         </button>
-
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <Clock className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Último pedido</p>
-          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatOrderDate(client.lastOrder)}</p>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <BarChart3 className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
-          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
-        </div>
       </div>
 
       {/* Desempenho de vendas e estoque */}
