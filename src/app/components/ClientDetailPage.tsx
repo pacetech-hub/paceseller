@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Plus, Clock,
+  ChevronLeft, ChevronDown, MapPin, LayoutGrid, ShoppingCart, BarChart3, Plus, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
 } from "lucide-react";
-import { formatCurrency, type Client } from "../data/mockData";
+import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
 
 interface ClientDetailPageProps {
@@ -26,8 +26,33 @@ function seededOrderCount(clientId: string): number {
   return 3 + (h % 8);
 }
 
+type StockStatusKey = 'zerado' | 'alto-giro' | 'chegando-ao-fim' | 'parado';
+
+const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; cls: string; icon: any }> = {
+  'zerado': { label: 'Estoque zerado', cls: 'text-red-400 bg-red-400/10', icon: PackageX },
+  'alto-giro': { label: 'Alto giro', cls: 'text-emerald-400 bg-emerald-400/10', icon: TrendingUp },
+  'chegando-ao-fim': { label: 'Estoque chegando ao fim', cls: 'text-amber-400 bg-amber-400/10', icon: PackageMinus },
+  'parado': { label: 'Parado no estoque', cls: 'text-muted-foreground bg-secondary', icon: PackageSearch },
+};
+
+// mock: classificação determinística do status de estoque por produto
+function stockStatusOf(p: Product): StockStatusKey {
+  if (p.availability === 'esgotado') return 'zerado';
+  if (p.availability === 'baixo estoque') return 'chegando-ao-fim';
+  if (p.soldUnits < 600) return 'zerado';
+  if (p.soldUnits < 900) return 'parado';
+  return 'alto-giro';
+}
+
 export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetailPageProps) {
   const [expanded, setExpanded] = useState(false);
+  const [stockFilter, setStockFilter] = useState<StockStatusKey | 'todos'>('todos');
+
+  const buyProducts = useMemo(
+    () => products.map(p => ({ ...p, stockStatus: stockStatusOf(p) })),
+    []
+  );
+  const filteredBuyProducts = stockFilter === 'todos' ? buyProducts : buyProducts.filter(p => p.stockStatus === stockFilter);
 
   if (!client) {
     return (
@@ -160,6 +185,84 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           </div>
           <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
           <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
+        </div>
+      </div>
+
+      {/* Produtos para comprar */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+          <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Produtos para comprar</h3>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap mb-4">
+          <button
+            onClick={() => setStockFilter('todos')}
+            className={`px-2.5 py-1 rounded-full transition-colors ${stockFilter === 'todos' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+            style={{ fontSize: '0.72rem', fontWeight: 600 }}
+          >
+            Todos
+          </button>
+          {(Object.keys(STOCK_STATUS_CONFIG) as StockStatusKey[]).map(key => {
+            const cfg = STOCK_STATUS_CONFIG[key];
+            return (
+              <button
+                key={key}
+                onClick={() => setStockFilter(key)}
+                className={`px-2.5 py-1 rounded-full transition-colors ${stockFilter === key ? 'bg-primary text-primary-foreground' : `${cfg.cls} hover:opacity-80`}`}
+                style={{ fontSize: '0.72rem', fontWeight: 600 }}
+              >
+                {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredBuyProducts.map(p => (
+            <BuyProductCard key={p.id} product={p} onBuy={() => onNavigate('order-grade')} />
+          ))}
+          {filteredBuyProducts.length === 0 && (
+            <p className="text-muted-foreground col-span-full text-center py-6" style={{ fontSize: '0.8rem' }}>
+              Nenhum produto encontrado para este filtro.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: StockStatusKey }; onBuy: () => void }) {
+  const [imgError, setImgError] = useState(false);
+  const cfg = STOCK_STATUS_CONFIG[product.stockStatus];
+  const Icon = cfg.icon;
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
+      <div className="aspect-square bg-white relative">
+        {!imgError ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Package2 className="w-8 h-8 text-muted-foreground/30" />
+          </div>
+        )}
+        <span className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full ${cfg.cls}`} style={{ fontSize: '0.62rem', fontWeight: 700 }}>
+          <Icon className="w-3 h-3" /> {cfg.label}
+        </span>
+      </div>
+      <div className="p-3 flex flex-col flex-1">
+        <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{product.name}</p>
+        <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{product.line} · {product.reference}</p>
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/60">
+          <span className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(product.price)}</span>
+          <button
+            onClick={onBuy}
+            className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            style={{ fontSize: '0.72rem', fontWeight: 600 }}
+          >
+            Comprar
+          </button>
         </div>
       </div>
     </div>
