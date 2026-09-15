@@ -44,6 +44,57 @@ function stockStatusOf(p: Product): StockStatusKey {
   return 'alto-giro';
 }
 
+function seededScore(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return (h % 1000) / 1000;
+}
+
+type RankItem = { key: string; label: string; sub?: string; pct: number };
+
+const PRODUCT_COLORS = Array.from(new Set(products.flatMap(p => p.colors)));
+
+const COLOR_SWATCH: Record<string, string> = {
+  'Denim': '#4a6fa5',
+  'Azul': '#2563eb',
+  'Branco': '#f5f5f5',
+  'Vermelho': '#ef4444',
+  'Marrom': '#7c4a2d',
+  'Preto': '#111111',
+  'Navy': '#1e3a5f',
+};
+
+// curva de participação por posição no ranking (top 5), soma 100
+const RANK_DECAY = [34, 24, 18, 14, 10];
+
+// mock: ranking determinístico de números (tamanhos) mais vendidos para este cliente
+function sizeRanking(clientId: string): RankItem[] {
+  const sizes = Object.keys(products[0].grades);
+  return sizes
+    .map(size => ({ size, raw: seededScore(`${clientId}-size-${size}`) }))
+    .sort((a, b) => b.raw - a.raw)
+    .slice(0, 5)
+    .map((x, i) => ({ key: x.size, label: `Nº ${x.size}`, pct: RANK_DECAY[i] }));
+}
+
+// mock: ranking determinístico de cores mais vendidas para este cliente
+function colorRanking(clientId: string): RankItem[] {
+  return PRODUCT_COLORS
+    .map(color => ({ color, raw: seededScore(`${clientId}-color-${color}`) }))
+    .sort((a, b) => b.raw - a.raw)
+    .slice(0, 5)
+    .map((x, i) => ({ key: x.color, label: x.color, pct: RANK_DECAY[i] }));
+}
+
+// mock: ranking determinístico de produtos mais vendidos para este cliente, priorizando o giro real (soldUnits)
+function productRanking(clientId: string): RankItem[] {
+  return products
+    .map(p => ({ p, raw: seededScore(`${clientId}-prod-${p.id}`) * (0.6 + (p.soldUnits / 1400) * 0.4) }))
+    .sort((a, b) => b.raw - a.raw)
+    .slice(0, 5)
+    .map((x, i) => ({ key: x.p.id, label: x.p.name, sub: x.p.line, pct: RANK_DECAY[i] }));
+}
+
 export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetailPageProps) {
   const [expanded, setExpanded] = useState(false);
   const [stockFilter, setStockFilter] = useState<StockStatusKey | 'todos'>('todos');
@@ -70,6 +121,9 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   }
 
   const avgTicket = client.totalPurchased / seededOrderCount(client.id);
+  const sizeRanks = sizeRanking(client.id);
+  const colorRanks = colorRanking(client.id);
+  const productRanks = productRanking(client.id);
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-5">
@@ -175,6 +229,62 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           </div>
           <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
           <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
+        </div>
+      </div>
+
+      {/* Vendas por perfil do cliente */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Números com mais vendas</h4>
+          <div className="space-y-3">
+            {sizeRanks.map(s => (
+              <div key={s.key}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{s.label}</span>
+                  <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{s.pct}%</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-secondary">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${s.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Cores com mais vendas</h4>
+          <div className="space-y-3">
+            {colorRanks.map(c => (
+              <div key={c.key}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                    <span className="w-2.5 h-2.5 rounded-full border border-border/60 flex-shrink-0" style={{ background: COLOR_SWATCH[c.key] ?? '#999' }} />
+                    {c.label}
+                  </span>
+                  <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{c.pct}%</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-secondary">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${c.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Produtos com mais vendas</h4>
+          <div className="space-y-2.5">
+            {productRanks.map((p, i) => (
+              <div key={p.key} className="flex items-center gap-2.5">
+                <span className="text-muted-foreground flex-shrink-0 text-center" style={{ fontSize: '0.72rem', fontWeight: 700, width: '1rem' }}>{i + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{p.label}</p>
+                  <p className="text-muted-foreground truncate" style={{ fontSize: '0.68rem' }}>{p.sub}</p>
+                </div>
+                <span className="text-foreground mono flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{p.pct}%</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
