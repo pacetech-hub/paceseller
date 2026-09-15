@@ -88,12 +88,12 @@ function buildSeries(monthlyBase: number, period: Period) {
   });
 }
 
-const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number }[] = [
-  { key: 'analise', label: 'Em análise', color: '#f59e0b', ratio: 0.10 },
-  { key: 'aprovado', label: 'Aprovado', color: '#111111', ratio: 0.40 },
-  { key: 'faturado', label: 'Faturado', color: '#3b82f6', ratio: 0.27 },
-  { key: 'entregue', label: 'Entregue', color: '#8b5cf6', ratio: 0.18 },
-  { key: 'cancelado', label: 'Cancelado', color: '#ef4444', ratio: 0.05 },
+const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
+  { key: 'analise', label: 'Em análise', color: '#f59e0b', ratio: 0.10, orderStatus: 'em análise' },
+  { key: 'aprovado', label: 'Aprovado', color: '#111111', ratio: 0.40, orderStatus: 'aprovado' },
+  { key: 'faturado', label: 'Faturado', color: '#3b82f6', ratio: 0.27, orderStatus: 'faturado' },
+  { key: 'entregue', label: 'Entregue', color: '#8b5cf6', ratio: 0.18, orderStatus: 'entregue' },
+  { key: 'cancelado', label: 'Cancelado', color: '#ef4444', ratio: 0.05, orderStatus: 'cancelado' },
 ];
 
 // referência fixa de "hoje" usada só para o mock de recência de pedidos
@@ -155,10 +155,11 @@ interface SalesIndicatorsSectionProps {
   onNavigateClients: () => void;
   onOpenClient: (client: Client) => void;
   onOpenSalesTeam: () => void;
+  onOpenStatus: (status: string) => void;
 }
 
 export function SalesIndicatorsSection({
-  scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient, onOpenSalesTeam,
+  scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient, onOpenSalesTeam, onOpenStatus,
 }: SalesIndicatorsSectionProps) {
   const [period, setPeriod] = useState<Period>('dia');
 
@@ -230,13 +231,17 @@ export function SalesIndicatorsSection({
         <div className="bg-card border border-border rounded-xl p-5 lg:col-span-4">
           <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Pedidos por status</h4>
           <p className="text-muted-foreground mt-0.5 mb-3" style={{ fontSize: '0.72rem' }}>{periodOrders.toLocaleString('pt-BR')} pedidos no período</p>
-          <div className="space-y-2.5">
+          <div className="space-y-1">
             {statusRows.map(s => (
-              <div key={s.key} className="flex items-center gap-2">
+              <button
+                key={s.key}
+                onClick={() => onOpenStatus(s.orderStatus)}
+                className="w-full flex items-center gap-2 py-1 px-1.5 -mx-1.5 rounded-lg hover:bg-primary/5 transition-colors"
+              >
                 <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: s.color }} />
-                <span className="text-foreground flex-1 truncate" style={{ fontSize: '0.8rem' }}>{s.label}</span>
+                <span className="text-foreground flex-1 truncate text-left" style={{ fontSize: '0.8rem' }}>{s.label}</span>
                 <span className="text-foreground mono" style={{ fontSize: '0.82rem', fontWeight: 700 }}>{s.count}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>

@@ -64,6 +64,7 @@ export default function App() {
     mockCarts.map(({ id, clientId, clientName, cartName, createdBy }) => ({ id, clientId, clientName, cartName, createdBy }))
   );
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
+  const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
 
   // Todos os perfis suportam múltiplos carrinhos.
   const multiCart = true;
@@ -138,8 +139,9 @@ export default function App() {
     switch (currentView) {
       case 'dashboard': {
         const openClientDetail = (client: Client) => { setSelectedClient(client); navigate('client-detail'); };
-        if (profile === 'admin') return <DashboardAdmin onNavigate={navigate} onSelectClient={openClientDetail} />;
-        if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} onSelectClient={openClientDetail} />;
+        const openOrderStatus = (status: string) => { setOrderStatusFilter(status); navigate('history'); };
+        if (profile === 'admin') return <DashboardAdmin onNavigate={navigate} onSelectClient={openClientDetail} onOpenOrderStatus={openOrderStatus} />;
+        if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} onSelectClient={openClientDetail} onOpenOrderStatus={openOrderStatus} />;
         return <DashboardLojista onNavigate={navigate} />;
       }
       case 'catalog': {
@@ -228,6 +230,7 @@ export default function App() {
             onSelectOrder={openOrder}
             profile={profile}
             initialSearch={profile !== 'lojista' && selectedClient ? selectedClient.name : ''}
+            initialStatusFilter={orderStatusFilter}
           />
         );
       case 'order-detail':
@@ -268,7 +271,13 @@ export default function App() {
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:
-        return <DashboardAdmin onNavigate={navigate} onSelectClient={(client) => { setSelectedClient(client); navigate('client-detail'); }} />;
+        return (
+          <DashboardAdmin
+            onNavigate={navigate}
+            onSelectClient={(client) => { setSelectedClient(client); navigate('client-detail'); }}
+            onOpenOrderStatus={(status) => { setOrderStatusFilter(status); navigate('history'); }}
+          />
+        );
     }
   };
 

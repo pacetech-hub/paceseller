@@ -9,12 +9,13 @@ interface DashboardRepProps {
   onNavigate: (view: View) => void;
   selectedClient: Client | null;
   onSelectClient: (client: Client) => void;
+  onOpenOrderStatus: (status: string) => void;
   embedded?: boolean;
 }
 
 const TICKET = 5000;
 
-export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: DashboardRepProps) {
+export function DashboardRep({ onNavigate, selectedClient, onSelectClient, onOpenOrderStatus }: DashboardRepProps) {
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
       {/* VENDAS */}
@@ -27,6 +28,7 @@ export function DashboardRep({ onNavigate, selectedClient, onSelectClient }: Das
         onNavigateClients={() => onNavigate('clients')}
         onOpenClient={onSelectClient}
         onOpenSalesTeam={() => onNavigate('sales-team')}
+        onOpenStatus={onOpenOrderStatus}
       />
     </div>
   );

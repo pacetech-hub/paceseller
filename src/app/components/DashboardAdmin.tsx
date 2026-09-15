@@ -6,11 +6,12 @@ type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'mark
 interface DashboardAdminProps {
   onNavigate: (view: View) => void;
   onSelectClient: (client: Client) => void;
+  onOpenOrderStatus: (status: string) => void;
 }
 
 const TICKET = 4030;
 
-export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminProps) {
+export function DashboardAdmin({ onNavigate, onSelectClient, onOpenOrderStatus }: DashboardAdminProps) {
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
       {/* VENDAS */}
@@ -22,6 +23,7 @@ export function DashboardAdmin({ onNavigate, onSelectClient }: DashboardAdminPro
         onNavigateClients={() => onNavigate('clients')}
         onOpenClient={onSelectClient}
         onOpenSalesTeam={() => onNavigate('sales-team')}
+        onOpenStatus={onOpenOrderStatus}
       />
 
     </div>
