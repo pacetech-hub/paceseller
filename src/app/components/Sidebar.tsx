@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
+import { Group, Button, ActionIcon, Indicator, Menu, Text, Box } from "@mantine/core";
 import {
   LayoutDashboard, Package2, ShoppingBag, ShoppingBasket, Clock,
   Sparkles, BarChart3, Settings, Users, Store, ChevronDown, ChevronRight,
-  Bell, Search, Menu, X, Building2, LogOut, ChevronLeft,
+  Bell, Search, Menu as MenuIcon, X, Building2, LogOut, ChevronLeft,
   UserCheck, Tag, Shield, Boxes, Receipt, FileText,
 } from "lucide-react";
 import type { Client } from "../data/mockData";
@@ -190,7 +190,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
       >
-        <Menu className="w-4 h-4" />
+        <MenuIcon className="w-4 h-4" />
       </button>
 
       {mobileOpen && (
@@ -226,9 +226,6 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient }: TopBarProps) {
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
-  const avatarRef = useRef<HTMLButtonElement>(null);
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
@@ -286,130 +283,114 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         ];
 
   const handleDropdownItem = (item: DropdownItem) => {
-    setProfileOpen(false);
     if (item.action) { item.action(); return; }
     if (item.view) onNavigate(item.view);
   };
 
   return (
-    <header className="h-14 border-b border-border bg-background/80 backdrop-blur flex items-center px-6 gap-3 flex-shrink-0">
-      <div className="flex-1 min-w-0 flex items-center gap-3">
-        {currentView !== 'catalog' && (
-          <div className="flex items-center pr-3 mr-1 border-r border-border h-8 flex-shrink-0">
-            <img src={teslaLogo} alt="Tesla Footwear" className="h-6 w-auto object-contain" />
-          </div>
-        )}
-        {/* Nav items à esquerda quando existem, caso contrário título */}
-        {headerItems.length > 0 ? (
-          <div className="flex items-center gap-1">
-            {headerItems.map(item => {
-          const Icon = item.icon;
-          const active = currentView === item.view;
-          return (
-            <button
-              key={item.label}
-              onClick={() => onNavigate(item.view)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors ${
-                active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-              }`}
-              style={{ fontSize: '0.78rem', fontWeight: active ? 600 : 500 }}
-              title={item.label}
+    <Box component="header" className="border-b border-border bg-background/80 backdrop-blur" h={56} px="lg" style={{ flexShrink: 0 }}>
+      <Group h="100%" gap="sm" wrap="nowrap">
+        <Group style={{ flex: 1, minWidth: 0 }} gap="sm" wrap="nowrap">
+          {currentView !== 'catalog' && (
+            <Box className="border-r border-border" pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <img src={teslaLogo} alt="Tesla Footwear" className="h-6 w-auto object-contain" />
+            </Box>
+          )}
+          {/* Nav items à esquerda quando existem, caso contrário título */}
+          {headerItems.length > 0 ? (
+            <Group gap={4} wrap="nowrap">
+              {headerItems.map(item => {
+                const Icon = item.icon;
+                const active = currentView === item.view;
+                return (
+                  <Button
+                    key={item.label}
+                    onClick={() => onNavigate(item.view)}
+                    variant={active ? 'light' : 'subtle'}
+                    color="neutral"
+                    size="sm"
+                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    title={item.label}
+                    styles={{ label: { fontWeight: active ? 600 : 500 } }}
+                  >
+                    <span className="hidden md:inline">{item.label}</span>
+                  </Button>
+                );
+              })}
+            </Group>
+          ) : (
+            <Box style={{ minWidth: 0 }}>
+              <Text truncate fw={600} size="0.95rem" style={{ letterSpacing: '-0.01em' }}>{title}</Text>
+              {subtitle && <Text truncate c="dimmed" size="0.75rem" visibleFrom="sm">{subtitle}</Text>}
+            </Box>
+          )}
+        </Group>
+
+        <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+          {actions}
+
+          {/* Cart(s) — todos os perfis usam multi-carrinhos */}
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
+            <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" title="Carrinhos">
+              <ShoppingBasket className="w-4 h-4" />
+            </ActionIcon>
+          </Indicator>
+
+          {/* Notifications */}
+          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
+            <ActionIcon variant="subtle" color="neutral" size="lg" title="Notificações">
+              <Bell className="w-4 h-4" />
+            </ActionIcon>
+          </Indicator>
+
+          {/* Client chip — before avatar */}
+          {selectedClient && (
+            <Button
+              onClick={() => onNavigate('history')}
+              variant="default"
+              color="neutral"
+              size="sm"
+              leftSection={<Store className="w-3.5 h-3.5" />}
+              title="Ver histórico de pedidos deste cliente"
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{item.label}</span>
-            </button>
-          );
-            })}
-          </div>
-        ) : (
-          <>
-            <h1 className="text-foreground truncate" style={{ fontSize: '0.95rem', fontWeight: 600, letterSpacing: '-0.01em' }}>{title}</h1>
-            {subtitle && <p className="text-muted-foreground truncate hidden sm:block" style={{ fontSize: '0.75rem' }}>{subtitle}</p>}
-          </>
-        )}
-
-      </div>
-
-      <div className="flex items-center gap-1 flex-shrink-0">
-        {actions}
-
-        {/* Cart(s) — todos os perfis usam multi-carrinhos */}
-        <button
-          onClick={() => onNavigate('carts')}
-          className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-          title="Carrinhos"
-        >
-          <ShoppingBasket className="w-4 h-4" />
-          {cartCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground rounded-full flex items-center justify-center" style={{ fontSize: '0.6rem', fontWeight: 700 }}>
-              {cartCount}
-            </span>
+              {selectedClient.name}
+            </Button>
           )}
-        </button>
 
-        {/* Notifications */}
-        <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-          <Bell className="w-4 h-4" />
-          {notifications > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />}
-        </button>
-
-        {/* Client chip — before avatar */}
-        {selectedClient && (
-          <button
-            onClick={() => onNavigate('history')}
-            className="flex items-center gap-2 px-3 py-1.5 bg-muted/40 border border-border/60 rounded-lg flex-shrink-0 hover:bg-secondary/60 hover:border-primary/30 transition-colors"
-            title="Ver histórico de pedidos deste cliente"
-          >
-            <Store className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground hover:text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{selectedClient.name}</span>
-          </button>
-        )}
-
-        {/* Avatar + dropdown */}
-        <div className="relative pl-2 border-l border-border ml-1">
-          <button
-            ref={avatarRef}
-            onClick={() => {
-              if (avatarRef.current) {
-                const rect = avatarRef.current.getBoundingClientRect();
-                setDropdownPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
-              }
-              setProfileOpen(o => !o);
-            }}
-            className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-colors"
-          >
-            <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
-          </button>
-
-          {profileOpen && createPortal(
-            <>
-              <div className="fixed inset-0 z-[9998]" onClick={() => setProfileOpen(false)} />
-              <div className="fixed w-48 bg-card border border-border rounded-xl shadow-lg z-[9999] py-1.5 overflow-hidden" style={{ top: dropdownPos.top, right: dropdownPos.right }}>
-                <p className="px-3 pb-1.5 pt-0.5 text-muted-foreground border-b border-border mb-1" style={{ fontSize: '0.7rem' }}>
-                  {profileInfo.label}
-                </p>
-                {dropdownItems.map(item => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.label}
-                      onClick={() => handleDropdownItem(item)}
-                      className={`w-full text-left px-3 py-2 hover:bg-secondary/60 transition-colors flex items-center gap-2.5 ${item.label === 'Sair' ? 'text-destructive' : 'text-foreground'}`}
-                      style={{ fontSize: '0.82rem' }}
-                    >
-                      <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </>,
-            document.body
-          )}
-        </div>
-      </div>
-    </header>
+          {/* Avatar + dropdown */}
+          <Menu position="bottom-end" offset={8} shadow="md" width={192}>
+            <Menu.Target>
+              <ActionIcon
+                variant="light"
+                color="neutral"
+                radius="xl"
+                size={32}
+                ml={4}
+                className="border-l border-border"
+                style={{ borderRadius: '50%' }}
+              >
+                <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Label>{profileInfo.label}</Menu.Label>
+              {dropdownItems.map(item => {
+                const Icon = item.icon;
+                return (
+                  <Menu.Item
+                    key={item.label}
+                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    color={item.label === 'Sair' ? 'red' : undefined}
+                    onClick={() => handleDropdownItem(item)}
+                  >
+                    {item.label}
+                  </Menu.Item>
+                );
+              })}
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+      </Group>
+    </Box>
   );
 }
