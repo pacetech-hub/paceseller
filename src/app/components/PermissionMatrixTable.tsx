@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Paper, Group, Stack, Text, Badge, Table, Checkbox } from "@mantine/core";
 import { profileDescriptions } from "../data/permissions";
 
 interface PermissionMatrixTableProps {
@@ -12,64 +12,67 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
   const modulos = Object.keys(matrix[perfis[0]]);
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div className="p-5 border-b border-border">
-        <div className="flex items-center gap-3">
+    <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+      <Stack gap={8} p="lg" className="border-b border-border">
+        <Group gap="sm">
           {perfis.map(perfil => (
-            <span key={perfil} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{perfil}</span>
+            <Badge key={perfil} color="neutral" variant="light">{perfil}</Badge>
           ))}
-        </div>
-        <div className="mt-2 space-y-0.5">
+        </Group>
+        <Stack gap={2}>
           {perfis.map(perfil => (
-            <p key={perfil} className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-              <span className="text-foreground font-medium">{perfil}:</span> {profileDescriptions[perfil]}
-            </p>
+            <Text key={perfil} c="dimmed" size="0.72rem">
+              <Text component="span" fw={500} c="var(--mantine-color-text)">{perfil}:</Text> {profileDescriptions[perfil]}
+            </Text>
           ))}
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="text-left px-5 py-3 text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Módulo</th>
-              {perfis.map(p => (
-                <th key={p} className="text-center px-4 py-3 text-foreground" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{p}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {modulos.map(modulo => (
-              <tr key={modulo} className="border-b border-border/40 hover:bg-secondary/20 transition-colors">
-                <td className="px-5 py-3 text-foreground" style={{ fontSize: '0.82rem' }}>{modulo}</td>
-                {perfis.map(perfil => {
-                  const allowed = matrix[perfil][modulo];
-                  return (
-                    <td key={perfil} className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => onToggle(perfil, modulo)}
-                        className="mx-auto flex items-center justify-center w-6 h-6 rounded transition-colors hover:scale-110"
-                        title={allowed ? 'Clique para revogar' : 'Clique para conceder'}
-                      >
-                        {allowed ? (
-                          <Check className="w-4 h-4 text-emerald-400" />
-                        ) : (
-                          <div className="w-4 h-px bg-border" />
-                        )}
-                      </button>
-                    </td>
-                  );
-                })}
-              </tr>
+        </Stack>
+      </Stack>
+
+      <Table verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Módulo</Table.Th>
+            {perfis.map(p => (
+              <Table.Th key={p} ta="center">{p}</Table.Th>
             ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="px-5 py-3 border-t border-border/40 flex items-center justify-between">
-        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Clique em qualquer célula para alternar a permissão</p>
-        <button onClick={onReset} className="text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.72rem' }}>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {modulos.map(modulo => (
+            <Table.Tr key={modulo}>
+              <Table.Td>{modulo}</Table.Td>
+              {perfis.map(perfil => {
+                const allowed = matrix[perfil][modulo];
+                return (
+                  <Table.Td key={perfil} ta="center">
+                    <Checkbox
+                      checked={allowed}
+                      onChange={() => onToggle(perfil, modulo)}
+                      color="neutral"
+                      title={allowed ? 'Clique para revogar' : 'Clique para conceder'}
+                      styles={{ input: { cursor: 'pointer' } }}
+                    />
+                  </Table.Td>
+                );
+              })}
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+
+      <Group justify="space-between" p="lg" className="border-t border-border">
+        <Text c="dimmed" size="0.72rem">Clique em qualquer célula para alternar a permissão</Text>
+        <Text
+          component="button"
+          onClick={onReset}
+          c="dimmed"
+          size="0.72rem"
+          style={{ cursor: 'pointer', background: 'none', border: 'none' }}
+          className="hover:text-foreground transition-colors"
+        >
           Restaurar padrões
-        </button>
-      </div>
-    </div>
+        </Text>
+      </Group>
+    </Paper>
   );
 }
