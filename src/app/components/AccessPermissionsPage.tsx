@@ -1,4 +1,8 @@
 import { useState } from "react";
+import {
+  Stack, Group, Box, Paper, ThemeIcon, Text, Alert, Button, TextInput,
+  Table, Avatar, Badge, Select, ActionIcon, SimpleGrid,
+} from "@mantine/core";
 import { Users, Store, Info, UserPlus, Trash2 } from "lucide-react";
 import { visoes, defaultPermissions, type VisaoKey, type PermissionsState } from "../data/permissions";
 import { linkedUsers as initialLinkedUsers, type LinkedUser } from "../data/linkedUsers";
@@ -102,144 +106,134 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   const visaoInfo = visoes.find(v => v.id === scope.visao)!;
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-foreground" style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{scope.title}</h2>
-          <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{scope.subtitle}</p>
-        </div>
-      </div>
+    <Stack gap="lg" maw={1400} mx="auto" p="lg">
+      <Group gap="sm" wrap="nowrap">
+        <ThemeIcon size={40} radius="md" variant="light" color="neutral">
+          <Icon className="w-5 h-5" />
+        </ThemeIcon>
+        <Box>
+          <Text fw={700} size="1.05rem" style={{ letterSpacing: '-0.01em' }}>{scope.title}</Text>
+          <Text c="dimmed" size="0.78rem">{scope.subtitle}</Text>
+        </Box>
+      </Group>
 
-      <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
-        <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-        <p className="text-foreground" style={{ fontSize: '0.78rem', lineHeight: 1.55 }}>
-          Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
-        </p>
-      </div>
+      <Alert icon={<Info className="w-4 h-4" />} color="neutral" radius="md" variant="light">
+        Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
+      </Alert>
 
       {/* Usuários vinculados */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <div className="p-5 border-b border-border flex items-center justify-between gap-3">
-          <div>
-            <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Usuários vinculados</h3>
-            <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>{scope.usersHint}</p>
-          </div>
-          <button
+      <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+        <Group justify="space-between" p="lg" className="border-b border-border" wrap="wrap">
+          <Box>
+            <Text fw={600} size="0.9rem">Usuários vinculados</Text>
+            <Text c="dimmed" size="0.75rem" mt={2}>{scope.usersHint}</Text>
+          </Box>
+          <Button
             onClick={() => setShowInvite(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex-shrink-0"
-            style={{ fontSize: '0.8rem', fontWeight: 600 }}
+            color="neutral"
+            size="sm"
+            leftSection={<UserPlus className="w-3.5 h-3.5" />}
           >
-            <UserPlus className="w-3.5 h-3.5" /> Convidar usuário
-          </button>
-        </div>
+            Convidar usuário
+          </Button>
+        </Group>
 
         {showInvite && (
-          <div className="p-4 bg-secondary/20 border-b border-primary/20 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Nome completo</label>
-                <input
-                  value={inviteName}
-                  onChange={e => setInviteName(e.target.value)}
-                  placeholder="Nome do usuário"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-                  style={{ fontSize: '0.82rem' }}
-                />
-              </div>
-              <div>
-                <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>E-mail</label>
-                <input
-                  value={inviteEmail}
-                  onChange={e => setInviteEmail(e.target.value)}
-                  placeholder="email@exemplo.com.br"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-                  style={{ fontSize: '0.82rem' }}
-                />
-              </div>
-            </div>
-            <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-              Será convidado com o perfil <span className="text-foreground font-medium">{subProfile}</span>. Você pode trocar o perfil depois de criado.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setShowInvite(false)} className="px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.8rem' }}>Cancelar</button>
-              <button onClick={inviteUser} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Convidar</button>
-            </div>
-          </div>
+          <Stack gap="sm" p="lg" className="bg-secondary/20 border-b border-border">
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+              <TextInput
+                label="Nome completo"
+                value={inviteName}
+                onChange={e => setInviteName(e.currentTarget.value)}
+                placeholder="Nome do usuário"
+              />
+              <TextInput
+                label="E-mail"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.currentTarget.value)}
+                placeholder="email@exemplo.com.br"
+              />
+            </SimpleGrid>
+            <Text c="dimmed" size="0.72rem">
+              Será convidado com o perfil <Text component="span" fw={500} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
+            </Text>
+            <Group justify="flex-end" gap="sm">
+              <Button onClick={() => setShowInvite(false)} variant="default" color="neutral" size="sm">Cancelar</Button>
+              <Button onClick={inviteUser} color="neutral" size="sm">Convidar</Button>
+            </Group>
+          </Stack>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-secondary/20">
-                {['Usuário', 'Perfil de acesso', 'Status', 'Último acesso', ''].map(c => (
-                  <th key={c} className="text-left px-4 py-2.5 text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                <tr key={u.id} className="border-b border-border/40 hover:bg-secondary/20 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary" style={{ fontSize: '0.62rem', fontWeight: 700 }}>{initials(u.name)}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{u.name}</p>
-                        <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{u.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={u.profile}
-                      onChange={e => changeUserProfile(u.id, e.target.value)}
-                      className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-foreground outline-none focus:border-primary"
-                      style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                    >
-                      {availableProfiles.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full ${u.status === 'ativo' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-muted text-muted-foreground'}`} style={{ fontSize: '0.65rem', fontWeight: 600 }}>
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground mono" style={{ fontSize: '0.75rem' }}>
+        <Table verticalSpacing="sm">
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Usuário</Table.Th>
+              <Table.Th>Perfil de acesso</Table.Th>
+              <Table.Th>Status</Table.Th>
+              <Table.Th>Último acesso</Table.Th>
+              <Table.Th />
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {users.map(u => (
+              <Table.Tr key={u.id}>
+                <Table.Td>
+                  <Group gap="sm" wrap="nowrap">
+                    <Avatar radius="xl" size={28} color="neutral">{initials(u.name)}</Avatar>
+                    <Box style={{ minWidth: 0 }}>
+                      <Text fw={500} size="0.82rem" truncate>{u.name}</Text>
+                      <Text c="dimmed" size="0.72rem" truncate>{u.email}</Text>
+                    </Box>
+                  </Group>
+                </Table.Td>
+                <Table.Td>
+                  <Select
+                    value={u.profile}
+                    onChange={v => v && changeUserProfile(u.id, v)}
+                    data={availableProfiles}
+                    size="xs"
+                    w={160}
+                    allowDeselect={false}
+                  />
+                </Table.Td>
+                <Table.Td>
+                  <Badge size="sm" color={u.status === 'ativo' ? 'green' : 'gray'} variant="light">{u.status}</Badge>
+                </Table.Td>
+                <Table.Td>
+                  <Text c="dimmed" size="0.75rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {u.lastLogin === '—' ? '—' : formatDate(u.lastLogin)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => removeUser(u.id)} className="p-1.5 rounded text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors" title="Remover vínculo">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {users.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground" style={{ fontSize: '0.82rem' }}>
+                  </Text>
+                </Table.Td>
+                <Table.Td>
+                  <ActionIcon onClick={() => removeUser(u.id)} variant="subtle" color="red" title="Remover vínculo">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </ActionIcon>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+            {users.length === 0 && (
+              <Table.Tr>
+                <Table.Td colSpan={5}>
+                  <Text c="dimmed" ta="center" py="lg" size="0.82rem">
                     Nenhum usuário vinculado ainda. Convide o primeiro acima.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </Text>
+                </Table.Td>
+              </Table.Tr>
+            )}
+          </Table.Tbody>
+        </Table>
+      </Paper>
 
       {/* O que cada perfil pode acessar */}
-      <div>
-        <h3 className="text-foreground mb-1" style={{ fontWeight: 600, fontSize: '0.95rem' }}>O que cada perfil pode acessar</h3>
-        <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>{visaoInfo.desc}. Alterar aqui afeta todos os usuários com o perfil correspondente.</p>
+      <Box>
+        <Text fw={600} size="0.95rem" mb={4}>O que cada perfil pode acessar</Text>
+        <Text c="dimmed" size="0.75rem" mb="sm">{visaoInfo.desc}. Alterar aqui afeta todos os usuários com o perfil correspondente.</Text>
         <PermissionMatrixTable
           matrix={permissionsState[scope.visao]}
           onToggle={togglePermission}
           onReset={() => setPermissionsState(prev => ({ ...prev, [scope.visao]: defaultPermissions[scope.visao] }))}
         />
-      </div>
-    </div>
+      </Box>
+    </Stack>
   );
 }

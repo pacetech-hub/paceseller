@@ -3,9 +3,11 @@ import { Toaster } from "./components/ui/sonner";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
-import { clients as clientsList, type Client } from "./data/mockData";
+import { clients as clientsList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
-import { DashboardRep } from "./components/DashboardRep";
+import { DashboardRep, CURRENT_REP_NAME } from "./components/DashboardRep";
+import { SalesTeamPage } from "./components/SalesTeamPage";
+import { getNetworkEntities, getRepTeamEntities } from "./components/SalesIndicatorsSection";
 import { DashboardLojista } from "./components/DashboardLojista";
 import { CatalogPage } from "./components/CatalogPage";
 import { OrderGrade } from "./components/OrderGrade";
@@ -17,7 +19,11 @@ import { MarketingStudio } from "./components/MarketingStudio";
 import { SelloutDashboard } from "./components/SelloutDashboard";
 import { AdminPage } from "./components/AdminPage";
 import { ClientsPage } from "./components/ClientsPage";
+import { ClientDetailPage } from "./components/ClientDetailPage";
 import { ProfilePage } from "./components/ProfilePage";
+import { BoletosPage } from "./components/BoletosPage";
+import { OrderDetailPage } from "./components/OrderDetailPage";
+import { FichaTecnicaPage } from "./components/FichaTecnicaPage";
 import { LojistaFiltersSidebar, defaultFilters, type CatalogFilters } from "./components/LojistaFiltersSidebar";
 import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
@@ -36,10 +42,15 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   sellout: { title: 'Sell-out Intelligence', subtitle: 'Análise de performance comercial' },
   admin: { title: 'Gestão', subtitle: 'Usuários, produtos, políticas e configurações' },
   clients: { title: 'Clientes', subtitle: 'Sua carteira de clientes' },
+  'client-detail': { title: 'Cliente', subtitle: 'Informações e ações rápidas' },
   profile: { title: 'Meu Perfil', subtitle: 'Seus dados, preferências e acesso' },
+  boletos: { title: 'Pagamentos e Boletos', subtitle: 'Suas faturas, boletos e histórico de pagamentos' },
   stock: { title: 'Meu Estoque', subtitle: 'Cadastre ou integre seu estoque da marca' },
   'industry-stock': { title: 'Estoque', subtitle: 'Estoque industrial e por cliente — somente visualização' },
   permissions: { title: 'Permissões de Acesso', subtitle: 'Controle o que os usuários vinculados à sua conta podem acessar' },
+  'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
+  'ficha-tecnica': { title: 'Ficha Técnica', subtitle: 'Informações completas, imagens e medidas dos produtos' },
+  'sales-team': { title: 'Vendedores', subtitle: 'Representantes e prepostos' },
 };
 
 export default function App() {
@@ -47,11 +58,13 @@ export default function App() {
   const [profile, setProfile] = useState<Profile>('admin');
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
   const [carts, setCarts] = useState<CartContext[]>(() =>
     mockCarts.map(({ id, clientId, clientName, cartName, createdBy }) => ({ id, clientId, clientName, cartName, createdBy }))
   );
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
+  const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
 
   // Todos os perfis suportam múltiplos carrinhos.
   const multiCart = true;
@@ -89,6 +102,12 @@ export default function App() {
     setAuthenticated(false);
     setCurrentView('dashboard');
     setSelectedClient(null);
+    setSelectedOrder(null);
+  };
+
+  const openOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setCurrentView('order-detail');
   };
 
   const navigate = (view: View) => setCurrentView(view);
@@ -101,6 +120,10 @@ export default function App() {
           profile === 'rep' ? 'Sua performance e carteira' :
           'Sua loja em números',
       }
+    : currentView === 'order-detail' && selectedOrder
+    ? { title: selectedOrder.id, subtitle: 'Detalhes do pedido' }
+    : currentView === 'client-detail' && selectedClient
+    ? { title: selectedClient.name, subtitle: 'Informações e ações rápidas' }
     : viewTitles[currentView];
 
   if (!authenticated) {
@@ -114,10 +137,13 @@ export default function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'dashboard':
-        if (profile === 'admin') return <DashboardAdmin onNavigate={navigate} />;
-        if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} />;
+      case 'dashboard': {
+        const openClientDetail = (client: Client) => { setSelectedClient(client); navigate('client-detail'); };
+        const openOrderStatus = (status: string) => { setOrderStatusFilter(status); navigate('history'); };
+        if (profile === 'admin') return <DashboardAdmin onNavigate={navigate} onSelectClient={openClientDetail} onOpenOrderStatus={openOrderStatus} />;
+        if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} onSelectClient={openClientDetail} onOpenOrderStatus={openOrderStatus} />;
         return <DashboardLojista onNavigate={navigate} />;
+      }
       case 'catalog': {
         const useFilters = true;
         return (
@@ -198,17 +224,46 @@ export default function App() {
           />
         );
       case 'history':
-        return <OrderHistory onNavigate={navigate} profile={profile} />;
+        return (
+          <OrderHistory
+            onNavigate={navigate}
+            onSelectOrder={openOrder}
+            profile={profile}
+            initialSearch={profile !== 'lojista' && selectedClient ? selectedClient.name : ''}
+            initialStatusFilter={orderStatusFilter}
+          />
+        );
+      case 'order-detail':
+        return <OrderDetailPage order={selectedOrder} onNavigate={navigate} profile={profile} />;
       case 'marketing':
-        return <MarketingStudio />;
+        return <MarketingStudio profile={profile} />;
       case 'sellout':
         return <SelloutDashboard />;
       case 'admin':
         return <AdminPage />;
       case 'clients':
         return <ClientsPage onNavigate={navigate} selectedClient={selectedClient} setSelectedClient={setSelectedClient} />;
+      case 'client-detail':
+        return <ClientDetailPage client={selectedClient} onNavigate={navigate} cartCount={clientCarts.length} />;
+      case 'sales-team':
+        return (
+          <SalesTeamPage
+            scope={profile === 'admin' ? 'network' : 'own'}
+            entities={profile === 'admin' ? getNetworkEntities() : getRepTeamEntities(CURRENT_REP_NAME)}
+            onBack={() => navigate('dashboard')}
+          />
+        );
       case 'profile':
         return <ProfilePage profile={profile} />;
+      case 'boletos':
+        return (
+          <BoletosPage
+            profile={profile}
+            initialSearch={profile !== 'lojista' && selectedClient ? selectedClient.name : ''}
+          />
+        );
+      case 'ficha-tecnica':
+        return <FichaTecnicaPage profile={profile} />;
       case 'stock':
         return <StockPage />;
       case 'industry-stock':
@@ -216,7 +271,13 @@ export default function App() {
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:
-        return <DashboardAdmin onNavigate={navigate} />;
+        return (
+          <DashboardAdmin
+            onNavigate={navigate}
+            onSelectClient={(client) => { setSelectedClient(client); navigate('client-detail'); }}
+            onOpenOrderStatus={(status) => { setOrderStatusFilter(status); navigate('history'); }}
+          />
+        );
     }
   };
 

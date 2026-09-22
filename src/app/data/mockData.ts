@@ -45,13 +45,15 @@ export interface Client {
   id: string;
   name: string;
   cnpj: string;
+  address: string;
   city: string;
   state: string;
   region: string;
   rep: string;
   lastOrder: string;
   totalPurchased: number;
-  status: 'ativo' | 'inativo' | 'em aberto';
+  status: 'ativo' | 'inativo';
+  inadimplente: boolean;
   avatar: string;
   policyId: string;
 }
@@ -94,8 +96,8 @@ export const products: Product[] = [
     isFavorite: true,
     rating: 4.8,
     soldUnits: 1400,
-    description: 'Tênis infantil linha Flow XL, modelo Denim. Grade 90-120-150-180-210.',
-    grades: { '90': 240, '120': 180, '150': 320, '180': 60, '210': 120 },
+    description: 'Tênis infantil linha Flow XL, modelo Denim. Grade 34 ao 44.',
+    grades: { '34': 35, '35': 65, '36': 90, '37': 120, '38': 140, '39': 140, '40': 120, '41': 90, '42': 65, '43': 35, '44': 20 },
   },
   {
     id: 'P002',
@@ -114,7 +116,7 @@ export const products: Product[] = [
     rating: 4.6,
     soldUnits: 1200,
     description: 'Tênis infantil linha Coil, modelo Branco.',
-    grades: { '90': 180, '120': 220, '150': 300, '180': 140, '210': 80 },
+    grades: { '34': 35, '35': 65, '36': 90, '37': 120, '38': 140, '39': 140, '40': 120, '41': 90, '42': 65, '43': 35, '44': 20 },
   },
   {
     id: 'P003',
@@ -133,7 +135,7 @@ export const products: Product[] = [
     rating: 4.2,
     soldUnits: 480,
     description: 'Tênis infantil linha Hertz Art, modelo Vermelho.',
-    grades: { '90': 20, '120': 30, '150': 40, '180': 15, '210': 10 },
+    grades: { '34': 5, '35': 8, '36': 12, '37': 15, '38': 17, '39': 18, '40': 15, '41': 11, '42': 8, '43': 4, '44': 2 },
   },
   {
     id: 'P004',
@@ -152,7 +154,7 @@ export const products: Product[] = [
     rating: 4.5,
     soldUnits: 920,
     description: 'Tênis infantil linha Hertz, modelo Marrom.',
-    grades: { '90': 160, '120': 200, '150': 260, '180': 120, '210': 60 },
+    grades: { '34': 32, '35': 56, '36': 80, '37': 104, '38': 120, '39': 120, '40': 104, '41': 80, '42': 56, '43': 32, '44': 16 },
   },
   {
     id: 'P005',
@@ -171,7 +173,7 @@ export const products: Product[] = [
     rating: 4.6,
     soldUnits: 1060,
     description: 'Tênis infantil linha Flow, modelo Preto.',
-    grades: { '90': 200, '120': 240, '150': 280, '180': 100, '210': 60 },
+    grades: { '34': 35, '35': 62, '36': 88, '37': 114, '38': 132, '39': 133, '40': 114, '41': 88, '42': 62, '43': 35, '44': 17 },
   },
   {
     id: 'P006',
@@ -190,7 +192,7 @@ export const products: Product[] = [
     rating: 4.4,
     soldUnits: 840,
     description: 'Tênis infantil linha Coil, modelo Navy.',
-    grades: { '90': 140, '120': 180, '150': 220, '180': 100, '210': 50 },
+    grades: { '34': 28, '35': 48, '36': 69, '37': 90, '38': 104, '39': 103, '40': 90, '41': 68, '42': 48, '43': 28, '44': 14 },
   },
   {
     id: 'P007',
@@ -209,7 +211,7 @@ export const products: Product[] = [
     rating: 4.3,
     soldUnits: 560,
     description: 'Tênis infantil linha Hertz Art, modelo Azul.',
-    grades: { '90': 100, '120': 140, '150': 180, '180': 80, '210': 40 },
+    grades: { '34': 22, '35': 38, '36': 54, '37': 70, '38': 81, '39': 81, '40': 70, '41': 54, '42': 38, '43': 21, '44': 11 },
   },
   {
     id: 'P008',
@@ -228,7 +230,7 @@ export const products: Product[] = [
     rating: 4.7,
     soldUnits: 1100,
     description: 'Tênis infantil linha Flow XL, modelo Preto.',
-    grades: { '90': 200, '120': 250, '150': 300, '180': 120, '210': 70 },
+    grades: { '34': 38, '35': 66, '36': 94, '37': 122, '38': 141, '39': 141, '40': 122, '41': 93, '42': 66, '43': 38, '44': 19 },
   },
 ];
 
@@ -244,22 +246,22 @@ export const orders: Order[] = [
 ];
 
 export const clients: Client[] = [
-  { id: 'CLI-001', name: 'Calçadão Paulista LTDA', cnpj: '12.345.678/0001-90', city: 'São Paulo', state: 'SP', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-06-09', totalPurchased: 142000, status: 'ativo', avatar: 'CP', policyId: 'TAB-A' },
-  { id: 'CLI-002', name: 'Sapataria Mineira', cnpj: '23.456.789/0001-01', city: 'Belo Horizonte', state: 'MG', region: 'Sudeste', rep: 'Fernanda Lima', lastOrder: '2026-06-08', totalPurchased: 76500, status: 'ativo', avatar: 'SM', policyId: 'TAB-B' },
-  { id: 'CLI-003', name: 'Mundo dos Sapatos RJ', cnpj: '34.567.890/0001-12', city: 'Rio de Janeiro', state: 'RJ', region: 'Sudeste', rep: 'Carlos Mendes', lastOrder: '2026-06-07', totalPurchased: 196000, status: 'ativo', avatar: 'MS', policyId: 'TAB-A' },
-  { id: 'CLI-004', name: 'Pé de Pato Bahia', cnpj: '45.678.901/0001-23', city: 'Salvador', state: 'BA', region: 'Nordeste', rep: 'Ana Santos', lastOrder: '2026-06-06', totalPurchased: 54000, status: 'ativo', avatar: 'PB', policyId: 'TAB-C' },
-  { id: 'CLI-005', name: 'Shoestore Norte', cnpj: '56.789.012/0001-34', city: 'Manaus', state: 'AM', region: 'Norte', rep: 'Marcos Andrade', lastOrder: '2026-06-05', totalPurchased: 33400, status: 'em aberto', avatar: 'SN', policyId: 'TAB-C' },
-  { id: 'CLI-006', name: 'Fashion Feet SP', cnpj: '67.890.123/0001-45', city: 'Campinas', state: 'SP', region: 'Sudeste', rep: 'Fernanda Lima', lastOrder: '2026-06-04', totalPurchased: 246000, status: 'ativo', avatar: 'FF', policyId: 'TAB-A' },
-  { id: 'CLI-007', name: 'Step Up Calçados', cnpj: '78.901.234/0001-56', city: 'Curitiba', state: 'PR', region: 'Sul', rep: 'Carlos Mendes', lastOrder: '2026-06-03', totalPurchased: 123500, status: 'ativo', avatar: 'SU', policyId: 'TAB-B' },
-  { id: 'CLI-008', name: 'Andar Bem Gaúcha', cnpj: '89.012.345/0001-67', city: 'Porto Alegre', state: 'RS', region: 'Sul', rep: 'Ana Santos', lastOrder: '2026-06-02', totalPurchased: 70400, status: 'ativo', avatar: 'AB', policyId: 'TAB-B' },
-  { id: 'CLI-009', name: 'Passo Certo Campinas', cnpj: '98.765.432/0001-11', city: 'Campinas', state: 'SP', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-06-01', totalPurchased: 87000, status: 'ativo', avatar: 'PC', policyId: 'TAB-A' },
-  { id: 'CLI-010', name: 'Péquenos do Sul', cnpj: '11.222.333/0001-22', city: 'Florianópolis', state: 'SC', region: 'Sul', rep: 'Marcos Andrade', lastOrder: '2026-05-28', totalPurchased: 45200, status: 'ativo', avatar: 'PS', policyId: 'TAB-B' },
-  { id: 'CLI-011', name: 'Caminhos Infantis RJ', cnpj: '22.333.444/0001-33', city: 'Niterói', state: 'RJ', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-25', totalPurchased: 67800, status: 'em aberto', avatar: 'CI', policyId: 'TAB-A' },
-  { id: 'CLI-012', name: 'Pé de Anjo Brasília', cnpj: '33.444.555/0001-44', city: 'Brasília', state: 'DF', region: 'Centro-Oeste', rep: 'Marcos Andrade', lastOrder: '2026-05-20', totalPurchased: 115000, status: 'ativo', avatar: 'PA', policyId: 'TAB-B' },
-  { id: 'CLI-013', name: 'Estilo Kids SP', cnpj: '44.555.666/0001-55', city: 'Guarulhos', state: 'SP', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-18', totalPurchased: 92000, status: 'ativo', avatar: 'EK', policyId: 'TAB-A' },
-  { id: 'CLI-014', name: 'Sapatinho de Ouro BH', cnpj: '55.666.777/0001-66', city: 'Contagem', state: 'MG', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-15', totalPurchased: 38100, status: 'inativo', avatar: 'SO', policyId: 'TAB-C' },
-  { id: 'CLI-015', name: 'Mundo Infantil Vitória', cnpj: '66.777.888/0001-77', city: 'Vitória', state: 'ES', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-10', totalPurchased: 56400, status: 'ativo', avatar: 'MV', policyId: 'TAB-B' },
-  { id: 'CLI-016', name: 'Alegria nos Pés PR', cnpj: '77.888.999/0001-88', city: 'Londrina', state: 'PR', region: 'Sul', rep: 'Marcos Andrade', lastOrder: '2026-05-08', totalPurchased: 72300, status: 'ativo', avatar: 'AP', policyId: 'TAB-A' },
+  { id: 'CLI-001', name: 'Calçadão Paulista LTDA', cnpj: '12.345.678/0001-90', address: 'Rua Augusta, 1200 — Consolação', city: 'São Paulo', state: 'SP', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-06-09', totalPurchased: 142000, status: 'ativo', inadimplente: false, avatar: 'CP', policyId: 'TAB-A' },
+  { id: 'CLI-002', name: 'Sapataria Mineira', cnpj: '23.456.789/0001-01', address: 'Av. Afonso Pena, 480 — Centro', city: 'Belo Horizonte', state: 'MG', region: 'Sudeste', rep: 'Fernanda Lima', lastOrder: '2026-06-08', totalPurchased: 76500, status: 'ativo', inadimplente: false, avatar: 'SM', policyId: 'TAB-B' },
+  { id: 'CLI-003', name: 'Mundo dos Sapatos RJ', cnpj: '34.567.890/0001-12', address: 'Rua Uruguaiana, 55 — Centro', city: 'Rio de Janeiro', state: 'RJ', region: 'Sudeste', rep: 'Carlos Mendes', lastOrder: '2026-06-07', totalPurchased: 196000, status: 'ativo', inadimplente: false, avatar: 'MS', policyId: 'TAB-A' },
+  { id: 'CLI-004', name: 'Pé de Pato Bahia', cnpj: '45.678.901/0001-23', address: 'Av. Sete de Setembro, 320 — Centro', city: 'Salvador', state: 'BA', region: 'Nordeste', rep: 'Ana Santos', lastOrder: '2026-06-06', totalPurchased: 54000, status: 'ativo', inadimplente: false, avatar: 'PB', policyId: 'TAB-C' },
+  { id: 'CLI-005', name: 'Shoestore Norte', cnpj: '56.789.012/0001-34', address: 'Av. Eduardo Ribeiro, 700 — Centro', city: 'Manaus', state: 'AM', region: 'Norte', rep: 'Marcos Andrade', lastOrder: '2026-06-05', totalPurchased: 33400, status: 'ativo', inadimplente: true, avatar: 'SN', policyId: 'TAB-C' },
+  { id: 'CLI-006', name: 'Fashion Feet SP', cnpj: '67.890.123/0001-45', address: 'Av. Iguatemi, 150 — Jardim Chapadão', city: 'Campinas', state: 'SP', region: 'Sudeste', rep: 'Fernanda Lima', lastOrder: '2026-06-04', totalPurchased: 246000, status: 'ativo', inadimplente: false, avatar: 'FF', policyId: 'TAB-A' },
+  { id: 'CLI-007', name: 'Step Up Calçados', cnpj: '78.901.234/0001-56', address: 'Rua XV de Novembro, 890 — Centro', city: 'Curitiba', state: 'PR', region: 'Sul', rep: 'Carlos Mendes', lastOrder: '2026-06-03', totalPurchased: 123500, status: 'ativo', inadimplente: false, avatar: 'SU', policyId: 'TAB-B' },
+  { id: 'CLI-008', name: 'Andar Bem Gaúcha', cnpj: '89.012.345/0001-67', address: 'Av. Borges de Medeiros, 400 — Centro Histórico', city: 'Porto Alegre', state: 'RS', region: 'Sul', rep: 'Ana Santos', lastOrder: '2026-06-02', totalPurchased: 70400, status: 'ativo', inadimplente: false, avatar: 'AB', policyId: 'TAB-B' },
+  { id: 'CLI-009', name: 'Passo Certo Campinas', cnpj: '98.765.432/0001-11', address: 'Av. Francisco Glicério, 935 — Centro', city: 'Campinas', state: 'SP', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-06-01', totalPurchased: 87000, status: 'ativo', inadimplente: false, avatar: 'PC', policyId: 'TAB-A' },
+  { id: 'CLI-010', name: 'Péquenos do Sul', cnpj: '11.222.333/0001-22', address: 'Rua Felipe Schmidt, 210 — Centro', city: 'Florianópolis', state: 'SC', region: 'Sul', rep: 'Marcos Andrade', lastOrder: '2026-05-28', totalPurchased: 45200, status: 'ativo', inadimplente: false, avatar: 'PS', policyId: 'TAB-B' },
+  { id: 'CLI-011', name: 'Caminhos Infantis RJ', cnpj: '22.333.444/0001-33', address: 'Rua Moreira César, 165 — Centro', city: 'Niterói', state: 'RJ', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-25', totalPurchased: 67800, status: 'ativo', inadimplente: false, avatar: 'CI', policyId: 'TAB-A' },
+  { id: 'CLI-012', name: 'Pé de Anjo Brasília', cnpj: '33.444.555/0001-44', address: 'SCS Quadra 4, Bloco A — Asa Sul', city: 'Brasília', state: 'DF', region: 'Centro-Oeste', rep: 'Marcos Andrade', lastOrder: '2026-05-20', totalPurchased: 115000, status: 'ativo', inadimplente: false, avatar: 'PA', policyId: 'TAB-B' },
+  { id: 'CLI-013', name: 'Estilo Kids SP', cnpj: '44.555.666/0001-55', address: 'Av. Paulo Faccini, 285 — Centro', city: 'Guarulhos', state: 'SP', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-18', totalPurchased: 92000, status: 'ativo', inadimplente: false, avatar: 'EK', policyId: 'TAB-A' },
+  { id: 'CLI-014', name: 'Sapatinho de Ouro BH', cnpj: '55.666.777/0001-66', address: 'Av. João César de Oliveira, 1020 — Eldorado', city: 'Contagem', state: 'MG', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-15', totalPurchased: 38100, status: 'inativo', inadimplente: true, avatar: 'SO', policyId: 'TAB-C' },
+  { id: 'CLI-015', name: 'Mundo Infantil Vitória', cnpj: '66.777.888/0001-77', address: 'Av. Jerônimo Monteiro, 500 — Centro', city: 'Vitória', state: 'ES', region: 'Sudeste', rep: 'Marcos Andrade', lastOrder: '2026-05-10', totalPurchased: 56400, status: 'ativo', inadimplente: false, avatar: 'MV', policyId: 'TAB-B' },
+  { id: 'CLI-016', name: 'Alegria nos Pés PR', cnpj: '77.888.999/0001-88', address: 'Av. Higienópolis, 620 — Centro', city: 'Londrina', state: 'PR', region: 'Sul', rep: 'Marcos Andrade', lastOrder: '2026-05-08', totalPurchased: 72300, status: 'ativo', inadimplente: false, avatar: 'AP', policyId: 'TAB-A' },
 ];
 
 export const selloutData: SelloutRecord[] = [
