@@ -362,6 +362,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             <Menu.Target>
               <ActionIcon
                 variant="light"
+                data-testid="user-menu"
                
                 radius="xl"
                 size={32}
