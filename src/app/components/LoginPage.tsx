@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRightIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 
 type Profile = "admin" | "rep" | "lojista";
@@ -185,7 +185,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                   </button>
                 </div>
                 <div className="flex justify-end mt-1.5">
@@ -209,7 +209,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                 ) : (
                   <>
-                    Entrar <ArrowRight className="w-4 h-4" />
+                    Entrar <ArrowRightIcon className="w-4 h-4" />
                   </>
                 )}
               </button>

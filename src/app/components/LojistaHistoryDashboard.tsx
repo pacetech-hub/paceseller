@@ -3,7 +3,15 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
-import { TrendingUp, TrendingDown, Package2, ShoppingBag, Trophy, Calendar, Download } from "lucide-react";
+import {
+  TrendUpIcon,
+  TrendDownIcon,
+  PackageIcon,
+  ShoppingBagIcon,
+  TrophyIcon,
+  CalendarBlankIcon,
+  DownloadSimpleIcon,
+} from "@phosphor-icons/react";
 import { selloutData, formatCurrency } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -81,19 +89,19 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
   const kpis = [
     {
       label: 'Sell-in', value: formatCurrency(totalSellIn), sub: 'comprado da fábrica',
-      icon: Package2, trend: '+12,4%', up: true,
+      icon: PackageIcon, trend: '+12,4%', up: true,
     },
     {
       label: 'Sell-out', value: formatCurrency(totalSellOut), sub: 'vendido na loja',
-      icon: ShoppingBag, trend: '+9,8%', up: true,
+      icon: ShoppingBagIcon, trend: '+9,8%', up: true,
     },
     {
       label: 'Taxa de Sell-out', value: `${selloutRate}%`, sub: 'conversão de estoque',
-      icon: TrendingUp, trend: '+2,1pp', up: true,
+      icon: TrendUpIcon, trend: '+2,1pp', up: true,
     },
     {
       label: 'Pares vendidos', value: totalUnits.toLocaleString('pt-BR'), sub: 'no período',
-      icon: Trophy, trend: '-1,3%', up: false,
+      icon: TrophyIcon, trend: '-1,3%', up: false,
     },
   ];
 
@@ -111,7 +119,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1">
-            <Calendar className="w-3.5 h-3.5 text-muted-foreground ml-1.5" />
+            <CalendarBlankIcon className="w-3.5 h-3.5 text-muted-foreground ml-1.5" />
             {periods.map(p => (
               <button
                 key={p.id}
@@ -128,7 +136,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
             style={{ fontSize: '0.78rem', fontWeight: 500 }}
           >
-            <Download className="w-3.5 h-3.5" /> Exportar
+            <DownloadSimpleIcon className="w-3.5 h-3.5" /> Exportar
           </button>
         </div>
       </div>
@@ -137,7 +145,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map(k => {
           const Icon = k.icon;
-          const TrendIcon = k.up ? TrendingUp : TrendingDown;
+          const TrendIcon = k.up ? TrendUpIcon : TrendDownIcon;
           return (
             <div key={k.label} className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
@@ -202,7 +210,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-400" />
+              <TrophyIcon className="w-4 h-4 text-amber-400" />
               <p className="text-foreground" style={{ fontSize: '0.95rem', fontWeight: 700 }}>Linhas mais vendidas</p>
             </div>
             <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{periods.find(p => p.id === period)?.label}</p>

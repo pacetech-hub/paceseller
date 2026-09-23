@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  Search, Download, Copy, CheckCircle2, Clock, AlertTriangle, Receipt,
-  ChevronDown, Barcode, QrCode,
-} from "lucide-react";
+  MagnifyingGlassIcon,
+  DownloadSimpleIcon,
+  CopyIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  WarningIcon,
+  ReceiptIcon,
+  CaretDownIcon,
+  BarcodeIcon,
+  QrCodeIcon,
+} from "@phosphor-icons/react";
 import { formatCurrency, formatDate } from "../data/mockData";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -133,9 +141,9 @@ const statusColors: Record<PaymentStatus, string> = {
 };
 
 const statusIcon: Record<PaymentStatus, React.ComponentType<{ className?: string }>> = {
-  pago: CheckCircle2,
-  pendente: Clock,
-  atrasado: AlertTriangle,
+  pago: CheckCircleIcon,
+  pendente: ClockIcon,
+  atrasado: WarningIcon,
 };
 
 const statusLabel: Record<PaymentStatus, string> = {
@@ -240,7 +248,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
         </div>
 
         {!isPago && (
-          <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          <CaretDownIcon className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         )}
       </div>
 
@@ -253,7 +261,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               className={methodToggleClass(method === 'boleto')}
               style={{ fontSize: '0.78rem', fontWeight: 600 }}
             >
-              <Barcode className="w-3.5 h-3.5" /> Boleto
+              <BarcodeIcon className="w-3.5 h-3.5" /> Boleto
             </button>
             <button
               onClick={() => setMethod('pix')}
@@ -261,7 +269,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               className={methodToggleClass(method === 'pix')}
               style={{ fontSize: '0.78rem', fontWeight: 600 }}
             >
-              <QrCode className="w-3.5 h-3.5" /> Pix
+              <QrCodeIcon className="w-3.5 h-3.5" /> Pix
             </button>
           </div>
 
@@ -279,14 +287,14 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                   style={{ fontSize: '0.78rem', fontWeight: 600 }}
                 >
-                  <Copy className="w-3.5 h-3.5" /> Copiar código de barras
+                  <CopyIcon className="w-3.5 h-3.5" /> Copiar código de barras
                 </button>
                 <button
                   onClick={() => toast.success('Fatura baixada')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                   style={{ fontSize: '0.78rem', fontWeight: 500 }}
                 >
-                  <Download className="w-3.5 h-3.5" /> Baixar fatura
+                  <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar fatura
                 </button>
               </div>
             </div>
@@ -304,14 +312,14 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                   style={{ fontSize: '0.78rem', fontWeight: 600 }}
                 >
-                  <Copy className="w-3.5 h-3.5" /> Copiar código Pix
+                  <CopyIcon className="w-3.5 h-3.5" /> Copiar código Pix
                 </button>
                 <button
                   onClick={() => setShowQr(v => !v)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                   style={{ fontSize: '0.78rem', fontWeight: 500 }}
                 >
-                  <QrCode className="w-3.5 h-3.5" /> {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
+                  <QrCodeIcon className="w-3.5 h-3.5" /> {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
                 </button>
               </div>
 
@@ -400,7 +408,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
             type="text"
             placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
@@ -432,7 +440,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
 
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-            <Receipt className="w-10 h-10 text-muted-foreground/30 mb-3" />
+            <ReceiptIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
             <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum boleto encontrado</p>
             <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
           </div>

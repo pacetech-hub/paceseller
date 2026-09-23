@@ -1,11 +1,32 @@
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
+import { Group, Button, ActionIcon, Indicator, Menu, Text, Box } from "@mantine/core";
 import {
-  LayoutDashboard, Package2, ShoppingBag, ShoppingBasket, Clock,
-  Sparkles, BarChart3, Settings, Users, Store, ChevronDown, ChevronRight,
-  Bell, Search, Menu, X, Building2, LogOut, ChevronLeft,
-  UserCheck, Tag, Shield, Boxes, Receipt, FileText,
-} from "lucide-react";
+  SquaresFourIcon,
+  PackageIcon,
+  ShoppingBagIcon,
+  BasketIcon,
+  ClockIcon,
+  SparkleIcon,
+  ChartBarIcon,
+  GearIcon,
+  UsersIcon,
+  StorefrontIcon,
+  CaretDownIcon,
+  CaretRightIcon,
+  BellIcon,
+  MagnifyingGlassIcon,
+  ListIcon,
+  XIcon,
+  BuildingsIcon,
+  SignOutIcon,
+  CaretLeftIcon,
+  UserCheckIcon,
+  TagIcon,
+  ShieldIcon,
+  WarehouseIcon,
+  ReceiptIcon,
+  FileTextIcon,
+} from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 
@@ -24,9 +45,9 @@ interface NavItem {
 }
 
 const profileLabels: Record<Profile, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  admin: { label: 'Indústria Admin', icon: Building2, color: 'text-black' },
-  rep: { label: 'Representante', icon: Users, color: 'text-amber-400' },
-  lojista: { label: 'Lojista', icon: Store, color: 'text-emerald-400' },
+  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'text-black' },
+  rep: { label: 'Representante', icon: UsersIcon, color: 'text-amber-400' },
+  lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'text-emerald-400' },
 };
 
 interface SidebarProps {
@@ -56,27 +77,27 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
     if (profile === 'rep') {
       if (!selectedClient) {
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-          { id: 'clients', label: 'Selecionar Cliente', icon: Store },
+          { id: 'dashboard', label: 'Dashboard', icon: SquaresFourIcon },
+          { id: 'clients', label: 'Selecionar Cliente', icon: StorefrontIcon },
         ];
       }
       return [
-        { id: 'catalog', label: 'Catálogo', icon: Package2 },
-        { id: 'order-grade', label: 'Novo Pedido', icon: ShoppingBag },
+        { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
+        { id: 'order-grade', label: 'Novo Pedido', icon: ShoppingBagIcon },
       ];
     }
     if (profile === 'lojista') {
       return [
-        { id: 'dashboard', label: 'Indicadores', icon: LayoutDashboard },
-        { id: 'catalog', label: 'Catálogo', icon: Package2 },
+        { id: 'dashboard', label: 'Indicadores', icon: SquaresFourIcon },
+        { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
       ];
     }
     return [
-      { id: 'catalog', label: 'Catálogo', icon: Package2 },
-      { id: 'history', label: 'Pedidos', icon: ShoppingBag },
-      { id: 'clients', label: 'Clientes', icon: Users },
-      { id: 'admin', label: 'Representantes', icon: UserCheck },
-      { id: 'admin', label: 'Política Comercial', icon: Tag },
+      { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
+      { id: 'history', label: 'Pedidos', icon: ShoppingBagIcon },
+      { id: 'clients', label: 'Clientes', icon: UsersIcon },
+      { id: 'admin', label: 'Representantes', icon: UserCheckIcon },
+      { id: 'admin', label: 'Política Comercial', icon: TagIcon },
     ];
   };
 
@@ -91,7 +112,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         </div>
         {!collapsed && (
           <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground transition-colors p-1 rounded">
-            <ChevronLeft className="w-4 h-4" />
+            <CaretLeftIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -118,7 +139,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       {!collapsed && (
         <div className="mx-3 mt-3">
           <div className="flex items-center gap-2 rounded-lg bg-secondary/40 border border-border px-3 py-2 text-muted-foreground">
-            <Search className="w-3.5 h-3.5 flex-shrink-0" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 flex-shrink-0" />
             <span style={{ fontSize: '0.78rem' }}>Buscar...</span>
             <kbd className="ml-auto text-muted-foreground/60 border border-border rounded px-1" style={{ fontSize: '0.6rem' }}>⌘K</kbd>
           </div>
@@ -168,7 +189,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
               <div className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>admin@tesla.com.br</div>
             </div>
             <button onClick={onLogout} className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded" title="Sair">
-              <LogOut className="w-3.5 h-3.5" />
+              <SignOutIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
@@ -177,7 +198,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
             onClick={() => setCollapsed(false)}
             className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-secondary/60"
           >
-            <ChevronRight className="w-4 h-4" />
+            <CaretRightIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -190,7 +211,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
       >
-        <Menu className="w-4 h-4" />
+        <ListIcon className="w-4 h-4" />
       </button>
 
       {mobileOpen && (
@@ -198,7 +219,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
           <div className="relative w-64 h-full bg-sidebar border-r border-sidebar-border">
             <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <X className="w-4 h-4" />
+              <XIcon className="w-4 h-4" />
             </button>
             <SidebarContent />
           </div>
@@ -226,9 +247,6 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient }: TopBarProps) {
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
-  const avatarRef = useRef<HTMLButtonElement>(null);
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
@@ -238,178 +256,162 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const headerItems: HeaderItem[] =
     profile === 'admin'
       ? [
-          { icon: BarChart3, label: 'Indicadores', view: 'dashboard' as View },
-          { icon: Users, label: 'Clientes', view: 'clients' as View },
-          { icon: Package2, label: 'Catálogo', view: 'catalog' as View },
-          { icon: Sparkles, label: 'Marketing IA', view: 'marketing' as View },
-          { icon: Shield, label: 'Administração', view: 'admin' as View },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          { icon: UsersIcon, label: 'Clientes', view: 'clients' as View },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
+          { icon: ShieldIcon, label: 'Administração', view: 'admin' as View },
         ]
       : profile === 'rep'
       ? [
-          { icon: BarChart3, label: 'Indicadores', view: 'dashboard' as View },
-          { icon: Store, label: 'Clientes', view: 'clients' as View },
-          { icon: Package2, label: 'Catálogo', view: 'catalog' as View },
-          { icon: Boxes, label: 'Estoque', view: 'industry-stock' as View },
-          { icon: Sparkles, label: 'Marketing IA', view: 'marketing' as View },
-          { icon: Shield, label: 'Permissões', view: 'permissions' as View },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          { icon: StorefrontIcon, label: 'Clientes', view: 'clients' as View },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
+          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' as View },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
+          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' as View },
         ]
       : [
-          { icon: BarChart3, label: 'Indicadores', view: 'dashboard' },
-          { icon: Package2, label: 'Catálogo', view: 'catalog' },
-          { icon: Boxes, label: 'Meu Estoque', view: 'stock' },
-          { icon: Sparkles, label: 'Marketing IA', view: 'marketing' },
-          { icon: Shield, label: 'Permissões', view: 'permissions' },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+          { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
         ];
 
   const dropdownItems: DropdownItem[] =
     profile === 'admin'
       ? [
-          { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: Users, label: 'Meu Perfil', view: 'profile' },
-          { icon: LogOut, label: 'Sair', action: onLogout },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
+          { icon: SignOutIcon, label: 'Sair', action: onLogout },
         ]
       : profile === 'rep'
       ? [
-          { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: Users, label: 'Meu Perfil', view: 'profile' },
-          { icon: LogOut, label: 'Sair', action: onLogout },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
+          { icon: SignOutIcon, label: 'Sair', action: onLogout },
         ]
       : [
-          { icon: ShoppingBag, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: Users, label: 'Meu Perfil', view: 'profile' },
-          { icon: LogOut, label: 'Sair', action: onLogout },
+          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
+          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
+          { icon: SignOutIcon, label: 'Sair', action: onLogout },
         ];
 
   const handleDropdownItem = (item: DropdownItem) => {
-    setProfileOpen(false);
     if (item.action) { item.action(); return; }
     if (item.view) onNavigate(item.view);
   };
 
   return (
-    <header className="h-14 border-b border-border bg-background/80 backdrop-blur flex items-center px-6 gap-3 flex-shrink-0">
-      <div className="flex-1 min-w-0 flex items-center gap-3">
-        {currentView !== 'catalog' && (
-          <div className="flex items-center pr-3 mr-1 border-r border-border h-8 flex-shrink-0">
-            <img src={teslaLogo} alt="Tesla Footwear" className="h-6 w-auto object-contain" />
-          </div>
-        )}
-        {/* Nav items à esquerda quando existem, caso contrário título */}
-        {headerItems.length > 0 ? (
-          <div className="flex items-center gap-1">
-            {headerItems.map(item => {
-          const Icon = item.icon;
-          const active = currentView === item.view;
-          return (
-            <button
-              key={item.label}
-              onClick={() => onNavigate(item.view)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors ${
-                active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-              }`}
-              style={{ fontSize: '0.78rem', fontWeight: active ? 600 : 500 }}
-              title={item.label}
+    <Box component="header" className="border-b border-border bg-background/80 backdrop-blur" h={56} px="lg" style={{ flexShrink: 0 }}>
+      <Group h="100%" gap="sm" wrap="nowrap">
+        <Group style={{ flex: 1, minWidth: 0 }} gap="sm" wrap="nowrap">
+          {currentView !== 'catalog' && (
+            <Box className="border-r border-border" pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <img src={teslaLogo} alt="Tesla Footwear" className="h-6 w-auto object-contain" />
+            </Box>
+          )}
+          {/* Nav items à esquerda quando existem, caso contrário título */}
+          {headerItems.length > 0 ? (
+            <Group gap={4} wrap="nowrap">
+              {headerItems.map(item => {
+                const Icon = item.icon;
+                const active = currentView === item.view;
+                return (
+                  <Button
+                    key={item.label}
+                    onClick={() => onNavigate(item.view)}
+                    variant={active ? 'light' : 'subtle'}
+                    color="neutral"
+                    size="sm"
+                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    title={item.label}
+                    styles={{ label: { fontWeight: active ? 600 : 500 } }}
+                  >
+                    <span className="hidden md:inline">{item.label}</span>
+                  </Button>
+                );
+              })}
+            </Group>
+          ) : (
+            <Box style={{ minWidth: 0 }}>
+              <Text truncate fw={600} size="0.95rem" style={{ letterSpacing: '-0.01em' }}>{title}</Text>
+              {subtitle && <Text truncate c="dimmed" size="0.75rem" visibleFrom="sm">{subtitle}</Text>}
+            </Box>
+          )}
+        </Group>
+
+        <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+          {actions}
+
+          {/* Cart(s) — todos os perfis usam multi-carrinhos */}
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
+            <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" title="Carrinhos">
+              <BasketIcon className="w-4 h-4" />
+            </ActionIcon>
+          </Indicator>
+
+          {/* Notifications */}
+          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
+            <ActionIcon variant="subtle" color="neutral" size="lg" title="Notificações">
+              <BellIcon className="w-4 h-4" />
+            </ActionIcon>
+          </Indicator>
+
+          {/* Client chip — before avatar */}
+          {selectedClient && (
+            <Button
+              onClick={() => onNavigate('history')}
+              variant="default"
+              color="neutral"
+              size="sm"
+              leftSection={<StorefrontIcon className="w-3.5 h-3.5" />}
+              title="Ver histórico de pedidos deste cliente"
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{item.label}</span>
-            </button>
-          );
-            })}
-          </div>
-        ) : (
-          <>
-            <h1 className="text-foreground truncate" style={{ fontSize: '0.95rem', fontWeight: 600, letterSpacing: '-0.01em' }}>{title}</h1>
-            {subtitle && <p className="text-muted-foreground truncate hidden sm:block" style={{ fontSize: '0.75rem' }}>{subtitle}</p>}
-          </>
-        )}
-
-      </div>
-
-      <div className="flex items-center gap-1 flex-shrink-0">
-        {actions}
-
-        {/* Cart(s) — todos os perfis usam multi-carrinhos */}
-        <button
-          onClick={() => onNavigate('carts')}
-          className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-          title="Carrinhos"
-        >
-          <ShoppingBasket className="w-4 h-4" />
-          {cartCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground rounded-full flex items-center justify-center" style={{ fontSize: '0.6rem', fontWeight: 700 }}>
-              {cartCount}
-            </span>
+              {selectedClient.name}
+            </Button>
           )}
-        </button>
 
-        {/* Notifications */}
-        <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-          <Bell className="w-4 h-4" />
-          {notifications > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />}
-        </button>
-
-        {/* Client chip — before avatar */}
-        {selectedClient && (
-          <button
-            onClick={() => onNavigate('history')}
-            className="flex items-center gap-2 px-3 py-1.5 bg-muted/40 border border-border/60 rounded-lg flex-shrink-0 hover:bg-secondary/60 hover:border-primary/30 transition-colors"
-            title="Ver histórico de pedidos deste cliente"
-          >
-            <Store className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground hover:text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{selectedClient.name}</span>
-          </button>
-        )}
-
-        {/* Avatar + dropdown */}
-        <div className="relative pl-2 border-l border-border ml-1">
-          <button
-            ref={avatarRef}
-            onClick={() => {
-              if (avatarRef.current) {
-                const rect = avatarRef.current.getBoundingClientRect();
-                setDropdownPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
-              }
-              setProfileOpen(o => !o);
-            }}
-            className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-colors"
-          >
-            <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
-          </button>
-
-          {profileOpen && createPortal(
-            <>
-              <div className="fixed inset-0 z-[9998]" onClick={() => setProfileOpen(false)} />
-              <div className="fixed w-48 bg-card border border-border rounded-xl shadow-lg z-[9999] py-1.5 overflow-hidden" style={{ top: dropdownPos.top, right: dropdownPos.right }}>
-                <p className="px-3 pb-1.5 pt-0.5 text-muted-foreground border-b border-border mb-1" style={{ fontSize: '0.7rem' }}>
-                  {profileInfo.label}
-                </p>
-                {dropdownItems.map(item => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.label}
-                      onClick={() => handleDropdownItem(item)}
-                      className={`w-full text-left px-3 py-2 hover:bg-secondary/60 transition-colors flex items-center gap-2.5 ${item.label === 'Sair' ? 'text-destructive' : 'text-foreground'}`}
-                      style={{ fontSize: '0.82rem' }}
-                    >
-                      <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </>,
-            document.body
-          )}
-        </div>
-      </div>
-    </header>
+          {/* Avatar + dropdown */}
+          <Menu position="bottom-end" offset={8} shadow="md" width={192}>
+            <Menu.Target>
+              <ActionIcon
+                variant="light"
+                color="neutral"
+                radius="xl"
+                size={32}
+                ml={4}
+                className="border-l border-border"
+                style={{ borderRadius: '50%' }}
+              >
+                <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Label>{profileInfo.label}</Menu.Label>
+              {dropdownItems.map(item => {
+                const Icon = item.icon;
+                return (
+                  <Menu.Item
+                    key={item.label}
+                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    color={item.label === 'Sair' ? 'red' : undefined}
+                    onClick={() => handleDropdownItem(item)}
+                  >
+                    {item.label}
+                  </Menu.Item>
+                );
+              })}
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+      </Group>
+    </Box>
   );
 }

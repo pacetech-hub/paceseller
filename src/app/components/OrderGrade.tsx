@@ -1,5 +1,16 @@
 import { useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Plus, Minus, Zap, Check, AlertCircle, ShoppingCart, Tag, Store } from "lucide-react";
+import {
+  CaretLeftIcon,
+  CaretRightIcon,
+  PlusIcon,
+  MinusIcon,
+  LightningIcon,
+  CheckIcon,
+  WarningCircleIcon,
+  ShoppingCartIcon,
+  TagIcon,
+  StorefrontIcon,
+} from "@phosphor-icons/react";
 import { products, clients, commercialPolicies, Product, Client, formatCurrency } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -41,7 +52,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
               <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{p.name}</p>
               <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{p.reference} · {formatCurrency(p.price)}</p>
             </div>
-            {selected?.id === p.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+            {selected?.id === p.id && <CheckIcon className="w-4 h-4 text-primary flex-shrink-0" />}
           </button>
         ))}
       </div>
@@ -127,7 +138,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-sm">
           <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-5">
-            <Check className="w-8 h-8 text-emerald-400" />
+            <CheckIcon className="w-8 h-8 text-emerald-400" />
           </div>
           <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.3rem' }}>Pedido enviado!</h2>
           <p className="text-muted-foreground mt-2 mb-1" style={{ fontSize: '0.85rem' }}>
@@ -162,7 +173,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
       {/* Client chip — shown when client was pre-selected */}
       {selectedClient && (
         <div className="bg-card border border-primary/20 rounded-xl px-4 py-3 flex items-center gap-2.5">
-          <Store className="w-4 h-4 text-primary flex-shrink-0" />
+          <StorefrontIcon className="w-4 h-4 text-primary flex-shrink-0" />
           <p className="text-muted-foreground" style={{ fontSize: '0.82rem' }}>Pedindo para</p>
           <p className="text-primary" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{selectedClient.name}</p>
         </div>
@@ -178,7 +189,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${step >= s.n ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
                   style={{ fontSize: '0.75rem', fontWeight: 700 }}
                 >
-                  {step > s.n ? <Check className="w-3.5 h-3.5" /> : s.n}
+                  {step > s.n ? <CheckIcon className="w-3.5 h-3.5" /> : s.n}
                 </div>
                 <span
                   className={`hidden sm:block ${step >= s.n ? 'text-foreground' : 'text-muted-foreground'}`}
@@ -228,7 +239,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-primary" />
+                  <TagIcon className="w-3.5 h-3.5 text-primary" />
                   <p className="text-muted-foreground" style={{ fontSize: '0.75rem', fontWeight: 500 }}>Política comercial aplicada</p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.72rem', fontWeight: 700 }}>
@@ -280,13 +291,13 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors flex-shrink-0"
                 style={{ fontSize: '0.78rem', fontWeight: 600 }}
               >
-                <Zap className="w-3.5 h-3.5" /> Sugestão IA
+                <LightningIcon className="w-3.5 h-3.5" /> Sugestão IA
               </button>
             </div>
 
             {autoFill && (
               <div className="flex items-center gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 px-3 py-2">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <LightningIcon className="w-3.5 h-3.5 text-amber-400" />
                 <p className="text-amber-400" style={{ fontSize: '0.78rem' }}>Quantidades sugeridas com base no histórico de giro desta loja.</p>
               </div>
             )}
@@ -328,7 +339,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                               className="w-6 h-6 rounded flex items-center justify-center bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
                               disabled={qty === 0}
                             >
-                              <Minus className="w-3 h-3" />
+                              <MinusIcon className="w-3 h-3" />
                             </button>
                             <input
                               type="number"
@@ -344,7 +355,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                               className="w-6 h-6 rounded flex items-center justify-center bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
                               disabled={qty >= stock}
                             >
-                              <Plus className="w-3 h-3" />
+                              <PlusIcon className="w-3 h-3" />
                             </button>
                           </div>
                           {qty > stock && (
@@ -402,7 +413,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
             {allGrades.length === 0 ? (
               <div className="flex items-center gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 px-3 py-3">
-                <AlertCircle className="w-4 h-4 text-amber-400" />
+                <WarningCircleIcon className="w-4 h-4 text-amber-400" />
                 <p className="text-amber-400" style={{ fontSize: '0.8rem' }}>Nenhum produto com quantidade adicionado.</p>
               </div>
             ) : (
@@ -446,7 +457,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             {/* Aviso pedido mínimo */}
             {allGrades.length > 0 && finalTotal < clientPolicy.minOrderValue && (
               <div className="flex items-center gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 px-3 py-2">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                <WarningCircleIcon className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
                 <p className="text-amber-400" style={{ fontSize: '0.78rem' }}>
                   Pedido abaixo do mínimo de {formatCurrency(clientPolicy.minOrderValue)} para {clientPolicy.name}.
                 </p>
@@ -487,7 +498,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-40"
           style={{ fontSize: '0.85rem', fontWeight: 500 }}
         >
-          <ChevronLeft className="w-4 h-4" /> Voltar
+          <CaretLeftIcon className="w-4 h-4" /> Voltar
         </button>
 
         <div className="flex items-center gap-3">
@@ -503,7 +514,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
               style={{ fontSize: '0.85rem', fontWeight: 600 }}
             >
-              {step === 3 ? 'Revisar pedido' : 'Continuar'} <ChevronRight className="w-4 h-4" />
+              {step === 3 ? 'Revisar pedido' : 'Continuar'} <CaretRightIcon className="w-4 h-4" />
             </button>
           ) : (
             <button
@@ -512,7 +523,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
               style={{ fontSize: '0.85rem', fontWeight: 600 }}
             >
-              <ShoppingCart className="w-4 h-4" /> Confirmar pedido
+              <ShoppingCartIcon className="w-4 h-4" /> Confirmar pedido
             </button>
           )}
         </div>

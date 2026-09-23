@@ -1,12 +1,12 @@
-import { Building2, Briefcase, Store } from "lucide-react";
+import { BuildingsIcon, BriefcaseIcon, StorefrontIcon } from "@phosphor-icons/react";
 
 export type VisaoKey = 'industria' | 'representante' | 'lojista';
 export type PermissionsState = Record<VisaoKey, Record<string, Record<string, boolean>>>;
 
 export const visoes: { id: VisaoKey; label: string; icon: React.ElementType; desc: string }[] = [
-  { id: 'industria', label: 'Indústria', icon: Building2, desc: 'Usuários internos da Tesla Footwear' },
-  { id: 'representante', label: 'Representante', icon: Briefcase, desc: 'Representantes comerciais externos' },
-  { id: 'lojista', label: 'Lojista', icon: Store, desc: 'Clientes lojistas da rede' },
+  { id: 'industria', label: 'Indústria', icon: BuildingsIcon, desc: 'Usuários internos da Tesla Footwear' },
+  { id: 'representante', label: 'Representante', icon: BriefcaseIcon, desc: 'Representantes comerciais externos' },
+  { id: 'lojista', label: 'Lojista', icon: StorefrontIcon, desc: 'Clientes lojistas da rede' },
 ];
 
 export const profileDescriptions: Record<string, string> = {

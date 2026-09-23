@@ -1,7 +1,17 @@
 import { useState } from "react";
-import { Search, MapPin, Users, BarChart3, Filter, ArrowUpDown, ChevronRight } from "lucide-react";
+import {
+  Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
+  Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box,
+} from "@mantine/core";
+import {
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  UsersIcon,
+  FunnelIcon,
+  ArrowsDownUpIcon,
+  CaretRightIcon,
+} from "@phosphor-icons/react";
 import { clients, Client } from "../data/mockData";
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
 
@@ -11,9 +21,9 @@ interface ClientsPageProps {
   setSelectedClient: (client: Client | null) => void;
 }
 
-const statusColors: Record<string, string> = {
-  'ativo': 'text-emerald-400 bg-emerald-400/10',
-  'inativo': 'text-red-400 bg-red-400/10',
+const statusColor: Record<string, string> = {
+  'ativo': 'green',
+  'inativo': 'red',
 };
 
 const formatOrderDate = (dateStr: string) =>
@@ -38,7 +48,6 @@ const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
 ];
 
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
-
   const [search, setSearch] = useState('');
   const [regionFilters, setRegionFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<StatusFilterValue[]>([]);
@@ -86,209 +95,177 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
   };
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
+    <Container size="xl" px="lg" py="lg" fluid>
+      <Stack gap="lg" maw={1400} mx="auto">
+        {/* Stats */}
+        <SimpleGrid cols={3} spacing="md">
+          {[
+            { count: filtered.length, suffix: 'clientes no total' },
+            { count: activeCount, suffix: 'ativos' },
+            { count: inactiveCount, suffix: 'inativos' },
+          ].map(stat => (
+            <Paper key={stat.suffix} withBorder radius="md" p="md">
+              <Group gap={8} align="baseline">
+                <Text fw={700} style={{ fontSize: '1.75rem', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{stat.count}</Text>
+                <Text c="dimmed" size="sm" fw={500}>{stat.suffix}</Text>
+              </Group>
+            </Paper>
+          ))}
+        </SimpleGrid>
 
-
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { count: filtered.length, suffix: 'clientes no total' },
-          { count: activeCount, suffix: 'ativos' },
-          { count: inactiveCount, suffix: 'inativos' },
-        ].map(stat => (
-          <div key={stat.suffix} className="bg-card border border-border rounded-xl p-4 flex items-baseline gap-2">
-            <span className="text-foreground mono" style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1 }}>{stat.count}</span>
-            <span className="text-muted-foreground" style={{ fontSize: '0.78rem', fontWeight: 500 }}>{stat.suffix}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input
-            type="text"
+        {/* Filters */}
+        <Group gap="sm" wrap="wrap">
+          <TextInput
             placeholder="Buscar cliente, cidade, rep..."
+            leftSection={<MagnifyingGlassIcon size={14} />}
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.82rem' }}
+            onChange={e => setSearch(e.currentTarget.value)}
+            style={{ flex: 1, minWidth: 200 }}
           />
-        </div>
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg border transition-colors ${activeFilterCount > 0 ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.8rem', fontWeight: 600 }}
-            >
-              <Filter className="w-3.5 h-3.5" /> Filtros
-              {activeFilterCount > 0 && (
-                <span className="flex items-center justify-center rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.62rem', fontWeight: 700, width: '1.1rem', height: '1.1rem' }}>
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 space-y-4">
-            <div>
-              <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Região</p>
-              <div className="flex flex-wrap gap-1.5">
-                {REGIONS.map(r => (
-                  <button
-                    key={r}
-                    onClick={() => toggleRegion(r)}
-                    className={`px-3 py-1.5 rounded-full transition-colors ${regionFilters.includes(r) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            <div>
-              <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Status</p>
-              <div className="flex flex-wrap gap-1.5">
-                {STATUS_OPTIONS.map(s => (
-                  <button
-                    key={s.value}
-                    onClick={() => toggleStatus(s.value)}
-                    className={`px-3 py-1.5 rounded-full transition-colors ${statusFilters.includes(s.value) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {activeFilterCount > 0 && (
-              <button
-                onClick={clearFilters}
-                className="text-muted-foreground hover:text-foreground underline"
-                style={{ fontSize: '0.75rem', fontWeight: 500 }}
+          <Popover position="bottom-end" withArrow shadow="md">
+            <Popover.Target>
+              <Button
+                variant={activeFilterCount > 0 ? 'light' : 'default'}
+                color="neutral"
+                leftSection={<FunnelIcon size={14} />}
+                rightSection={activeFilterCount > 0 ? (
+                  <Badge circle size="sm" color="neutral">{activeFilterCount}</Badge>
+                ) : undefined}
               >
-                Limpar filtros
-              </button>
-            )}
-          </PopoverContent>
-        </Popover>
+                Filtros
+              </Button>
+            </Popover.Target>
+            <Popover.Dropdown w={320}>
+              <Stack gap="md">
+                <div>
+                  <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Região</Text>
+                  <Group gap={6}>
+                    {REGIONS.map(r => (
+                      <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="neutral" size="sm">
+                        {r}
+                      </Chip>
+                    ))}
+                  </Group>
+                </div>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg border transition-colors ${sortActive ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.8rem', fontWeight: 600 }}
-            >
-              <ArrowUpDown className="w-3.5 h-3.5" /> Ordenar
-              {sortActive && (
-                <span className="flex items-center justify-center rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.62rem', fontWeight: 700, width: '1.1rem', height: '1.1rem' }}>
-                  1
-                </span>
-              )}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-72 space-y-3">
-            <div>
-              <p className="text-muted-foreground uppercase tracking-wider mb-2" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Ordenar por</p>
-              <div className="space-y-1">
+                <div>
+                  <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Status</Text>
+                  <Group gap={6}>
+                    {STATUS_OPTIONS.map(s => (
+                      <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="neutral" size="sm">
+                        {s.label}
+                      </Chip>
+                    ))}
+                  </Group>
+                </div>
+
+                {activeFilterCount > 0 && (
+                  <Button variant="subtle" color="neutral" size="xs" px={0} onClick={clearFilters}>
+                    Limpar filtros
+                  </Button>
+                )}
+              </Stack>
+            </Popover.Dropdown>
+          </Popover>
+
+          <Popover position="bottom-end" withArrow shadow="md">
+            <Popover.Target>
+              <Button
+                variant={sortActive ? 'light' : 'default'}
+                color="neutral"
+                leftSection={<ArrowsDownUpIcon size={14} />}
+                rightSection={sortActive ? <Badge circle size="sm" color="neutral">1</Badge> : undefined}
+              >
+                Ordenar
+              </Button>
+            </Popover.Target>
+            <Popover.Dropdown w={280}>
+              <Stack gap={4}>
+                <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={4}>Ordenar por</Text>
                 {SORT_OPTIONS.map(opt => (
-                  <button
+                  <Button
                     key={opt.value}
+                    variant={sortOrder === opt.value ? 'light' : 'subtle'}
+                    color="neutral"
+                    justify="flex-start"
+                    fullWidth
                     onClick={() => setSortOrder(opt.value)}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-lg transition-colors ${sortOrder === opt.value ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-secondary'}`}
-                    style={{ fontSize: '0.78rem', fontWeight: 500 }}
                   >
                     {opt.label}
-                  </button>
+                  </Button>
                 ))}
-              </div>
-            </div>
+                {sortActive && (
+                  <Button variant="subtle" color="neutral" size="xs" px={0} mt={4} onClick={() => setSortOrder(DEFAULT_SORT)}>
+                    Restaurar ordenação padrão
+                  </Button>
+                )}
+              </Stack>
+            </Popover.Dropdown>
+          </Popover>
+        </Group>
 
-            {sortActive && (
-              <button
-                onClick={() => setSortOrder(DEFAULT_SORT)}
-                className="text-muted-foreground hover:text-foreground underline"
-                style={{ fontSize: '0.75rem', fontWeight: 500 }}
-              >
-                Restaurar ordenação padrão
-              </button>
-            )}
-          </PopoverContent>
-        </Popover>
-      </div>
+        {/* Client table */}
+        <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+          <Table highlightOnHover verticalSpacing="sm">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th w="50%">Cliente</Table.Th>
+                <Table.Th>Cidade/Estado</Table.Th>
+                <Table.Th>Representante</Table.Th>
+                <Table.Th w={40} />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {sortedClients.map(client => {
+                const isSelected = selectedClient?.id === client.id;
+                return (
+                  <Table.Tr
+                    key={client.id}
+                    onClick={() => handleSelectClient(client)}
+                    style={{ cursor: 'pointer', backgroundColor: isSelected ? 'var(--mantine-color-neutral-0)' : undefined }}
+                  >
+                    <Table.Td>
+                      <Group gap="sm" wrap="nowrap">
+                        <Avatar radius="xl" size={36} color="neutral">{client.avatar}</Avatar>
+                        <Box style={{ minWidth: 0 }}>
+                          <Group gap={6} mb={2}>
+                            <Badge size="xs" color={statusColor[client.status]} variant="light">{client.status}</Badge>
+                            {client.inadimplente && <Badge size="xs" color="yellow" variant="light">inadimplente</Badge>}
+                            {isSelected && <Badge size="xs" color="neutral" variant="light">selecionado</Badge>}
+                          </Group>
+                          <Text fw={600} size="sm" truncate>{client.name}</Text>
+                          <Text c="dimmed" size="xs">Último pedido em {formatOrderDate(client.lastOrder)}</Text>
+                        </Box>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4} wrap="nowrap">
+                        <MapPinIcon size={12} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                        <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td><Text size="sm" c="dimmed">{client.rep}</Text></Table.Td>
+                    <Table.Td ta="right">
+                      <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })}
+            </Table.Tbody>
+          </Table>
 
-      {/* Client table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <table className="w-full text-left" style={{ fontSize: '0.82rem' }}>
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground" style={{ width: '50%' }}>Cliente</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Cidade/Estado</th>
-              <th className="px-4 py-2.5 font-semibold text-muted-foreground">Representante</th>
-              <th className="px-4 py-2.5" style={{ width: '2.5rem' }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedClients.map(client => {
-              const isSelected = selectedClient?.id === client.id;
-              return (
-                <tr
-                  key={client.id}
-                  className={`border-b border-border cursor-pointer transition-colors hover:bg-primary/5 ${isSelected ? 'bg-primary/5' : ''}`}
-                  onClick={() => handleSelectClient(client)}
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary" style={{ fontSize: '0.7rem', fontWeight: 700 }}>{client.avatar}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                          <span className={`px-1.5 py-0.5 rounded-full flex-shrink-0 ${statusColors[client.status]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
-                            {client.status}
-                          </span>
-                          {client.inadimplente && (
-                            <span className="px-1.5 py-0.5 rounded-full flex-shrink-0 text-amber-400 bg-amber-400/10" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
-                              inadimplente
-                            </span>
-                          )}
-                          {isSelected && (
-                            <span className="px-1.5 py-0.5 rounded-full flex-shrink-0 bg-primary/15 text-primary" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
-                              selecionado
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{client.name}</p>
-                        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Último pedido em {formatOrderDate(client.lastOrder)}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> {client.city}/{client.state}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.rep}</td>
-                  <td className="px-4 py-3 text-right">
-                    <ChevronRight className="w-4 h-4 text-muted-foreground inline-block" />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Users className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum cliente encontrado</p>
-            <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros</p>
-          </div>
-        )}
-      </div>
-    </div>
+          {filtered.length === 0 && (
+            <Stack align="center" py="xl" gap={4}>
+              <ThemeIcon variant="light" color="neutral" size={48} radius="xl">
+                <UsersIcon size={24} />
+              </ThemeIcon>
+              <Text fw={600}>Nenhum cliente encontrado</Text>
+              <Text c="dimmed" size="sm">Tente ajustar os filtros</Text>
+            </Stack>
+          )}
+        </Paper>
+      </Stack>
+    </Container>
   );
 }

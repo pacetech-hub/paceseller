@@ -1,8 +1,21 @@
 import { useMemo, useState } from "react";
 import {
-  Boxes, Plug, Upload, Plus, Search, AlertTriangle, PackageX, PackageCheck,
-  TrendingDown, RefreshCw, CheckCircle2, Pencil, Save, X, Filter,
-} from "lucide-react";
+  WarehouseIcon,
+  PlugIcon,
+  UploadSimpleIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
+  WarningIcon,
+  EmptyIcon,
+  CheckSquareIcon,
+  TrendDownIcon,
+  ArrowsClockwiseIcon,
+  CheckCircleIcon,
+  PencilSimpleIcon,
+  FloppyDiskIcon,
+  XIcon,
+  FunnelIcon,
+} from "@phosphor-icons/react";
 import { products, formatCurrency } from "../data/mockData";
 
 type Mode = 'manual' | 'integration';
@@ -78,7 +91,7 @@ export function StockPage() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Boxes className="w-5 h-5 text-primary" />
+              <WarehouseIcon className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h2 className="text-foreground" style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.01em' }}>Meu Estoque · Tesla Footwear</h2>
@@ -89,8 +102,8 @@ export function StockPage() {
           </div>
           <div className="inline-flex rounded-lg bg-secondary p-0.5">
             {([
-              { v: 'manual', l: 'Cadastro manual', icon: Pencil },
-              { v: 'integration', l: 'Integração ERP', icon: Plug },
+              { v: 'manual', l: 'Cadastro manual', icon: PencilSimpleIcon },
+              { v: 'integration', l: 'Integração ERP', icon: PlugIcon },
             ] as { v: Mode; l: string; icon: any }[]).map(o => {
               const Icon = o.icon;
               const active = mode === o.v;
@@ -113,10 +126,10 @@ export function StockPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Em ruptura', value: String(kpis.ruptura), sub: `${kpis.total} SKUs cadastrados`, icon: PackageX, color: 'text-red-400', bg: 'bg-red-400/10' },
-          { label: 'Estoque baixo', value: String(kpis.baixo), sub: 'abaixo do limiar', icon: TrendingDown, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-          { label: 'Estoque OK', value: String(kpis.ok), sub: 'disponíveis para venda', icon: PackageCheck, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-          { label: 'Valor em estoque', value: formatCurrency(kpis.valor), sub: 'a preço de tabela', icon: Boxes, color: 'text-black', bg: 'bg-black/10' },
+          { label: 'Em ruptura', value: String(kpis.ruptura), sub: `${kpis.total} SKUs cadastrados`, icon: EmptyIcon, color: 'text-red-400', bg: 'bg-red-400/10' },
+          { label: 'Estoque baixo', value: String(kpis.baixo), sub: 'abaixo do limiar', icon: TrendDownIcon, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+          { label: 'Estoque OK', value: String(kpis.ok), sub: 'disponíveis para venda', icon: CheckSquareIcon, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+          { label: 'Valor em estoque', value: formatCurrency(kpis.valor), sub: 'a preço de tabela', icon: WarehouseIcon, color: 'text-black', bg: 'bg-black/10' },
         ].map(k => {
           const Icon = k.icon;
           return (
@@ -139,7 +152,7 @@ export function StockPage() {
         <div className="bg-card border border-border rounded-xl p-5">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-9 h-9 rounded-lg bg-black/10 flex items-center justify-center flex-shrink-0">
-              <Plug className="w-4 h-4 text-black" />
+              <PlugIcon className="w-4 h-4 text-black" />
             </div>
             <div className="flex-1">
               <h3 className="text-foreground" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Integração com seu sistema de estoque</h3>
@@ -149,7 +162,7 @@ export function StockPage() {
             </div>
             {integrationConnected && (
               <span className="px-2 py-1 rounded-full bg-emerald-400/15 text-emerald-400 flex items-center gap-1" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                <CheckCircle2 className="w-3 h-3" /> Conectado
+                <CheckCircleIcon className="w-3 h-3" /> Conectado
               </span>
             )}
           </div>
@@ -170,7 +183,7 @@ export function StockPage() {
           {integrationConnected && (
             <div className="rounded-lg bg-secondary/40 border border-border p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground" />
+                <ArrowsClockwiseIcon className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Última sincronização: hoje, 14:02 · próxima em 38min</span>
               </div>
               <button className="px-3 py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
@@ -184,7 +197,7 @@ export function StockPage() {
       {/* Toolbar */}
       <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-secondary/40 border border-border rounded-lg px-3 py-2">
-          <Search className="w-3.5 h-3.5 text-muted-foreground" />
+          <MagnifyingGlassIcon className="w-3.5 h-3.5 text-muted-foreground" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -213,10 +226,10 @@ export function StockPage() {
         {mode === 'manual' && (
           <>
             <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border text-foreground hover:bg-secondary transition-colors" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
-              <Upload className="w-3.5 h-3.5" /> Importar planilha
+              <UploadSimpleIcon className="w-3.5 h-3.5" /> Importar planilha
             </button>
             <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-              <Plus className="w-3.5 h-3.5" /> Adicionar SKU
+              <PlusIcon className="w-3.5 h-3.5" /> Adicionar SKU
             </button>
           </>
         )}
@@ -282,7 +295,7 @@ export function StockPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full ${st.cls} inline-flex items-center gap-1`} style={{ fontSize: '0.68rem', fontWeight: 700 }}>
-                        {st.key !== 'ok' && <AlertTriangle className="w-3 h-3" />}
+                        {st.key !== 'ok' && <WarningIcon className="w-3 h-3" />}
                         {st.label}
                       </span>
                     </td>
@@ -292,15 +305,15 @@ export function StockPage() {
                         isEditing ? (
                           <div className="flex items-center gap-1">
                             <button onClick={() => saveEdit(it.sku)} className="p-1.5 rounded-md bg-primary/15 text-primary hover:bg-primary/25 transition-colors">
-                              <Save className="w-3.5 h-3.5" />
+                              <FloppyDiskIcon className="w-3.5 h-3.5" />
                             </button>
                             <button onClick={() => setEditing(null)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-                              <X className="w-3.5 h-3.5" />
+                              <XIcon className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         ) : (
                           <button onClick={() => startEdit(it)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-                            <Pencil className="w-3.5 h-3.5" />
+                            <PencilSimpleIcon className="w-3.5 h-3.5" />
                           </button>
                         )
                       ) : (
@@ -313,7 +326,7 @@ export function StockPage() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground" style={{ fontSize: '0.82rem' }}>
-                    <Filter className="w-5 h-5 mx-auto mb-2 opacity-60" />
+                    <FunnelIcon className="w-5 h-5 mx-auto mb-2 opacity-60" />
                     Nenhum SKU encontrado para os filtros aplicados.
                   </td>
                 </tr>

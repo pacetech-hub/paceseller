@@ -1,9 +1,21 @@
 import { useState } from "react";
 import {
-  Filter, Tag, Layers, Palette, DollarSign,
-  Menu, X, LogOut, ChevronLeft, ChevronRight, Store, Search,
-  ChevronUp, ChevronDown, Users,
-} from "lucide-react";
+  FunnelIcon,
+  TagIcon,
+  StackIcon,
+  PaletteIcon,
+  CurrencyDollarIcon,
+  ListIcon,
+  XIcon,
+  SignOutIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  StorefrontIcon,
+  MagnifyingGlassIcon,
+  CaretUpIcon,
+  CaretDownIcon,
+  UsersIcon,
+} from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import { products, formatCurrency } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
@@ -98,7 +110,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         </div>
         {!collapsed && (
           <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground p-1 rounded">
-            <ChevronLeft className="w-4 h-4" />
+            <CaretLeftIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -106,7 +118,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
       {collapsed ? (
         <div className="flex-1 flex flex-col items-center pt-4 gap-3">
           <button onClick={() => setCollapsed(false)} className="p-2 rounded-md bg-primary/15 text-primary" title="Filtros">
-            <Filter className="w-4 h-4" />
+            <FunnelIcon className="w-4 h-4" />
           </button>
           {activeCount > 0 && (
             <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.6rem', fontWeight: 700 }}>
@@ -120,7 +132,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           {/* Tabela de Preço */}
           <div className="px-3 pt-3 pb-3 border-b border-sidebar-border">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <DollarSign className="w-3 h-3 text-primary" />
+              <CurrencyDollarIcon className="w-3 h-3 text-primary" />
               <span className="text-muted-foreground" style={{ fontSize: '0.66rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Tabela de preço
               </span>
@@ -140,7 +152,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Filter className="w-3.5 h-3.5 text-primary" />
+              <FunnelIcon className="w-3.5 h-3.5 text-primary" />
               <span className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Filtros</span>
               {activeCount > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.62rem', fontWeight: 700 }}>
@@ -150,7 +162,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             </div>
             {activeCount > 0 && (
               <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
-                <X className="w-3 h-3" /> Limpar
+                <XIcon className="w-3 h-3" /> Limpar
               </button>
             )}
           </div>
@@ -158,7 +170,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           {/* Search */}
           <div className="px-3 pb-3">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <input
                 type="text"
                 value={filters.search}
@@ -173,7 +185,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-5">
             {/* Modelo / Linha */}
             <FilterSection
-              icon={Tag}
+              icon={TagIcon}
               label="Modelo / Linha"
               isOpen={openSections.has('Modelo / Linha')}
               onToggle={() => toggleSection('Modelo / Linha')}
@@ -194,7 +206,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
             {/* Categoria */}
             <FilterSection
-              icon={Layers}
+              icon={StackIcon}
               label="Categoria"
               isOpen={openSections.has('Categoria')}
               onToggle={() => toggleSection('Categoria')}
@@ -215,7 +227,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
             {/* Cores */}
             <FilterSection
-              icon={Palette}
+              icon={PaletteIcon}
               label="Cores"
               isOpen={openSections.has('Cores')}
               onToggle={() => toggleSection('Cores')}
@@ -248,7 +260,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
             {/* Preço */}
             <FilterSection
-              icon={DollarSign}
+              icon={CurrencyDollarIcon}
               label="Faixa de preço"
               isOpen={openSections.has('Faixa de preço')}
               onToggle={() => toggleSection('Faixa de preço')}
@@ -278,8 +290,8 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           <div className="flex items-center gap-2 px-3 py-2">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${profile === 'rep' ? 'bg-amber-400/20' : 'bg-emerald-400/20'}`}>
               {profile === 'rep'
-                ? <Users className="w-3.5 h-3.5 text-amber-400" />
-                : <Store className="w-3.5 h-3.5 text-emerald-400" />}
+                ? <UsersIcon className="w-3.5 h-3.5 text-amber-400" />
+                : <StorefrontIcon className="w-3.5 h-3.5 text-emerald-400" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
@@ -290,7 +302,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               </div>
             </div>
             <button onClick={onLogout} className="text-muted-foreground hover:text-destructive p-1 rounded" title="Sair">
-              <LogOut className="w-3.5 h-3.5" />
+              <SignOutIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         ) : (
@@ -298,7 +310,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             onClick={() => setCollapsed(false)}
             className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60"
           >
-            <ChevronRight className="w-4 h-4" />
+            <CaretRightIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -311,7 +323,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
       >
-        <Menu className="w-4 h-4" />
+        <ListIcon className="w-4 h-4" />
       </button>
 
       {mobileOpen && (
@@ -319,7 +331,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
           <div className="relative w-72 h-full bg-sidebar border-r border-sidebar-border">
             <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <X className="w-4 h-4" />
+              <XIcon className="w-4 h-4" />
             </button>
             <Content />
           </div>
@@ -357,9 +369,9 @@ function FilterSection({
           <span className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</span>
         </div>
         {isOpen ? (
-          <ChevronUp className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <CaretUpIcon className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
         ) : (
-          <ChevronDown className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <CaretDownIcon className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
         )}
       </button>
       {isOpen && <div className="animate-in fade-in slide-in-from-top-1 duration-200">{children}</div>}

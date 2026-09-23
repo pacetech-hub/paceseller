@@ -1,7 +1,18 @@
 import { useMemo, useState } from "react";
 import {
-  ChevronLeft, ChevronDown, MapPin, Plus, ShoppingCart, BarChart3, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
-} from "lucide-react";
+  CaretLeftIcon,
+  CaretDownIcon,
+  MapPinIcon,
+  PlusIcon,
+  ShoppingCartIcon,
+  ChartBarIcon,
+  ClockIcon,
+  EmptyIcon,
+  TrendUpIcon,
+  HourglassLowIcon,
+  ListMagnifyingGlassIcon,
+  PackageIcon,
+} from "@phosphor-icons/react";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
 
@@ -29,10 +40,10 @@ function seededOrderCount(clientId: string): number {
 type StockStatusKey = 'zerado' | 'alto-giro' | 'chegando-ao-fim' | 'parado';
 
 const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; cls: string; icon: any }> = {
-  'zerado': { label: 'Estoque zerado', cls: 'text-red-400 bg-red-400/10', icon: PackageX },
-  'alto-giro': { label: 'Alto giro', cls: 'text-emerald-400 bg-emerald-400/10', icon: TrendingUp },
-  'chegando-ao-fim': { label: 'Estoque chegando ao fim', cls: 'text-amber-400 bg-amber-400/10', icon: PackageMinus },
-  'parado': { label: 'Parado no estoque', cls: 'text-muted-foreground bg-secondary', icon: PackageSearch },
+  'zerado': { label: 'Estoque zerado', cls: 'text-red-400 bg-red-400/10', icon: EmptyIcon },
+  'alto-giro': { label: 'Alto giro', cls: 'text-emerald-400 bg-emerald-400/10', icon: TrendUpIcon },
+  'chegando-ao-fim': { label: 'Estoque chegando ao fim', cls: 'text-amber-400 bg-amber-400/10', icon: HourglassLowIcon },
+  'parado': { label: 'Parado no estoque', cls: 'text-muted-foreground bg-secondary', icon: ListMagnifyingGlassIcon },
 };
 
 // mock: classificação determinística do status de estoque por produto
@@ -114,7 +125,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
           style={{ fontSize: '0.82rem', fontWeight: 500 }}
         >
-          <ChevronLeft className="w-4 h-4" /> Voltar para Clientes
+          <CaretLeftIcon className="w-4 h-4" /> Voltar para Clientes
         </button>
         <p className="text-muted-foreground">Nenhum cliente selecionado.</p>
       </div>
@@ -134,7 +145,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         style={{ fontSize: '0.82rem', fontWeight: 500 }}
       >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Clientes
+        <CaretLeftIcon className="w-4 h-4" /> Voltar para Clientes
       </button>
 
       {/* Header */}
@@ -156,7 +167,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             </div>
             <h2 className="text-foreground mb-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
             <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.8rem' }}>
-              <MapPin className="w-3.5 h-3.5" /> {client.city}/{client.state}
+              <MapPinIcon className="w-3.5 h-3.5" /> {client.city}/{client.state}
             </p>
           </div>
         </div>
@@ -167,7 +178,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           style={{ fontSize: '0.78rem', fontWeight: 600 }}
         >
           {expanded ? 'Ver menos informações' : 'Ver mais informações'}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          <CaretDownIcon className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </button>
 
         {expanded && (
@@ -192,7 +203,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <Clock className="w-4 h-4 text-primary" />
+            <ClockIcon className="w-4 h-4 text-primary" />
           </div>
           <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Último pedido</p>
           <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatOrderDate(client.lastOrder)}</p>
@@ -200,7 +211,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <BarChart3 className="w-4 h-4 text-primary" />
+            <ChartBarIcon className="w-4 h-4 text-primary" />
           </div>
           <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
           <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
@@ -214,7 +225,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
         >
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <Plus className="w-4 h-4 text-primary" />
+            <PlusIcon className="w-4 h-4 text-primary" />
           </div>
           <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Novo carrinho</p>
           <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Criar um novo carrinho para este cliente</p>
@@ -225,7 +236,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
         >
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <ShoppingCart className="w-4 h-4 text-primary" />
+            <ShoppingCartIcon className="w-4 h-4 text-primary" />
           </div>
           <div className="flex items-center gap-2">
             <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Carrinhos</p>
@@ -300,7 +311,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         <div className="bg-card border border-border rounded-xl p-5">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-              <PackageSearch className="w-4 h-4 text-muted-foreground" />
+              <ListMagnifyingGlassIcon className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
               <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Produtos parados no estoque</h4>
@@ -383,7 +394,7 @@ function ProductThumb({ src, alt, className, iconClassName, bordered = true }: {
         <img src={src} alt={alt} className="w-full h-full object-cover" onError={() => setImgError(true)} />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <Package2 className={`text-muted-foreground/30 ${iconClassName ?? 'w-8 h-8'}`} />
+          <PackageIcon className={`text-muted-foreground/30 ${iconClassName ?? 'w-8 h-8'}`} />
         </div>
       )}
     </div>

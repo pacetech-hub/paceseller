@@ -1,8 +1,13 @@
 import { useState } from "react";
 import {
-  Search, ChevronRight, Clock,
-  CheckCircle2, XCircle, FileCheck2, PackageCheck,
-} from "lucide-react";
+  MagnifyingGlassIcon,
+  CaretRightIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  SealCheckIcon,
+  CheckSquareIcon,
+} from "@phosphor-icons/react";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
@@ -26,11 +31,11 @@ export const statusColors: Record<string, string> = {
 };
 
 export const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = {
-  'aprovado': CheckCircle2,
-  'em análise': Clock,
-  'faturado': FileCheck2,
-  'cancelado': XCircle,
-  'entregue': PackageCheck,
+  'aprovado': CheckCircleIcon,
+  'em análise': ClockIcon,
+  'faturado': SealCheckIcon,
+  'cancelado': XCircleIcon,
+  'entregue': CheckSquareIcon,
 };
 
 export const orderProductNames: Record<string, string> = {
@@ -124,7 +129,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           <p className="text-foreground mono truncate" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
         </div>
 
-        <ChevronRight className="w-4 h-4 text-muted-foreground justify-self-center" />
+        <CaretRightIcon className="w-4 h-4 text-muted-foreground justify-self-center" />
       </div>
     </div>
   );
@@ -156,7 +161,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar pedido, cliente, rep..."
@@ -216,7 +221,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
 
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-              <Clock className="w-10 h-10 text-muted-foreground/30 mb-3" />
+              <ClockIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
               <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido encontrado</p>
               <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
             </div>
