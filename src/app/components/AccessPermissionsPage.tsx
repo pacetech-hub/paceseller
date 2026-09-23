@@ -3,7 +3,7 @@ import {
   Stack, Group, Box, Paper, ThemeIcon, Text, Alert, Button, TextInput,
   Table, Avatar, Badge, Select, ActionIcon, SimpleGrid,
 } from "@mantine/core";
-import { Users, Store, Info, UserPlus, Trash2 } from "lucide-react";
+import { Users, Store, Info, UserPlus, Trash2, type LucideIcon } from "lucide-react";
 import { visoes, defaultPermissions, type VisaoKey, type PermissionsState } from "../data/permissions";
 import { linkedUsers as initialLinkedUsers, type LinkedUser } from "../data/linkedUsers";
 import { clients, formatDate } from "../data/mockData";
@@ -24,7 +24,7 @@ const scopeCopy: Record<Profile, {
   title: string;
   subtitle: string;
   usersHint: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
 }> = {
   rep: {
     visao: 'representante',
@@ -109,7 +109,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
     <Stack gap="lg" maw={1400} mx="auto" p="lg">
       <Group gap="sm" wrap="nowrap">
         <ThemeIcon size={40} radius="md" variant="light">
-          <Icon className="w-5 h-5" />
+          <Icon size={20} />
         </ThemeIcon>
         <Box>
           <Text fw={700} size="1.05rem" style={{ letterSpacing: '-0.01em' }}>{scope.title}</Text>
@@ -117,13 +117,13 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         </Box>
       </Group>
 
-      <Alert icon={<Info className="w-4 h-4" />} radius="md" variant="light">
+      <Alert icon={<Info size={16} />} radius="md" variant="light">
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
       </Alert>
 
       {/* Usuários vinculados */}
       <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
-        <Group justify="space-between" p="lg" className="border-b border-border" wrap="wrap">
+        <Group justify="space-between" p="lg" wrap="wrap" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
           <Box>
             <Text fw={600} size="0.9rem">Usuários vinculados</Text>
             <Text c="dimmed" size="0.75rem" mt={2}>{scope.usersHint}</Text>
@@ -132,14 +132,14 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             onClick={() => setShowInvite(v => !v)}
            
             size="sm"
-            leftSection={<UserPlus className="w-3.5 h-3.5" />}
+            leftSection={<UserPlus size={14} />}
           >
             Convidar usuário
           </Button>
         </Group>
 
         {showInvite && (
-          <Stack gap="sm" p="lg" className="bg-secondary/20 border-b border-border">
+          <Stack gap="sm" p="lg" bg="gray.0" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
               <TextInput
                 label="Nome completo"
@@ -206,7 +206,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 </Table.Td>
                 <Table.Td>
                   <ActionIcon onClick={() => removeUser(u.id)} variant="subtle" color="red" title="Remover vínculo">
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 size={14} />
                   </ActionIcon>
                 </Table.Td>
               </Table.Tr>

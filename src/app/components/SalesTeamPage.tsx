@@ -18,7 +18,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
 
   return (
     <Stack gap="lg" maw={1400} mx="auto" p="lg">
-      <Button onClick={onBack} variant="subtle" size="sm" leftSection={<ChevronLeft className="w-4 h-4" />} px={0}>
+      <Button onClick={onBack} variant="subtle" size="sm" leftSection={<ChevronLeft size={16} />} px={0}>
         Voltar
       </Button>
 

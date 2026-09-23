@@ -3,6 +3,8 @@ import {
   Users, Target, TrendingUp, Store, Settings, Database,
   Activity, Package2, Tag, ShieldCheck, Mail, Phone, CheckCircle2, XCircle,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import classes from "./ProfilePage.module.css";
 import { SimpleGrid, Paper, Group, Stack, Box, Text, ThemeIcon, Switch, Badge, Button, Progress } from "@mantine/core";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -12,12 +14,12 @@ interface ProfilePageProps {
 }
 
 // ---------- helpers ----------
-function Section({ icon: Icon, title, description, children }: { icon: React.ComponentType<{ className?: string }>; title: string; description?: string; children: React.ReactNode }) {
+function Section({ icon: Icon, title, description, children }: { icon: LucideIcon; title: string; description?: string; children: React.ReactNode }) {
   return (
     <Paper component="section" withBorder radius="md" p="lg">
       <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
         <ThemeIcon size={36} radius="md" variant="light" style={{ flexShrink: 0 }}>
-          <Icon className="w-4 h-4" />
+          <Icon size={16} />
         </ThemeIcon>
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Text fw={600} size="0.92rem">{title}</Text>
@@ -31,10 +33,10 @@ function Section({ icon: Icon, title, description, children }: { icon: React.Com
 
 function Field({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
-    <div className="grid grid-cols-3 gap-3 items-start py-1.5 border-b border-border/60 last:border-0">
-      <Text c="dimmed" size="0.75rem" className="col-span-1">{label}</Text>
-      <Text fw={500} size="0.82rem" ff={mono ? 'monospace' : undefined} className="col-span-2">{value}</Text>
-    </div>
+    <SimpleGrid cols={3} spacing="sm" py={6} className={classes.row} style={{ alignItems: 'start' }}>
+      <Text c="dimmed" size="0.75rem" style={{ gridColumn: 'span 1' }}>{label}</Text>
+      <Text component="div" fw={500} size="0.82rem" ff={mono ? 'monospace' : undefined} style={{ gridColumn: 'span 2' }}>{value}</Text>
+    </SimpleGrid>
   );
 }
 
@@ -57,7 +59,7 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
     <Badge
       color={ok ? 'green' : 'red'}
       variant="light"
-      leftSection={ok ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+      leftSection={ok ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
     >
       {label}
     </Badge>
@@ -99,8 +101,8 @@ function LojistaProfile() {
       <Section icon={UserCheck} title="Representante responsável">
         <Field label="Nome" value="Marina Costa" />
         <Field label="Região" value="Sudeste — SP Capital" />
-        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><Mail className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />marina.costa@tesla.com.br</Group>} />
-        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><Phone className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />(11) 98765-4321</Group>} />
+        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><Mail size={14} color="var(--mantine-color-dimmed)" />marina.costa@tesla.com.br</Group>} />
+        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><Phone size={14} color="var(--mantine-color-dimmed)" />(11) 98765-4321</Group>} />
       </Section>
 
       <Section icon={Bell} title="Preferências de notificação">
@@ -193,14 +195,14 @@ function AdminProfile() {
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
         <Field label="Plano" value={<Badge variant="light">Enterprise</Badge>} />
-        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheck className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-teal-6)' }} />Administrador master</Group>} />
+        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheck size={14} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
       </Section>
 
       <Section icon={Package2} title="Configurações de catálogo">
         <Field label="Linhas ativas" value="Feminino · Masculino · Infantil" />
         <Field label="SKUs publicados" value="1.284" />
         <Field label="Coleção corrente" value="Verão 26" />
-        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><Tag className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />A · B · C</Group>} />
+        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><Tag size={14} color="var(--mantine-color-dimmed)" />A · B · C</Group>} />
       </Section>
 
       <Section icon={Users} title="Usuários cadastrados">
@@ -234,7 +236,7 @@ function AdminProfile() {
             { who: 'paulo.ramos', what: 'cadastrou novo lojista', when: 'hoje, 08:42' },
             { who: 'sistema', what: 'sincronização ERP concluída', when: 'hoje, 06:00' },
           ].map((l, i) => (
-            <Group key={i} justify="space-between" gap="sm" py={6} className="border-b border-border/60 last:border-0" wrap="nowrap">
+            <Group key={i} justify="space-between" gap="sm" py={6} className={classes.row} wrap="nowrap">
               <Box style={{ minWidth: 0 }}>
                 <Text component="span" fw={500} size="0.8rem">{l.who}</Text>
                 <Text component="span" c="dimmed" size="0.78rem" ml={8}>{l.what}</Text>

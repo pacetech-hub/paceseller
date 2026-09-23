@@ -1,5 +1,6 @@
 import { Paper, Group, Stack, Text, Badge, Table, Checkbox } from "@mantine/core";
 import { profileDescriptions } from "../data/permissions";
+import classes from "./PermissionMatrixTable.module.css";
 
 interface PermissionMatrixTableProps {
   matrix: Record<string, Record<string, boolean>>;
@@ -13,7 +14,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
 
   return (
     <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
-      <Stack gap={8} p="lg" className="border-b border-border">
+      <Stack gap={8} p="lg" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
         <Group gap="sm">
           {perfis.map(perfil => (
             <Badge key={perfil} variant="light">{perfil}</Badge>
@@ -60,15 +61,13 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
         </Table.Tbody>
       </Table>
 
-      <Group justify="space-between" p="lg" className="border-t border-border">
+      <Group justify="space-between" p="lg" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
         <Text c="dimmed" size="0.72rem">Clique em qualquer célula para alternar a permissão</Text>
         <Text
           component="button"
           onClick={onReset}
-          c="dimmed"
           size="0.72rem"
-          style={{ cursor: 'pointer', background: 'none', border: 'none' }}
-          className="hover:text-foreground transition-colors"
+          className={classes.resetButton}
         >
           Restaurar padrões
         </Text>

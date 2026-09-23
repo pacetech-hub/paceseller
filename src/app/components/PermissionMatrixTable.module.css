@@ -1,0 +1,11 @@
+.resetButton {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}

@@ -1,0 +1,84 @@
+.iconButton {
+  color: var(--mantine-color-dimmed);
+  padding: 4px;
+  border-radius: var(--mantine-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.logoutButton {
+  composes: iconButton;
+
+  @mixin hover {
+    color: var(--mantine-color-red-7);
+  }
+}
+
+.navItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-dimmed);
+  transition: all 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+
+  &[data-collapsed] {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  &[data-active] {
+    color: var(--mantine-color-gray-9);
+    background-color: var(--mantine-color-gray-2);
+  }
+}
+
+.expandButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-dimmed);
+  transition: all 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--mantine-color-white);
+  border-right: 1px solid var(--mantine-color-gray-3);
+  transition: all 200ms ease;
+  flex-shrink: 0;
+  width: 260px;
+
+  &[data-collapsed] {
+    width: 52px;
+  }
+}
+
+.topBar {
+  border-bottom: 1px solid var(--mantine-color-gray-3);
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+}

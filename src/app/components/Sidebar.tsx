@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { Group, Button, ActionIcon, Indicator, Menu, Text, Box } from "@mantine/core";
+import { Group, Button, ActionIcon, Indicator, Menu, Text, Box, Flex, Stack, UnstyledButton, Badge, Kbd } from "@mantine/core";
 import {
   LayoutDashboard, Package2, ShoppingBag, ShoppingBasket, Clock,
   Sparkles, BarChart3, Settings, Users, Store, ChevronDown, ChevronRight,
   Bell, Search, Menu as MenuIcon, X, Building2, LogOut, ChevronLeft,
   UserCheck, Tag, Shield, Boxes, Receipt, FileText,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
+import classes from "./Sidebar.module.css";
 
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
@@ -19,14 +21,14 @@ type Profile = 'admin' | 'rep' | 'lojista';
 interface NavItem {
   id: View;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   badge?: number;
 }
 
-const profileLabels: Record<Profile, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  admin: { label: 'Indústria Admin', icon: Building2, color: 'text-black' },
-  rep: { label: 'Representante', icon: Users, color: 'text-amber-400' },
-  lojista: { label: 'Lojista', icon: Store, color: 'text-emerald-400' },
+const profileLabels: Record<Profile, { label: string; icon: LucideIcon; color: string }> = {
+  admin: { label: 'Indústria Admin', icon: Building2, color: 'var(--mantine-color-black)' },
+  rep: { label: 'Representante', icon: Users, color: 'var(--mantine-color-yellow-7)' },
+  lojista: { label: 'Lojista', icon: Store, color: 'var(--mantine-color-teal-7)' },
 };
 
 interface SidebarProps {
@@ -83,131 +85,142 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
   const visibleItems = getVisibleItems();
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <Flex direction="column" h="100%">
       {/* Logo */}
-      <div className={`flex items-center border-b border-sidebar-border px-4 h-14 ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className={`flex items-center justify-center flex-shrink-0 ${collapsed ? 'w-7 h-7' : 'h-8'}`}>
-          <img src={teslaLogo} alt="Tesla Footwear" className={collapsed ? 'h-6 w-auto object-contain' : 'h-7 w-auto object-contain'} />
-        </div>
+      <Group
+        wrap="nowrap"
+        gap={collapsed ? 0 : 'sm'}
+        justify={collapsed ? 'center' : undefined}
+        px="md"
+        h={56}
+        style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}
+      >
+        <Flex align="center" justify="center" w={collapsed ? 28 : undefined} h={collapsed ? 28 : 32} style={{ flexShrink: 0 }}>
+          <img src={teslaLogo} alt="Tesla Footwear" style={{ height: collapsed ? 24 : 28, width: 'auto', objectFit: 'contain' }} />
+        </Flex>
         {!collapsed && (
-          <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground transition-colors p-1 rounded">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+          <UnstyledButton onClick={() => setCollapsed(true)} className={classes.iconButton} ml="auto">
+            <ChevronLeft size={16} />
+          </UnstyledButton>
         )}
-      </div>
+      </Group>
 
       {/* Profile pill */}
       {!collapsed && (
-        <div className="mx-3 mt-3 rounded-lg bg-secondary/60 border border-border px-3 py-2">
-          <div className="flex items-center gap-2">
-            <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
-            <span className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>{profileInfo.label}</span>
-          </div>
-        </div>
+        <Box mx="sm" mt="sm" px="sm" py={8} bg="gray.1" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-3)' }}>
+          <Group gap={8} wrap="nowrap">
+            <ProfileIcon size={14} color={profileInfo.color} />
+            <Text component="span" truncate fz="0.78rem" fw={500}>{profileInfo.label}</Text>
+          </Group>
+        </Box>
       )}
 
       {/* Selected client chip — rep only */}
       {!collapsed && profile === 'rep' && selectedClient && (
-        <div className="mx-3 mt-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2">
-          <p className="text-muted-foreground" style={{ fontSize: '0.62rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pedindo para</p>
-          <p className="text-primary truncate mt-0.5" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{selectedClient.name}</p>
-        </div>
+        <Box mx="sm" mt={8} px="sm" py={8} bg="gray.0" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-3)' }}>
+          <Text c="dimmed" fz="0.62rem" fw={500} tt="uppercase" lts="0.06em">Pedindo para</Text>
+          <Text c="gray.9" truncate mt={2} fz="0.82rem" fw={600}>{selectedClient.name}</Text>
+        </Box>
       )}
 
       {/* Search */}
       {!collapsed && (
-        <div className="mx-3 mt-3">
-          <div className="flex items-center gap-2 rounded-lg bg-secondary/40 border border-border px-3 py-2 text-muted-foreground">
-            <Search className="w-3.5 h-3.5 flex-shrink-0" />
-            <span style={{ fontSize: '0.78rem' }}>Buscar...</span>
-            <kbd className="ml-auto text-muted-foreground/60 border border-border rounded px-1" style={{ fontSize: '0.6rem' }}>⌘K</kbd>
-          </div>
-        </div>
+        <Box mx="sm" mt="sm">
+          <Group gap={8} wrap="nowrap" px="sm" py={8} c="dimmed" bg="gray.0" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-3)' }}>
+            <Search size={14} style={{ flexShrink: 0 }} />
+            <Text component="span" fz="0.78rem">Buscar...</Text>
+            <Kbd ml="auto" c="gray.5" fz="0.6rem" px={4} py={0} bg="transparent" style={{ borderRadius: 'var(--mantine-radius-sm)', borderBottomWidth: 1 }}>⌘K</Kbd>
+          </Group>
+        </Box>
       )}
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
+      <Stack component="nav" gap={2} flex={1} px={8} py="sm" style={{ overflowY: 'auto' }}>
         {visibleItems.map(item => {
           const Icon = item.icon;
           const active = currentView === item.id;
           return (
-            <button
+            <UnstyledButton
               key={item.label}
               onClick={() => { onNavigate(item.id); setMobileOpen(false); }}
-              className={`w-full flex items-center rounded-md transition-all duration-150 ${collapsed ? 'justify-center p-2.5' : 'gap-2.5 px-3 py-2.5'} ${
-                active ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-              }`}
+              className={classes.navItem}
+              data-active={active || undefined}
+              data-collapsed={collapsed || undefined}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon size={16} style={{ flexShrink: 0 }} />
               {!collapsed && (
                 <>
-                  <span className="flex-1 text-left truncate" style={{ fontSize: '0.83rem', fontWeight: active ? 600 : 400 }}>
+                  <Text component="span" flex={1} ta="left" truncate fz="0.83rem" fw={active ? 600 : 400}>
                     {item.label}
-                  </span>
+                  </Text>
                   {item.badge && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary" style={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                    <Badge size="sm" radius="xl" variant="light" tt="none" fz="0.65rem" fw={600}>
                       {item.badge}
-                    </span>
+                    </Badge>
                   )}
                 </>
               )}
-            </button>
+            </UnstyledButton>
           );
         })}
-      </nav>
+      </Stack>
 
       {/* Bottom */}
-      <div className="border-t border-sidebar-border p-2 space-y-1">
+      <Stack gap={4} p={8} style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
         {!collapsed && (
-          <div className="flex items-center gap-2 px-3 py-2">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary" style={{ fontSize: '0.65rem', fontWeight: 700 }}>TF</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>Tesla Footwear</div>
-              <div className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>admin@tesla.com.br</div>
-            </div>
-            <button onClick={onLogout} className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded" title="Sair">
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <Group gap={8} wrap="nowrap" px="sm" py={8}>
+            <Flex w={28} h={28} align="center" justify="center" bg="gray.2" style={{ borderRadius: '50%', flexShrink: 0 }}>
+              <Text component="span" c="gray.9" fz="0.65rem" fw={700}>TF</Text>
+            </Flex>
+            <Box flex={1} miw={0}>
+              <Text truncate fz="0.78rem" fw={500}>Tesla Footwear</Text>
+              <Text truncate c="dimmed" fz="0.7rem">admin@tesla.com.br</Text>
+            </Box>
+            <UnstyledButton onClick={onLogout} className={classes.logoutButton} title="Sair">
+              <LogOut size={14} />
+            </UnstyledButton>
+          </Group>
         )}
         {collapsed && (
-          <button
-            onClick={() => setCollapsed(false)}
-            className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-secondary/60"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <UnstyledButton onClick={() => setCollapsed(false)} className={classes.expandButton}>
+            <ChevronRight size={16} />
+          </UnstyledButton>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Flex>
   );
 
   return (
     <>
-      <button
+      <ActionIcon
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
+        hiddenFrom="lg"
+        variant="default"
+        size={34}
+        radius="md"
+        pos="fixed"
+        top={16}
+        left={16}
+        style={{ zIndex: 50 }}
       >
-        <MenuIcon className="w-4 h-4" />
-      </button>
+        <MenuIcon size={16} />
+      </ActionIcon>
 
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-64 h-full bg-sidebar border-r border-sidebar-border">
-            <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <X className="w-4 h-4" />
-            </button>
+        <Flex hiddenFrom="lg" pos="fixed" inset={0} style={{ zIndex: 50 }}>
+          <Box pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.6)" onClick={() => setMobileOpen(false)} />
+          <Box pos="relative" w={256} h="100%" bg="white" style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}>
+            <UnstyledButton onClick={() => setMobileOpen(false)} className={classes.iconButton} pos="absolute" top={12} right={12}>
+              <X size={16} />
+            </UnstyledButton>
             <SidebarContent />
-          </div>
-        </div>
+          </Box>
+        </Flex>
       )}
 
-      <aside className={`hidden lg:flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-200 flex-shrink-0 ${collapsed ? 'w-[52px]' : 'w-[260px]'}`}>
+      <Box component="aside" visibleFrom="lg" className={classes.aside} data-collapsed={collapsed || undefined}>
         <SidebarContent />
-      </aside>
+      </Box>
     </>
   );
 }
@@ -229,8 +242,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
-  type DropdownItem = { label: string; icon: React.ComponentType<{ className?: string }>; view?: View; action?: () => void };
-  type HeaderItem = { label: string; icon: React.ComponentType<{ className?: string }>; view: View };
+  type DropdownItem = { label: string; icon: LucideIcon; view?: View; action?: () => void };
+  type HeaderItem = { label: string; icon: LucideIcon; view: View };
 
   const headerItems: HeaderItem[] =
     profile === 'admin'
@@ -288,12 +301,12 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   };
 
   return (
-    <Box component="header" className="border-b border-border bg-background/80 backdrop-blur" h={56} px="lg" style={{ flexShrink: 0 }}>
+    <Box component="header" className={classes.topBar} h={56} px="lg" style={{ flexShrink: 0 }}>
       <Group h="100%" gap="sm" wrap="nowrap">
         <Group style={{ flex: 1, minWidth: 0 }} gap="sm" wrap="nowrap">
           {currentView !== 'catalog' && (
-            <Box className="border-r border-border" pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-              <img src={teslaLogo} alt="Tesla Footwear" className="h-6 w-auto object-contain" />
+            <Box pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0, borderRight: '1px solid var(--mantine-color-gray-3)' }}>
+              <img src={teslaLogo} alt="Tesla Footwear" style={{ height: 24, width: 'auto', objectFit: 'contain' }} />
             </Box>
           )}
           {/* Nav items à esquerda quando existem, caso contrário título */}
@@ -309,11 +322,11 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                     variant={active ? 'light' : 'subtle'}
                    
                     size="sm"
-                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    leftSection={<Icon size={14} />}
                     title={item.label}
                     styles={{ label: { fontWeight: active ? 600 : 500 } }}
                   >
-                    <span className="hidden md:inline">{item.label}</span>
+                    <Box component="span" visibleFrom="md">{item.label}</Box>
                   </Button>
                 );
               })}
@@ -332,14 +345,14 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           {/* Cart(s) — todos os perfis usam multi-carrinhos */}
           <Indicator label={cartCount} disabled={cartCount === 0} size={16} offset={4}>
             <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" size="lg" title="Carrinhos">
-              <ShoppingBasket className="w-4 h-4" />
+              <ShoppingBasket size={16} />
             </ActionIcon>
           </Indicator>
 
           {/* Notifications */}
           <Indicator disabled={notifications === 0} size={8} offset={6}>
             <ActionIcon variant="subtle" size="lg" title="Notificações">
-              <Bell className="w-4 h-4" />
+              <Bell size={16} />
             </ActionIcon>
           </Indicator>
 
@@ -350,7 +363,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               variant="default"
              
               size="sm"
-              leftSection={<Store className="w-3.5 h-3.5" />}
+              leftSection={<Store size={14} />}
               title="Ver histórico de pedidos deste cliente"
             >
               {selectedClient.name}
@@ -367,10 +380,9 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 radius="xl"
                 size={32}
                 ml={4}
-                className="border-l border-border"
-                style={{ borderRadius: '50%' }}
+                style={{ borderRadius: '50%', borderLeft: '1px solid var(--mantine-color-gray-3)' }}
               >
-                <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
+                <ProfileIcon size={14} color={profileInfo.color} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
@@ -380,7 +392,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 return (
                   <Menu.Item
                     key={item.label}
-                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    leftSection={<Icon size={14} />}
                     color={item.label === 'Sair' ? 'red' : undefined}
                     onClick={() => handleDropdownItem(item)}
                   >

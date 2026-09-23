@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Toaster } from "./components/ui/sonner";
+import { Box, Flex } from "@mantine/core";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
@@ -285,8 +285,7 @@ export default function App() {
   const hideSidebar = currentView !== 'catalog';
 
   return (
-    <div className="h-screen flex bg-background text-foreground overflow-hidden">
-      <Toaster position="top-center" duration={4000} />
+    <Flex h="100vh" bg="white" c="var(--mantine-color-text)" style={{ overflow: 'hidden' }}>
       {isFiltersCatalog ? (
         <LojistaFiltersSidebar
           filters={catalogFilters}
@@ -305,7 +304,7 @@ export default function App() {
           selectedClient={selectedClient}
         />
       )}
-      <div className="flex-1 flex flex-col min-w-0">
+      <Flex direction="column" flex={1} miw={0}>
         <TopBar
           title={viewInfo.title}
           subtitle={viewInfo.subtitle}
@@ -317,10 +316,10 @@ export default function App() {
           cartCount={cartsClient ? clientCarts.length : carts.length}
           selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
         />
-        <main className="flex-1 overflow-y-auto">
+        <Box component="main" flex={1} style={{ overflowY: 'auto' }}>
           {renderView()}
-        </main>
-      </div>
-    </div>
+        </Box>
+      </Flex>
+    </Flex>
   );
 }

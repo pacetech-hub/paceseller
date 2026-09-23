@@ -1,0 +1,9 @@
+.forgotLink {
+  color: var(--mantine-color-gray-9);
+  font-size: 0.78rem;
+  transition: opacity 150ms ease;
+
+  @mixin hover {
+    opacity: 0.8;
+  }
+}

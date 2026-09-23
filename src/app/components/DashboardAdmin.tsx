@@ -1,3 +1,4 @@
+import { Stack } from "@mantine/core";
 import { SalesIndicatorsSection, getNetworkEntities, getNetworkMonthlyTotal } from "./SalesIndicatorsSection";
 import type { Client } from "../data/mockData";
 
@@ -13,7 +14,7 @@ const TICKET = 4030;
 
 export function DashboardAdmin({ onNavigate, onSelectClient, onOpenOrderStatus }: DashboardAdminProps) {
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* VENDAS */}
       <SalesIndicatorsSection
         scope="network"
@@ -26,6 +27,6 @@ export function DashboardAdmin({ onNavigate, onSelectClient, onOpenOrderStatus }
         onOpenStatus={onOpenOrderStatus}
       />
 
-    </div>
+    </Stack>
   );
 }
