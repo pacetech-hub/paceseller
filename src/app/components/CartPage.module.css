@@ -1,0 +1,60 @@
+.textLink {
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.removeBtn {
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-red-6);
+    background: transparent;
+  }
+}
+
+.qtyBtn {
+  color: var(--mantine-color-dimmed);
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background: transparent;
+  }
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--mantine-color-gray-3);
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-0);
+  }
+}
+
+.optionActive {
+  border-color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-1);
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.campaignActive {
+  border-color: var(--mantine-color-teal-3);
+  background-color: var(--mantine-color-teal-0);
+
+  @mixin hover {
+    background-color: var(--mantine-color-teal-0);
+  }
+}

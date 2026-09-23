@@ -1,19 +1,25 @@
-import { useState } from "react";
-import { toast } from "sonner";
+import { useState, type CSSProperties } from "react";
+import {
+  ActionIcon, AspectRatio, Badge, Box, Button, Group, Modal, NativeSelect, Paper, SimpleGrid,
+  Stack, Table, Text, TextInput, Title, UnstyledButton, VisuallyHidden, type BadgeProps,
+} from "@mantine/core";
+import { toast } from "@/lib/toast";
 import {
   Search, ChevronLeft, Download, ZoomIn,
   FileText, Package2, CheckCircle2, RefreshCw,
 } from "lucide-react";
 import { products, type Product } from "../data/mockData";
-import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import classes from "./FichaTecnicaPage.module.css";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
-const availabilityColors: Record<Product['availability'], string> = {
-  'disponível': 'text-emerald-400 bg-emerald-400/10',
-  'baixo estoque': 'text-amber-400 bg-amber-400/10',
-  'esgotado': 'text-red-400 bg-red-400/10',
+const availabilityBadge: Record<Product['availability'], Pick<BadgeProps, 'color' | 'c'>> = {
+  'disponível': { color: 'teal', c: 'teal.7' },
+  'baixo estoque': { color: 'yellow', c: 'yellow.8' },
+  'esgotado': { color: 'red', c: 'red.7' },
 };
+
+const num = { fontVariantNumeric: 'tabular-nums' } as const;
 
 // produtos descontinuados — não fazem mais parte do sortimento vendável
 const discontinuedIds = new Set(['P003', 'P006']);
@@ -132,12 +138,12 @@ function getGallery(product: Product): string[] {
   return Array.from({ length: 6 }, (_, i) => unique[i % unique.length]);
 }
 
-// classes de span para montar um bento grid (4 colunas x 3 linhas) com as 6 imagens do produto
-function bentoSpanClasses(index: number): string {
-  if (index === 0) return 'col-span-2 row-span-2';
-  if (index === 1) return 'col-span-2 row-span-1';
-  if (index === 2 || index === 3) return 'col-span-1 row-span-1';
-  return 'col-span-2 row-span-1';
+// spans para montar um bento grid (4 colunas x 3 linhas) com as 6 imagens do produto
+function bentoSpanStyle(index: number): CSSProperties {
+  if (index === 0) return { gridColumn: 'span 2', gridRow: 'span 2' };
+  if (index === 1) return { gridColumn: 'span 2', gridRow: 'span 1' };
+  if (index === 2 || index === 3) return { gridColumn: 'span 1', gridRow: 'span 1' };
+  return { gridColumn: 'span 2', gridRow: 'span 1' };
 }
 
 const colorPalette = ['Preto', 'Branco', 'Cinza', 'Vermelho', 'Azul', 'Navy', 'Bege', 'Marrom'];
@@ -201,88 +207,85 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   });
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
-      <div>
-        <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Ficha Técnica</h2>
-        <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Consulte informações completas, imagens e medidas de cada produto</p>
-      </div>
+    <Stack p="lg" maw={1400} mx="auto" w="100%" gap={20}>
+      <Box>
+        <Title order={2} fw={700} fz="1rem">Ficha Técnica</Title>
+        <Text c="dimmed" fz="0.8rem">Consulte informações completas, imagens e medidas de cada produto</Text>
+      </Box>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar por nome ou referência..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.82rem' }}
-          />
-        </div>
-        <select
+      <Group gap="sm" wrap="wrap">
+        <TextInput
+          flex={1}
+          miw={200}
+          leftSection={<Search size={14} />}
+          type="text"
+          placeholder="Buscar por nome ou referência..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          styles={{ input: { fontSize: '0.82rem' } }}
+        />
+        <NativeSelect
           value={line}
           onChange={e => setLine(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-foreground outline-none focus:border-primary"
-          style={{ fontSize: '0.82rem' }}
-        >
-          {lineOptions.map(l => <option key={l} value={l}>{l}</option>)}
-        </select>
-        <select
+          styles={{ input: { fontSize: '0.82rem' } }}
+          data={lineOptions}
+        />
+        <NativeSelect
           value={category}
           onChange={e => setCategory(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-foreground outline-none focus:border-primary"
-          style={{ fontSize: '0.82rem' }}
-        >
-          {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select
+          styles={{ input: { fontSize: '0.82rem' } }}
+          data={categoryOptions}
+        />
+        <NativeSelect
           value={sortBy}
           onChange={e => setSortBy(e.target.value as typeof sortBy)}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-foreground outline-none focus:border-primary"
-          style={{ fontSize: '0.82rem' }}
-        >
-          <option value="relevância">Relevância</option>
-          <option value="nome">Nome (A-Z)</option>
-          <option value="referência">Referência</option>
-        </select>
-      </div>
+          styles={{ input: { fontSize: '0.82rem' } }}
+          data={[
+            { value: 'relevância', label: 'Relevância' },
+            { value: 'nome', label: 'Nome (A-Z)' },
+            { value: 'referência', label: 'Referência' },
+          ]}
+        />
+      </Group>
 
       {sorted.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
           {sorted.map(p => (
-            <button
+            <UnstyledButton
               key={p.id}
               onClick={() => onOpen(p)}
-              className="bg-card border border-border rounded-xl overflow-hidden text-left hover:border-border/60 transition-colors"
+              className={classes.productCard}
             >
-              <div className="aspect-square bg-white">
-                <img src={p.image} alt={p.name} className="w-full h-full object-contain p-3" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              </div>
-              <div className="p-3 border-t border-border">
-                <p className="text-muted-foreground" style={{ fontSize: '0.68rem', textTransform: 'uppercase' }}>Ref. {p.reference}</p>
-                <p className="text-foreground truncate mt-0.5 mb-1.5" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.name}</p>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`inline-block px-2 py-0.5 rounded-full ${availabilityColors[p.availability]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+              <AspectRatio ratio={1} bg="white">
+                <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 12 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              </AspectRatio>
+              <Box p="sm" className={classes.cardFooter}>
+                <Text c="dimmed" fz="0.68rem" tt="uppercase">Ref. {p.reference}</Text>
+                <Text truncate mt={2} mb={6} fw={600} fz="0.85rem">{p.name}</Text>
+                <Group gap={6} wrap="wrap">
+                  <Badge {...availabilityBadge[p.availability]} variant="light" radius="xl" tt="none" size="sm" fz="0.62rem" fw={600} px={8}>
                     {p.availability}
-                  </span>
+                  </Badge>
                   {isDiscontinued(p) && (
-                    <span className="inline-block px-2 py-0.5 rounded-full text-muted-foreground bg-secondary" style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                    <Badge color="gray" c="dimmed" variant="light" radius="xl" tt="none" size="sm" fz="0.62rem" fw={600} px={8}>
                       Fora de linha
-                    </span>
+                    </Badge>
                   )}
-                </div>
-              </div>
-            </button>
+                </Group>
+              </Box>
+            </UnstyledButton>
           ))}
-        </div>
+        </SimpleGrid>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-          <Package2 className="w-10 h-10 text-muted-foreground/30 mb-3" />
-          <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum produto encontrado</p>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
-        </div>
+        <Paper withBorder radius="lg" py={64}>
+          <Stack align="center" justify="center" ta="center" gap={0}>
+            <Package2 size={40} color="var(--mantine-color-gray-4)" style={{ marginBottom: 12 }} />
+            <Text fw={600}>Nenhum produto encontrado</Text>
+            <Text c="dimmed" mt={4} fz="0.85rem">Tente ajustar os filtros de busca</Text>
+          </Stack>
+        </Paper>
       )}
-    </div>
+    </Stack>
   );
 }
 
@@ -301,188 +304,209 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
   };
 
   return (
-    <div className="p-6 max-w-[1200px] mx-auto w-full space-y-5">
-      <button
+    <Stack p="lg" maw={1200} mx="auto" w="100%" gap={20}>
+      <UnstyledButton
         onClick={onBack}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        style={{ fontSize: '0.82rem', fontWeight: 500 }}
+        className={classes.backLink}
+        fz="0.82rem"
+        fw={500}
+        style={{ display: 'flex', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}
       >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Ficha Técnica
-      </button>
+        <ChevronLeft size={16} /> Voltar para Ficha Técnica
+      </UnstyledButton>
 
-      <div className="flex items-center justify-end gap-2 flex-wrap">
-        <button
+      <Group justify="flex-end" gap="xs" wrap="wrap">
+        <Button
           onClick={() => toast.success('Imagens baixadas (ZIP)')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-          style={{ fontSize: '0.78rem', fontWeight: 500 }}
+          variant="default"
+          size="xs"
+          fz="0.78rem"
+          fw={500}
+          leftSection={<Download size={14} />}
         >
-          <Download className="w-3.5 h-3.5" /> Baixar imagens
-        </button>
-        <button
+          Baixar imagens
+        </Button>
+        <Button
           onClick={() => toast.success('PDF gerado')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          style={{ fontSize: '0.78rem', fontWeight: 600 }}
+          size="xs"
+          fz="0.78rem"
+          fw={600}
+          leftSection={<FileText size={14} />}
         >
-          <FileText className="w-3.5 h-3.5" /> Baixar PDF
-        </button>
-      </div>
+          Baixar PDF
+        </Button>
+      </Group>
 
       {/* Bento grid — 6 imagens do produto */}
-      <div className="grid grid-cols-4 grid-rows-3 gap-2 aspect-[4/3] rounded-xl overflow-hidden">
+      <Box className={classes.bentoGrid}>
         {gallery.map((img, idx) => (
-          <div
+          <Box
             key={idx}
             onClick={() => openZoom(idx)}
-            className={`relative overflow-hidden bg-white border border-border group cursor-pointer ${bentoSpanClasses(idx)}`}
+            className={classes.bentoCell}
+            style={bentoSpanStyle(idx)}
           >
-            <img src={img} alt={`${product.name} — foto ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
-              <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <button
+            <img src={img} alt={`${product.name} — foto ${idx + 1}`} className={classes.bentoImg} />
+            <Box className={classes.bentoOverlay}>
+              <ZoomIn size={20} className={classes.bentoZoomIcon} />
+            </Box>
+            <ActionIcon
               onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
               aria-label="Baixar imagem"
-              className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+              size={28}
+              radius="md"
+              variant="transparent"
+              className={classes.bentoDownload}
             >
-              <Download className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              <Download size={14} />
+            </ActionIcon>
+          </Box>
         ))}
-      </div>
+      </Box>
 
       {/* Informações do produto */}
-      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-        <div>
-          <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>Ref. {product.reference}</p>
-          <h2 className="text-foreground mb-1.5" style={{ fontWeight: 700, fontSize: '1.15rem' }}>{product.name}</h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`px-2 py-0.5 rounded-full ${availabilityColors[product.availability]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-              {product.availability}
-            </span>
-            {isDiscontinued(product) && (
-              <span className="px-2 py-0.5 rounded-full text-muted-foreground bg-secondary" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                Fora de linha
-              </span>
-            )}
-          </div>
-        </div>
+      <Paper withBorder radius="lg" p={20}>
+        <Stack gap="md">
+          <Box>
+            <Text c="dimmed" mb={2} fz="0.72rem" tt="uppercase">Ref. {product.reference}</Text>
+            <Title order={2} mb={6} fw={700} fz="1.15rem">{product.name}</Title>
+            <Group gap="xs" wrap="wrap">
+              <Badge {...availabilityBadge[product.availability]} variant="light" radius="xl" tt="none" fz="0.7rem" fw={600} px={8}>
+                {product.availability}
+              </Badge>
+              {isDiscontinued(product) && (
+                <Badge color="gray" c="dimmed" variant="light" radius="xl" tt="none" fz="0.7rem" fw={600} px={8}>
+                  Fora de linha
+                </Badge>
+              )}
+            </Group>
+          </Box>
 
-        <div>
-          <p className="text-muted-foreground mb-1.5" style={labelStyle}>Descrição</p>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{product.description}</p>
-        </div>
+          <Box>
+            <Text c="dimmed" mb={6} style={labelStyle}>Descrição</Text>
+            <Text fz="0.85rem" lh={1.6}>{product.description}</Text>
+          </Box>
 
-        {highlights && (
-          <div>
-            <p className="text-muted-foreground mb-2" style={labelStyle}>Destaques do produto</p>
-            <ul className="space-y-2.5">
-              {highlights.items.map((h, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-foreground" style={{ fontSize: '0.82rem', lineHeight: 1.5 }}>
-                    <span style={{ fontWeight: 600 }}>{h.title}: </span>
-                    {h.description}
-                  </p>
-                </li>
-              ))}
-            </ul>
-            <p className="text-muted-foreground mt-3" style={{ fontSize: '0.8rem', fontStyle: 'italic', lineHeight: 1.5 }}>
-              {highlights.tagline}
-            </p>
-          </div>
-        )}
-      </div>
+          {highlights && (
+            <Box>
+              <Text c="dimmed" mb="xs" style={labelStyle}>Destaques do produto</Text>
+              <Stack component="ul" gap={10} m={0} p={0} style={{ listStyle: 'none' }}>
+                {highlights.items.map((h, i) => (
+                  <Group component="li" key={i} align="flex-start" gap="xs" wrap="nowrap">
+                    <CheckCircle2 size={14} color="var(--mantine-color-teal-6)" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <Text fz="0.82rem" lh={1.5}>
+                      <Text span fw={600} inherit>{h.title}: </Text>
+                      {h.description}
+                    </Text>
+                  </Group>
+                ))}
+              </Stack>
+              <Text c="dimmed" mt="sm" fz="0.8rem" fs="italic" lh={1.5}>
+                {highlights.tagline}
+              </Text>
+            </Box>
+          )}
+        </Stack>
+      </Paper>
 
       {/* Estoque */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div>
-          <p className="text-muted-foreground mb-2" style={labelStyle}>
+      <Paper withBorder radius="lg" p={20}>
+        <Box>
+          <Text c="dimmed" mb="xs" style={labelStyle}>
             {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-muted-foreground text-left border-b border-border" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <th className="py-2 pr-4 font-normal">Tamanho</th>
-                  <th className="py-2 px-4 font-normal text-center">Estoque fábrica</th>
-                  {profile === 'lojista' && <th className="py-2 pl-4 font-normal text-center">Estoque loja</th>}
-                </tr>
-              </thead>
-              <tbody>
+          </Text>
+          <Table.ScrollContainer minWidth={0}>
+            <Table withRowBorders={false} horizontalSpacing={0}>
+              <Table.Thead>
+                <Table.Tr c="dimmed" ta="left" fz="0.68rem" tt="uppercase" lts="0.04em" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+                  <Table.Th py="xs" pr="md" fw={400}>Tamanho</Table.Th>
+                  <Table.Th py="xs" px="md" fw={400} ta="center">Estoque fábrica</Table.Th>
+                  {profile === 'lojista' && <Table.Th py="xs" pl="md" fw={400} ta="center">Estoque loja</Table.Th>}
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {sizes.map(s => {
                   const factoryStock = product.grades[s] ?? 0;
-                  const factoryColor = factoryStock === 0 ? 'text-red-400' : factoryStock < 20 ? 'text-amber-400' : 'text-emerald-400';
+                  const factoryColor = factoryStock === 0 ? 'red.6' : factoryStock < 20 ? 'yellow.7' : 'teal.7';
                   const storeQty = storeStock[s] ?? 0;
-                  const storeColor = storeQty === 0 ? 'text-red-400' : storeQty < 3 ? 'text-amber-400' : 'text-emerald-400';
+                  const storeColor = storeQty === 0 ? 'red.6' : storeQty < 3 ? 'yellow.7' : 'teal.7';
                   const storeLow = storeQty < 3;
                   return (
-                    <tr key={s} className="border-b border-border/60 last:border-0">
-                      <td className="py-2.5 pr-4 text-foreground whitespace-nowrap" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Nº {s}</td>
-                      <td className={`py-2.5 px-4 text-center mono ${factoryColor}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                    <Table.Tr key={s} className={classes.stockRow}>
+                      <Table.Td py={10} pr="md" fz="0.82rem" fw={600} style={{ whiteSpace: 'nowrap' }}>Nº {s}</Table.Td>
+                      <Table.Td py={10} px="md" ta="center" c={factoryColor} fz="0.8rem" fw={600} style={num}>
                         {factoryStock}
-                      </td>
+                      </Table.Td>
                       {profile === 'lojista' && (
-                        <td className="py-2.5 pl-4">
-                          <div className="flex items-center justify-end gap-2">
-                            <span className={`mono ${storeColor}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>{storeQty}</span>
+                        <Table.Td py={10} pl="md">
+                          <Group justify="flex-end" gap="xs" wrap="nowrap">
+                            <Text span c={storeColor} fz="0.8rem" fw={600} style={num}>{storeQty}</Text>
                             {storeLow && (
-                              <button
+                              <Button
                                 onClick={() => toast.success(`Reposição rápida solicitada — Nº ${s}`)}
-                                className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex-shrink-0"
-                                style={{ fontSize: '0.65rem', fontWeight: 600 }}
+                                size="compact-xs"
+                                radius="sm"
+                                fz="0.65rem"
+                                fw={600}
+                                leftSection={<RefreshCw size={12} />}
+                                style={{ flexShrink: 0 }}
                               >
-                                <RefreshCw className="w-3 h-3" /> Reposição rápida
-                              </button>
+                                Reposição rápida
+                              </Button>
                             )}
-                          </div>
-                        </td>
+                          </Group>
+                        </Table.Td>
                       )}
-                    </tr>
+                    </Table.Tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        </Box>
+      </Paper>
 
       {/* Produtos relacionados */}
       {related.length > 0 && (
-        <div>
-          <p className="text-muted-foreground mb-3" style={labelStyle}>Produtos relacionados</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Box>
+          <Text c="dimmed" mb="sm" style={labelStyle}>Produtos relacionados</Text>
+          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
             {related.map(p => (
-              <button
+              <UnstyledButton
                 key={p.id}
                 onClick={() => onOpenRelated(p)}
-                className="bg-card border border-border rounded-xl overflow-hidden text-left hover:border-border/60 transition-colors"
+                className={classes.productCard}
               >
-                <div className="aspect-square bg-white">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                </div>
-                <div className="p-2.5 border-t border-border">
-                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem', textTransform: 'uppercase' }}>Ref. {p.reference}</p>
-                  <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{p.name}</p>
+                <AspectRatio ratio={1} bg="white">
+                  <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                </AspectRatio>
+                <Box p={10} className={classes.cardFooter}>
+                  <Text c="dimmed" fz="0.65rem" tt="uppercase">Ref. {p.reference}</Text>
+                  <Text truncate fz="0.8rem" fw={600}>{p.name}</Text>
                   {isDiscontinued(p) && (
-                    <span className="inline-block px-1.5 py-0.5 rounded-full text-muted-foreground bg-secondary mt-1" style={{ fontSize: '0.6rem', fontWeight: 600 }}>
+                    <Badge color="gray" c="dimmed" variant="light" radius="xl" tt="none" size="xs" mt={4} fz="0.6rem" fw={600} px={6}>
                       Fora de linha
-                    </span>
+                    </Badge>
                   )}
-                </div>
-              </button>
+                </Box>
+              </UnstyledButton>
             ))}
-          </div>
-        </div>
+          </SimpleGrid>
+        </Box>
       )}
 
       {/* Zoom */}
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogTitle className="sr-only">{product.name}</DialogTitle>
-          <img src={gallery[activeImage]} alt={product.name} className="w-full h-auto object-contain" />
-        </DialogContent>
-      </Dialog>
-    </div>
+      <Modal
+        opened={zoomOpen}
+        onClose={() => setZoomOpen(false)}
+        centered
+        size={672}
+        withCloseButton
+        title={<VisuallyHidden>{product.name}</VisuallyHidden>}
+      >
+        <img src={gallery[activeImage]} alt={product.name} style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
+      </Modal>
+    </Stack>
   );
 }
 

@@ -3,7 +3,13 @@ import { ShoppingCart, Trash2, Plus, Minus, CreditCard, FileText, Check, Chevron
 import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./LojistaFiltersSidebar";
 import type { CartContext, CartCreator } from "./CartsListPage";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import {
+  ActionIcon, Badge, Box, Button, Center, Checkbox, Divider, Grid, Group, Modal, NativeSelect,
+  Paper, Radio, SimpleGrid, Stack, Text, TextInput, Textarea, ThemeIcon, Title, UnstyledButton,
+} from "@mantine/core";
+import classes from "./CartPage.module.css";
+
+const num = { fontVariantNumeric: 'tabular-nums' } as const;
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -142,420 +148,480 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
   if (step === 'done') {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-5">
-            <Check className="w-8 h-8 text-emerald-400" />
-          </div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.3rem' }}>Pedido enviado para aprovação!</h2>
-          <p className="text-muted-foreground mt-2" style={{ fontSize: '0.85rem' }}>
-            Pedido <span className="text-foreground font-semibold mono">PED-2026-0413</span>
-          </p>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>
+      <Center p="lg" mih="60vh">
+        <Box ta="center" maw={384}>
+          <ThemeIcon size={64} radius="xl" color="teal" variant="light" mx="auto" mb={20}>
+            <Check size={32} color="var(--mantine-color-teal-6)" />
+          </ThemeIcon>
+          <Title order={2} fw={700} fz="1.3rem">Pedido enviado para aprovação!</Title>
+          <Text c="dimmed" mt="xs" fz="0.85rem">
+            Pedido <Text span c="var(--mantine-color-text)" fw={600} inherit style={num}>PED-2026-0413</Text>
+          </Text>
+          <Text c="dimmed" mt={4} fz="0.82rem">
             {grandPairs} pares · {formatCurrency(finalTotal)}
-          </p>
-          <p className="text-muted-foreground mt-3 text-sm">Você receberá uma confirmação por e-mail assim que aprovado.</p>
-          <div className="flex gap-3 mt-6 justify-center">
-            <button onClick={() => onNavigate('history')} className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>
+          </Text>
+          <Text c="dimmed" mt="sm" size="sm">Você receberá uma confirmação por e-mail assim que aprovado.</Text>
+          <Group gap="sm" mt="lg" justify="center">
+            <Button onClick={() => onNavigate('history')} variant="default" fz="0.85rem" fw={500}>
               Ver histórico
-            </button>
-            <button onClick={() => onNavigate('catalog')} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+            </Button>
+            <Button onClick={() => onNavigate('catalog')} fz="0.85rem" fw={600}>
               Continuar comprando
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </Group>
+        </Box>
+      </Center>
     );
   }
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full">
+    <Box p="lg" maw={1400} mx="auto" w="100%">
       {cartContext && (
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
+        <Group justify="space-between" mb="md" gap="sm" wrap="wrap">
+          <Group gap="sm" wrap="nowrap" miw={0}>
+            <UnstyledButton
               onClick={() => onNavigate('carts')}
-              className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-              style={{ fontSize: '0.78rem' }}
+              className={classes.textLink}
+              fz="0.78rem"
+              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
             >
-              <ChevronLeft className="w-3.5 h-3.5" /> Carrinhos
-            </button>
-            <div className="w-px h-5 bg-border" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-foreground truncate" style={{ fontSize: '1rem', fontWeight: 700 }}>{cartContext.cartName}</p>
+              <ChevronLeft size={14} /> Carrinhos
+            </UnstyledButton>
+            <Divider orientation="vertical" h={20} style={{ alignSelf: 'center' }} />
+            <Box miw={0}>
+              <Group gap="xs" wrap="wrap">
+                <Text truncate fz="1rem" fw={700}>{cartContext.cartName}</Text>
                 {cartContext.createdBy && (
-                  <span
-                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${cartContext.createdBy === 'lojista' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'}`}
-                    style={{ fontSize: '0.65rem', fontWeight: 600 }}
+                  <Badge
+                    variant="light"
+                    color={cartContext.createdBy === 'lojista' ? 'teal' : 'yellow'}
+                    c={cartContext.createdBy === 'lojista' ? 'teal.7' : 'yellow.8'}
+                    radius="sm"
+                    tt="none"
+                    size="sm"
+                    fz="0.65rem"
+                    fw={600}
+                    px={6}
+                    leftSection={cartContext.createdBy === 'lojista' ? <Store size={10} /> : <UserCheck size={10} />}
                     title={cartContext.createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante'}
                   >
-                    {cartContext.createdBy === 'lojista' ? <Store className="w-2.5 h-2.5" /> : <UserCheck className="w-2.5 h-2.5" />}
                     {cartContext.createdBy === viewerRole ? 'Você' : cartContext.createdBy === 'lojista' ? 'Lojista' : 'Representante'}
-                  </span>
+                  </Badge>
                 )}
-              </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Store className="w-3 h-3" />
-                <span className="truncate" style={{ fontSize: '0.75rem' }}>Cliente: <span className="text-foreground" style={{ fontWeight: 600 }}>{cartContext.clientName}</span></span>
-              </div>
-            </div>
-          </div>
+              </Group>
+              <Group gap={6} wrap="nowrap" c="dimmed">
+                <Store size={12} />
+                <Text truncate fz="0.75rem" c="dimmed">Cliente: <Text span c="var(--mantine-color-text)" fw={600} inherit>{cartContext.clientName}</Text></Text>
+              </Group>
+            </Box>
+          </Group>
           {multiCart && (
-            <div className="flex items-center gap-2">
-              <button
+            <Group gap="xs">
+              <Button
                 onClick={() => onNavigate('carts')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-                style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                variant="default"
+                size="xs"
+                radius="sm"
+                c="dimmed"
+                fz="0.75rem"
+                fw={500}
+                leftSection={<List size={14} />}
                 title="Selecionar outro carrinho"
               >
-                <List className="w-3.5 h-3.5" /> Outros carrinhos
-              </button>
-              <button
+                Outros carrinhos
+              </Button>
+              <Button
                 onClick={() => {
                   setNewCartName('');
                   setShowNewCartDialog(true);
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                style={{ fontSize: '0.75rem', fontWeight: 600 }}
+                size="xs"
+                radius="sm"
+                fz="0.75rem"
+                fw={600}
+                leftSection={<FolderPlus size={14} />}
                 title="Criar outro carrinho para este cliente"
               >
-                <FolderPlus className="w-3.5 h-3.5" /> Novo carrinho
-              </button>
-            </div>
+                Novo carrinho
+              </Button>
+            </Group>
           )}
-        </div>
+        </Group>
       )}
       {/* New cart dialog */}
-      <Dialog open={showNewCartDialog} onOpenChange={setShowNewCartDialog}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle style={{ fontSize: '0.95rem' }}>Novo carrinho</DialogTitle>
-            <DialogDescription style={{ fontSize: '0.78rem' }}>
+      <Modal
+        opened={showNewCartDialog}
+        onClose={() => setShowNewCartDialog(false)}
+        centered
+        size="sm"
+        title={
+          <Stack gap={4}>
+            <Text fw={600} fz="0.95rem">Novo carrinho</Text>
+            <Text c="dimmed" fz="0.78rem">
               Criar carrinho para {cartContext?.clientName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <label className="block text-muted-foreground" style={{ fontSize: '0.72rem' }}>Nome do carrinho</label>
-            <input
-              autoFocus
-              value={newCartName}
-              onChange={e => setNewCartName(e.target.value)}
-              placeholder="Ex.: Reposição Inverno 26"
-              className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-              style={{ fontSize: '0.82rem' }}
-            />
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => setShowNewCartDialog(false)}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={() => {
-                onCreateNewCart?.(newCartName.trim() || 'Novo carrinho');
-                setShowNewCartDialog(false);
-                setNewCartName('');
-              }}
-              className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
-            >
-              Criar
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </Text>
+          </Stack>
+        }
+      >
+        <Box py="xs">
+          <TextInput
+            data-autofocus
+            label="Nome do carrinho"
+            value={newCartName}
+            onChange={e => setNewCartName(e.target.value)}
+            placeholder="Ex.: Reposição Inverno 26"
+            radius="sm"
+            styles={{
+              label: { fontSize: '0.72rem', color: 'var(--mantine-color-dimmed)', fontWeight: 400, marginBottom: 12 },
+              input: { fontSize: '0.82rem', backgroundColor: 'var(--mantine-color-gray-0)' },
+            }}
+          />
+        </Box>
+        <Group justify="flex-end" mt="md" gap="xs">
+          <Button
+            onClick={() => setShowNewCartDialog(false)}
+            variant="default"
+            radius="sm"
+            c="dimmed"
+            fz="0.82rem"
+            fw={500}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              onCreateNewCart?.(newCartName.trim() || 'Novo carrinho');
+              setShowNewCartDialog(false);
+              setNewCartName('');
+            }}
+            radius="sm"
+            fz="0.82rem"
+            fw={600}
+          >
+            Criar
+          </Button>
+        </Group>
+      </Modal>
       {/* Step indicator */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
+      <Group gap="sm" mb="lg">
+        <Button
           onClick={() => setStep('cart')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${step === 'cart' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          style={{ fontSize: '0.82rem', fontWeight: 600 }}
+          radius="xl"
+          variant={step === 'cart' ? 'filled' : 'subtle'}
+          c={step === 'cart' ? undefined : 'dimmed'}
+          fz="0.82rem"
+          fw={600}
+          leftSection={<ShoppingCart size={14} />}
         >
-          <ShoppingCart className="w-3.5 h-3.5" /> Carrinho ({cart.length})
-        </button>
-        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        <button
+          Carrinho ({cart.length})
+        </Button>
+        <ChevronRight size={16} color="var(--mantine-color-dimmed)" />
+        <Button
           onClick={() => cart.length > 0 && setStep('checkout')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${step === 'checkout' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          style={{ fontSize: '0.82rem', fontWeight: 600 }}
+          radius="xl"
+          variant={step === 'checkout' ? 'filled' : 'subtle'}
+          c={step === 'checkout' ? undefined : 'dimmed'}
+          fz="0.82rem"
+          fw={600}
+          leftSection={<CreditCard size={14} />}
         >
-          <CreditCard className="w-3.5 h-3.5" /> Checkout
-        </button>
-      </div>
+          Checkout
+        </Button>
+      </Group>
 
       {cart.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ShoppingCart className="w-12 h-12 text-muted-foreground/30 mb-4" />
-          <p className="text-foreground" style={{ fontWeight: 600 }}>Carrinho vazio</p>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Adicione produtos do catálogo para criar um pedido.</p>
-          <button
+        <Stack align="center" justify="center" py={80} ta="center" gap={0}>
+          <ShoppingCart size={48} color="var(--mantine-color-gray-4)" style={{ marginBottom: 16 }} />
+          <Text fw={600}>Carrinho vazio</Text>
+          <Text c="dimmed" mt={4} fz="0.85rem">Adicione produtos do catálogo para criar um pedido.</Text>
+          <Button
             onClick={() => onNavigate('catalog')}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            style={{ fontSize: '0.85rem', fontWeight: 600 }}
+            mt="md"
+            fz="0.85rem"
+            fw={600}
           >
             Ir ao catálogo
-          </button>
-        </div>
+          </Button>
+        </Stack>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <Grid gutter={20}>
           {/* Items */}
-          <div className="lg:col-span-2 space-y-3">
+          <Grid.Col span={{ base: 12, lg: 8 }}>
+            <Stack gap="sm">
             {step === 'cart' ? (
               cart.map(item => {
                 const { pairs, value } = getItemTotal(item);
                 return (
-                  <div key={item.product.id} className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                        <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-foreground" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{item.product.name}</p>
-                        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{item.product.reference} · {formatCurrency(item.product.price)}/par</p>
-                        <p className="text-foreground mono mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(value)}</p>
-                      </div>
-                      <button
+                  <Paper key={item.product.id} withBorder radius="lg" p="md">
+                    <Group align="flex-start" gap="sm" mb="sm" wrap="nowrap">
+                      <Box w={64} h={64} bg="gray.0" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', flexShrink: 0 }}>
+                        <img src={item.product.image} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      </Box>
+                      <Box flex={1} miw={0}>
+                        <Text fz="0.88rem" fw={600}>{item.product.name}</Text>
+                        <Text c="dimmed" fz="0.72rem">{item.product.reference} · {formatCurrency(item.product.price)}/par</Text>
+                        <Text mt={2} fz="0.85rem" fw={700} style={num}>{formatCurrency(value)}</Text>
+                      </Box>
+                      <ActionIcon
                         onClick={() => removeItem(item.product.id)}
-                        className="text-muted-foreground hover:text-red-400 transition-colors p-1"
+                        variant="transparent"
+                        className={classes.removeBtn}
+                        size="md"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
+                        <Trash2 size={16} />
+                      </ActionIcon>
+                    </Group>
+                    <Group gap="xs">
                       {Object.entries(item.sizes).map(([size, qty]) => (
-                        <div key={size} className="flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 bg-secondary/40">
-                          <span className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Nº {size}</span>
-                          <button onClick={() => updateQty(item.product.id, size, -1)} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                            <Minus className="w-2.5 h-2.5" />
-                          </button>
-                          <span className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 600, minWidth: 16, textAlign: 'center' }}>{qty}</span>
-                          <button onClick={() => updateQty(item.product.id, size, 1)} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                            <Plus className="w-2.5 h-2.5" />
-                          </button>
-                        </div>
+                        <Group key={size} gap={6} wrap="nowrap" px="xs" py={4} bg="gray.0" style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: 'var(--mantine-radius-md)' }}>
+                          <Text c="dimmed" fz="0.7rem">Nº {size}</Text>
+                          <ActionIcon onClick={() => updateQty(item.product.id, size, -1)} variant="transparent" size={20} className={classes.qtyBtn}>
+                            <Minus size={10} />
+                          </ActionIcon>
+                          <Text fz="0.78rem" fw={600} miw={16} ta="center" style={num}>{qty}</Text>
+                          <ActionIcon onClick={() => updateQty(item.product.id, size, 1)} variant="transparent" size={20} className={classes.qtyBtn}>
+                            <Plus size={10} />
+                          </ActionIcon>
+                        </Group>
                       ))}
-                    </div>
-                    <p className="text-muted-foreground mt-2" style={{ fontSize: '0.72rem' }}>{pairs} pares neste item</p>
-                  </div>
+                    </Group>
+                    <Text c="dimmed" mt="xs" fz="0.72rem">{pairs} pares neste item</Text>
+                  </Paper>
                 );
               })
             ) : (
               /* Checkout — Tabela, Condição, Campanhas */
-              <div className="space-y-4">
+              <Stack gap="md">
                 {/* Tabela de preço aplicada */}
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-foreground flex items-center gap-2" style={{ fontWeight: 600 }}>
-                      <Tag className="w-4 h-4 text-primary" /> Política comercial aplicada
-                    </h3>
-                    <select
+                <Paper withBorder radius="lg" p={20}>
+                  <Group justify="space-between" mb="sm">
+                    <Title order={3} fz="1rem" fw={600} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Tag size={16} color="var(--mantine-color-gray-9)" /> Política comercial aplicada
+                    </Title>
+                    <NativeSelect
                       value={tableId}
                       onChange={e => { setTableId(e.target.value); setPaymentId((paymentOptionsByTable[e.target.value] ?? [])[0]?.id ?? ''); setCampaignIds([]); }}
-                      className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-foreground outline-none focus:border-primary"
-                      style={{ fontSize: '0.78rem' }}
-                    >
-                      {priceTables.map(p => <option key={p.id} value={p.id}>{p.label} — {p.desc}</option>)}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Desconto da tabela</p>
-                      <p className="text-foreground mono mt-0.5" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Pagamento padrão</p>
-                      <p className="text-foreground mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{policyDetails.paymentCondition}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Pedido mínimo</p>
-                      <p className="text-foreground mono mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{formatCurrency(policyDetails.minOrderValue)}</p>
-                    </div>
-                  </div>
-                </div>
+                      size="xs"
+                      radius="sm"
+                      styles={{ input: { fontSize: '0.78rem', backgroundColor: 'var(--mantine-color-gray-0)' } }}
+                      data={priceTables.map(p => ({ value: p.id, label: `${p.label} — ${p.desc}` }))}
+                    />
+                  </Group>
+                  <SimpleGrid cols={3} spacing="sm">
+                    <Box>
+                      <Text c="dimmed" fz="0.7rem">Desconto da tabela</Text>
+                      <Text mt={2} fz="0.9rem" fw={600} style={num}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
+                    </Box>
+                    <Box>
+                      <Text c="dimmed" fz="0.7rem">Pagamento padrão</Text>
+                      <Text mt={2} fz="0.85rem" fw={600}>{policyDetails.paymentCondition}</Text>
+                    </Box>
+                    <Box>
+                      <Text c="dimmed" fz="0.7rem">Pedido mínimo</Text>
+                      <Text mt={2} fz="0.85rem" fw={600} style={num}>{formatCurrency(policyDetails.minOrderValue)}</Text>
+                    </Box>
+                  </SimpleGrid>
+                </Paper>
 
                 {/* Condições de pagamento disponíveis */}
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <h3 className="text-foreground flex items-center gap-2 mb-3" style={{ fontWeight: 600 }}>
-                    <CreditCard className="w-4 h-4 text-primary" /> Condições de pagamento disponíveis
-                  </h3>
-                  <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>
-                    Opções habilitadas para a <span className="text-foreground" style={{ fontWeight: 600 }}>{policy.label}</span>.
-                  </p>
-                  <div className="space-y-2">
+                <Paper withBorder radius="lg" p={20}>
+                  <Title order={3} fz="1rem" fw={600} mb="sm" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CreditCard size={16} color="var(--mantine-color-gray-9)" /> Condições de pagamento disponíveis
+                  </Title>
+                  <Text c="dimmed" mb="sm" fz="0.75rem">
+                    Opções habilitadas para a <Text span c="var(--mantine-color-text)" fw={600} inherit>{policy.label}</Text>.
+                  </Text>
+                  <Stack gap="xs">
                     {paymentOptions.map(opt => {
                       const active = paymentId === opt.id;
                       return (
-                        <label
+                        <Box
+                          component="label"
                           key={opt.id}
-                          className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${active ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary/40'}`}
+                          className={active ? `${classes.option} ${classes.optionActive}` : classes.option}
                         >
-                          <input type="radio" name="payment" checked={active} onChange={() => setPaymentId(opt.id)} className="mt-1 accent-primary" />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{opt.label}</p>
+                          <Radio name="payment" checked={active} onChange={() => setPaymentId(opt.id)} size="xs" mt={4} />
+                          <Box flex={1}>
+                            <Group justify="space-between">
+                              <Text fz="0.85rem" fw={600}>{opt.label}</Text>
                               {opt.surcharge !== 0 && (
-                                <span className={`mono ${opt.surcharge < 0 ? 'text-emerald-400' : 'text-amber-400'}`} style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                <Text span c={opt.surcharge < 0 ? 'teal.7' : 'yellow.7'} fz="0.75rem" fw={600} style={num}>
                                   {opt.surcharge < 0 ? `${opt.surcharge}%` : `+${opt.surcharge}%`}
-                                </span>
+                                </Text>
                               )}
-                            </div>
-                            {opt.description && <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>{opt.description}</p>}
-                          </div>
-                        </label>
+                            </Group>
+                            {opt.description && <Text c="dimmed" mt={2} fz="0.72rem">{opt.description}</Text>}
+                          </Box>
+                        </Box>
                       );
                     })}
-                  </div>
-                </div>
+                  </Stack>
+                </Paper>
 
                 {/* Campanhas disponíveis */}
                 {campaigns.length > 0 && (
-                  <div className="bg-card border border-border rounded-xl p-5">
-                    <h3 className="text-foreground flex items-center gap-2 mb-3" style={{ fontWeight: 600 }}>
-                      <Sparkles className="w-4 h-4 text-primary" /> Campanhas disponíveis
-                    </h3>
-                    <div className="space-y-2">
+                  <Paper withBorder radius="lg" p={20}>
+                    <Title order={3} fz="1rem" fw={600} mb="sm" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Sparkles size={16} color="var(--mantine-color-gray-9)" /> Campanhas disponíveis
+                    </Title>
+                    <Stack gap="xs">
                       {campaigns.map(c => {
                         const active = campaignIds.includes(c.id);
                         return (
-                          <label
+                          <Box
+                            component="label"
                             key={c.id}
-                            className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${active ? 'border-emerald-400/60 bg-emerald-400/5' : 'border-border hover:bg-secondary/40'}`}
+                            className={active ? `${classes.option} ${classes.campaignActive}` : classes.option}
                           >
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               checked={active}
                               onChange={() => setCampaignIds(prev => prev.includes(c.id) ? prev.filter(x => x !== c.id) : [...prev, c.id])}
-                              className="mt-1 accent-emerald-400"
+                              color="teal"
+                              size="xs"
+                              mt={4}
                             />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <p className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                                  <Percent className="w-3 h-3 text-emerald-400" /> {c.name}
-                                </p>
-                                <span className="text-emerald-400 mono" style={{ fontSize: '0.75rem', fontWeight: 600 }}>-{c.discount}%</span>
-                              </div>
-                              <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>{c.description}</p>
-                            </div>
-                          </label>
+                            <Box flex={1}>
+                              <Group justify="space-between">
+                                <Group gap={6} wrap="nowrap">
+                                  <Percent size={12} color="var(--mantine-color-teal-6)" />
+                                  <Text fz="0.85rem" fw={600}>{c.name}</Text>
+                                </Group>
+                                <Text span c="teal.7" fz="0.75rem" fw={600} style={num}>-{c.discount}%</Text>
+                              </Group>
+                              <Text c="dimmed" mt={2} fz="0.72rem">{c.description}</Text>
+                            </Box>
+                          </Box>
                         );
                       })}
-                    </div>
-                  </div>
+                    </Stack>
+                  </Paper>
                 )}
 
                 {/* Observações */}
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <label className="block text-muted-foreground mb-1.5" style={{ fontSize: '0.78rem' }}>Observações</label>
-                  <textarea
+                <Paper withBorder radius="lg" p={20}>
+                  <Textarea
+                    label="Observações"
                     value={obs}
                     onChange={e => setObs(e.target.value)}
                     rows={3}
                     placeholder="Informações adicionais..."
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary resize-none"
-                    style={{ fontSize: '0.85rem' }}
+                    styles={{
+                      label: { fontSize: '0.78rem', color: 'var(--mantine-color-dimmed)', fontWeight: 400, marginBottom: 6 },
+                      input: { fontSize: '0.85rem', backgroundColor: 'var(--mantine-color-gray-0)', resize: 'none' },
+                    }}
                   />
-                </div>
+                </Paper>
 
                 {approvalRequired && (
-                  <div className="flex items-start gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 p-3">
-                    <FileText className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-amber-400" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Aprovação necessária</p>
-                      <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Este pedido passará pela aprovação do representante antes de ser faturado.</p>
-                    </div>
-                  </div>
+                  <Group align="flex-start" gap="xs" wrap="nowrap" p="sm" bg="yellow.0" style={{ border: '1px solid var(--mantine-color-yellow-2)', borderRadius: 'var(--mantine-radius-md)' }}>
+                    <FileText size={16} color="var(--mantine-color-yellow-7)" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <Box>
+                      <Text c="yellow.7" fz="0.8rem" fw={600}>Aprovação necessária</Text>
+                      <Text c="dimmed" mt={2} fz="0.75rem">Este pedido passará pela aprovação do representante antes de ser faturado.</Text>
+                    </Box>
+                  </Group>
                 )}
-              </div>
+              </Stack>
             )}
-
-          </div>
+            </Stack>
+          </Grid.Col>
 
           {/* Summary */}
-          <div className="space-y-4">
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="text-foreground mb-4" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Resumo do pedido</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Valor bruto · {grandPairs} pares</span>
-                  <span className="text-foreground mono" style={{ fontSize: '0.82rem' }}>{formatCurrency(grandTotal)}</span>
-                </div>
+          <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Stack gap="md">
+            <Paper withBorder radius="lg" p={20}>
+              <Title order={3} mb="md" fw={600} fz="0.9rem">Resumo do pedido</Title>
+              <Stack gap="xs">
+                <Group justify="space-between" wrap="nowrap">
+                  <Text c="dimmed" fz="0.72rem" tt="uppercase" lts="0.05em">Valor bruto · {grandPairs} pares</Text>
+                  <Text fz="0.82rem" style={num}>{formatCurrency(grandTotal)}</Text>
+                </Group>
                 {tableDiscount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-emerald-400" style={{ fontSize: '0.82rem' }}>Desconto {policy.label} ({policyDetails.discount}%)</span>
-                    <span className="text-emerald-400 mono" style={{ fontSize: '0.82rem' }}>-{formatCurrency(tableDiscount)}</span>
-                  </div>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text c="teal.7" fz="0.82rem">Desconto {policy.label} ({policyDetails.discount}%)</Text>
+                    <Text c="teal.7" fz="0.82rem" style={num}>-{formatCurrency(tableDiscount)}</Text>
+                  </Group>
                 )}
                 {campaignDiscount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-emerald-400" style={{ fontSize: '0.82rem' }}>Campanhas</span>
-                    <span className="text-emerald-400 mono" style={{ fontSize: '0.82rem' }}>-{formatCurrency(campaignDiscount)}</span>
-                  </div>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text c="teal.7" fz="0.82rem">Campanhas</Text>
+                    <Text c="teal.7" fz="0.82rem" style={num}>-{formatCurrency(campaignDiscount)}</Text>
+                  </Group>
                 )}
                 {paymentAdj !== 0 && (
-                  <div className="flex justify-between">
-                    <span className={paymentAdj < 0 ? 'text-emerald-400' : 'text-amber-400'} style={{ fontSize: '0.82rem' }}>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text c={paymentAdj < 0 ? 'teal.7' : 'yellow.7'} fz="0.82rem">
                       Ajuste pagamento
-                    </span>
-                    <span className={`mono ${paymentAdj < 0 ? 'text-emerald-400' : 'text-amber-400'}`} style={{ fontSize: '0.82rem' }}>
+                    </Text>
+                    <Text c={paymentAdj < 0 ? 'teal.7' : 'yellow.7'} fz="0.82rem" style={num}>
                       {paymentAdj < 0 ? '-' : '+'}{formatCurrency(Math.abs(paymentAdj))}
-                    </span>
-                  </div>
+                    </Text>
+                  </Group>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-primary" style={{ fontSize: '0.82rem', fontWeight: 500 }}>IVA ({(IVA_RATE * 100).toFixed(0)}%)</span>
-                  <span className="text-primary mono" style={{ fontSize: '0.82rem', fontWeight: 500 }}>+{formatCurrency(finalTotal * IVA_RATE)}</span>
-                </div>
-                <div className="h-px bg-border my-2" />
-                <div className="flex justify-between">
-                  <span className="text-foreground" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Total c/ IVA</span>
-                  <span className="text-foreground mono" style={{ fontSize: '1rem', fontWeight: 700 }}>{formatCurrency(finalTotal * (1 + IVA_RATE))}</span>
-                </div>
+                <Group justify="space-between" wrap="nowrap">
+                  <Text c="gray.9" fz="0.82rem" fw={500}>IVA ({(IVA_RATE * 100).toFixed(0)}%)</Text>
+                  <Text c="gray.9" fz="0.82rem" fw={500} style={num}>+{formatCurrency(finalTotal * IVA_RATE)}</Text>
+                </Group>
+                <Divider my="xs" />
+                <Group justify="space-between" wrap="nowrap">
+                  <Text fz="0.9rem" fw={600}>Total c/ IVA</Text>
+                  <Text fz="1rem" fw={700} style={num}>{formatCurrency(finalTotal * (1 + IVA_RATE))}</Text>
+                </Group>
                 {step === 'checkout' && selectedPayment && (
-                  <div className="text-muted-foreground text-center pt-1" style={{ fontSize: '0.72rem' }}>
+                  <Text c="dimmed" ta="center" pt={4} fz="0.72rem">
                     Condição: {selectedPayment.label}
-                  </div>
+                  </Text>
                 )}
                 {belowMin && step === 'checkout' && (
-                  <div className="mt-2 rounded-md bg-amber-400/10 border border-amber-400/30 px-2.5 py-2 text-amber-400" style={{ fontSize: '0.72rem' }}>
+                  <Box mt="xs" px={10} py="xs" bg="yellow.0" c="yellow.7" fz="0.72rem" style={{ border: '1px solid var(--mantine-color-yellow-3)', borderRadius: 'var(--mantine-radius-sm)' }}>
                     Pedido mínimo da {policy.label}: {formatCurrency(policyDetails.minOrderValue)}
-                  </div>
+                  </Box>
                 )}
-              </div>
-            </div>
+              </Stack>
+            </Paper>
 
 
             {step === 'cart' ? (
-              <button
+              <Button
                 onClick={() => setStep('checkout')}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-                style={{ fontWeight: 600, fontSize: '0.9rem' }}
+                fullWidth
+                size="md"
+                radius="lg"
+                fw={600}
+                fz="0.9rem"
+                rightSection={<ChevronRight size={16} />}
               >
-                Ir para checkout <ChevronRight className="w-4 h-4" />
-              </button>
+                Ir para checkout
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={() => setStep('done')}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-                style={{ fontWeight: 600, fontSize: '0.9rem' }}
+                fullWidth
+                size="md"
+                radius="lg"
+                fw={600}
+                fz="0.9rem"
+                leftSection={<Check size={16} />}
               >
-                <Check className="w-4 h-4" /> Confirmar pedido
-              </button>
+                Confirmar pedido
+              </Button>
             )}
 
-            <button
+            <Button
               onClick={() => onNavigate('catalog')}
-              className="w-full py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.85rem' }}
+              fullWidth
+              variant="default"
+              radius="lg"
+              c="dimmed"
+              fz="0.85rem"
+              fw={400}
             >
               Continuar comprando
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Stack>
+          </Grid.Col>
+        </Grid>
       )}
-    </div>
+    </Box>
   );
 }

@@ -1,0 +1,191 @@
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+/* botão escuro sobre imagem (excluir) */
+.overlayDelete {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  color: var(--mantine-color-white);
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background: var(--mantine-color-red-6);
+    color: var(--mantine-color-white);
+  }
+}
+
+/* lista de campanhas (painel esquerdo) */
+.campaignItem {
+  display: flex;
+  align-items: center;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.campaignItemActive {
+  background-color: var(--mantine-color-gray-2);
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-2);
+  }
+}
+
+.campaignItemDelete {
+  margin-right: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  color: var(--mantine-color-dimmed);
+  transition: opacity 150ms ease, color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-red-6);
+    background-color: var(--mantine-color-red-0);
+  }
+}
+
+.campaignItem:hover .campaignItemDelete,
+.campaignItemDelete:focus-visible {
+  opacity: 1;
+}
+
+.uploadLabel {
+  cursor: pointer;
+}
+
+/* cartões selecionáveis do assistente */
+.selectCard {
+  display: block;
+  text-align: left;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  overflow: hidden;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-5);
+  }
+}
+
+.selectCardRing {
+  border-color: var(--mantine-color-gray-9);
+  box-shadow: 0 0 0 1px var(--mantine-color-gray-9);
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-9);
+  }
+}
+
+.selectCardFilled {
+  border-color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-1);
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-9);
+  }
+}
+
+/* stepper */
+.stepDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background-color: var(--mantine-color-gray-1);
+  color: var(--mantine-color-dimmed);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.stepDotDone {
+  background-color: var(--mantine-color-gray-9);
+  color: var(--mantine-color-white);
+}
+
+.stepDotCurrent {
+  background-color: var(--mantine-color-gray-9);
+  color: var(--mantine-color-white);
+  box-shadow: 0 0 0 2px var(--mantine-color-white), 0 0 0 4px var(--mantine-color-gray-4);
+}
+
+.stepLine {
+  flex: 1;
+  height: 1px;
+  margin: 0 8px;
+  background-color: var(--mantine-color-gray-3);
+}
+
+.stepLineDone {
+  background-color: var(--mantine-color-gray-9);
+}
+
+/* sugestões da IA */
+.suggestion {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-sm);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    border-color: var(--mantine-color-gray-5);
+  }
+}
+
+.suggestionActive {
+  border-color: var(--mantine-color-violet-3);
+  background-color: var(--mantine-color-violet-0);
+  color: var(--mantine-color-text);
+
+  @mixin hover {
+    border-color: var(--mantine-color-violet-3);
+  }
+}
+
+.promptInput:focus {
+  border-color: var(--mantine-color-violet-4);
+  box-shadow: 0 0 0 1px var(--mantine-color-violet-4);
+}
+
+/* botões desabilitados: mantém a cor original e só esmaece (como o design anterior) */
+.fadeDisabled:disabled,
+.fadeDisabled[data-disabled] {
+  opacity: 0.4;
+  background: var(--button-bg);
+  color: var(--button-color);
+  border: var(--button-bd);
+  cursor: not-allowed;
+}
+
+.fadeDisabledSoft:disabled,
+.fadeDisabledSoft[data-disabled] {
+  opacity: 0.6;
+  background: var(--button-bg);
+  color: var(--button-color);
+  border: var(--button-bd);
+  cursor: not-allowed;
+}

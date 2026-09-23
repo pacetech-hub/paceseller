@@ -1,0 +1,99 @@
+.productCard {
+  display: block;
+  background: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  overflow: hidden;
+  text-align: left;
+  transition: border-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-5);
+  }
+}
+
+.cardFooter {
+  border-top: 1px solid var(--mantine-color-gray-3);
+}
+
+.backLink {
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--mantine-radius-lg);
+  overflow: hidden;
+}
+
+.bentoCell {
+  position: relative;
+  overflow: hidden;
+  background: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  cursor: pointer;
+}
+
+.bentoImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bentoOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  transition: background-color 150ms ease;
+}
+
+.bentoZoomIcon {
+  color: var(--mantine-color-white);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.bentoCell:hover .bentoOverlay {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.bentoCell:hover .bentoZoomIcon {
+  opacity: 1;
+}
+
+.bentoDownload {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  color: var(--mantine-color-white);
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--mantine-color-white);
+  }
+}
+
+.stockRow {
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.stockRow:last-child {
+  border-bottom: 0;
+}
