@@ -1,0 +1,31 @@
+.row {
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-0);
+  }
+}
+
+.pill {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+
+  &[data-active] {
+    background-color: var(--mantine-color-gray-9);
+    border-color: var(--mantine-color-gray-9);
+    color: var(--mantine-color-white);
+  }
+}

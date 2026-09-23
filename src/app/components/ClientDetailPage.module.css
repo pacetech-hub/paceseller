@@ -1,0 +1,73 @@
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.actionCard {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  padding: 16px;
+  transition: border-color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-9);
+    background-color: var(--mantine-color-gray-0);
+  }
+}
+
+.actionIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--mantine-radius-md);
+  background-color: var(--mantine-color-gray-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  transition: background-color 150ms ease;
+}
+
+.actionCard:hover .actionIcon {
+  background-color: var(--mantine-color-gray-2);
+}
+
+.pill {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: color 150ms ease, background-color 150ms ease, opacity 150ms ease;
+
+  &[data-active] {
+    background-color: var(--mantine-color-gray-9);
+    color: var(--mantine-color-white);
+  }
+
+  &[data-variant='muted']:not([data-active]) {
+    background-color: var(--mantine-color-gray-1);
+    color: var(--mantine-color-dimmed);
+
+    @mixin hover {
+      color: var(--mantine-color-text);
+    }
+  }
+
+  &[data-variant='tone']:not([data-active]) {
+    @mixin hover {
+      opacity: 0.8;
+    }
+  }
+}

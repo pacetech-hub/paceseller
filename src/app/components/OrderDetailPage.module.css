@@ -1,0 +1,33 @@
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: $mantine-breakpoint-sm) {
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+.divided {
+  min-width: 0;
+
+  @media (min-width: $mantine-breakpoint-sm) {
+    border-left: 1px solid var(--mantine-color-gray-3);
+    padding-left: 32px;
+  }
+}

@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Badge, Box, Group, Paper, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
 import {
   Search, ChevronRight, Clock,
   CheckCircle2, XCircle, FileCheck2, PackageCheck,
 } from "lucide-react";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
+import classes from "./OrderHistory.module.css";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
 
@@ -17,15 +19,16 @@ interface OrderHistoryProps {
   initialStatusFilter?: string;
 }
 
+// cor Mantine (Open Color) do badge de cada status — usar com <Badge color={...} variant="light">
 export const statusColors: Record<string, string> = {
-  'aprovado': 'text-black bg-black/10',
-  'em análise': 'text-amber-400 bg-amber-400/10',
-  'faturado': 'text-emerald-400 bg-emerald-400/10',
-  'cancelado': 'text-red-400 bg-red-400/10',
-  'entregue': 'text-purple-400 bg-purple-400/10',
+  'aprovado': 'dark',
+  'em análise': 'yellow',
+  'faturado': 'teal',
+  'cancelado': 'red',
+  'entregue': 'violet',
 };
 
-export const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = {
+export const statusIcon: Record<string, React.ComponentType<{ className?: string; size?: number | string }>> = {
   'aprovado': CheckCircle2,
   'em análise': Clock,
   'faturado': FileCheck2,
@@ -79,54 +82,66 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
       <div
         onClick={onOpen}
-        className="p-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+        className={classes.row}
         style={{ display: 'grid', gridTemplateColumns: orderGridTemplate(profile), columnGap: '1rem', alignItems: 'center' }}
       >
         {/* column 1: order info */}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[order.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-              <StatusIcon className="w-3 h-3" />
+        <Box miw={0}>
+          <Group gap={8} mb={4}>
+            <Badge
+              color={statusColors[order.status]}
+              variant="light"
+              radius="xl"
+              tt="none"
+              h="auto"
+              px={8}
+              py={2}
+              fz="0.7rem"
+              fw={600}
+              leftSection={<StatusIcon size={12} />}
+              styles={{ section: { marginInlineEnd: 4 } }}
+              style={{ flexShrink: 0 }}
+            >
               {order.status}
-            </span>
-            <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
-          </div>
-          <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-            <span className="mono">{order.id}</span> — {productName}
-          </p>
-        </div>
+            </Badge>
+            <Text span c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
+          </Group>
+          <Text truncate size="0.85rem" fw={600}>
+            <Text span inherit style={{ fontVariantNumeric: 'tabular-nums' }}>{order.id}</Text> — {productName}
+          </Text>
+        </Box>
 
         {/* column 2: cliente (admin/rep only) */}
         {profile !== 'lojista' && (
-          <div className="min-w-0">
-            <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{client?.name ?? order.client}</p>
-            <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{client ? `${client.city} / ${client.state}` : ''}</p>
-          </div>
+          <Box miw={0}>
+            <Text truncate size="0.8rem" fw={500}>{client?.name ?? order.client}</Text>
+            <Text c="dimmed" truncate size="0.7rem">{client ? `${client.city} / ${client.state}` : ''}</Text>
+          </Box>
         )}
 
         {/* column 3: representante (hidden for rep, viewing their own orders) */}
         {profile !== 'rep' && (
-          <div className="min-w-0">
-            <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.rep}</p>
-          </div>
+          <Box miw={0}>
+            <Text truncate size="0.8rem" fw={500}>{order.rep}</Text>
+          </Box>
         )}
 
         {/* column 4: quantidade */}
-        <div className="min-w-0">
-          <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
-        </div>
+        <Box miw={0}>
+          <Text truncate size="0.8rem" fw={500}>{order.items} pares</Text>
+        </Box>
 
         {/* column 5: total */}
-        <div className="text-right min-w-0">
-          <p className="text-foreground mono truncate" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
-        </div>
+        <Box ta="right" miw={0}>
+          <Text truncate size="0.95rem" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(order.total)}</Text>
+        </Box>
 
-        <ChevronRight className="w-4 h-4 text-muted-foreground justify-self-center" />
+        <ChevronRight size={16} color="var(--mantine-color-dimmed)" style={{ justifySelf: 'center' }} />
       </div>
-    </div>
+    </Paper>
   );
 }
 
@@ -152,40 +167,46 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
     .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap={20} p="lg" maw={1400} mx="auto" w="100%">
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar pedido, cliente, rep..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.82rem' }}
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <Group gap="sm">
+        <TextInput
+          type="text"
+          placeholder="Buscar pedido, cliente, rep..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          flex={1}
+          miw={160}
+          leftSection={<Search size={14} />}
+          styles={{ input: { fontSize: '0.82rem' } }}
+        />
+        <Group gap={6}>
           {statuses.map(s => (
-            <button
+            <UnstyledButton
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-full transition-colors capitalize ${statusFilter === s ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.75rem', fontWeight: 500 }}
+              className={classes.pill}
+              data-active={statusFilter === s || undefined}
             >
               {s}
-            </button>
+            </UnstyledButton>
           ))}
-        </div>
-      </div>
+        </Group>
+      </Group>
 
       {/* Orders */}
-      <div className="space-y-3">
+      <Stack gap="sm">
         {filtered.length > 0 && (
-          <div
-            className="sticky top-0 z-10 bg-card border border-border rounded-xl px-4 py-2.5 text-muted-foreground"
+          <Paper
+            withBorder
+            radius="lg"
+            px="md"
+            py={10}
+            c="dimmed"
+            pos="sticky"
+            top={0}
             style={{
+              zIndex: 10,
               display: 'grid',
               gridTemplateColumns: orderGridTemplate(profile),
               columnGap: '1rem',
@@ -196,15 +217,15 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
               letterSpacing: '0.04em',
             }}
           >
-            <div className="min-w-0">Pedido</div>
-            {profile !== 'lojista' && <div className="min-w-0">Cliente</div>}
-            {profile !== 'rep' && <div className="min-w-0">Representante</div>}
-            <div className="min-w-0">Quantidade</div>
-            <div className="text-right min-w-0">Total</div>
+            <Box miw={0}>Pedido</Box>
+            {profile !== 'lojista' && <Box miw={0}>Cliente</Box>}
+            {profile !== 'rep' && <Box miw={0}>Representante</Box>}
+            <Box miw={0}>Quantidade</Box>
+            <Box ta="right" miw={0}>Total</Box>
             <div />
-          </div>
+          </Paper>
         )}
-        <div className="space-y-3">
+        <Stack gap="sm">
           {filtered.map(order => (
             <OrderCard
               key={order.id}
@@ -215,14 +236,16 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           ))}
 
           {filtered.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-              <Clock className="w-10 h-10 text-muted-foreground/30 mb-3" />
-              <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido encontrado</p>
-              <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
-            </div>
+            <Paper withBorder radius="lg" py={64} ta="center">
+              <Stack gap={0} align="center" justify="center">
+                <Clock size={40} color="var(--mantine-color-gray-4)" style={{ marginBottom: 12 }} />
+                <Text fw={600}>Nenhum pedido encontrado</Text>
+                <Text c="dimmed" mt={4} size="0.85rem">Tente ajustar os filtros de busca</Text>
+              </Stack>
+            </Paper>
           )}
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }

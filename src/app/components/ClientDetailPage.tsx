@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
+import { Badge, Box, Button, Center, Group, Paper, Progress, SimpleGrid, Stack, Text, Title, UnstyledButton } from "@mantine/core";
 import {
   ChevronLeft, ChevronDown, MapPin, Plus, ShoppingCart, BarChart3, Clock, PackageX, TrendingUp, PackageMinus, PackageSearch, Package2,
 } from "lucide-react";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
+import classes from "./ClientDetailPage.module.css";
 
 interface ClientDetailPageProps {
   client: Client | null;
@@ -11,9 +13,10 @@ interface ClientDetailPageProps {
   cartCount: number;
 }
 
+// cor Mantine do badge de status do cliente
 const statusColors: Record<Client['status'], string> = {
-  'ativo': 'text-emerald-400 bg-emerald-400/10',
-  'inativo': 'text-red-400 bg-red-400/10',
+  'ativo': 'teal',
+  'inativo': 'red',
 };
 
 const formatOrderDate = (dateStr: string) =>
@@ -28,11 +31,12 @@ function seededOrderCount(clientId: string): number {
 
 type StockStatusKey = 'zerado' | 'alto-giro' | 'chegando-ao-fim' | 'parado';
 
-const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; cls: string; icon: any }> = {
-  'zerado': { label: 'Estoque zerado', cls: 'text-red-400 bg-red-400/10', icon: PackageX },
-  'alto-giro': { label: 'Alto giro', cls: 'text-emerald-400 bg-emerald-400/10', icon: TrendingUp },
-  'chegando-ao-fim': { label: 'Estoque chegando ao fim', cls: 'text-amber-400 bg-amber-400/10', icon: PackageMinus },
-  'parado': { label: 'Parado no estoque', cls: 'text-muted-foreground bg-secondary', icon: PackageSearch },
+// c = cor do texto, bg = cor de fundo (tokens Mantine)
+const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; c: string; bg: string; icon: any }> = {
+  'zerado': { label: 'Estoque zerado', c: 'var(--mantine-color-red-7)', bg: 'var(--mantine-color-red-0)', icon: PackageX },
+  'alto-giro': { label: 'Alto giro', c: 'var(--mantine-color-teal-7)', bg: 'var(--mantine-color-teal-0)', icon: TrendingUp },
+  'chegando-ao-fim': { label: 'Estoque chegando ao fim', c: 'var(--mantine-color-yellow-7)', bg: 'var(--mantine-color-yellow-0)', icon: PackageMinus },
+  'parado': { label: 'Parado no estoque', c: 'var(--mantine-color-dimmed)', bg: 'var(--mantine-color-gray-1)', icon: PackageSearch },
 };
 
 // mock: classificação determinística do status de estoque por produto
@@ -108,16 +112,14 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
   if (!client) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto space-y-4">
-        <button
-          onClick={() => onNavigate('clients')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          style={{ fontSize: '0.82rem', fontWeight: 500 }}
-        >
-          <ChevronLeft className="w-4 h-4" /> Voltar para Clientes
-        </button>
-        <p className="text-muted-foreground">Nenhum cliente selecionado.</p>
-      </div>
+      <Stack gap="md" p="lg" maw={1400} mx="auto">
+        <Box>
+          <UnstyledButton onClick={() => onNavigate('clients')} className={classes.backLink}>
+            <ChevronLeft size={16} /> Voltar para Clientes
+          </UnstyledButton>
+        </Box>
+        <Text c="dimmed">Nenhum cliente selecionado.</Text>
+      </Stack>
     );
   }
 
@@ -127,266 +129,297 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   const typeRanks = typeRanking(client.id);
   const stuckProducts = products.filter(p => stockStatusOf(p) === 'parado');
 
+  const pillBadge = {
+    variant: 'light' as const,
+    radius: 'xl' as const,
+    tt: 'none' as const,
+    h: 'auto',
+    px: 8,
+    py: 2,
+    fz: '0.7rem',
+    fw: 600,
+  };
+
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
-      <button
-        onClick={() => onNavigate('clients')}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        style={{ fontSize: '0.82rem', fontWeight: 500 }}
-      >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Clientes
-      </button>
+    <Stack gap={20} p="lg" maw={1400} mx="auto">
+      <Box>
+        <UnstyledButton onClick={() => onNavigate('clients')} className={classes.backLink}>
+          <ChevronLeft size={16} /> Voltar para Clientes
+        </UnstyledButton>
+      </Box>
 
       {/* Header */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary" style={{ fontSize: '1rem', fontWeight: 700 }}>{client.avatar}</span>
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className={`px-2 py-0.5 rounded-full ${statusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+      <Paper withBorder radius="lg" p={20}>
+        <Group gap="md" wrap="nowrap" miw={0}>
+          <Center w={56} h={56} bg="gray.2" style={{ borderRadius: '50%', flexShrink: 0 }}>
+            <Text span c="gray.9" size="1rem" fw={700}>{client.avatar}</Text>
+          </Center>
+          <Box miw={0}>
+            <Group gap={8} mb={4}>
+              <Badge {...pillBadge} color={statusColors[client.status]}>
                 {client.status}
-              </span>
+              </Badge>
               {client.inadimplente && (
-                <span className="px-2 py-0.5 rounded-full text-amber-400 bg-amber-400/10" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                <Badge {...pillBadge} color="yellow">
                   inadimplente
-                </span>
+                </Badge>
               )}
-            </div>
-            <h2 className="text-foreground mb-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
-            <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.8rem' }}>
-              <MapPin className="w-3.5 h-3.5" /> {client.city}/{client.state}
-            </p>
-          </div>
-        </div>
+            </Group>
+            <Title order={2} mb={4} size="1.1rem" fw={700}>{client.name}</Title>
+            <Group gap={4} wrap="nowrap">
+              <MapPin size={14} color="var(--mantine-color-dimmed)" />
+              <Text c="dimmed" size="0.8rem">{client.city}/{client.state}</Text>
+            </Group>
+          </Box>
+        </Group>
 
-        <button
+        <UnstyledButton
           onClick={() => setExpanded(v => !v)}
-          className="flex items-center gap-1 text-primary mt-3"
-          style={{ fontSize: '0.78rem', fontWeight: 600 }}
+          mt="sm"
+          c="gray.9"
+          fz="0.78rem"
+          fw={600}
+          style={{ display: 'flex', alignItems: 'center', gap: 4 }}
         >
           {expanded ? 'Ver menos informações' : 'Ver mais informações'}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-        </button>
+          <ChevronDown size={14} style={{ transition: 'transform 150ms ease', transform: expanded ? 'rotate(180deg)' : undefined }} />
+        </UnstyledButton>
 
         {expanded && (
-          <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SimpleGrid
+            cols={{ base: 1, sm: 3 }}
+            spacing="md"
+            mt="sm"
+            pt="sm"
+            style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}
+          >
             <div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Endereço</p>
-              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.address}</p>
+              <Text c="dimmed" size="0.68rem" fw={600}>Endereço</Text>
+              <Text size="0.82rem" fw={600}>{client.address}</Text>
             </div>
             <div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>CNPJ</p>
-              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.cnpj}</p>
+              <Text c="dimmed" size="0.68rem" fw={600}>CNPJ</Text>
+              <Text size="0.82rem" fw={600}>{client.cnpj}</Text>
             </div>
             <div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Representante</p>
-              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.rep}</p>
+              <Text c="dimmed" size="0.68rem" fw={600}>Representante</Text>
+              <Text size="0.82rem" fw={600}>{client.rep}</Text>
             </div>
-          </div>
+          </SimpleGrid>
         )}
-      </div>
+      </Paper>
 
       {/* Último pedido e ticket médio */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <Clock className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Último pedido</p>
-          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatOrderDate(client.lastOrder)}</p>
-        </div>
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <Paper withBorder radius="lg" p="md">
+          <Center w={36} h={36} bg="gray.1" mb="sm" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+            <Clock size={16} color="var(--mantine-color-gray-9)" />
+          </Center>
+          <Text size="0.85rem" fw={600}>Último pedido</Text>
+          <Text mt={2} size="1.05rem" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatOrderDate(client.lastOrder)}</Text>
+        </Paper>
 
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <BarChart3 className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
-          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
-        </div>
-      </div>
+        <Paper withBorder radius="lg" p="md">
+          <Center w={36} h={36} bg="gray.1" mb="sm" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+            <BarChart3 size={16} color="var(--mantine-color-gray-9)" />
+          </Center>
+          <Text size="0.85rem" fw={600}>Ticket médio por pedido</Text>
+          <Text mt={2} size="1.05rem" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(avgTicket)}</Text>
+        </Paper>
+      </SimpleGrid>
 
       {/* Ações de carrinho */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <button
-          onClick={() => onNavigate('carts')}
-          className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
-        >
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <Plus className="w-4 h-4 text-primary" />
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <UnstyledButton onClick={() => onNavigate('carts')} className={classes.actionCard}>
+          <div className={classes.actionIcon}>
+            <Plus size={16} color="var(--mantine-color-gray-9)" />
           </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Novo carrinho</p>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Criar um novo carrinho para este cliente</p>
-        </button>
+          <Text size="0.85rem" fw={600}>Novo carrinho</Text>
+          <Text c="dimmed" mt={2} size="0.75rem">Criar um novo carrinho para este cliente</Text>
+        </UnstyledButton>
 
-        <button
-          onClick={() => onNavigate('carts')}
-          className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
-        >
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <ShoppingCart className="w-4 h-4 text-primary" />
+        <UnstyledButton onClick={() => onNavigate('carts')} className={classes.actionCard}>
+          <div className={classes.actionIcon}>
+            <ShoppingCart size={16} color="var(--mantine-color-gray-9)" />
           </div>
-          <div className="flex items-center gap-2">
-            <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Carrinhos</p>
-            <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.68rem', fontWeight: 700 }}>{cartCount}</span>
-          </div>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>
+          <Group gap={8}>
+            <Text size="0.85rem" fw={600}>Carrinhos</Text>
+            <Badge variant="light" color="gray" c="gray.9" bg="gray.2" radius="xl" tt="none" h="auto" px={6} py={2} fz="0.68rem" fw={700}>{cartCount}</Badge>
+          </Group>
+          <Text c="dimmed" mt={2} size="0.75rem">
             {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
-          </p>
-        </button>
-      </div>
+          </Text>
+        </UnstyledButton>
+      </SimpleGrid>
 
       {/* Desempenho de vendas e estoque */}
-      <div className="space-y-4">
-        <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Desempenho de vendas e estoque</h3>
+      <Stack gap="md">
+        <Title order={3} size="0.95rem" fw={600}>Desempenho de vendas e estoque</Title>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Números com mais vendas</h4>
-            <div className="space-y-3">
+        <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={4} mb="sm" size="0.85rem" fw={600}>Números com mais vendas</Title>
+            <Stack gap="sm">
               {sizeRanks.map(s => (
                 <div key={s.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{s.label}</span>
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{s.pct}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${s.pct}%` }} />
-                  </div>
+                  <Group justify="space-between" mb={4} wrap="nowrap">
+                    <Text span size="0.8rem" fw={600}>{s.label}</Text>
+                    <Text span c="dimmed" size="0.7rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{s.pct}%</Text>
+                  </Group>
+                  <Progress value={s.pct} size={6} radius="xl" color="gray.9" bg="gray.1" />
                 </div>
               ))}
-            </div>
-          </div>
+            </Stack>
+          </Paper>
 
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Cores com mais vendas</h4>
-            <div className="space-y-3">
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={4} mb="sm" size="0.85rem" fw={600}>Cores com mais vendas</Title>
+            <Stack gap="sm">
               {colorRanks.map(c => (
                 <div key={c.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                      <span className="w-2.5 h-2.5 rounded-full border border-border/60 flex-shrink-0" style={{ background: COLOR_SWATCH[c.key] ?? '#999' }} />
-                      {c.label}
-                    </span>
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{c.pct}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${c.pct}%` }} />
-                  </div>
+                  <Group justify="space-between" mb={4} wrap="nowrap">
+                    <Group gap={6} wrap="nowrap">
+                      <Box
+                        w={10}
+                        h={10}
+                        style={{ borderRadius: '50%', border: '1px solid var(--mantine-color-gray-2)', flexShrink: 0, background: COLOR_SWATCH[c.key] ?? '#999' }}
+                      />
+                      <Text span size="0.8rem" fw={600}>{c.label}</Text>
+                    </Group>
+                    <Text span c="dimmed" size="0.7rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{c.pct}%</Text>
+                  </Group>
+                  <Progress value={c.pct} size={6} radius="xl" color="gray.9" bg="gray.1" />
                 </div>
               ))}
-            </div>
-          </div>
+            </Stack>
+          </Paper>
 
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Tipo com mais vendas</h4>
-            <div className="space-y-3">
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={4} mb="sm" size="0.85rem" fw={600}>Tipo com mais vendas</Title>
+            <Stack gap="sm">
               {typeRanks.map(t => (
                 <div key={t.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{t.label}</span>
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{t.pct}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${t.pct}%` }} />
-                  </div>
+                  <Group justify="space-between" mb={4} wrap="nowrap">
+                    <Text span size="0.8rem" fw={600}>{t.label}</Text>
+                    <Text span c="dimmed" size="0.7rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{t.pct}%</Text>
+                  </Group>
+                  <Progress value={t.pct} size={6} radius="xl" color="gray.9" bg="gray.1" />
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Paper>
+        </SimpleGrid>
 
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-              <PackageSearch className="w-4 h-4 text-muted-foreground" />
-            </div>
+        <Paper withBorder radius="lg" p={20}>
+          <Group gap={10} mb="sm" wrap="nowrap">
+            <Center w={32} h={32} bg="gray.1" style={{ borderRadius: 'var(--mantine-radius-md)', flexShrink: 0 }}>
+              <PackageSearch size={16} color="var(--mantine-color-dimmed)" />
+            </Center>
             <div>
-              <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Produtos parados no estoque</h4>
-              <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Baixo giro nos últimos meses — considere oferecer com condição especial</p>
+              <Title order={4} size="0.85rem" fw={600}>Produtos parados no estoque</Title>
+              <Text c="dimmed" size="0.72rem">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
             </div>
-          </div>
-          <div className="space-y-2">
+          </Group>
+          <Stack gap={8}>
             {stuckProducts.map(p => (
-              <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/60">
-                <ProductThumb src={p.image} alt={p.name} className="w-10 h-10 rounded-lg flex-shrink-0" iconClassName="w-4 h-4" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{p.name}</p>
-                  <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{p.line} · {p.reference}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{p.soldUnits} un.</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>vendidas · giro baixo</p>
-                </div>
-              </div>
+              <Group
+                key={p.id}
+                gap="sm"
+                wrap="nowrap"
+                p={10}
+                style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-2)' }}
+              >
+                <ProductThumb src={p.image} alt={p.name} w={40} h={40} radius="var(--mantine-radius-md)" iconSize={16} />
+                <Box miw={0} flex={1}>
+                  <Text truncate size="0.82rem" fw={600}>{p.name}</Text>
+                  <Text c="dimmed" truncate size="0.7rem">{p.line} · {p.reference}</Text>
+                </Box>
+                <Box ta="right" style={{ flexShrink: 0 }}>
+                  <Text size="0.78rem" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{p.soldUnits} un.</Text>
+                  <Text c="dimmed" size="0.65rem">vendidas · giro baixo</Text>
+                </Box>
+              </Group>
             ))}
             {stuckProducts.length === 0 && (
-              <p className="text-muted-foreground text-center py-4" style={{ fontSize: '0.8rem' }}>
+              <Text c="dimmed" ta="center" py="md" size="0.8rem">
                 Nenhum produto parado no estoque no momento.
-              </p>
+              </Text>
             )}
-          </div>
-        </div>
-      </div>
+          </Stack>
+        </Paper>
+      </Stack>
 
       {/* Sugestões de venda */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-          <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Sugestões de venda</h3>
-        </div>
+      <Paper withBorder radius="lg" p={20}>
+        <Group justify="space-between" gap={8} mb="sm">
+          <Title order={3} size="0.95rem" fw={600}>Sugestões de venda</Title>
+        </Group>
 
-        <div className="flex items-center gap-1.5 flex-wrap mb-4">
-          <button
+        <Group gap={6} mb="md">
+          <UnstyledButton
             onClick={() => setStockFilter('todos')}
-            className={`px-2.5 py-1 rounded-full transition-colors ${stockFilter === 'todos' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-            style={{ fontSize: '0.72rem', fontWeight: 600 }}
+            className={classes.pill}
+            data-variant="muted"
+            data-active={stockFilter === 'todos' || undefined}
           >
             Todos
-          </button>
+          </UnstyledButton>
           {(Object.keys(STOCK_STATUS_CONFIG) as StockStatusKey[]).map(key => {
             const cfg = STOCK_STATUS_CONFIG[key];
+            const active = stockFilter === key;
             return (
-              <button
+              <UnstyledButton
                 key={key}
                 onClick={() => setStockFilter(key)}
-                className={`px-2.5 py-1 rounded-full transition-colors ${stockFilter === key ? 'bg-primary text-primary-foreground' : `${cfg.cls} hover:opacity-80`}`}
-                style={{ fontSize: '0.72rem', fontWeight: 600 }}
+                className={classes.pill}
+                data-variant="tone"
+                data-active={active || undefined}
+                style={active ? undefined : { color: cfg.c, backgroundColor: cfg.bg }}
               >
                 {cfg.label}
-              </button>
+              </UnstyledButton>
             );
           })}
-        </div>
+        </Group>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
           {filteredBuyProducts.map(p => (
             <BuyProductCard key={p.id} product={p} onBuy={() => onNavigate('order-grade')} />
           ))}
           {filteredBuyProducts.length === 0 && (
-            <p className="text-muted-foreground col-span-full text-center py-6" style={{ fontSize: '0.8rem' }}>
+            <Text c="dimmed" ta="center" py="lg" size="0.8rem" style={{ gridColumn: '1 / -1' }}>
               Nenhum produto encontrado para este filtro.
-            </p>
+            </Text>
           )}
-        </div>
-      </div>
-    </div>
+        </SimpleGrid>
+      </Paper>
+    </Stack>
   );
 }
 
-function ProductThumb({ src, alt, className, iconClassName, bordered = true }: { src: string; alt: string; className?: string; iconClassName?: string; bordered?: boolean }) {
+function ProductThumb({ src, alt, w, h, radius, iconSize = 32, bordered = true }: { src: string; alt: string; w: number | string; h: number | string; radius?: string; iconSize?: number; bordered?: boolean }) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className={`bg-white overflow-hidden ${bordered ? 'border border-border/60' : ''} ${className ?? ''}`}>
+    <Box
+      w={w}
+      h={h}
+      bg="white"
+      style={{
+        overflow: 'hidden',
+        flexShrink: 0,
+        borderRadius: radius,
+        border: bordered ? '1px solid var(--mantine-color-gray-2)' : undefined,
+      }}
+    >
       {!imgError ? (
-        <img src={src} alt={alt} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+        <img src={src} alt={alt} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setImgError(true)} />
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <Package2 className={`text-muted-foreground/30 ${iconClassName ?? 'w-8 h-8'}`} />
-        </div>
+        <Center w="100%" h="100%">
+          <Package2 size={iconSize} color="var(--mantine-color-gray-4)" />
+        </Center>
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -395,27 +428,34 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
   const Icon = cfg.icon;
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
-      <div className="aspect-square relative">
-        <ProductThumb src={product.image} alt={product.name} className="w-full h-full" iconClassName="w-8 h-8" bordered={false} />
-        <span className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full ${cfg.cls}`} style={{ fontSize: '0.62rem', fontWeight: 700 }}>
-          <Icon className="w-3 h-3" /> {cfg.label}
-        </span>
-      </div>
-      <div className="p-3 flex flex-col flex-1">
-        <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{product.name}</p>
-        <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{product.line} · {product.reference}</p>
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/60">
-          <span className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(product.price)}</span>
-          <button
-            onClick={onBuy}
-            className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-            style={{ fontSize: '0.72rem', fontWeight: 600 }}
-          >
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Box pos="relative" style={{ aspectRatio: '1 / 1' }}>
+        <ProductThumb src={product.image} alt={product.name} w="100%" h="100%" iconSize={32} bordered={false} />
+        <Group
+          gap={4}
+          wrap="nowrap"
+          pos="absolute"
+          top={8}
+          left={8}
+          px={6}
+          py={2}
+          fz="0.62rem"
+          fw={700}
+          style={{ borderRadius: 9999, color: cfg.c, backgroundColor: cfg.bg }}
+        >
+          <Icon size={12} /> {cfg.label}
+        </Group>
+      </Box>
+      <Stack gap={0} p="sm" flex={1}>
+        <Text truncate size="0.82rem" fw={600}>{product.name}</Text>
+        <Text c="dimmed" truncate size="0.7rem">{product.line} · {product.reference}</Text>
+        <Group justify="space-between" wrap="nowrap" mt={8} pt={8} style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
+          <Text span size="0.85rem" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(product.price)}</Text>
+          <Button onClick={onBuy} size="compact-sm" px={10} fz="0.72rem" fw={600}>
             Comprar
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Group>
+      </Stack>
+    </Paper>
   );
 }

@@ -1,0 +1,97 @@
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--mantine-radius-md);
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+
+  &[data-active] {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.policyCard {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  padding: 20px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-6);
+    box-shadow: var(--mantine-shadow-xs);
+  }
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.iconBtn {
+  padding: 6px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-dimmed);
+  display: inline-flex;
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.dangerBtn {
+  padding: 6px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-dimmed);
+  display: inline-flex;
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-red-6);
+  }
+}
+
+.viewCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: left;
+  border-radius: var(--mantine-radius-lg);
+  border: 1px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-white);
+  transition: border-color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-5);
+    background-color: var(--mantine-color-gray-0);
+  }
+
+  &[data-active] {
+    border-color: var(--mantine-color-gray-9);
+    background-color: var(--mantine-color-gray-1);
+  }
+}

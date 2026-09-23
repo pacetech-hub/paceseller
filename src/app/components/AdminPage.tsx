@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Box, Button, Center, Grid, Group, NativeSelect, Paper, SimpleGrid, Stack, Table, Text, TextInput, Title, Badge, UnstyledButton } from "@mantine/core";
 import { Users, Boxes, Tag, Settings, Shield, Plus, Edit3, Trash2, Search, ChevronRight, ArrowLeft, Info, MapPin, UserCircle2, Layers, Package, Lock, Building2, Briefcase, Store, PlugZap } from "lucide-react";
 
 import { clients, formatDate } from "../data/mockData";
@@ -7,6 +8,7 @@ import { linkedUsers } from "../data/linkedUsers";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
+import classes from "./AdminPage.module.css";
 
 const tabs = [
   { id: 'industry-stock', label: 'Estoque Industrial', icon: Boxes },
@@ -19,10 +21,17 @@ const tabs = [
 
 function ErpSyncNotice({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
-      <PlugZap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-      <p className="text-foreground" style={{ fontSize: '0.78rem', lineHeight: 1.55 }}>{text}</p>
-    </div>
+    <Group
+      align="flex-start"
+      gap={10}
+      wrap="nowrap"
+      p={14}
+      bg="gray.0"
+      style={{ borderRadius: 'var(--mantine-radius-lg)', border: '1px solid var(--mantine-color-gray-2)' }}
+    >
+      <PlugZap size={16} color="var(--mantine-color-gray-9)" style={{ flexShrink: 0, marginTop: 2 }} />
+      <Text size="0.78rem" lh={1.55}>{text}</Text>
+    </Group>
   );
 }
 
@@ -69,6 +78,26 @@ const coveredClientsMock = [
   { name: 'Calçados Estrela', city: 'Curitiba, PR', rep: 'Carlos Mendes' },
 ];
 
+const searchInputStyles = {
+  input: { fontSize: '0.82rem', backgroundColor: 'var(--mantine-color-gray-0)' },
+};
+
+const formInputStyles = {
+  label: { fontSize: '0.75rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)', marginBottom: 4 },
+  input: { fontSize: '0.82rem', backgroundColor: 'var(--mantine-color-gray-0)' },
+};
+
+const pillProps = {
+  variant: 'light' as const,
+  radius: 'xl' as const,
+  tt: 'none' as const,
+  h: 'auto',
+  px: 8,
+  py: 2,
+  fz: '0.65rem',
+  fw: 600,
+};
+
 export function AdminPage() {
   const [activeTab, setActiveTab] = useState('industry-stock');
   const [search, setSearch] = useState('');
@@ -92,24 +121,27 @@ export function AdminPage() {
   };
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap={20} p="lg" maw={1400} mx="auto" w="100%">
       {/* Tab bar */}
-      <div className="flex items-center gap-1 bg-card border border-border rounded-xl p-1 overflow-x-auto">
-        {tabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors flex-shrink-0 ${activeTab === tab.id ? 'bg-secondary/60 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'}`}
-              style={{ fontSize: '0.82rem', fontWeight: activeTab === tab.id ? 600 : 400 }}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <Paper withBorder radius="lg" p={4}>
+        <Group gap={4} wrap="nowrap" style={{ overflowX: 'auto' }}>
+          {tabs.map(tab => {
+            const Icon = tab.icon;
+            return (
+              <UnstyledButton
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={classes.tab}
+                data-active={activeTab === tab.id || undefined}
+                style={{ fontWeight: activeTab === tab.id ? 600 : 400 }}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </UnstyledButton>
+            );
+          })}
+        </Group>
+      </Paper>
 
       {/* Estoque Industrial Tab */}
       {activeTab === 'industry-stock' && (
@@ -123,43 +155,48 @@ export function AdminPage() {
 
       {/* Pricing Tab */}
       {activeTab === 'pricing' && !selectedPolicyId && (
-        <div className="space-y-4">
+        <Stack gap="md">
           <ErpSyncNotice text="Campanhas comerciais são somente leitura neste momento — os dados vêm diretamente das regras cadastradas no ERP da Tesla." />
-          <div className="flex items-center justify-between">
-            <p className="text-muted-foreground" style={{ fontSize: '0.85rem' }}>Políticas de preço ativas</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Group justify="space-between">
+            <Text c="dimmed" size="0.85rem">Políticas de preço ativas</Text>
+          </Group>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             {pricePolicies.map(policy => (
-              <button
+              <UnstyledButton
                 key={policy.id}
                 onClick={() => setSelectedPolicyId(policy.id)}
-                className="text-left bg-card border border-border rounded-xl p-5 hover:border-primary/60 hover:shadow-sm transition-all"
+                className={classes.policyCard}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>{policy.name}</h3>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                </div>
-                <div className="grid grid-cols-3 gap-3 mb-3">
+                <Group justify="space-between" align="flex-start" wrap="nowrap" mb="sm">
+                  <Title order={3} size="0.9rem" fw={600}>{policy.name}</Title>
+                  <ChevronRight size={14} color="var(--mantine-color-dimmed)" />
+                </Group>
+                <SimpleGrid cols={3} spacing="sm" mb="sm">
                   {[
                     { label: 'Desconto', value: policy.discount, highlight: true },
                     { label: 'Pedido mín.', value: policy.minOrder, mono: true },
                     { label: 'Pagamento', value: policy.payment },
                   ].map(detail => (
                     <div key={detail.label}>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{detail.label}</p>
-                      <p className={`${detail.highlight ? 'text-primary' : 'text-foreground'} ${detail.mono ? 'mono' : ''}`} style={{ fontSize: '0.85rem', fontWeight: detail.highlight ? 700 : 500 }}>
+                      <Text c="dimmed" size="0.7rem">{detail.label}</Text>
+                      <Text
+                        c={detail.highlight ? 'gray.9' : undefined}
+                        size="0.85rem"
+                        fw={detail.highlight ? 700 : 500}
+                        style={detail.mono ? { fontVariantNumeric: 'tabular-nums' } : undefined}
+                      >
                         {detail.value}
-                      </p>
+                      </Text>
                     </div>
                   ))}
-                </div>
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-                  <span className="text-foreground font-semibold">{policy.clients}</span> clientes nesta política
-                </p>
-              </button>
+                </SimpleGrid>
+                <Text c="dimmed" size="0.72rem">
+                  <Text span fw={600} c="var(--mantine-color-text)" inherit>{policy.clients}</Text> clientes nesta política
+                </Text>
+              </UnstyledButton>
             ))}
-          </div>
-        </div>
+          </SimpleGrid>
+        </Stack>
       )}
 
       {activeTab === 'pricing' && selectedPolicyId && (() => {
@@ -168,121 +205,159 @@ export function AdminPage() {
         const covered = selectedPolicyId === 'P002' ? coveredClientsMock : coveredClientsMock.slice(0, Math.min(policy.clients, coveredClientsMock.length));
 
         const Section = ({ icon: Icon, title, hint, children }: any) => (
-          <div className="bg-card border border-border rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-1">
-              <Icon className="w-3.5 h-3.5 text-primary" />
-              <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{title}</h4>
-            </div>
-            {hint && <p className="text-muted-foreground mb-3" style={{ fontSize: '0.72rem' }}>{hint}</p>}
-            <div className="mt-3">{children}</div>
-          </div>
+          <Paper withBorder radius="lg" p={20}>
+            <Group gap="xs" mb={4} wrap="nowrap">
+              <Icon size={14} color="var(--mantine-color-gray-9)" />
+              <Title order={4} size="0.85rem" fw={600}>{title}</Title>
+            </Group>
+            {hint && <Text c="dimmed" mb="sm" size="0.72rem">{hint}</Text>}
+            <Box mt="sm">{children}</Box>
+          </Paper>
         );
 
         const Chips = ({ items }: { items: string[] }) => (
-          <div className="flex flex-wrap gap-1.5">
-            {items.length === 0 && <span className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Nenhum item nesta condição</span>}
+          <Group gap={6}>
+            {items.length === 0 && <Text span c="dimmed" size="0.75rem">Nenhum item nesta condição</Text>}
             {items.map(v => (
-              <span key={v} className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20" style={{ fontSize: '0.75rem', fontWeight: 500 }}>
+              <Badge
+                key={v}
+                variant="light"
+                color="gray"
+                radius="xl"
+                tt="none"
+                c="gray.9"
+                bg="gray.1"
+                h="auto"
+                px={10}
+                py={4}
+                fz="0.75rem"
+                fw={500}
+                style={{ border: '1px solid var(--mantine-color-gray-3)' }}
+              >
                 {v}
-              </span>
+              </Badge>
             ))}
-          </div>
+          </Group>
         );
 
         return (
-          <div className="space-y-5">
-            <button onClick={() => setSelectedPolicyId(null)} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.78rem' }}>
-              <ArrowLeft className="w-3.5 h-3.5" /> Voltar para políticas
-            </button>
+          <Stack gap={20}>
+            <Box>
+              <UnstyledButton onClick={() => setSelectedPolicyId(null)} className={classes.backLink}>
+                <ArrowLeft size={14} /> Voltar para políticas
+              </UnstyledButton>
+            </Box>
 
             <ErpSyncNotice text="Esta política é somente leitura — a regra ativa vem do ERP da Tesla." />
 
             {/* Identidade */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <div className="mb-4">
-                <h2 className="text-foreground mb-1" style={{ fontWeight: 700, fontSize: '1.15rem' }}>{policy.name}</h2>
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>Configuração da política comercial</p>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Paper withBorder radius="lg" p={20}>
+              <Box mb="md">
+                <Title order={2} mb={4} size="1.15rem" fw={700}>{policy.name}</Title>
+                <Text c="dimmed" size="0.78rem">Configuração da política comercial</Text>
+              </Box>
+              <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
                 {[
                   { label: 'Desconto', value: policy.discount, highlight: true },
                   { label: 'Pedido mínimo', value: policy.minOrder, mono: true },
                   { label: 'Pagamento', value: policy.payment },
                   { label: 'Clientes cobertos', value: String(policy.clients) },
                 ].map(d => (
-                  <div key={d.label} className="rounded-lg bg-secondary/30 p-3">
-                    <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d.label}</p>
-                    <p className={`${d.highlight ? 'text-primary' : 'text-foreground'} ${d.mono ? 'mono' : ''}`} style={{ fontSize: '1rem', fontWeight: d.highlight ? 700 : 600 }}>{d.value}</p>
-                  </div>
+                  <Box key={d.label} bg="gray.0" p="sm" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+                    <Text c="dimmed" mb={4} size="0.7rem" tt="uppercase" lts="0.05em">{d.label}</Text>
+                    <Text
+                      c={d.highlight ? 'gray.9' : undefined}
+                      size="1rem"
+                      fw={d.highlight ? 700 : 600}
+                      style={d.mono ? { fontVariantNumeric: 'tabular-nums' } : undefined}
+                    >
+                      {d.value}
+                    </Text>
+                  </Box>
                 ))}
-              </div>
-            </div>
+              </SimpleGrid>
+            </Paper>
 
             {/* Aviso precedência */}
-            <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/30 bg-amber-400/5 p-3.5">
-              <Info className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-foreground" style={{ fontSize: '0.78rem', lineHeight: 1.55 }}>
-                <span style={{ fontWeight: 600 }}>Precedência:</span> critérios mais específicos sobrepõem os mais amplos.
+            <Group
+              align="flex-start"
+              gap={10}
+              wrap="nowrap"
+              p={14}
+              bg="yellow.0"
+              style={{ borderRadius: 'var(--mantine-radius-lg)', border: '1px solid var(--mantine-color-yellow-3)' }}
+            >
+              <Info size={16} color="var(--mantine-color-yellow-7)" style={{ flexShrink: 0, marginTop: 2 }} />
+              <Text size="0.78rem" lh={1.55}>
+                <Text span fw={600} inherit>Precedência:</Text> critérios mais específicos sobrepõem os mais amplos.
                 Clientes específicos &gt; Representantes &gt; Regiões. Produtos específicos &gt; Linhas de produto.
-              </p>
-            </div>
+              </Text>
+            </Group>
 
             {/* Critérios */}
             <div>
-              <h3 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Critérios de aplicação</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Section icon={UserCircle2} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
-                  <Chips items={criteria.clients} />
-                </Section>
+              <Title order={3} mb="sm" size="0.95rem" fw={600}>Critérios de aplicação</Title>
+              <Grid gutter="md">
+                <Grid.Col span={{ base: 12, lg: 6 }}>
+                  <Section icon={UserCircle2} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
+                    <Chips items={criteria.clients} />
+                  </Section>
+                </Grid.Col>
 
-                <Section icon={MapPin} title="Regiões" hint="Vale para todos os clientes da região.">
-                  <Chips items={criteria.regions} />
-                </Section>
+                <Grid.Col span={{ base: 12, lg: 6 }}>
+                  <Section icon={MapPin} title="Regiões" hint="Vale para todos os clientes da região.">
+                    <Chips items={criteria.regions} />
+                  </Section>
+                </Grid.Col>
 
-                <Section icon={Users} title="Representantes" hint="Aplica a toda a carteira do rep.">
-                  <Chips items={criteria.reps} />
-                </Section>
+                <Grid.Col span={{ base: 12, lg: 6 }}>
+                  <Section icon={Users} title="Representantes" hint="Aplica a toda a carteira do rep.">
+                    <Chips items={criteria.reps} />
+                  </Section>
+                </Grid.Col>
 
-                <Section icon={Layers} title="Linhas de produto" hint="A política se aplica apenas a estas linhas.">
-                  <Chips items={criteria.lines} />
-                </Section>
+                <Grid.Col span={{ base: 12, lg: 6 }}>
+                  <Section icon={Layers} title="Linhas de produto" hint="A política se aplica apenas a estas linhas.">
+                    <Chips items={criteria.lines} />
+                  </Section>
+                </Grid.Col>
 
-                <div className="lg:col-span-2">
+                <Grid.Col span={12}>
                   <Section icon={Package} title="Produtos específicos (SKU)" hint="Granularidade por SKU. Se vazio, vale para todas as linhas marcadas acima.">
                     <Chips items={criteria.products} />
                   </Section>
-                </div>
-              </div>
+                </Grid.Col>
+              </Grid>
             </div>
 
             {/* Clientes cobertos */}
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-              <div className="p-5 border-b border-border">
-                <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Clientes cobertos</h3>
-                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.75rem' }}>
+            <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+              <Box p={20} style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+                <Title order={3} size="0.95rem" fw={600}>Clientes cobertos</Title>
+                <Text c="dimmed" mt={4} size="0.75rem">
                   Resultado consolidado dos critérios acima · {policy.clients} lojistas · somente leitura
-                </p>
-              </div>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/20">
+                </Text>
+              </Box>
+              <Table highlightOnHover highlightOnHoverColor="gray.0" horizontalSpacing="md" verticalSpacing={12} borderColor="gray.2">
+                <Table.Thead>
+                  <Table.Tr bg="gray.0">
                     {['Lojista', 'Cidade/UF', 'Representante'].map(c => (
-                      <th key={c} className="text-left px-4 py-2.5 text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c}</th>
+                      <Table.Th key={c} py={10} c="dimmed" fz="0.7rem" fw={500} tt="uppercase" lts="0.05em">{c}</Table.Th>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
                   {covered.map(c => (
-                    <tr key={c.name} className="border-b border-border/40 hover:bg-secondary/20 transition-colors">
-                      <td className="px-4 py-3 text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{c.name}</td>
-                      <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>{c.city}</td>
-                      <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>{c.rep}</td>
-                    </tr>
+                    <Table.Tr key={c.name}>
+                      <Table.Td fz="0.82rem" fw={500}>{c.name}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{c.city}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{c.rep}</Table.Td>
+                    </Table.Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </Table.Tbody>
+              </Table>
+            </Paper>
+          </Stack>
         );
       })()}
 
@@ -290,245 +365,268 @@ export function AdminPage() {
 
       {/* Policies Tab */}
       {activeTab === 'policies' && (
-        <div className="space-y-4">
+        <Stack gap="md">
           <ErpSyncNotice text="Políticas são somente leitura neste momento — os valores exibidos refletem as regras vigentes no ERP da Tesla." />
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-foreground mb-4" style={{ fontWeight: 600 }}>Configurações de aprovação</h3>
-            <div className="space-y-4">
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={3} mb="md" size="1rem" fw={600}>Configurações de aprovação</Title>
+            <Stack gap="md">
               {[
                 { label: 'Aprovação automática até', desc: 'Pedidos abaixo deste valor são aprovados automaticamente', value: 'R$ 5.000' },
                 { label: 'Prazo de aprovação', desc: 'Tempo máximo para aprovação manual de pedidos', value: '48 horas' },
                 { label: 'Desconto máximo por rep', desc: 'Desconto máximo que um representante pode conceder', value: '15%' },
               ].map(setting => (
-                <div key={setting.label} className="flex items-center justify-between p-4 rounded-lg border border-border/60 bg-secondary/20">
+                <Group
+                  key={setting.label}
+                  justify="space-between"
+                  wrap="nowrap"
+                  p="md"
+                  bg="gray.0"
+                  style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-2)' }}
+                >
                   <div>
-                    <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{setting.label}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>{setting.desc}</p>
+                    <Text size="0.85rem" fw={500}>{setting.label}</Text>
+                    <Text c="dimmed" size="0.75rem">{setting.desc}</Text>
                   </div>
-                  <span className="text-primary mono" style={{ fontWeight: 700 }}>{setting.value}</span>
-                </div>
+                  <Text span c="gray.9" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{setting.value}</Text>
+                </Group>
               ))}
-            </div>
-          </div>
+            </Stack>
+          </Paper>
 
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Inadimplência</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Define o comportamento do sistema para clientes com pagamentos em atraso.</p>
-            <div className="flex items-center justify-between p-4 rounded-lg border border-border/60 bg-secondary/20">
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={3} mb={4} size="1rem" fw={600}>Inadimplência</Title>
+            <Text c="dimmed" mb="md" size="0.78rem">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
+            <Group
+              justify="space-between"
+              wrap="nowrap"
+              p="md"
+              bg="gray.0"
+              style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-2)' }}
+            >
               <div>
-                <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 500 }}>Clientes inadimplentes</p>
-                <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Condição de pagamento aplicada automaticamente a clientes com débitos em aberto</p>
+                <Text size="0.85rem" fw={500}>Clientes inadimplentes</Text>
+                <Text c="dimmed" size="0.75rem">Condição de pagamento aplicada automaticamente a clientes com débitos em aberto</Text>
               </div>
-              <span className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>
+              <Text
+                span
+                px="sm"
+                py={8}
+                bg="gray.1"
+                size="0.82rem"
+                fw={500}
+                style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-3)' }}
+              >
                 Apenas pagamento à vista
-              </span>
-            </div>
-          </div>
+              </Text>
+            </Group>
+          </Paper>
 
-        </div>
+        </Stack>
       )}
 
       {/* Settings Tab */}
       {activeTab === 'settings' && (
-        <div className="space-y-4">
+        <Stack gap="md">
           {/* Usuários */}
-          <div className="bg-card border border-border rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4 gap-3">
-              <h3 className="text-foreground" style={{ fontWeight: 600 }}>Usuários</h3>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Buscar usuário..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="pl-9 pr-3 py-1.5 rounded-lg border border-border bg-surface text-foreground outline-none focus:border-primary"
-                    style={{ fontSize: '0.82rem' }}
-                  />
-                </div>
-                <button
+          <Paper withBorder radius="lg" p={20}>
+            <Group justify="space-between" mb="md" gap="sm">
+              <Title order={3} size="1rem" fw={600}>Usuários</Title>
+              <Group gap={8}>
+                <TextInput
+                  type="text"
+                  placeholder="Buscar usuário..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  size="xs"
+                  leftSection={<Search size={14} />}
+                  styles={searchInputStyles}
+                />
+                <Button
                   onClick={() => setShowAddUser(!showAddUser)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                  style={{ fontSize: '0.82rem', fontWeight: 600 }}
+                  size="xs"
+                  px="sm"
+                  fz="0.82rem"
+                  fw={600}
+                  leftSection={<Plus size={14} />}
+                  styles={{ section: { marginInlineEnd: 6 } }}
                 >
-                  <Plus className="w-3.5 h-3.5" /> Novo usuário
-                </button>
-              </div>
-            </div>
+                  Novo usuário
+                </Button>
+              </Group>
+            </Group>
             {showAddUser && (
-              <div className="bg-secondary/20 border border-primary/30 rounded-xl p-4 mb-4 space-y-3">
-                <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.88rem' }}>Adicionar usuário</h4>
-                <div className="grid grid-cols-2 gap-3">
+              <Stack
+                gap="sm"
+                bg="gray.0"
+                p="md"
+                mb="md"
+                style={{ borderRadius: 'var(--mantine-radius-lg)', border: '1px solid var(--mantine-color-gray-4)' }}
+              >
+                <Title order={4} size="0.88rem" fw={600}>Adicionar usuário</Title>
+                <SimpleGrid cols={2} spacing="sm">
                   {[
                     { label: 'Nome completo', placeholder: 'Nome do usuário' },
                     { label: 'E-mail', placeholder: 'email@tesla.com.br' },
                   ].map(field => (
-                    <div key={field.label}>
-                      <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.75rem' }}>{field.label}</label>
-                      <input type="text" placeholder={field.placeholder} className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary" style={{ fontSize: '0.82rem' }} />
-                    </div>
+                    <TextInput key={field.label} type="text" label={field.label} placeholder={field.placeholder} styles={formInputStyles} />
                   ))}
-                  <div>
-                    <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.75rem' }}>Perfil</label>
-                    <select className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground outline-none focus:border-primary" style={{ fontSize: '0.82rem' }}>
-                      <option>Representante</option><option>Preposto</option><option>Lojista</option><option>Comprador</option><option>Admin</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.75rem' }}>Região</label>
-                    <select className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground outline-none focus:border-primary" style={{ fontSize: '0.82rem' }}>
-                      <option>Sudeste</option><option>Sul</option><option>Nordeste</option><option>Centro-Oeste</option><option>Norte</option><option>Nacional</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <button onClick={() => setShowAddUser(false)} className="px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.82rem' }}>Cancelar</button>
-                  <button onClick={() => setShowAddUser(false)} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Criar usuário</button>
-                </div>
-              </div>
+                  <NativeSelect
+                    label="Perfil"
+                    data={['Representante', 'Preposto', 'Lojista', 'Comprador', 'Admin']}
+                    styles={formInputStyles}
+                  />
+                  <NativeSelect
+                    label="Região"
+                    data={['Sudeste', 'Sul', 'Nordeste', 'Centro-Oeste', 'Norte', 'Nacional']}
+                    styles={formInputStyles}
+                  />
+                </SimpleGrid>
+                <Group gap={8} justify="flex-end">
+                  <Button onClick={() => setShowAddUser(false)} variant="default" c="dimmed" size="xs" px="sm" fz="0.82rem" fw={400}>Cancelar</Button>
+                  <Button onClick={() => setShowAddUser(false)} size="xs" px="sm" fz="0.82rem" fw={600}>Criar usuário</Button>
+                </Group>
+              </Stack>
             )}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/20">
+            <Table.ScrollContainer minWidth={0}>
+              <Table highlightOnHover highlightOnHoverColor="gray.0" horizontalSpacing="md" verticalSpacing={12} borderColor="gray.2">
+                <Table.Thead>
+                  <Table.Tr bg="gray.0">
                     {['Nome', 'E-mail', 'Perfil', 'Região', 'Status', 'Último acesso', ''].map(col => (
-                      <th key={col} className="text-left px-4 py-3 text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{col}</th>
+                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={500}>{col}</Table.Th>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
                   {mockUsers.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).map(user => (
-                    <tr key={user.id} className="border-b border-border/40 hover:bg-secondary/20 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                            <span className="text-primary" style={{ fontSize: '0.62rem', fontWeight: 700 }}>{user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
-                          </div>
-                          <span className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{user.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>{user.email}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full ${user.role === 'Admin' ? 'bg-purple-400/10 text-purple-400' : 'bg-black/10 text-black'}`} style={{ fontSize: '0.65rem', fontWeight: 600 }}>{user.role}</span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>{user.region}</td>
-                      <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400" style={{ fontSize: '0.65rem', fontWeight: 600 }}>{user.status}</span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground mono" style={{ fontSize: '0.75rem' }}>{formatDate(user.lastLogin)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <button className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"><Edit3 className="w-3.5 h-3.5" /></button>
-                          <button className="p-1.5 rounded text-muted-foreground hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </div>
-                      </td>
-                    </tr>
+                    <Table.Tr key={user.id}>
+                      <Table.Td>
+                        <Group gap={10} wrap="nowrap">
+                          <Center w={28} h={28} bg="gray.2" style={{ borderRadius: '50%', flexShrink: 0 }}>
+                            <Text span c="gray.9" size="0.62rem" fw={700}>{user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</Text>
+                          </Center>
+                          <Text span size="0.82rem" fw={500}>{user.name}</Text>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{user.email}</Table.Td>
+                      <Table.Td>
+                        <Badge {...pillProps} color={user.role === 'Admin' ? 'violet' : 'dark'}>{user.role}</Badge>
+                      </Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{user.region}</Table.Td>
+                      <Table.Td>
+                        <Badge {...pillProps} color="teal">{user.status}</Badge>
+                      </Table.Td>
+                      <Table.Td c="dimmed" fz="0.75rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatDate(user.lastLogin)}</Table.Td>
+                      <Table.Td>
+                        <Group gap={4} wrap="nowrap">
+                          <UnstyledButton className={classes.iconBtn}><Edit3 size={14} /></UnstyledButton>
+                          <UnstyledButton className={classes.dangerBtn}><Trash2 size={14} /></UnstyledButton>
+                        </Group>
+                      </Table.Td>
+                    </Table.Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Paper>
 
           {/* Usuários vinculados a representantes e lojistas */}
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-foreground" style={{ fontWeight: 600 }}>Usuários vinculados</h3>
-            <p className="text-muted-foreground mt-1 mb-4" style={{ fontSize: '0.78rem' }}>
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={3} size="1rem" fw={600}>Usuários vinculados</Title>
+            <Text c="dimmed" mt={4} mb="md" size="0.78rem">
               Contas registradas sob um representante ou lojista (ex.: prepostos e compradores). Cada um gerencia o perfil de acesso da própria equipe.
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/20">
+            </Text>
+            <Table.ScrollContainer minWidth={0}>
+              <Table highlightOnHover highlightOnHoverColor="gray.0" horizontalSpacing="md" verticalSpacing={12} borderColor="gray.2">
+                <Table.Thead>
+                  <Table.Tr bg="gray.0">
                     {['Usuário', 'E-mail', 'Perfil', 'Vinculado a', 'Status', 'Último acesso'].map(col => (
-                      <th key={col} className="text-left px-4 py-3 text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{col}</th>
+                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={500}>{col}</Table.Th>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
                   {linkedUsers.map(user => (
-                    <tr key={user.id} className="border-b border-border/40 hover:bg-secondary/20 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                            <span className="text-primary" style={{ fontSize: '0.62rem', fontWeight: 700 }}>{user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
-                          </div>
-                          <span className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{user.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>{user.email}</td>
-                      <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary" style={{ fontSize: '0.65rem', fontWeight: 600 }}>{user.profile}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full ${user.ownerType === 'representante' ? 'bg-amber-400/10 text-amber-500' : 'bg-emerald-400/10 text-emerald-500'}`} style={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                    <Table.Tr key={user.id}>
+                      <Table.Td>
+                        <Group gap={10} wrap="nowrap">
+                          <Center w={28} h={28} bg="gray.2" style={{ borderRadius: '50%', flexShrink: 0 }}>
+                            <Text span c="gray.9" size="0.62rem" fw={700}>{user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</Text>
+                          </Center>
+                          <Text span size="0.82rem" fw={500}>{user.name}</Text>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{user.email}</Table.Td>
+                      <Table.Td>
+                        <Badge {...pillProps} color="gray" c="gray.9">{user.profile}</Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <Badge {...pillProps} color={user.ownerType === 'representante' ? 'yellow' : 'teal'}>
                           {user.ownerType === 'representante' ? 'Rep · ' : 'Lojista · '}{user.ownerName}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full ${user.status === 'ativo' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-muted text-muted-foreground'}`} style={{ fontSize: '0.65rem', fontWeight: 600 }}>{user.status}</span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground mono" style={{ fontSize: '0.75rem' }}>{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</td>
-                    </tr>
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <Badge {...pillProps} color={user.status === 'ativo' ? 'teal' : 'gray'} c={user.status === 'ativo' ? undefined : 'dimmed'}>{user.status}</Badge>
+                      </Table.Td>
+                      <Table.Td c="dimmed" fz="0.75rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
+                    </Table.Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Paper>
 
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-foreground mb-4" style={{ fontWeight: 600 }}>Informações da empresa</h3>
-            <div className="grid grid-cols-2 gap-4">
+          <Paper withBorder radius="lg" p={20}>
+            <Title order={3} mb="md" size="1rem" fw={600}>Informações da empresa</Title>
+            <SimpleGrid cols={2} spacing="md">
               {[
                 { label: 'Nome da empresa', value: 'Tesla Footwear Indústria LTDA' },
                 { label: 'CNPJ', value: '12.345.678/0001-90' },
                 { label: 'Website', value: 'teslafootwear.com.br' },
                 { label: 'Suporte', value: 'suporte@tesla.com.br' },
               ].map(field => (
-                <div key={field.label}>
-                  <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.75rem' }}>{field.label}</label>
-                  <input
-                    type="text"
-                    defaultValue={field.value}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground outline-none focus:border-primary"
-                    style={{ fontSize: '0.85rem' }}
-                  />
-                </div>
+                <TextInput
+                  key={field.label}
+                  type="text"
+                  label={field.label}
+                  defaultValue={field.value}
+                  styles={{ ...formInputStyles, input: { ...formInputStyles.input, fontSize: '0.85rem' } }}
+                />
               ))}
-            </div>
-            <button className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+            </SimpleGrid>
+            <Button mt="md" size="sm" px="md" fz="0.82rem" fw={600}>
               Salvar alterações
-            </button>
-          </div>
+            </Button>
+          </Paper>
 
-        </div>
+        </Stack>
       )}
 
       {/* Permissions Tab */}
       {activeTab === 'permissions' && (
-        <div className="space-y-4">
+        <Stack gap="md">
           {/* Visão selector */}
-          <div className="grid grid-cols-3 gap-3">
+          <SimpleGrid cols={3} spacing="sm">
             {visoes.map(v => {
               const Icon = v.icon;
               const active = activeView === v.id;
               return (
-                <button
+                <UnstyledButton
                   key={v.id}
                   onClick={() => setActiveView(v.id)}
-                  className={`flex items-center gap-3 p-4 rounded-xl border transition-colors text-left ${active ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/30'}`}
+                  className={classes.viewCard}
+                  data-active={active || undefined}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${active ? 'bg-primary/20' : 'bg-secondary/60'}`}>
-                    <Icon className={`w-4 h-4 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
-                  </div>
+                  <Center w={36} h={36} bg={active ? 'gray.2' : 'gray.1'} style={{ borderRadius: 'var(--mantine-radius-md)', flexShrink: 0 }}>
+                    <Icon size={16} color={active ? 'var(--mantine-color-gray-9)' : 'var(--mantine-color-dimmed)'} />
+                  </Center>
                   <div>
-                    <p className={`${active ? 'text-primary' : 'text-foreground'}`} style={{ fontSize: '0.85rem', fontWeight: 600 }}>{v.label}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{v.desc}</p>
+                    <Text c={active ? 'gray.9' : undefined} size="0.85rem" fw={600}>{v.label}</Text>
+                    <Text c="dimmed" size="0.72rem">{v.desc}</Text>
                   </div>
-                </button>
+                </UnstyledButton>
               );
             })}
-          </div>
+          </SimpleGrid>
 
           {/* Permission matrix */}
           <PermissionMatrixTable
@@ -536,8 +634,8 @@ export function AdminPage() {
             onToggle={(perfil, modulo) => togglePermission(activeView, perfil, modulo)}
             onReset={() => setPermissionsState(prev => ({ ...prev, [activeView]: defaultPermissions[activeView] }))}
           />
-        </div>
+        </Stack>
       )}
-    </div>
+    </Stack>
   );
 }
