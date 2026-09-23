@@ -20,7 +20,7 @@ import {
 import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./LojistaFiltersSidebar";
 import type { CartContext, CartCreator } from "./CartsListPage";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import { Button, Group, Modal, Stack, Text, TextInput } from "@mantine/core";
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -244,47 +244,37 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
         </div>
       )}
       {/* New cart dialog */}
-      <Dialog open={showNewCartDialog} onOpenChange={setShowNewCartDialog}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle style={{ fontSize: '0.95rem' }}>Novo carrinho</DialogTitle>
-            <DialogDescription style={{ fontSize: '0.78rem' }}>
-              Criar carrinho para {cartContext?.clientName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <label className="block text-muted-foreground" style={{ fontSize: '0.72rem' }}>Nome do carrinho</label>
-            <input
-              autoFocus
-              value={newCartName}
-              onChange={e => setNewCartName(e.target.value)}
-              placeholder="Ex.: Reposição Inverno 26"
-              className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-              style={{ fontSize: '0.82rem' }}
-            />
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => setShowNewCartDialog(false)}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
+      <Modal
+        opened={showNewCartDialog}
+        onClose={() => setShowNewCartDialog(false)}
+        size="sm"
+        title="Novo carrinho"
+      >
+        <Stack gap="md">
+          <Text c="dimmed" size="sm">Criar carrinho para {cartContext?.clientName}</Text>
+          <TextInput
+            data-autofocus
+            label="Nome do carrinho"
+            placeholder="Ex.: Reposição Inverno 26"
+            value={newCartName}
+            onChange={e => setNewCartName(e.currentTarget.value)}
+          />
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => setShowNewCartDialog(false)}>
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 onCreateNewCart?.(newCartName.trim() || 'Novo carrinho');
                 setShowNewCartDialog(false);
                 setNewCartName('');
               }}
-              className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
             >
               Criar
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
       {/* Step indicator */}
       <div className="flex items-center gap-3 mb-6">
         <button

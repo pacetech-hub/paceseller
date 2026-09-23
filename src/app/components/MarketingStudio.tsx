@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from "react";
-import { toast } from "sonner";
+import { notify } from "../../mantine/notify";
 import {
   SparkleIcon,
   CheckIcon,
@@ -20,8 +20,7 @@ import {
   UploadSimpleIcon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency, type Product } from "../data/mockData";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "./ui/alert-dialog";
+import { Button, Group, Modal, Stack, Text, TextInput, Textarea } from "@mantine/core";
 import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
 import bannerLimitedEdition from "@/assets/banner-edicao-limitada.webp";
 
@@ -180,7 +179,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                   <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{item.formatLabel}</p>
                   <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem', ...clampStyle }}>{item.copy}</p>
                   <button
-                    onClick={() => toast.success('Arquivo baixado')}
+                    onClick={() => notify.success('Arquivo baixado')}
                     className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                     style={{ fontSize: '0.78rem', fontWeight: 500 }}
                   >
@@ -345,87 +344,64 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
       </div>
 
       {/* Create campaign dialog */}
-      <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle style={{ fontSize: '0.95rem' }}>Nova campanha</DialogTitle>
-            <DialogDescription style={{ fontSize: '0.78rem' }}>
-              Defina o nome e a descrição deste objetivo de campanha
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <div>
-              <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Nome</label>
-              <input
-                autoFocus
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                placeholder="Ex.: Dia dos Pais"
-                className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-                style={{ fontSize: '0.82rem' }}
-              />
-            </div>
-            <div>
-              <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Descrição</label>
-              <textarea
-                value={newDescription}
-                onChange={e => setNewDescription(e.target.value)}
-                rows={3}
-                placeholder="Descreva o objetivo desta campanha"
-                className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary resize-none"
-                style={{ fontSize: '0.82rem' }}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
+      <Modal
+        opened={creating}
+        onClose={() => setCreating(false)}
+        size="sm"
+        title="Nova campanha"
+      >
+        <Stack gap="md">
+          <Text c="dimmed" size="sm">Defina o nome e a descrição deste objetivo de campanha</Text>
+          <TextInput
+            data-autofocus
+            label="Nome"
+            placeholder="Ex.: Dia dos Pais"
+            value={newName}
+            onChange={e => setNewName(e.currentTarget.value)}
+          />
+          <Textarea
+            label="Descrição"
+            placeholder="Descreva o objetivo desta campanha"
+            rows={3}
+            value={newDescription}
+            onChange={e => setNewDescription(e.currentTarget.value)}
+          />
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}>
               Cancelar
-            </button>
-            <button
-              onClick={handleCreate}
-              className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
-            >
-              Salvar
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </Button>
+            <Button onClick={handleCreate}>Salvar</Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       {/* Delete campaign confirmation */}
-      <AlertDialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="sm:max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle style={{ fontSize: '0.95rem' }}>Excluir campanha</AlertDialogTitle>
-            <AlertDialogDescription style={{ fontSize: '0.78rem' }}>
-              Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <button
-              onClick={() => setDeleteTarget(null)}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
+      <Modal
+        opened={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        size="sm"
+        title="Excluir campanha"
+      >
+        <Stack gap="md">
+          <Text c="dimmed" size="sm">
+            Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => setDeleteTarget(null)}>
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
+              color="danger"
               onClick={() => {
                 if (deleteTarget) onDeleteCampaign(deleteTarget.id);
                 setDeleteTarget(null);
               }}
-              className="px-3 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
             >
               Excluir
-            </button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </div>
   );
 }
@@ -482,7 +458,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
       createdAt: 'agora',
     }));
     onFinish(items);
-    toast.success(items.length === 1 ? 'Peça salva no histórico' : `${items.length} peças salvas no histórico`);
+    notify.success(items.length === 1 ? 'Peça salva no histórico' : `${items.length} peças salvas no histórico`);
     onBack();
   };
 
@@ -743,7 +719,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{f.label}</p>
                     <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem', ...clampStyle }}>{prompt}</p>
                     <button
-                      onClick={() => toast.success('Arquivo baixado')}
+                      onClick={() => notify.success('Arquivo baixado')}
                       className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                       style={{ fontSize: '0.78rem', fontWeight: 500 }}
                     >
@@ -827,7 +803,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       const fallback = campaigns[idx + 1] ?? campaigns[idx - 1] ?? null;
       setSelectedCampaignId(fallback ? fallback.id : null);
     }
-    toast.success('Campanha excluída');
+    notify.success('Campanha excluída');
   };
 
   if (mode === 'campaigns') {
@@ -841,15 +817,15 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
           const id = `camp-${Date.now()}`;
           setCampaigns(prev => [{ id, name, description, photos: [] }, ...prev]);
           setSelectedCampaignId(id);
-          toast.success('Campanha criada');
+          notify.success('Campanha criada');
         }}
         onAddPhotos={(campaignId, photos) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: [...photos, ...c.photos] } : c));
-          toast.success(photos.length > 1 ? `${photos.length} fotos adicionadas` : 'Foto adicionada');
+          notify.success(photos.length > 1 ? `${photos.length} fotos adicionadas` : 'Foto adicionada');
         }}
         onDeletePhoto={(campaignId, photoIndex) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: c.photos.filter((_, i) => i !== photoIndex) } : c));
-          toast.success('Cenário removido');
+          notify.success('Cenário removido');
         }}
         onDeleteCampaign={handleDeleteCampaign}
       />
@@ -874,7 +850,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       onManageCampaigns={() => setMode('campaigns')}
       onDelete={id => {
         setHistory(prev => prev.filter(item => item.id !== id));
-        toast.success('Peça excluída do histórico');
+        notify.success('Peça excluída do histórico');
       }}
     />
   );

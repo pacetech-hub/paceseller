@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { notify } from "../../mantine/notify";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
 import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
 import { statusColors, statusIcon, statusSupportText, orderProductNames } from "./OrderHistory";
@@ -177,7 +177,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             </p>
             {order.status === 'faturado' || order.status === 'entregue' ? (
               <button
-                onClick={() => toast.success('Nota fiscal baixada')}
+                onClick={() => notify.success('Nota fiscal baixada')}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                 style={{ fontSize: '0.78rem', fontWeight: 500 }}
               >

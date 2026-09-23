@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import { notify } from "../../mantine/notify";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -474,7 +474,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   const commitAdd = (p: Product, qtys: Record<string, number>, cartName?: string) => {
     const total = Object.values(qtys).reduce((a, b) => a + b, 0);
     setGradeOpenId(null);
-    toast.success(`${total} ${total === 1 ? 'par' : 'pares'} de ${p.name} adicionados${cartName ? ` em "${cartName}"` : ''}`);
+    notify.success(`${total} ${total === 1 ? 'par' : 'pares'} de ${p.name} adicionados${cartName ? ` em "${cartName}"` : ''}`);
   };
   const addGrade = (p: Product, qtys: Record<string, number>) => {
     const total = Object.values(qtys).reduce((a, b) => a + b, 0);

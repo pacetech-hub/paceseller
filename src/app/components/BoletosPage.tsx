@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import { notify } from "../../mantine/notify";
 import {
   MagnifyingGlassIcon,
   DownloadSimpleIcon,
@@ -154,8 +154,8 @@ const statusLabel: Record<PaymentStatus, string> = {
 
 function copyToClipboard(text: string, label: string) {
   navigator.clipboard?.writeText(text).then(
-    () => toast.success(`${label} copiado`),
-    () => toast.error(`Não foi possível copiar o ${label.toLowerCase()}`)
+    () => notify.success(`${label} copiado`),
+    () => notify.error(`Não foi possível copiar o ${label.toLowerCase()}`)
   );
 }
 
@@ -290,7 +290,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                   <CopyIcon className="w-3.5 h-3.5" /> Copiar código de barras
                 </button>
                 <button
-                  onClick={() => toast.success('Fatura baixada')}
+                  onClick={() => notify.success('Fatura baixada')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                   style={{ fontSize: '0.78rem', fontWeight: 500 }}
                 >

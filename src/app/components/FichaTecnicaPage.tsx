@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import { notify } from "../../mantine/notify";
 import {
   MagnifyingGlassIcon,
   CaretLeftIcon,
@@ -11,7 +11,7 @@ import {
   ArrowsClockwiseIcon,
 } from "@phosphor-icons/react";
 import { products, type Product } from "../data/mockData";
-import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Image, Modal } from "@mantine/core";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -318,14 +318,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
 
       <div className="flex items-center justify-end gap-2 flex-wrap">
         <button
-          onClick={() => toast.success('Imagens baixadas (ZIP)')}
+          onClick={() => notify.success('Imagens baixadas (ZIP)')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
           style={{ fontSize: '0.78rem', fontWeight: 500 }}
         >
           <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar imagens
         </button>
         <button
-          onClick={() => toast.success('PDF gerado')}
+          onClick={() => notify.success('PDF gerado')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           style={{ fontSize: '0.78rem', fontWeight: 600 }}
         >
@@ -346,7 +346,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
               <MagnifyingGlassPlusIcon className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <button
-              onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
+              onClick={e => { e.stopPropagation(); notify.success('Imagem baixada'); }}
               aria-label="Baixar imagem"
               className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
             >
@@ -433,7 +433,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                             <span className={`mono ${storeColor}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>{storeQty}</span>
                             {storeLow && (
                               <button
-                                onClick={() => toast.success(`Reposição rápida solicitada — Nº ${s}`)}
+                                onClick={() => notify.success(`Reposição rápida solicitada — Nº ${s}`)}
                                 className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex-shrink-0"
                                 style={{ fontSize: '0.65rem', fontWeight: 600 }}
                               >
@@ -482,12 +482,9 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       )}
 
       {/* Zoom */}
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogTitle className="sr-only">{product.name}</DialogTitle>
-          <img src={gallery[activeImage]} alt={product.name} className="w-full h-auto object-contain" />
-        </DialogContent>
-      </Dialog>
+      <Modal opened={zoomOpen} onClose={() => setZoomOpen(false)} size="xl" title={product.name}>
+        <Image src={gallery[activeImage]} alt={product.name} fit="contain" />
+      </Modal>
     </div>
   );
 }
