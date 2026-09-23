@@ -1,19 +1,8 @@
-import * as React from "react";
+import { useMantineTheme } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 
-const MOBILE_BREAKPOINT = 768;
-
+// "Mobile" = abaixo do breakpoint `sm` do tema Mantine (48em / 768px).
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
-
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-    mql.addEventListener("change", onChange);
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-
-  return !!isMobile;
+  const theme = useMantineTheme();
+  return !!useMediaQuery(`(max-width: calc(${theme.breakpoints.sm} - 1px))`);
 }

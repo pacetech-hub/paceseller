@@ -9,6 +9,7 @@
 * Do not use Tailwind color classes (`bg-*`, `text-*`, `border-*`, `from-*`, `ring-*` with a color), the CSS variables in `src/styles/theme.css` (`--primary`, `--muted-foreground`, `--surface`, `--border`, ...), or hard-coded hex/rgb/oklch values in components.
 * Tailwind is still fine for layout (flex, grid, spacing, sizing, responsive visibility).
 * Icons come from `@phosphor-icons/react`.
+* Breakpoints are Mantine's defaults: xs 36em (576px), sm 48em (768px), md 62em (992px), lg 75em (1200px), xl 88em (1408px). Tailwind's `xs:`/`sm:`/`md:`/`lg:`/`xl:` are set to the same values in `src/styles/tailwind.css` (there is no `2xl:`), so they match Mantine's `visibleFrom`/`hiddenFrom` and responsive props. In JS, read `theme.breakpoints` with `useMediaQuery` from `@mantine/hooks`; never hard-code pixel breakpoints.
 
 <!--
 
