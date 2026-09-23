@@ -7,11 +7,11 @@ export default {
     postcssPresetMantine(),
     postcssSimpleVars({
       variables: {
-        'mantine-breakpoint-xs': '36em',
-        'mantine-breakpoint-sm': '48em',
-        'mantine-breakpoint-md': '62em',
-        'mantine-breakpoint-lg': '75em',
-        'mantine-breakpoint-xl': '88em',
+        'mantine-breakpoint-xs': '30em',
+        'mantine-breakpoint-sm': '40em',
+        'mantine-breakpoint-md': '48em',
+        'mantine-breakpoint-lg': '64em',
+        'mantine-breakpoint-xl': '80em',
       },
     }),
   ],

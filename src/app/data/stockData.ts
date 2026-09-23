@@ -14,10 +14,10 @@ export interface StockItem {
 
 export type StockStatusKey = 'ruptura' | 'baixo' | 'ok';
 
-export function statusOf(item: Pick<StockItem, 'stock' | 'min'>): { key: StockStatusKey; label: string; cls: string } {
-  if (item.stock <= 0) return { key: 'ruptura', label: 'Ruptura', cls: 'bg-red-400/15 text-red-400' };
-  if (item.stock < item.min) return { key: 'baixo', label: 'Baixo', cls: 'bg-amber-400/15 text-amber-400' };
-  return { key: 'ok', label: 'OK', cls: 'bg-emerald-400/15 text-emerald-400' };
+export function statusOf(item: Pick<StockItem, 'stock' | 'min'>): { key: StockStatusKey; label: string } {
+  if (item.stock <= 0) return { key: 'ruptura', label: 'Ruptura' };
+  if (item.stock < item.min) return { key: 'baixo', label: 'Baixo' };
+  return { key: 'ok', label: 'OK' };
 }
 
 /** RNG determinístico por semente, para gerar estoque estável por cliente sem precisar cadastrar tudo à mão. */

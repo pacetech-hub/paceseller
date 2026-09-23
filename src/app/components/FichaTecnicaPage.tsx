@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import {
-  ActionIcon, AspectRatio, Badge, Box, Button, Group, Modal, NativeSelect, Paper, SimpleGrid,
+  ActionIcon, Badge, Box, Button, Group, Modal, NativeSelect, Paper, SimpleGrid,
   Stack, Table, Text, TextInput, Title, UnstyledButton, VisuallyHidden, type BadgeProps,
 } from "@mantine/core";
 import { toast } from "@/lib/toast";
@@ -256,9 +256,9 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
               onClick={() => onOpen(p)}
               className={classes.productCard}
             >
-              <AspectRatio ratio={1} bg="white">
+              <Box bg="white" style={{ aspectRatio: '1 / 1' }}>
                 <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 12 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              </AspectRatio>
+              </Box>
               <Box p="sm" className={classes.cardFooter}>
                 <Text c="dimmed" fz="0.68rem" tt="uppercase">Ref. {p.reference}</Text>
                 <Text truncate mt={2} mb={6} fw={600} fz="0.85rem">{p.name}</Text>
@@ -477,9 +477,9 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                 onClick={() => onOpenRelated(p)}
                 className={classes.productCard}
               >
-                <AspectRatio ratio={1} bg="white">
+                <Box bg="white" style={{ aspectRatio: '1 / 1' }}>
                   <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                </AspectRatio>
+                </Box>
                 <Box p={10} className={classes.cardFooter}>
                   <Text c="dimmed" fz="0.65rem" tt="uppercase">Ref. {p.reference}</Text>
                   <Text truncate fz="0.8rem" fw={600}>{p.name}</Text>
