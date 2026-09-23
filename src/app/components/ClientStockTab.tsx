@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Store, MapPin, X } from "lucide-react";
+import { Stack, Box, TextInput, UnstyledButton, Paper, Text, Center, Group } from "@mantine/core";
 import { clients as allClients, type Client } from "../data/mockData";
 import { generateClientStock, type StockItem } from "../data/stockData";
 import { StockTable } from "./StockTable";
+import classes from "./ClientStockTab.module.css";
 
 interface ClientStockTabProps {
   /** Rep só enxerga os dados, sem controles de edição. */
@@ -32,66 +34,68 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative max-w-md">
-        <div className="flex items-center gap-2 rounded-lg bg-card border border-border px-3 py-2.5">
-          <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Buscar cliente por nome ou código..."
-            className="flex-1 bg-transparent outline-none text-foreground placeholder-muted-foreground"
-            style={{ fontSize: '0.85rem' }}
-          />
-          {selected && (
-            <button onClick={() => { setSelected(null); setQuery(''); }} className="text-muted-foreground hover:text-foreground flex-shrink-0">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+    <Stack gap="md">
+      <Box pos="relative" maw={448}>
+        <TextInput
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Buscar cliente por nome ou código..."
+          size="md"
+          leftSection={<Search size={14} color="var(--mantine-color-dimmed)" />}
+          rightSection={selected ? (
+            <UnstyledButton onClick={() => { setSelected(null); setQuery(''); }} className={classes.clearBtn}>
+              <X size={14} />
+            </UnstyledButton>
+          ) : undefined}
+          styles={{ input: { fontSize: '0.85rem' } }}
+        />
         {query && matches.length > 0 && (
-          <div className="absolute z-10 left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+          <Paper withBorder radius="md" shadow="lg" pos="absolute" left={0} right={0} mt={4} style={{ zIndex: 10, overflow: 'hidden' }}>
             {matches.map(c => (
-              <button
+              <UnstyledButton
                 key={c.id}
                 onClick={() => { setSelected(c); setQuery(''); }}
-                className="w-full text-left px-3 py-2 hover:bg-secondary/60 flex items-center gap-2 transition-colors"
+                className={classes.option}
               >
-                <Store className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                <span className="text-foreground truncate" style={{ fontSize: '0.82rem' }}>{c.name}</span>
-                <span className="text-muted-foreground ml-auto mono flex-shrink-0" style={{ fontSize: '0.7rem' }}>{c.id}</span>
-              </button>
+                <Store size={14} color="var(--mantine-color-dimmed)" style={{ flexShrink: 0 }} />
+                <Text span truncate size="0.82rem">{c.name}</Text>
+                <Text span c="dimmed" ml="auto" size="0.7rem" style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{c.id}</Text>
+              </UnstyledButton>
             ))}
-          </div>
+          </Paper>
         )}
         {query && matches.length === 0 && (
-          <div className="absolute z-10 left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>
-            Nenhum cliente encontrado.
-          </div>
+          <Paper withBorder radius="md" pos="absolute" left={0} right={0} mt={4} p="sm" style={{ zIndex: 10 }}>
+            <Text c="dimmed" size="0.78rem">Nenhum cliente encontrado.</Text>
+          </Paper>
         )}
-      </div>
+      </Box>
 
       {!selected && (
-        <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-xl">
-          <Store className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p style={{ fontSize: '0.88rem' }}>Busque um cliente acima para ver o estoque reportado por ele.</p>
-        </div>
+        <Paper withBorder radius="lg" py={64} ta="center">
+          <Center mb="sm">
+            <Store size={40} color="var(--mantine-color-dimmed)" style={{ opacity: 0.3 }} />
+          </Center>
+          <Text c="dimmed" size="0.88rem">Busque um cliente acima para ver o estoque reportado por ele.</Text>
+        </Paper>
       )}
 
       {selected && (
         <>
-          <div className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-              <Store className="w-4 h-4 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-foreground truncate" style={{ fontSize: '0.92rem', fontWeight: 700 }}>{selected.name}</p>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <MapPin className="w-3 h-3" />
-                <span style={{ fontSize: '0.75rem' }}>{selected.city} · {selected.state} · Rep: {selected.rep}</span>
-              </div>
-            </div>
-          </div>
+          <Paper withBorder radius="lg" p="md">
+            <Group gap="sm" wrap="nowrap">
+              <Center w={40} h={40} bg="gray.1" style={{ borderRadius: 'var(--mantine-radius-md)', flexShrink: 0 }}>
+                <Store size={16} color="var(--mantine-color-gray-9)" />
+              </Center>
+              <Box miw={0}>
+                <Text truncate size="0.92rem" fw={700}>{selected.name}</Text>
+                <Group gap={6} wrap="nowrap" c="dimmed">
+                  <MapPin size={12} />
+                  <Text span size="0.75rem">{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
+                </Group>
+              </Box>
+            </Group>
+          </Paper>
 
           <StockTable
             items={items}
@@ -100,6 +104,6 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
           />
         </>
       )}
-    </div>
+    </Stack>
   );
 }

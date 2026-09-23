@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import {
+  Box, Paper, Group, Stack, Text, Button, TextInput, SimpleGrid, Badge, Center,
+} from "@mantine/core";
+import { toast } from "@/lib/toast";
 import {
   Search, Download, Copy, CheckCircle2, Clock, AlertTriangle, Receipt,
-  ChevronDown, Barcode, QrCode,
+  ChevronDown, Barcode, QrCode, type LucideIcon,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "../data/mockData";
+import classes from "./BoletosPage.module.css";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -127,12 +131,12 @@ const boletosLojista: Payment[] = [
 ];
 
 const statusColors: Record<PaymentStatus, string> = {
-  pago: 'text-emerald-400 bg-emerald-400/10',
-  pendente: 'text-amber-400 bg-amber-400/10',
-  atrasado: 'text-red-400 bg-red-400/10',
+  pago: 'teal',
+  pendente: 'yellow',
+  atrasado: 'red',
 };
 
-const statusIcon: Record<PaymentStatus, React.ComponentType<{ className?: string }>> = {
+const statusIcon: Record<PaymentStatus, LucideIcon> = {
   pago: CheckCircle2,
   pendente: Clock,
   atrasado: AlertTriangle,
@@ -189,13 +193,6 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   );
 }
 
-const methodToggleClass = (selected: boolean) =>
-  `flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
-    selected
-      ? 'bg-primary text-primary-foreground border-primary'
-      : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-  }`;
-
 function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile }) {
   const [expanded, setExpanded] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>('boleto');
@@ -212,130 +209,172 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
     ...(profile === 'admin' ? [payment.rep] : []),
   ];
 
+  const methodButtonProps = (selected: boolean) => ({
+    variant: selected ? 'filled' : 'default',
+    c: selected ? undefined : 'dimmed',
+    size: 'xs',
+    h: 32,
+    px: 'sm',
+    fz: '0.78rem',
+    fw: 600,
+  } as const);
+
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
       <div
         onClick={!isPago ? () => setExpanded(e => !e) : undefined}
-        className={`p-4 flex items-center gap-4 flex-wrap ${!isPago ? 'cursor-pointer hover:bg-secondary/30 transition-colors' : ''}`}
+        className={!isPago ? `${classes.header} ${classes.clickable}` : classes.header}
       >
-        <div className="min-w-0 flex-1">
+        <Box miw={0} flex={1}>
           {/* line 1: status + due/payment date */}
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[payment.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-              <StatusIcon className="w-3 h-3" />
+          <Group gap={8} mb={4}>
+            <Badge
+              variant="light"
+              color={statusColors[payment.status]}
+              radius="xl"
+              tt="none"
+              fz="0.7rem"
+              fw={600}
+              leftSection={<StatusIcon size={12} />}
+              style={{ flexShrink: 0 }}
+            >
               {statusLabel[payment.status]}
-            </span>
-            <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>
+            </Badge>
+            <Text span c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>
               {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
-            </span>
-          </div>
+            </Text>
+          </Group>
           {/* line 2: order title */}
-          <p className="text-foreground truncate mb-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{payment.product}</p>
+          <Text truncate mb={2} size="0.85rem" fw={600}>{payment.product}</Text>
           {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
-          <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{metaParts.join(' · ')}</p>
-        </div>
+          <Text c="dimmed" truncate size="0.72rem">{metaParts.join(' · ')}</Text>
+        </Box>
 
-        <div className="text-right flex-shrink-0">
-          <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(payment.amount)}</p>
-        </div>
+        <Box ta="right" style={{ flexShrink: 0 }}>
+          <Text size="0.95rem" fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(payment.amount)}</Text>
+        </Box>
 
         {!isPago && (
-          <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={16}
+            color="var(--mantine-color-dimmed)"
+            style={{ flexShrink: 0, transition: 'transform 150ms ease', transform: expanded ? 'rotate(180deg)' : undefined }}
+          />
         )}
       </div>
 
       {expanded && !isPago && (
-        <div className="border-t border-border bg-secondary/20 p-4">
-          <div className="flex items-center gap-1.5 mb-3" role="tablist" aria-label="Forma de pagamento">
-            <button
+        <Box p="md" bg="gray.0" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+          <Group gap={6} mb="sm" role="tablist" aria-label="Forma de pagamento">
+            <Button
               onClick={() => setMethod('boleto')}
               aria-pressed={method === 'boleto'}
-              className={methodToggleClass(method === 'boleto')}
-              style={{ fontSize: '0.78rem', fontWeight: 600 }}
+              leftSection={<Barcode size={14} />}
+              {...methodButtonProps(method === 'boleto')}
             >
-              <Barcode className="w-3.5 h-3.5" /> Boleto
-            </button>
-            <button
+              Boleto
+            </Button>
+            <Button
               onClick={() => setMethod('pix')}
               aria-pressed={method === 'pix'}
-              className={methodToggleClass(method === 'pix')}
-              style={{ fontSize: '0.78rem', fontWeight: 600 }}
+              leftSection={<QrCode size={14} />}
+              {...methodButtonProps(method === 'pix')}
             >
-              <QrCode className="w-3.5 h-3.5" /> Pix
-            </button>
-          </div>
+              Pix
+            </Button>
+          </Group>
 
           {method === 'boleto' ? (
-            <div className="space-y-3">
+            <Stack gap="sm">
               <div>
-                <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Linha digitável</p>
-                <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.78rem' }}>
+                <Text c="dimmed" mb={4} size="0.7rem">Linha digitável</Text>
+                <code className={classes.code} style={{ fontSize: '0.78rem' }}>
                   {payment.boletoLine}
                 </code>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
+              <Group gap={8}>
+                <Button
                   onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                  variant="light"
+                  size="xs"
+                  h={32}
+                  px="sm"
+                  fz="0.78rem"
+                  fw={600}
+                  leftSection={<Copy size={14} />}
                 >
-                  <Copy className="w-3.5 h-3.5" /> Copiar código de barras
-                </button>
-                <button
+                  Copiar código de barras
+                </Button>
+                <Button
                   onClick={() => toast.success('Fatura baixada')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                  variant="default"
+                  size="xs"
+                  h={32}
+                  px="sm"
+                  fz="0.78rem"
+                  fw={500}
+                  leftSection={<Download size={14} />}
                 >
-                  <Download className="w-3.5 h-3.5" /> Baixar fatura
-                </button>
-              </div>
-            </div>
+                  Baixar fatura
+                </Button>
+              </Group>
+            </Stack>
           ) : (
-            <div className="space-y-3">
+            <Stack gap="sm">
               <div>
-                <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Pix Copia e Cola</p>
-                <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.72rem' }}>
+                <Text c="dimmed" mb={4} size="0.7rem">Pix Copia e Cola</Text>
+                <code className={classes.code} style={{ fontSize: '0.72rem' }}>
                   {payment.pixCode}
                 </code>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
+              <Group gap={8}>
+                <Button
                   onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                  variant="light"
+                  size="xs"
+                  h={32}
+                  px="sm"
+                  fz="0.78rem"
+                  fw={600}
+                  leftSection={<Copy size={14} />}
                 >
-                  <Copy className="w-3.5 h-3.5" /> Copiar código Pix
-                </button>
-                <button
+                  Copiar código Pix
+                </Button>
+                <Button
                   onClick={() => setShowQr(v => !v)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                  variant="default"
+                  size="xs"
+                  h={32}
+                  px="sm"
+                  fz="0.78rem"
+                  fw={500}
+                  leftSection={<QrCode size={14} />}
                 >
-                  <QrCode className="w-3.5 h-3.5" /> {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
-                </button>
-              </div>
+                  {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
+                </Button>
+              </Group>
 
               {showQr && (
-                <div className="flex items-start gap-4 flex-wrap pt-1">
-                  <div className="inline-block bg-white p-3 rounded-lg border border-border flex-shrink-0">
+                <Group align="flex-start" gap="md" pt={4}>
+                  <Paper withBorder radius="md" p="sm" bg="white" style={{ display: 'inline-block', flexShrink: 0 }}>
                     <PixQrCode data={payment.pixCode} />
-                  </div>
-                  <div className="flex-1 min-w-[220px]">
-                    <p className="text-foreground mb-1" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Como pagar</p>
-                    <ol className="text-muted-foreground space-y-1 list-decimal list-inside" style={{ fontSize: '0.75rem' }}>
+                  </Paper>
+                  <Box flex={1} miw={220}>
+                    <Text mb={4} size="0.8rem" fw={600}>Como pagar</Text>
+                    <ol className={classes.steps}>
                       <li>Abra o app do seu banco</li>
                       <li>Escolha pagar via Pix com QR Code ou Copia e Cola</li>
                       <li>Escaneie o código ao lado ou cole o código copiado</li>
                       <li>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</li>
                     </ol>
-                  </div>
-                </div>
+                  </Box>
+                </Group>
               )}
-            </div>
+            </Stack>
           )}
-        </div>
+        </Box>
       )}
-    </div>
+    </Paper>
   );
 }
 
@@ -385,59 +424,81 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   ];
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap={20} p="lg" maw={1400} mx="auto" w="100%">
       {/* Financial summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
         {stats.map(stat => (
-          <div key={stat.label} className={`bg-card border rounded-xl p-4 ${stat.tone === 'danger' ? 'border-red-500/30' : 'border-border'}`}>
-            <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
-            <p className={`mono ${stat.caption ? 'mb-1' : ''} ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
-            {stat.caption && <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.caption}</p>}
-          </div>
+          <Paper
+            key={stat.label}
+            radius="lg"
+            p="md"
+            style={{ border: `1px solid ${stat.tone === 'danger' ? 'var(--mantine-color-red-3)' : 'var(--mantine-color-gray-3)'}` }}
+          >
+            <Text c="dimmed" mb={4} size="0.75rem" fw={500}>{stat.label}</Text>
+            <Text
+              mb={stat.caption ? 4 : undefined}
+              c={stat.tone === 'danger' ? 'red.7' : undefined}
+              size="1.4rem"
+              fw={700}
+              lts="-0.01em"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {stat.value}
+            </Text>
+            {stat.caption && <Text c="dimmed" size="0.7rem">{stat.caption}</Text>}
+          </Paper>
         ))}
-      </div>
+      </SimpleGrid>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.82rem' }}
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <Group gap="sm">
+        <TextInput
+          type="text"
+          placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          leftSection={<Search size={14} color="var(--mantine-color-dimmed)" />}
+          flex={1}
+          miw={160}
+          styles={{ input: { fontSize: '0.82rem' } }}
+        />
+        <Group gap={6}>
           {statuses.map(s => (
-            <button
+            <Button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-full transition-colors capitalize ${statusFilter === s ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.75rem', fontWeight: 500 }}
+              variant={statusFilter === s ? 'filled' : 'default'}
+              c={statusFilter === s ? undefined : 'dimmed'}
+              radius="xl"
+              size="xs"
+              h={30}
+              px="sm"
+              fz="0.75rem"
+              fw={500}
+              tt="capitalize"
             >
               {s === 'todos' ? 'Todos' : statusLabel[s]}
-            </button>
+            </Button>
           ))}
-        </div>
-      </div>
+        </Group>
+      </Group>
 
       {/* Payment cards */}
-      <div className="space-y-3">
+      <Stack gap="sm">
         {filtered.map(payment => (
           <PaymentCard key={payment.id} payment={payment} profile={profile} />
         ))}
 
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-            <Receipt className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum boleto encontrado</p>
-            <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
-          </div>
+          <Paper withBorder radius="lg" py={64} ta="center">
+            <Center mb="sm">
+              <Receipt size={40} color="var(--mantine-color-gray-4)" />
+            </Center>
+            <Text fw={600}>Nenhum boleto encontrado</Text>
+            <Text c="dimmed" mt={4} size="0.85rem">Tente ajustar os filtros de busca</Text>
+          </Paper>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }

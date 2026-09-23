@@ -1,0 +1,23 @@
+.option {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.clearBtn {
+  display: inline-flex;
+  color: var(--mantine-color-dimmed);
+  flex-shrink: 0;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}

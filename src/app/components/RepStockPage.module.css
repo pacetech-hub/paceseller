@@ -1,0 +1,20 @@
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--mantine-radius-md);
+  font-size: 0.82rem;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+
+  &[data-active] {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+}

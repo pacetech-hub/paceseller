@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Boxes, Store, Eye } from "lucide-react";
+import { Stack, Group, Paper, UnstyledButton, Badge } from "@mantine/core";
 import { clients } from "../data/mockData";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
+import classes from "./RepStockPage.module.css";
 
 const tabs = [
   { id: 'industrial', label: 'Estoque Industrial', icon: Boxes },
@@ -14,34 +16,47 @@ export function RepStockPage() {
   const myClients = clients.filter(c => c.rep === 'Marcos Andrade');
 
   return (
-    <div className="p-6 space-y-5 max-w-[1400px] mx-auto w-full">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-1 bg-card border border-border rounded-xl p-1">
-          {tabs.map(tab => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === tab.id ? 'bg-secondary/60 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'}`}
-                style={{ fontSize: '0.82rem', fontWeight: activeTab === tab.id ? 600 : 400 }}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/60 text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-          <Eye className="w-3 h-3" /> Somente visualização
-        </span>
-      </div>
+    <Stack gap={20} maw={1400} mx="auto" w="100%" p="lg">
+      <Group justify="space-between" gap="sm">
+        <Paper withBorder radius="lg" p={4}>
+          <Group gap={4} wrap="nowrap">
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <UnstyledButton
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={classes.tab}
+                  data-active={activeTab === tab.id || undefined}
+                  style={{ fontWeight: activeTab === tab.id ? 600 : 400 }}
+                >
+                  <Icon size={14} />
+                  {tab.label}
+                </UnstyledButton>
+              );
+            })}
+          </Group>
+        </Paper>
+        <Badge
+          variant="light"
+          color="gray"
+          radius="xl"
+          tt="none"
+          c="dimmed"
+          bg="gray.1"
+          fz="0.7rem"
+          fw={600}
+          leftSection={<Eye size={12} />}
+        >
+          Somente visualização
+        </Badge>
+      </Group>
 
       {activeTab === 'industrial' ? (
         <IndustryStockTable readOnly />
       ) : (
         <ClientStockTab readOnly scopeClients={myClients} />
       )}
-    </div>
+    </Stack>
   );
 }

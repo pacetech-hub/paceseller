@@ -1,0 +1,53 @@
+.option {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.clearBtn {
+  display: inline-flex;
+  color: var(--mantine-color-dimmed);
+  flex-shrink: 0;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  transition: border-color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-6);
+    background-color: var(--mantine-color-gray-0);
+  }
+}
+
+.cardTitle {
+  transition: color 150ms ease;
+}
+
+.card:hover .cardTitle {
+  color: var(--mantine-color-gray-9);
+}
+
+.cardBody {
+  flex: 1;
+  text-align: left;
+  display: block;
+}

@@ -1,0 +1,41 @@
+.header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-0);
+  }
+}
+
+.code {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--mantine-radius-md);
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  color: var(--mantine-color-text);
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+  white-space: normal;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: decimal inside;
+  color: var(--mantine-color-dimmed);
+  font-size: 0.75rem;
+
+  & li + li {
+    margin-top: 4px;
+  }
+}

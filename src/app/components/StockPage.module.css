@@ -1,0 +1,44 @@
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-1);
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-2);
+  }
+}
+
+.providerCard {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--mantine-color-gray-2);
+  transition: border-color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-5);
+    background-color: var(--mantine-color-gray-0);
+  }
+}
