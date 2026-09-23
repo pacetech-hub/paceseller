@@ -9,16 +9,12 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@emotion/react": "11.14.0",
-    "@emotion/styled": "11.14.1",
     "@mantine/charts": "^7.17.8",
     "@mantine/core": "^7.17.8",
     "@mantine/dates": "^7.17.8",
     "@mantine/form": "^7.17.8",
     "@mantine/hooks": "^7.17.8",
     "@mantine/notifications": "^7.17.8",
-    "@mui/icons-material": "7.3.5",
-    "@mui/material": "7.3.5",
     "@phosphor-icons/react": "2.1.10",
     "@popperjs/core": "2.11.8",
     "@radix-ui/react-accordion": "1.2.3",
