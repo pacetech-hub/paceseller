@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+
+/*
+ * Estilos globais mínimos. Cores, espaçamentos e tipografia vêm do tema Mantine
+ * (src/mantine/theme.ts), cuja paleta é o Open Color — use as variáveis
+ * --mantine-color-* em vez de valores fixos.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Números alinhados em tabelas, preços e KPIs */
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mantine-color-gray-5);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mantine-color-gray-6);
+}

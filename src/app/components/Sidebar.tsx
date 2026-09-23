@@ -307,7 +307,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                     key={item.label}
                     onClick={() => onNavigate(item.view)}
                     variant={active ? 'light' : 'subtle'}
-                    color="neutral"
+                   
                     size="sm"
                     leftSection={<Icon className="w-3.5 h-3.5" />}
                     title={item.label}
@@ -330,15 +330,15 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           {actions}
 
           {/* Cart(s) — todos os perfis usam multi-carrinhos */}
-          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
-            <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" title="Carrinhos">
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} offset={4}>
+            <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" size="lg" title="Carrinhos">
               <ShoppingBasket className="w-4 h-4" />
             </ActionIcon>
           </Indicator>
 
           {/* Notifications */}
-          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
-            <ActionIcon variant="subtle" color="neutral" size="lg" title="Notificações">
+          <Indicator disabled={notifications === 0} size={8} offset={6}>
+            <ActionIcon variant="subtle" size="lg" title="Notificações">
               <Bell className="w-4 h-4" />
             </ActionIcon>
           </Indicator>
@@ -348,7 +348,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             <Button
               onClick={() => onNavigate('history')}
               variant="default"
-              color="neutral"
+             
               size="sm"
               leftSection={<Store className="w-3.5 h-3.5" />}
               title="Ver histórico de pedidos deste cliente"
@@ -362,7 +362,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             <Menu.Target>
               <ActionIcon
                 variant="light"
-                color="neutral"
+               
                 radius="xl"
                 size={32}
                 ml={4}

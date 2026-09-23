@@ -16,7 +16,7 @@ function Section({ icon: Icon, title, description, children }: { icon: React.Com
   return (
     <Paper component="section" withBorder radius="md" p="lg">
       <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
-        <ThemeIcon size={36} radius="md" variant="light" color="neutral" style={{ flexShrink: 0 }}>
+        <ThemeIcon size={36} radius="md" variant="light" style={{ flexShrink: 0 }}>
           <Icon className="w-4 h-4" />
         </ThemeIcon>
         <Box style={{ flex: 1, minWidth: 0 }}>
@@ -41,7 +41,7 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
 function ToggleRow({ label, description, defaultChecked = false }: { label: string; description?: string; defaultChecked?: boolean }) {
   return (
     <Switch
-      color="neutral"
+     
       labelPosition="left"
       defaultChecked={defaultChecked}
       py="xs"
@@ -83,7 +83,7 @@ function LojistaProfile() {
       </Section>
 
       <Section icon={FileText} title="Tabela comercial vigente" description="Definida pela indústria para sua conta">
-        <Field label="Tabela" value={<Badge color="neutral" variant="light">Tabela B — Verão 26</Badge>} />
+        <Field label="Tabela" value={<Badge variant="light">Tabela B — Verão 26</Badge>} />
         <Field label="Condição de pagamento" value="30/60/90 dias" />
         <Field label="Pedido mínimo" value="R$ 3.000,00" />
         <Field label="Frete" value="CIF acima de R$ 5.000,00" />
@@ -113,7 +113,7 @@ function LojistaProfile() {
       <Section icon={Lock} title="Senha e acesso">
         <Field label="E-mail de acesso" value="compras@bellamoda.com.br" />
         <Field label="Última alteração de senha" value="há 3 meses" />
-        <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
+        <Button variant="default" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
           Alterar senha
         </Button>
       </Section>
@@ -142,15 +142,15 @@ function RepProfile() {
 
       <Section icon={Store} title="Carteira de lojas" description="32 lojas vinculadas">
         <SimpleGrid cols={3} spacing="xs" mb="xs">
-          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-gray-0)">
             <Text c="teal" fw={700} size="1.1rem">24</Text>
             <Text c="dimmed" size="0.68rem">Ativas</Text>
           </Paper>
-          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-gray-0)">
             <Text c="orange" fw={700} size="1.1rem">5</Text>
             <Text c="dimmed" size="0.68rem">Inativas</Text>
           </Paper>
-          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-gray-0)">
             <Text c="red" fw={700} size="1.1rem">3</Text>
             <Text c="dimmed" size="0.68rem">Bloqueadas</Text>
           </Paper>
@@ -177,7 +177,7 @@ function RepProfile() {
         <Field label="Usuário" value="marina.costa" />
         <Field label="Última alteração de senha" value="há 1 mês" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Ativa" />} />
-        <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
+        <Button variant="default" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
           Alterar senha
         </Button>
       </Section>
@@ -192,7 +192,7 @@ function AdminProfile() {
       <Section icon={Building2} title="Dados da conta">
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
-        <Field label="Plano" value={<Badge color="neutral" variant="light">Enterprise</Badge>} />
+        <Field label="Plano" value={<Badge variant="light">Enterprise</Badge>} />
         <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheck className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-teal-6)' }} />Administrador master</Group>} />
       </Section>
 
@@ -250,7 +250,7 @@ function AdminProfile() {
         <Field label="Última alteração de senha" value="há 14 dias" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Obrigatória" />} />
         <Field label="Sessões ativas" value="2 dispositivos" />
-        <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
+        <Button variant="default" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
           Alterar senha
         </Button>
       </Section>

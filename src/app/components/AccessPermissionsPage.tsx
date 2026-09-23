@@ -108,7 +108,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   return (
     <Stack gap="lg" maw={1400} mx="auto" p="lg">
       <Group gap="sm" wrap="nowrap">
-        <ThemeIcon size={40} radius="md" variant="light" color="neutral">
+        <ThemeIcon size={40} radius="md" variant="light">
           <Icon className="w-5 h-5" />
         </ThemeIcon>
         <Box>
@@ -117,7 +117,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         </Box>
       </Group>
 
-      <Alert icon={<Info className="w-4 h-4" />} color="neutral" radius="md" variant="light">
+      <Alert icon={<Info className="w-4 h-4" />} radius="md" variant="light">
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
       </Alert>
 
@@ -130,7 +130,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
           </Box>
           <Button
             onClick={() => setShowInvite(v => !v)}
-            color="neutral"
+           
             size="sm"
             leftSection={<UserPlus className="w-3.5 h-3.5" />}
           >
@@ -158,8 +158,8 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               Será convidado com o perfil <Text component="span" fw={500} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
             </Text>
             <Group justify="flex-end" gap="sm">
-              <Button onClick={() => setShowInvite(false)} variant="default" color="neutral" size="sm">Cancelar</Button>
-              <Button onClick={inviteUser} color="neutral" size="sm">Convidar</Button>
+              <Button onClick={() => setShowInvite(false)} variant="default" size="sm">Cancelar</Button>
+              <Button onClick={inviteUser} size="sm">Convidar</Button>
             </Group>
           </Stack>
         )}
@@ -179,7 +179,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               <Table.Tr key={u.id}>
                 <Table.Td>
                   <Group gap="sm" wrap="nowrap">
-                    <Avatar radius="xl" size={28} color="neutral">{initials(u.name)}</Avatar>
+                    <Avatar radius="xl" size={28}>{initials(u.name)}</Avatar>
                     <Box style={{ minWidth: 0 }}>
                       <Text fw={500} size="0.82rem" truncate>{u.name}</Text>
                       <Text c="dimmed" size="0.72rem" truncate>{u.email}</Text>
