@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { AlertTriangle, UserX, PackageX, TrendingDown, Settings2, ChevronRight, MapPin, Box, AlertOctagon } from "lucide-react";
+import { Paper, Group, Box, Stack, Text, Title, Center, UnstyledButton, SimpleGrid, Progress, SegmentedControl } from "@mantine/core";
+import { AlertTriangle, UserX, PackageX, TrendingDown, Settings2, ChevronRight, MapPin, Box as BoxIcon, AlertOctagon } from "lucide-react";
 import { formatCurrency } from "../data/mockData";
+import classes from "./RuptureAlerts.module.css";
 
 type Profile = 'rep' | 'admin';
 type TabKey = 'risco' | 'encalhe' | 'meta' | 'ruptura';
@@ -64,7 +66,25 @@ const repsBelowAdmin = [
 ];
 
 const severityColor = (s: string) =>
-  s === 'alta' ? 'bg-amber-500/15 text-amber-500' : s === 'media' ? 'bg-amber-400/15 text-amber-400' : 'bg-black/15 text-black';
+  s === 'alta' ? { bg: 'yellow.1', c: 'yellow.8' } : s === 'media' ? { bg: 'yellow.0', c: 'yellow.7' } : { bg: 'gray.2', c: 'black' };
+
+const TABULAR = { fontVariantNumeric: 'tabular-nums' } as const;
+
+function Pill({ bg, c, children }: { bg: string; c: string; children: React.ReactNode }) {
+  return (
+    <Text component="span" bg={bg} c={c} px={6} py={2} fz="0.62rem" fw={700} style={{ borderRadius: 9999, lineHeight: 1.4 }}>
+      {children}
+    </Text>
+  );
+}
+
+function IconBox({ size, round, bg, children }: { size: number; round?: boolean; bg: string; children: React.ReactNode }) {
+  return (
+    <Center w={size} h={size} bg={bg} style={{ borderRadius: round ? '50%' : 'var(--mantine-radius-md)', flexShrink: 0 }}>
+      {children}
+    </Center>
+  );
+}
 
 export function RuptureAlerts({ profile }: RuptureAlertsProps) {
   const [tab, setTab] = useState<TabKey>('risco');
@@ -80,230 +100,229 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
   ];
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-          </div>
+      <Group justify="space-between" wrap="nowrap" px={20} py="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+        <Group gap={10} wrap="nowrap">
+          <IconBox size={32} bg="yellow.0">
+            <AlertTriangle size={16} color="var(--mantine-color-yellow-7)" />
+          </IconBox>
           <div>
-            <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alerta de Riscos</h3>
-            <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>
+            <Title order={3} fw={600} fz="0.9rem">Alerta de Riscos</Title>
+            <Text c="dimmed" fz="0.72rem">
               {profile === 'rep' ? 'Sinais críticos na sua carteira' : 'Sinais críticos consolidados'}
-            </p>
+            </Text>
           </div>
-        </div>
-        <button className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.72rem' }}>
-          <Settings2 className="w-3.5 h-3.5" /> Limiares
-        </button>
-      </div>
+        </Group>
+        <UnstyledButton className={classes.textBtn} fz="0.72rem">
+          <Settings2 size={14} /> Limiares
+        </UnstyledButton>
+      </Group>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 px-5 border-b border-border">
+      <Group gap={4} px={20} wrap="nowrap" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
         {tabs.map(t => {
           const Icon = t.icon;
           const active = tab === t.key;
           return (
-            <button
+            <UnstyledButton
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 -mb-px transition-colors ${
-                active ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-              style={{ fontSize: '0.78rem', fontWeight: 500 }}
+              className={classes.tab}
+              data-active={active || undefined}
+              fz="0.78rem"
+              fw={500}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon size={14} />
               {t.label}
-              <span className={`ml-1 px-1.5 py-0.5 rounded-full ${active ? 'bg-primary/15 text-primary' : 'bg-secondary text-muted-foreground'}`} style={{ fontSize: '0.62rem', fontWeight: 700 }}>
+              <Text component="span" ml={4} px={6} py={2} bg={active ? 'gray.2' : 'gray.1'} c={active ? 'gray.9' : 'dimmed'} fz="0.62rem" fw={700} style={{ borderRadius: 9999, lineHeight: 1.4 }}>
                 {t.count}
-              </span>
-            </button>
+              </Text>
+            </UnstyledButton>
           );
         })}
-      </div>
+      </Group>
 
       {/* Body */}
-      <div className="p-5">
+      <Box p={20}>
         {tab === 'risco' && (profile === 'rep' ? (
-          <div className="space-y-2">
-            {riskClientsRep.map(c => (
-              <div key={c.id} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-colors cursor-pointer">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-foreground truncate" style={{ fontSize: '0.83rem', fontWeight: 500 }}>{c.name}</p>
-                    <span className={`px-1.5 py-0.5 rounded-full ${severityColor(c.severity)}`} style={{ fontSize: '0.62rem', fontWeight: 700 }}>
-                      {c.severity}
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>
-                    <MapPin className="inline w-3 h-3 mr-0.5" />{c.city} · sem visita há <span className="text-amber-400 font-semibold">{c.lastVisit}d</span> · sem pedido há <span className="text-amber-400 font-semibold">{c.lastOrder}d</span>
-                  </p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-foreground mono" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{formatCurrency(c.value)}</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>histórico 12m</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </div>
-            ))}
-          </div>
+          <Stack gap={8}>
+            {riskClientsRep.map(c => {
+              const sev = severityColor(c.severity);
+              return (
+              <Group key={c.id} gap="sm" wrap="nowrap" p="sm" className={classes.riskRow}>
+                <Box flex={1} miw={0}>
+                  <Group gap={8} wrap="nowrap">
+                    <Text truncate fz="0.83rem" fw={500}>{c.name}</Text>
+                    <Pill bg={sev.bg} c={sev.c}>{c.severity}</Pill>
+                  </Group>
+                  <Text c="dimmed" mt={2} fz="0.72rem">
+                    <MapPin size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} />{c.city} · sem visita há <Text span c="yellow.7" fw={600} inherit>{c.lastVisit}d</Text> · sem pedido há <Text span c="yellow.7" fw={600} inherit>{c.lastOrder}d</Text>
+                  </Text>
+                </Box>
+                <Box ta="right" style={{ flexShrink: 0 }}>
+                  <Text fz="0.8rem" fw={600} style={TABULAR}>{formatCurrency(c.value)}</Text>
+                  <Text c="dimmed" fz="0.65rem">histórico 12m</Text>
+                </Box>
+                <ChevronRight size={16} color="var(--mantine-color-dimmed)" style={{ flexShrink: 0 }} />
+              </Group>
+              );
+            })}
+          </Stack>
         ) : (
           <>
             <GroupBySwitch value={groupBy} onChange={setGroupBy} options={[{v:'regiao',l:'Região'},{v:'segmento',l:'Segmento'},{v:'rep',l:'Rep responsável'}]} />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm">
               {riskClientsAdmin.map(g => (
-                <div key={g.group} className="rounded-lg border border-border/60 p-3 hover:border-primary/30 transition-colors cursor-pointer">
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{g.group}</p>
-                  <p className="text-foreground mt-1" style={{ fontSize: '1.3rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{g.count}</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>clientes em risco</p>
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/60">
-                    <span className="text-foreground mono" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{formatCurrency(g.value)}</span>
-                    <span className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>{g.reps} reps</span>
-                  </div>
-                </div>
+                <Box key={g.group} p="sm" className={classes.clickItem}>
+                  <Text c="dimmed" fz="0.7rem">{g.group}</Text>
+                  <Text mt={4} fz="1.3rem" fw={700} lts="-0.02em">{g.count}</Text>
+                  <Text c="dimmed" fz="0.7rem">clientes em risco</Text>
+                  <Group justify="space-between" wrap="nowrap" mt={8} pt={8} style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
+                    <Text component="span" fz="0.72rem" fw={600} style={TABULAR}>{formatCurrency(g.value)}</Text>
+                    <Text component="span" c="dimmed" fz="0.65rem">{g.reps} reps</Text>
+                  </Group>
+                </Box>
               ))}
-            </div>
+            </SimpleGrid>
           </>
         ))}
 
         {tab === 'encalhe' && (profile === 'rep' ? (
-          <div className="space-y-2">
+          <Stack gap={8}>
             {stalledProductsRep.map(p => (
-              <div key={p.sku} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 transition-colors cursor-pointer">
-                <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                  <PackageX className="w-4 h-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-foreground truncate" style={{ fontSize: '0.83rem', fontWeight: 500 }}>{p.name}</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{p.sku} · {p.line}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-amber-400" style={{ fontSize: '0.78rem', fontWeight: 600 }}>{p.days}d sem venda</p>
-                  <p className="text-muted-foreground mono" style={{ fontSize: '0.68rem' }}>{p.stock} un. estoque</p>
-                </div>
-              </div>
+              <Group key={p.sku} gap="sm" wrap="nowrap" p="sm" className={classes.clickItem}>
+                <IconBox size={36} bg="gray.1">
+                  <PackageX size={16} color="var(--mantine-color-dimmed)" />
+                </IconBox>
+                <Box flex={1} miw={0}>
+                  <Text truncate fz="0.83rem" fw={500}>{p.name}</Text>
+                  <Text c="dimmed" fz="0.7rem">{p.sku} · {p.line}</Text>
+                </Box>
+                <Box ta="right" style={{ flexShrink: 0 }}>
+                  <Text c="yellow.7" fz="0.78rem" fw={600}>{p.days}d sem venda</Text>
+                  <Text c="dimmed" fz="0.68rem" style={TABULAR}>{p.stock} un. estoque</Text>
+                </Box>
+              </Group>
             ))}
-            <p className="text-muted-foreground text-center pt-2" style={{ fontSize: '0.72rem' }}>
+            <Text c="dimmed" ta="center" pt={8} fz="0.72rem">
               Você não vendeu esses produtos nos últimos 60 dias
-            </p>
-          </div>
+            </Text>
+          </Stack>
         ) : (
           <>
             <GroupBySwitch value={stalledGroupBy} onChange={setStalledGroupBy} options={[{v:'linha',l:'Linha'},{v:'marca',l:'Marca'},{v:'regiao',l:'Região'}]} />
-            <div className="space-y-2">
+            <Stack gap={8}>
               {stalledProductsAdmin.map(g => (
-                <div key={g.group} className="flex items-center gap-3 p-3 rounded-lg border border-border/60">
-                  <div className="flex-1">
-                    <p className="text-foreground" style={{ fontSize: '0.83rem', fontWeight: 500 }}>{g.group}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{g.count} SKUs parados · {g.units.toLocaleString('pt-BR')} un.</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-foreground mono" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{formatCurrency(g.value)}</p>
-                    <p className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>capital parado</p>
-                  </div>
-                </div>
+                <Group key={g.group} gap="sm" wrap="nowrap" p="sm" className={classes.item}>
+                  <Box flex={1}>
+                    <Text fz="0.83rem" fw={500}>{g.group}</Text>
+                    <Text c="dimmed" fz="0.7rem">{g.count} SKUs parados · {g.units.toLocaleString('pt-BR')} un.</Text>
+                  </Box>
+                  <Box ta="right">
+                    <Text fz="0.82rem" fw={600} style={TABULAR}>{formatCurrency(g.value)}</Text>
+                    <Text c="dimmed" fz="0.65rem">capital parado</Text>
+                  </Box>
+                </Group>
               ))}
-            </div>
+            </Stack>
           </>
         ))}
 
         {tab === 'meta' && (profile === 'rep' ? (
           <div>
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-400/5 border border-amber-400/20 mb-3">
-              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <Group align="flex-start" gap="sm" wrap="nowrap" p="sm" mb="sm" bg="yellow.0" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-yellow-2)' }}>
+              <AlertTriangle size={16} color="var(--mantine-color-yellow-7)" style={{ flexShrink: 0, marginTop: 2 }} />
               <div>
-                <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>3 meses consecutivos abaixo da meta</p>
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Risco estrutural identificado. Gap médio: -15%</p>
+                <Text fz="0.82rem" fw={600}>3 meses consecutivos abaixo da meta</Text>
+                <Text c="dimmed" fz="0.72rem">Risco estrutural identificado. Gap médio: -15%</Text>
               </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
+            </Group>
+            <SimpleGrid cols={3} spacing={8}>
               {repMonthlyRep.map(m => {
                 const pct = Math.round((m.real / m.meta) * 100);
                 return (
-                  <div key={m.month} className="rounded-lg border border-border/60 p-3 text-center">
-                    <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{m.month}/26</p>
-                    <p className="text-foreground mt-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{pct}%</p>
-                    <p className="text-muted-foreground mono" style={{ fontSize: '0.65rem' }}>{m.real}k / {m.meta}k</p>
-                    <div className="w-full h-1 rounded-full bg-secondary mt-2">
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
+                  <Box key={m.month} p="sm" ta="center" className={classes.item}>
+                    <Text c="dimmed" fz="0.7rem">{m.month}/26</Text>
+                    <Text mt={4} fz="1.1rem" fw={700}>{pct}%</Text>
+                    <Text c="dimmed" fz="0.65rem" style={TABULAR}>{m.real}k / {m.meta}k</Text>
+                    <Progress value={pct} size={4} radius="xl" color="yellow.5" bg="gray.1" mt={8} />
+                  </Box>
                 );
               })}
-            </div>
+            </SimpleGrid>
           </div>
         ) : (
-          <div className="space-y-2">
+          <Stack gap={8}>
             {repsBelowAdmin.map(r => (
-              <div key={r.name} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 transition-colors cursor-pointer">
-                <div className="w-9 h-9 rounded-full bg-amber-400/15 flex items-center justify-center flex-shrink-0">
-                  <span className="text-amber-400" style={{ fontSize: '0.7rem', fontWeight: 700 }}>
+              <Group key={r.name} gap="sm" wrap="nowrap" p="sm" className={classes.clickItem}>
+                <IconBox size={36} round bg="yellow.1">
+                  <Text component="span" c="yellow.7" fz="0.7rem" fw={700}>
                     {r.name.split(' ').map(p=>p[0]).slice(0,2).join('')}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-foreground" style={{ fontSize: '0.83rem', fontWeight: 500 }}>{r.name}</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{r.region} · gestor: {r.manager}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-amber-400" style={{ fontSize: '0.8rem', fontWeight: 700 }}>{r.months} meses</p>
-                  <p className="text-muted-foreground mono" style={{ fontSize: '0.68rem' }}>gap {r.gap}%</p>
-                </div>
-              </div>
+                  </Text>
+                </IconBox>
+                <Box flex={1} miw={0}>
+                  <Text fz="0.83rem" fw={500}>{r.name}</Text>
+                  <Text c="dimmed" fz="0.7rem">{r.region} · gestor: {r.manager}</Text>
+                </Box>
+                <Box ta="right" style={{ flexShrink: 0 }}>
+                  <Text c="yellow.7" fz="0.8rem" fw={700}>{r.months} meses</Text>
+                  <Text c="dimmed" fz="0.68rem" style={TABULAR}>gap {r.gap}%</Text>
+                </Box>
+              </Group>
             ))}
-          </div>
+          </Stack>
         ))}
 
         {tab === 'ruptura' && (profile === 'rep' ? (
-          <div className="space-y-2">
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-400/5 border border-amber-400/20 mb-2">
-              <AlertOctagon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <Stack gap={8}>
+            <Group align="flex-start" gap="sm" wrap="nowrap" p="sm" mb={8} bg="yellow.0" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-yellow-2)' }}>
+              <AlertOctagon size={16} color="var(--mantine-color-yellow-7)" style={{ flexShrink: 0, marginTop: 2 }} />
               <div>
-                <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Produtos indisponíveis para compra</p>
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Notifique clientes da sua carteira para evitar vendas perdidas e frustração.</p>
+                <Text fz="0.82rem" fw={600}>Produtos indisponíveis para compra</Text>
+                <Text c="dimmed" fz="0.72rem">Notifique clientes da sua carteira para evitar vendas perdidas e frustração.</Text>
               </div>
-            </div>
+            </Group>
             {catalogRuptureRep.map(p => (
-              <div key={p.sku} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-amber-400/30 hover:bg-amber-400/5 transition-colors cursor-pointer">
-                <div className="w-9 h-9 rounded-lg bg-amber-400/15 flex items-center justify-center flex-shrink-0">
-                  <Box className="w-4 h-4 text-amber-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-foreground truncate" style={{ fontSize: '0.83rem', fontWeight: 500 }}>{p.name}</p>
-                    <span className="px-1.5 py-0.5 rounded-full bg-amber-400/15 text-amber-400" style={{ fontSize: '0.62rem', fontWeight: 700 }}>Ruptura</span>
-                  </div>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{p.sku} · {p.line} · estoque zerado</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-amber-400" style={{ fontSize: '0.8rem', fontWeight: 700 }}>{p.clientsAffected} clientes</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>última venda há {p.lastSale}d</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </div>
+              <Group key={p.sku} gap="sm" wrap="nowrap" p="sm" className={classes.ruptureRow}>
+                <IconBox size={36} bg="yellow.1">
+                  <BoxIcon size={16} color="var(--mantine-color-yellow-7)" />
+                </IconBox>
+                <Box flex={1} miw={0}>
+                  <Group gap={8} wrap="nowrap">
+                    <Text truncate fz="0.83rem" fw={500}>{p.name}</Text>
+                    <Pill bg="yellow.1" c="yellow.7">Ruptura</Pill>
+                  </Group>
+                  <Text c="dimmed" fz="0.7rem">{p.sku} · {p.line} · estoque zerado</Text>
+                </Box>
+                <Box ta="right" style={{ flexShrink: 0 }}>
+                  <Text c="yellow.7" fz="0.8rem" fw={700}>{p.clientsAffected} clientes</Text>
+                  <Text c="dimmed" fz="0.68rem">última venda há {p.lastSale}d</Text>
+                </Box>
+                <ChevronRight size={16} color="var(--mantine-color-dimmed)" style={{ flexShrink: 0 }} />
+              </Group>
             ))}
-          </div>
+          </Stack>
         ) : (
           <>
             <GroupBySwitch value={ruptureGroupBy} onChange={setRuptureGroupBy} options={[{v:'linha',l:'Linha'},{v:'marca',l:'Marca'},{v:'regiao',l:'Região'}]} />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm">
               {catalogRuptureAdmin.map(g => (
-                <div key={g.group} className="rounded-lg border border-amber-400/20 p-3 hover:border-amber-400/40 transition-colors cursor-pointer bg-amber-400/5">
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{g.group}</p>
-                  <p className="text-foreground mt-1" style={{ fontSize: '1.3rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{g.count}</p>
-                  <p className="text-amber-400" style={{ fontSize: '0.7rem', fontWeight: 600 }}>SKUs em ruptura</p>
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-amber-400/10">
-                    <span className="text-foreground" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{g.totalClients} clientes</span>
-                    <span className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>{g.skus}</span>
-                  </div>
-                </div>
+                <Box key={g.group} p="sm" bg="yellow.0" className={classes.warnCard}>
+                  <Text c="dimmed" fz="0.7rem">{g.group}</Text>
+                  <Text mt={4} fz="1.3rem" fw={700} lts="-0.02em">{g.count}</Text>
+                  <Text c="yellow.7" fz="0.7rem" fw={600}>SKUs em ruptura</Text>
+                  <Group justify="space-between" wrap="nowrap" mt={8} pt={8} style={{ borderTop: '1px solid var(--mantine-color-yellow-1)' }}>
+                    <Text component="span" fz="0.72rem" fw={600}>{g.totalClients} clientes</Text>
+                    <Text component="span" c="dimmed" fz="0.65rem">{g.skus}</Text>
+                  </Group>
+                </Box>
               ))}
-            </div>
+            </SimpleGrid>
           </>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Paper>
   );
 }
 
@@ -311,22 +330,18 @@ function GroupBySwitch<T extends string>({ value, onChange, options }: {
   value: T; onChange: (v: T) => void; options: { v: T; l: string }[];
 }) {
   return (
-    <div className="flex items-center gap-2 mb-3">
-      <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Agrupar por:</span>
-      <div className="inline-flex rounded-lg bg-secondary p-0.5">
-        {options.map(o => (
-          <button
-            key={o.v}
-            onClick={() => onChange(o.v)}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
-              value === o.v ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            }`}
-            style={{ fontSize: '0.72rem', fontWeight: 500 }}
-          >
-            {o.l}
-          </button>
-        ))}
-      </div>
-    </div>
+    <Group gap={8} mb="sm">
+      <Text component="span" c="dimmed" fz="0.72rem">Agrupar por:</Text>
+      <SegmentedControl
+        value={value}
+        onChange={v => onChange(v as T)}
+        size="xs"
+        radius="md"
+        bg="gray.1"
+        p={2}
+        data={options.map(o => ({ value: o.v, label: o.l }))}
+        styles={{ label: { fontSize: '0.72rem', fontWeight: 500 } }}
+      />
+    </Group>
   );
 }

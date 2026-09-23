@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
+import { Stack, Group, Grid, SimpleGrid, Paper, Box, Center, Text, Title, Progress, UnstyledButton } from "@mantine/core";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
 import { TrendingUp, TrendingDown, Package2, ShoppingBag, Trophy, Calendar, Download } from "lucide-react";
 import { selloutData, formatCurrency } from "../data/mockData";
+import classes from "./LojistaHistoryDashboard.module.css";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
@@ -46,16 +48,22 @@ const periods = [
 const ChartTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>{label}</p>
+    <Paper withBorder radius="md" px="sm" py={8} shadow="xl">
+      <Text c="dimmed" mb={4} fz="0.72rem">{label}</Text>
       {payload.map((e: any, i: number) => (
-        <p key={i} style={{ color: e.color, fontSize: '0.8rem', fontWeight: 600 }}>
+        <Text key={i} style={{ color: e.color }} fz="0.8rem" fw={600}>
           {e.name}: {formatCurrency(e.value)}
-        </p>
+        </Text>
       ))}
-    </div>
+    </Paper>
   );
 };
+
+const TABULAR = { fontVariantNumeric: 'tabular-nums' } as const;
+const GRID_STROKE = 'var(--mantine-color-gray-3)';
+const AXIS_STROKE = 'var(--mantine-color-gray-6)';
+const SELL_IN = 'var(--mantine-color-blue-6)';
+const SELL_OUT = 'var(--mantine-color-teal-5)';
 
 export function LojistaHistoryDashboard({ onNavigate }: Props) {
   const [period, setPeriod] = useState<'30d' | '90d' | '6m'>('90d');
@@ -98,163 +106,192 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
   ];
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-6">
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <Group justify="space-between" gap="sm">
         <div>
-          <h1 className="text-foreground" style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <Title order={1} fz="1.4rem" fw={700} lts="-0.02em">
             Histórico de Compras
-          </h1>
-          <p className="text-muted-foreground" style={{ fontSize: '0.82rem' }}>
+          </Title>
+          <Text c="dimmed" fz="0.82rem">
             Visão de sell-in × sell-out e linhas em destaque
-          </p>
+          </Text>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1">
-            <Calendar className="w-3.5 h-3.5 text-muted-foreground ml-1.5" />
+        <Group gap={8} wrap="nowrap">
+          <Group gap={4} wrap="nowrap" p={4} bg="white" style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: 'var(--mantine-radius-md)' }}>
+            <Calendar size={14} color="var(--mantine-color-dimmed)" style={{ marginLeft: 6 }} />
             {periods.map(p => (
-              <button
+              <UnstyledButton
                 key={p.id}
                 onClick={() => setPeriod(p.id as any)}
-                className={`px-3 py-1 rounded-md transition-colors ${period === p.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                style={{ fontSize: '0.74rem', fontWeight: 600 }}
+                className={classes.periodBtn}
+                data-active={period === p.id || undefined}
+                fz="0.74rem"
+                fw={600}
               >
                 {p.label}
-              </button>
+              </UnstyledButton>
             ))}
-          </div>
-          <button
+          </Group>
+          <UnstyledButton
             onClick={() => onNavigate('history')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 500 }}
+            className={classes.exportBtn}
+            fz="0.78rem"
+            fw={500}
           >
-            <Download className="w-3.5 h-3.5" /> Exportar
-          </button>
-        </div>
-      </div>
+            <Download size={14} /> Exportar
+          </UnstyledButton>
+        </Group>
+      </Group>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
         {kpis.map(k => {
           const Icon = k.icon;
           const TrendIcon = k.up ? TrendingUp : TrendingDown;
           return (
-            <div key={k.label} className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-primary" />
-                </div>
-                <div className={`flex items-center gap-1 ${k.up ? 'text-emerald-400' : 'text-red-400'}`} style={{ fontSize: '0.72rem', fontWeight: 700 }}>
-                  <TrendIcon className="w-3 h-3" />
+            <Paper key={k.label} withBorder radius="lg" p="md">
+              <Group justify="space-between" wrap="nowrap" mb={8}>
+                <Center w={32} h={32} bg="gray.1" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+                  <Icon size={16} color="var(--mantine-color-gray-9)" />
+                </Center>
+                <Group gap={4} wrap="nowrap" c={k.up ? 'teal.6' : 'red.6'} fz="0.72rem" fw={700}>
+                  <TrendIcon size={12} />
                   {k.trend}
-                </div>
-              </div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{k.label}</p>
-              <p className="text-foreground mono" style={{ fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{k.value}</p>
-              <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{k.sub}</p>
-            </div>
+                </Group>
+              </Group>
+              <Text c="dimmed" fz="0.72rem" fw={500}>{k.label}</Text>
+              <Text fz="1.15rem" fw={700} lts="-0.01em" style={TABULAR}>{k.value}</Text>
+              <Text c="dimmed" fz="0.7rem">{k.sub}</Text>
+            </Paper>
           );
         })}
-      </div>
+      </SimpleGrid>
 
       {/* Sell-in x Sell-out chart */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
+      <Paper withBorder radius="lg" p={20}>
+        <Group justify="space-between" wrap="nowrap" mb="md">
           <div>
-            <p className="text-foreground" style={{ fontSize: '0.95rem', fontWeight: 700 }}>Sell-in × Sell-out</p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.74rem' }}>Comparativo mensal</p>
+            <Text fz="0.95rem" fw={700}>Sell-in × Sell-out</Text>
+            <Text c="dimmed" fz="0.74rem">Comparativo mensal</Text>
           </div>
-          <div className="flex items-center gap-3" style={{ fontSize: '0.72rem' }}>
-            <span className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="w-2.5 h-2.5 rounded-sm bg-primary" /> Sell-in
-            </span>
-            <span className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400" /> Sell-out
-            </span>
-          </div>
-        </div>
+          <Group gap="sm" wrap="nowrap" fz="0.72rem">
+            <Group component="span" gap={6} wrap="nowrap" c="dimmed">
+              <Box component="span" w={10} h={10} bg="gray.9" style={{ borderRadius: 2 }} /> Sell-in
+            </Group>
+            <Group component="span" gap={6} wrap="nowrap" c="dimmed">
+              <Box component="span" w={10} h={10} bg="teal.4" style={{ borderRadius: 2 }} /> Sell-out
+            </Group>
+          </Group>
+        </Group>
         <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
             <AreaChart data={chartData} margin={{ top: 5, right: 10, bottom: 0, left: -10 }}>
               <defs>
                 <linearGradient id="gIn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.6 0.22 262)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="oklch(0.6 0.22 262)" stopOpacity={0} />
+                  <stop offset="0%" stopColor={SELL_IN} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={SELL_IN} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gOut" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#34d399" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+                  <stop offset="0%" stopColor={SELL_OUT} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={SELL_OUT} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" style={{ fontSize: '0.72rem' }} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: '0.72rem' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
+              <XAxis dataKey="month" stroke={AXIS_STROKE} style={{ fontSize: '0.72rem' }} tickLine={false} axisLine={false} />
+              <YAxis stroke={AXIS_STROKE} style={{ fontSize: '0.72rem' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
               <Tooltip content={<ChartTooltip />} />
-              <Area type="monotone" dataKey="Sell-in" stroke="oklch(0.6 0.22 262)" strokeWidth={2} fill="url(#gIn)" />
-              <Area type="monotone" dataKey="Sell-out" stroke="#34d399" strokeWidth={2} fill="url(#gOut)" />
+              <Area type="monotone" dataKey="Sell-in" stroke={SELL_IN} strokeWidth={2} fill="url(#gIn)" />
+              <Area type="monotone" dataKey="Sell-out" stroke={SELL_OUT} strokeWidth={2} fill="url(#gOut)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Paper>
 
       {/* Linhas em destaque */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <p className="text-foreground" style={{ fontSize: '0.95rem', fontWeight: 700 }}>Linhas mais vendidas</p>
+      <Grid gutter={20}>
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+          <Paper withBorder radius="lg" p={20} h="100%">
+            <Group justify="space-between" wrap="nowrap" mb="md">
+              <Group gap={8} wrap="nowrap">
+                <Trophy size={16} color="var(--mantine-color-yellow-6)" />
+                <Text fz="0.95rem" fw={700}>Linhas mais vendidas</Text>
+              </Group>
+              <Text c="dimmed" fz="0.72rem">{periods.find(p => p.id === period)?.label}</Text>
+            </Group>
+            <div style={{ width: '100%', height: 260 }}>
+              <ResponsiveContainer>
+                <BarChart data={lines} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} horizontal={false} />
+                  <XAxis type="number" stroke={AXIS_STROKE} style={{ fontSize: '0.7rem' }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke={AXIS_STROKE} style={{ fontSize: '0.72rem' }} width={110} tickLine={false} axisLine={false} />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Bar dataKey="revenue" name="Receita" radius={[0, 6, 6, 0]}>
+                    {lines.map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? 'var(--mantine-color-yellow-6)' : SELL_IN} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{periods.find(p => p.id === period)?.label}</p>
-          </div>
-          <div style={{ width: '100%', height: 260 }}>
-            <ResponsiveContainer>
-              <BarChart data={lines} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis type="number" stroke="hsl(var(--muted-foreground))" style={{ fontSize: '0.7rem' }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
-                <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" style={{ fontSize: '0.72rem' }} width={110} tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="revenue" name="Receita" radius={[0, 6, 6, 0]}>
-                  {lines.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? '#f59e0b' : 'oklch(0.6 0.22 262)'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          </Paper>
+        </Grid.Col>
 
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-foreground" style={{ fontSize: '0.95rem', fontWeight: 700 }}>Ranking</p>
-            <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Top 5</p>
-          </div>
-          <div className="space-y-2.5">
-            {lines.map((l, i) => (
-              <div key={l.name} className={`p-3 rounded-lg border transition-colors ${i === 0 ? 'border-amber-400/40 bg-amber-400/5' : 'border-border bg-secondary/20'}`}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${i === 0 ? 'bg-amber-400 text-background' : 'bg-secondary text-muted-foreground'}`} style={{ fontSize: '0.65rem', fontWeight: 700 }}>
-                      {i + 1}
-                    </span>
-                    <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{l.name}</p>
-                  </div>
-                  <span className={`${l.growth >= 0 ? 'text-emerald-400' : 'text-red-400'}`} style={{ fontSize: '0.7rem', fontWeight: 700 }}>
-                    {l.growth >= 0 ? '+' : ''}{l.growth}%
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-                  <span>{l.units} pares</span>
-                  <span className="mono text-foreground" style={{ fontWeight: 600 }}>{formatCurrency(l.revenue)}</span>
-                </div>
-                <div className="mt-1.5 h-1 rounded-full bg-secondary overflow-hidden">
-                  <div className={`h-full ${i === 0 ? 'bg-amber-400' : 'bg-primary'}`} style={{ width: `${(l.revenue / maxRev) * 100}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Paper withBorder radius="lg" p={20} h="100%">
+            <Group justify="space-between" wrap="nowrap" mb="sm">
+              <Text fz="0.95rem" fw={700}>Ranking</Text>
+              <Text c="dimmed" fz="0.72rem">Top 5</Text>
+            </Group>
+            <Stack gap={10}>
+              {lines.map((l, i) => (
+                <Box
+                  key={l.name}
+                  p="sm"
+                  bg={i === 0 ? 'yellow.0' : 'gray.0'}
+                  style={{
+                    borderRadius: 'var(--mantine-radius-md)',
+                    border: `1px solid ${i === 0 ? 'var(--mantine-color-yellow-3)' : 'var(--mantine-color-gray-3)'}`,
+                    transition: 'background-color 150ms ease, border-color 150ms ease',
+                  }}
+                >
+                  <Group justify="space-between" wrap="nowrap" mb={6}>
+                    <Group gap={8} wrap="nowrap" miw={0}>
+                      <Center
+                        w={20}
+                        h={20}
+                        bg={i === 0 ? 'yellow.5' : 'gray.1'}
+                        c={i === 0 ? 'white' : 'dimmed'}
+                        fz="0.65rem"
+                        fw={700}
+                        style={{ borderRadius: '50%', flexShrink: 0 }}
+                      >
+                        {i + 1}
+                      </Center>
+                      <Text truncate fz="0.82rem" fw={600}>{l.name}</Text>
+                    </Group>
+                    <Text component="span" c={l.growth >= 0 ? 'teal.6' : 'red.6'} fz="0.7rem" fw={700}>
+                      {l.growth >= 0 ? '+' : ''}{l.growth}%
+                    </Text>
+                  </Group>
+                  <Group justify="space-between" wrap="nowrap" c="dimmed" fz="0.72rem">
+                    <span>{l.units} pares</span>
+                    <Text component="span" inherit c="var(--mantine-color-text)" fw={600} style={TABULAR}>{formatCurrency(l.revenue)}</Text>
+                  </Group>
+                  <Progress
+                    mt={6}
+                    size={4}
+                    radius="xl"
+                    bg="gray.1"
+                    color={i === 0 ? 'yellow.5' : 'gray.9'}
+                    value={(l.revenue / maxRev) * 100}
+                  />
+                </Box>
+              ))}
+            </Stack>
+          </Paper>
+        </Grid.Col>
+      </Grid>
+    </Stack>
   );
 }

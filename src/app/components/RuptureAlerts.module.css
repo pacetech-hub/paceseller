@@ -1,0 +1,75 @@
+.textBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+
+  &[data-active] {
+    border-bottom-color: var(--mantine-color-gray-9);
+    color: var(--mantine-color-gray-9);
+  }
+}
+
+.item {
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--mantine-color-gray-2);
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.clickItem {
+  composes: item;
+  cursor: pointer;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-4);
+  }
+}
+
+.riskRow {
+  composes: clickItem;
+
+  @mixin hover {
+    border-color: var(--mantine-color-gray-4);
+    background-color: var(--mantine-color-gray-0);
+  }
+}
+
+.ruptureRow {
+  composes: clickItem;
+
+  @mixin hover {
+    border-color: var(--mantine-color-yellow-3);
+    background-color: var(--mantine-color-yellow-0);
+  }
+}
+
+.warnCard {
+  cursor: pointer;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--mantine-color-yellow-2);
+  transition: border-color 150ms ease;
+
+  @mixin hover {
+    border-color: var(--mantine-color-yellow-4);
+  }
+}

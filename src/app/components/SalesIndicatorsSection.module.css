@@ -1,0 +1,34 @@
+.statusRow {
+  width: calc(100% + 12px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.clientRow {
+  width: calc(100% + 16px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  margin: 0 -8px;
+  text-align: left;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-gray-1);
+  }
+}
+
+.divided > * + * {
+  border-top: 1px solid var(--mantine-color-gray-3);
+}

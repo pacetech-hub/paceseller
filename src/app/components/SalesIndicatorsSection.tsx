@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { Stack, Group, SegmentedControl, SimpleGrid, Paper, Text, Title, Grid, UnstyledButton, Box } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
 import { clients as allClients, type Client } from "../data/mockData";
+import classes from "./SalesIndicatorsSection.module.css";
+
+const TABULAR = { fontVariantNumeric: 'tabular-nums' } as const;
 
 export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
 
@@ -89,11 +93,11 @@ function buildSeries(monthlyBase: number, period: Period) {
 }
 
 const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
-  { key: 'analise', label: 'Em análise', color: '#f59e0b', ratio: 0.10, orderStatus: 'em análise' },
-  { key: 'aprovado', label: 'Aprovado', color: '#111111', ratio: 0.40, orderStatus: 'aprovado' },
-  { key: 'faturado', label: 'Faturado', color: '#3b82f6', ratio: 0.27, orderStatus: 'faturado' },
-  { key: 'entregue', label: 'Entregue', color: '#8b5cf6', ratio: 0.18, orderStatus: 'entregue' },
-  { key: 'cancelado', label: 'Cancelado', color: '#ef4444', ratio: 0.05, orderStatus: 'cancelado' },
+  { key: 'analise', label: 'Em análise', color: 'var(--mantine-color-yellow-6)', ratio: 0.10, orderStatus: 'em análise' },
+  { key: 'aprovado', label: 'Aprovado', color: 'var(--mantine-color-gray-9)', ratio: 0.40, orderStatus: 'aprovado' },
+  { key: 'faturado', label: 'Faturado', color: 'var(--mantine-color-blue-6)', ratio: 0.27, orderStatus: 'faturado' },
+  { key: 'entregue', label: 'Entregue', color: 'var(--mantine-color-violet-6)', ratio: 0.18, orderStatus: 'entregue' },
+  { key: 'cancelado', label: 'Cancelado', color: 'var(--mantine-color-red-6)', ratio: 0.05, orderStatus: 'cancelado' },
 ];
 
 // referência fixa de "hoje" usada só para o mock de recência de pedidos
@@ -180,127 +184,128 @@ export function SalesIndicatorsSection({
   const financeDelta = seededPercent(`finance-${scope}-${period}`, 4, 15);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-end flex-wrap gap-2">
-        <div className="inline-flex flex-wrap rounded-lg bg-secondary p-1">
-          {PERIOD_OPTIONS.map(opt => (
-            <button
-              key={opt.id}
-              onClick={() => setPeriod(opt.id)}
-              className={`px-2.5 py-1 rounded-md transition-colors ${period === opt.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
-              style={{ fontSize: '0.7rem', fontWeight: 600 }}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <Stack gap="md">
+      <Group justify="flex-end" gap={8}>
+        <SegmentedControl
+          value={period}
+          onChange={v => setPeriod(v as Period)}
+          color="gray"
+          radius="md"
+          size="xs"
+          data={PERIOD_OPTIONS.map(opt => ({ value: opt.id, label: opt.label }))}
+          styles={{ label: { fontSize: '0.7rem', fontWeight: 600 } }}
+        />
+      </Group>
 
       {/* A + B */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Pedidos no período</p>
-          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{periodOrders.toLocaleString('pt-BR')}</p>
-          <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{ordersDelta}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Faturamento</p>
-          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{formatCompactCurrency(periodValue)}</p>
-          <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{financeDelta}</p>
-        </div>
-      </div>
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <Paper withBorder radius="lg" p="md">
+          <Text c="gray.9" tt="uppercase" lts="0.05em" size="0.66rem" fw={700}>Pedidos no período</Text>
+          <Text mt={4} size="1.6rem" fw={700} style={TABULAR}>{periodOrders.toLocaleString('pt-BR')}</Text>
+          <Text c="teal.7" mt={4} size="0.72rem" fw={600}>{ordersDelta}</Text>
+        </Paper>
+        <Paper withBorder radius="lg" p="md">
+          <Text c="gray.9" tt="uppercase" lts="0.05em" size="0.66rem" fw={700}>Faturamento</Text>
+          <Text mt={4} size="1.6rem" fw={700} style={TABULAR}>{formatCompactCurrency(periodValue)}</Text>
+          <Text c="teal.7" mt={4} size="0.72rem" fw={600}>{financeDelta}</Text>
+        </Paper>
+      </SimpleGrid>
 
       {/* C: gráfico de colunas x ano anterior + status dos pedidos */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5 lg:col-span-8">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas vs. ano passado</h4>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>Colunas do período atual · linha do mesmo ciclo no ano anterior</p>
-          <ResponsiveContainer width="100%" height={240}>
-            <ComposedChart data={series} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisValue} />
-              <Tooltip formatter={(v: any, name: any) => [brl(v as number), name === 'current' ? 'Período atual' : 'Ano passado']} />
-              <Legend formatter={(v: string) => v === 'current' ? 'Período atual' : 'Ano passado'} wrapperStyle={{ fontSize: '0.72rem' }} />
-              <Bar dataKey="current" name="current" fill="#111" radius={[4, 4, 0, 0]} />
-              <Line type="monotone" dataKey="lastYear" name="lastYear" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: '#f59e0b' }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+      <Grid gutter="md">
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+          <Paper withBorder radius="lg" p={20} h="100%">
+            <Title order={4} fw={600} fz="0.85rem">Vendas vs. ano passado</Title>
+            <Text c="dimmed" mt={2} size="0.72rem">Colunas do período atual · linha do mesmo ciclo no ano anterior</Text>
+            <ResponsiveContainer width="100%" height={240}>
+              <ComposedChart data={series} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisValue} />
+                <Tooltip formatter={(v: any, name: any) => [brl(v as number), name === 'current' ? 'Período atual' : 'Ano passado']} />
+                <Legend formatter={(v: string) => v === 'current' ? 'Período atual' : 'Ano passado'} wrapperStyle={{ fontSize: '0.72rem' }} />
+                <Bar dataKey="current" name="current" fill="var(--mantine-color-gray-9)" radius={[4, 4, 0, 0]} />
+                <Line type="monotone" dataKey="lastYear" name="lastYear" stroke="var(--mantine-color-yellow-6)" strokeWidth={2} dot={{ r: 3, fill: 'var(--mantine-color-yellow-6)' }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid.Col>
 
-        <div className="bg-card border border-border rounded-xl p-5 lg:col-span-4">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Pedidos por status</h4>
-          <p className="text-muted-foreground mt-0.5 mb-3" style={{ fontSize: '0.72rem' }}>{periodOrders.toLocaleString('pt-BR')} pedidos no período</p>
-          <div className="space-y-1">
-            {statusRows.map(s => (
-              <button
-                key={s.key}
-                onClick={() => onOpenStatus(s.orderStatus)}
-                className="w-full flex items-center gap-2 py-1 px-1.5 -mx-1.5 rounded-lg hover:bg-primary/5 transition-colors"
-              >
-                <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: s.color }} />
-                <span className="text-foreground flex-1 truncate text-left" style={{ fontSize: '0.8rem' }}>{s.label}</span>
-                <span className="text-foreground mono" style={{ fontSize: '0.82rem', fontWeight: 700 }}>{s.count}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Paper withBorder radius="lg" p={20} h="100%">
+            <Title order={4} fw={600} fz="0.85rem">Pedidos por status</Title>
+            <Text c="dimmed" mt={2} mb="sm" size="0.72rem">{periodOrders.toLocaleString('pt-BR')} pedidos no período</Text>
+            <Stack gap={4}>
+              {statusRows.map(s => (
+                <UnstyledButton
+                  key={s.key}
+                  onClick={() => onOpenStatus(s.orderStatus)}
+                  className={classes.statusRow}
+                >
+                  <Box w={10} h={10} style={{ borderRadius: 2, flexShrink: 0, background: s.color }} />
+                  <Text flex={1} truncate ta="left" size="0.8rem">{s.label}</Text>
+                  <Text size="0.82rem" fw={700} style={TABULAR}>{s.count}</Text>
+                </UnstyledButton>
+              ))}
+            </Stack>
+          </Paper>
+        </Grid.Col>
+      </Grid>
 
       {/* D: top 10 vendedores */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas por representante</h4>
-          <button onClick={onOpenSalesTeam} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+      <Paper withBorder radius="lg" p={20}>
+        <Group justify="space-between" gap={8} mb="sm">
+          <Title order={4} fw={600} fz="0.85rem">Vendas por representante</Title>
+          <UnstyledButton onClick={onOpenSalesTeam} c="gray.9" fz="0.78rem" fw={600} style={{ flexShrink: 0 }}>
             Ver mais →
-          </button>
-        </div>
-        <div className="space-y-2">
+          </UnstyledButton>
+        </Group>
+        <Stack gap={8}>
           {ranked.map((e, i) => (
-            <div key={e.id} className="flex items-center gap-3">
-              <span className="text-muted-foreground w-5 text-right flex-shrink-0" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{i + 1}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{e.name}</p>
-                <p className="text-muted-foreground truncate" style={{ fontSize: '0.68rem' }}>
+            <Group key={e.id} gap="sm" wrap="nowrap">
+              <Text c="dimmed" w={20} ta="right" size="0.75rem" fw={600} style={{ flexShrink: 0 }}>{i + 1}</Text>
+              <Box miw={0} flex={1}>
+                <Text truncate size="0.82rem" fw={500}>{e.name}</Text>
+                <Text c="dimmed" truncate size="0.68rem">
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
-                </p>
-              </div>
-              <span className="text-foreground mono flex-shrink-0" style={{ fontSize: '0.82rem', fontWeight: 700 }}>{brl(e.value)}</span>
-            </div>
+                </Text>
+              </Box>
+              <Text size="0.82rem" fw={700} style={{ ...TABULAR, flexShrink: 0 }}>{brl(e.value)}</Text>
+            </Group>
           ))}
           {ranked.length === 0 && (
-            <p className="text-muted-foreground text-center py-6" style={{ fontSize: '0.8rem' }}>Nenhum vendedor no período</p>
+            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum vendedor no período</Text>
           )}
-        </div>
-      </div>
+        </Stack>
+      </Paper>
 
       {/* E: 5 clientes prioritários */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Prioridade de contato</h4>
-          <button onClick={onNavigateClients} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
+      <Paper withBorder radius="lg" p={20}>
+        <Group justify="space-between" gap={8} mb={4}>
+          <Title order={4} fw={600} fz="0.85rem">Prioridade de contato</Title>
+          <UnstyledButton onClick={onNavigateClients} c="gray.9" fz="0.78rem" fw={600} style={{ flexShrink: 0 }}>
             Ver mais →
-          </button>
-        </div>
-        <div className="mt-2 divide-y divide-border">
+          </UnstyledButton>
+        </Group>
+        <Box mt={8} className={classes.divided}>
           {priorityClients.map(c => (
-            <button
+            <UnstyledButton
               key={c.id}
               onClick={() => onOpenClient(c)}
-              className="w-full flex items-center gap-3 py-2.5 px-2 -mx-2 text-left rounded-lg hover:bg-primary/5 transition-colors"
+              className={classes.clientRow}
             >
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{c.name}</p>
-                <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.reason}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </button>
+              <Box miw={0} flex={1}>
+                <Text truncate size="0.82rem" fw={600}>{c.name}</Text>
+                <Text c="dimmed" truncate size="0.72rem">{c.reason}</Text>
+              </Box>
+              <ChevronRight size={16} color="var(--mantine-color-dimmed)" style={{ flexShrink: 0 }} />
+            </UnstyledButton>
           ))}
           {priorityClients.length === 0 && (
-            <p className="text-muted-foreground text-center py-6" style={{ fontSize: '0.8rem' }}>Nenhum cliente na carteira</p>
+            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum cliente na carteira</Text>
           )}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Paper>
+    </Stack>
   );
 }
