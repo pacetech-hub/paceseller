@@ -1,5 +1,8 @@
 import { useState } from "react";
 import {
+  Box, Stack, Group, Text, UnstyledButton, NativeSelect, TextInput, Slider, SimpleGrid, Image, Badge, ThemeIcon,
+} from "@mantine/core";
+import {
   Filter, Tag, Layers, Palette, DollarSign,
   Menu, X, LogOut, ChevronLeft, ChevronRight, Store, Search,
   ChevronUp, ChevronDown, Users,
@@ -7,6 +10,7 @@ import {
 import type { Client } from "../data/mockData";
 import { products, formatCurrency } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
+import classes from "./LojistaFiltersSidebar.module.css";
 
 export type CatalogFilters = {
   search: string;
@@ -90,87 +94,99 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
     (filters.priceRange[0] !== priceMin || filters.priceRange[1] !== priceMax ? 1 : 0);
 
   const Content = () => (
-    <div className="flex flex-col h-full">
+    <Stack gap={0} h="100%">
       {/* Logo */}
-      <div className={`flex items-center border-b border-sidebar-border px-4 h-14 ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className={`flex items-center justify-center flex-shrink-0 ${collapsed ? 'w-7 h-7' : 'h-8'}`}>
-          <img src={teslaLogo} alt="Tesla Footwear" className={collapsed ? 'h-6 w-auto object-contain' : 'h-7 w-auto object-contain'} />
-        </div>
+      <Group
+        gap={collapsed ? 0 : 'sm'}
+        justify={collapsed ? 'center' : undefined}
+        wrap="nowrap"
+        px="md"
+        h={56}
+        style={{ borderBottom: '1px solid var(--mantine-color-gray-3)', flexShrink: 0 }}
+      >
+        <Box
+          w={collapsed ? 28 : undefined}
+          h={collapsed ? 28 : 32}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+        >
+          <Image src={teslaLogo} alt="Tesla Footwear" h={collapsed ? 24 : 28} w="auto" fit="contain" />
+        </Box>
         {!collapsed && (
-          <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground p-1 rounded">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+          <UnstyledButton onClick={() => setCollapsed(true)} className={classes.iconBtn} ml="auto">
+            <ChevronLeft size={16} />
+          </UnstyledButton>
         )}
-      </div>
+      </Group>
 
       {collapsed ? (
-        <div className="flex-1 flex flex-col items-center pt-4 gap-3">
-          <button onClick={() => setCollapsed(false)} className="p-2 rounded-md bg-primary/15 text-primary" title="Filtros">
-            <Filter className="w-4 h-4" />
-          </button>
+        <Stack flex={1} align="center" pt="md" gap="sm">
+          <UnstyledButton
+            onClick={() => setCollapsed(false)}
+            p={8}
+            bg="gray.2"
+            c="gray.9"
+            style={{ borderRadius: 'var(--mantine-radius-md)', display: 'inline-flex' }}
+            title="Filtros"
+          >
+            <Filter size={16} />
+          </UnstyledButton>
           {activeCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.6rem', fontWeight: 700 }}>
+            <Badge radius="xl" size="xs" px={6} fz="0.6rem" fw={700}>
               {activeCount}
-            </span>
+            </Badge>
           )}
-        </div>
+        </Stack>
       ) : (
         <>
 
           {/* Tabela de Preço */}
-          <div className="px-3 pt-3 pb-3 border-b border-sidebar-border">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <DollarSign className="w-3 h-3 text-primary" />
-              <span className="text-muted-foreground" style={{ fontSize: '0.66rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <Box px="sm" pt="sm" pb="sm" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+            <Group gap={6} mb={6} wrap="nowrap">
+              <DollarSign size={12} color="var(--mantine-color-gray-9)" />
+              <Text c="dimmed" fz="0.66rem" fw={600} lts="0.06em" tt="uppercase">
                 Tabela de preço
-              </span>
-            </div>
-            <select
+              </Text>
+            </Group>
+            <NativeSelect
               value={filters.priceTable}
               onChange={e => onChange({ ...filters, priceTable: e.target.value })}
-              className="w-full px-2.5 py-2 rounded-md bg-secondary/40 border border-border text-foreground outline-none focus:border-primary cursor-pointer"
-              style={{ fontSize: '0.78rem', fontWeight: 500 }}
-            >
-              {priceTables.map(t => (
-                <option key={t.id} value={t.id}>{t.label} — {t.desc}</option>
-              ))}
-            </select>
-          </div>
+              size="sm"
+              styles={{ input: { fontSize: '0.78rem', fontWeight: 500, background: 'var(--mantine-color-gray-0)', cursor: 'pointer' } }}
+              data={priceTables.map(t => ({ value: t.id, label: `${t.label} — ${t.desc}` }))}
+            />
+          </Box>
 
 
-          <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Filter className="w-3.5 h-3.5 text-primary" />
-              <span className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Filtros</span>
+          <Group justify="space-between" px="md" pt="md" pb={8} wrap="nowrap">
+            <Group gap={8} wrap="nowrap">
+              <Filter size={14} color="var(--mantine-color-gray-9)" />
+              <Text fz="0.82rem" fw={600}>Filtros</Text>
               {activeCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.62rem', fontWeight: 700 }}>
+                <Badge variant="light" radius="xl" size="xs" px={6} fz="0.62rem" fw={700} c="gray.9" bg="gray.2">
                   {activeCount}
-                </span>
+                </Badge>
               )}
-            </div>
+            </Group>
             {activeCount > 0 && (
-              <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
-                <X className="w-3 h-3" /> Limpar
-              </button>
+              <UnstyledButton onClick={reset} className={classes.clearBtn}>
+                <X size={12} /> Limpar
+              </UnstyledButton>
             )}
-          </div>
+          </Group>
 
           {/* Search */}
-          <div className="px-3 pb-3">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                value={filters.search}
-                onChange={e => onChange({ ...filters, search: e.target.value })}
-                placeholder="Buscar produto..."
-                className="w-full pl-8 pr-3 py-2 rounded-md bg-secondary/40 border border-border text-foreground outline-none focus:border-primary"
-                style={{ fontSize: '0.78rem' }}
-              />
-            </div>
-          </div>
+          <Box px="sm" pb="sm">
+            <TextInput
+              type="text"
+              value={filters.search}
+              onChange={e => onChange({ ...filters, search: e.target.value })}
+              placeholder="Buscar produto..."
+              leftSection={<Search size={14} />}
+              styles={{ input: { fontSize: '0.78rem', background: 'var(--mantine-color-gray-0)' } }}
+            />
+          </Box>
 
-          <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-5">
+          <Stack flex={1} gap={20} px="sm" pb="sm" style={{ overflowY: 'auto' }}>
             {/* Modelo / Linha */}
             <FilterSection
               icon={Tag}
@@ -178,18 +194,17 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               isOpen={openSections.has('Modelo / Linha')}
               onToggle={() => toggleSection('Modelo / Linha')}
             >
-              <div className="flex flex-wrap gap-1.5">
+              <Group gap={6}>
                 {lines.map(l => (
-                  <button
+                  <UnstyledButton
                     key={l}
                     onClick={() => onChange({ ...filters, line: l })}
-                    className={`px-2.5 py-1 rounded-full transition-colors ${filters.line === l ? 'bg-primary text-primary-foreground' : 'bg-secondary/60 text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.72rem', fontWeight: 500 }}
+                    className={filters.line === l ? `${classes.chip} ${classes.chipActive}` : classes.chip}
                   >
                     {l}
-                  </button>
+                  </UnstyledButton>
                 ))}
-              </div>
+              </Group>
             </FilterSection>
 
             {/* Categoria */}
@@ -199,18 +214,17 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               isOpen={openSections.has('Categoria')}
               onToggle={() => toggleSection('Categoria')}
             >
-              <div className="flex flex-wrap gap-1.5">
+              <Group gap={6}>
                 {categories.map(c => (
-                  <button
+                  <UnstyledButton
                     key={c}
                     onClick={() => onChange({ ...filters, category: c })}
-                    className={`px-2.5 py-1 rounded-full transition-colors ${filters.category === c ? 'bg-primary text-primary-foreground' : 'bg-secondary/60 text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.72rem', fontWeight: 500 }}
+                    className={filters.category === c ? `${classes.chip} ${classes.chipActive}` : classes.chip}
                   >
                     {c}
-                  </button>
+                  </UnstyledButton>
                 ))}
-              </div>
+              </Group>
             </FilterSection>
 
             {/* Cores */}
@@ -220,29 +234,36 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               isOpen={openSections.has('Cores')}
               onToggle={() => toggleSection('Cores')}
             >
-              <div className="grid grid-cols-6 gap-1.5">
+              <SimpleGrid cols={6} spacing={6} verticalSpacing={6}>
                 {allColors.map(c => {
                   const active = filters.colors.includes(c);
                   const bg = colorSwatch[c] || '#94a3b8';
                   return (
-                    <button
+                    <UnstyledButton
                       key={c}
                       onClick={() => toggleColor(c)}
                       title={c}
-                      className={`relative w-5 h-5 rounded-full border-2 transition-all ${active ? 'border-primary scale-110' : 'border-border hover:border-foreground/40'}`}
+                      className={active ? `${classes.swatch} ${classes.swatchActive}` : classes.swatch}
                       style={{ background: bg }}
                     >
                       {active && (
-                        <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold" style={{ color: bg === '#fff' ? '#111' : '#fff' }}>✓</span>
+                        <Box
+                          component="span"
+                          pos="absolute"
+                          inset={0}
+                          fz={7}
+                          fw={700}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: bg === '#fff' ? '#111' : '#fff' }}
+                        >✓</Box>
                       )}
-                    </button>
+                    </UnstyledButton>
                   );
                 })}
-              </div>
+              </SimpleGrid>
               {filters.colors.length > 0 && (
-                <p className="mt-2 text-muted-foreground" style={{ fontSize: '0.68rem' }}>
+                <Text mt={8} c="dimmed" fz="0.68rem">
                   {filters.colors.join(', ')}
-                </p>
+                </Text>
               )}
             </FilterSection>
 
@@ -253,80 +274,87 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               isOpen={openSections.has('Faixa de preço')}
               onToggle={() => toggleSection('Faixa de preço')}
             >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-muted-foreground" style={{ fontSize: '0.72rem' }}>
+              <Stack gap={8}>
+                <Group justify="space-between" c="dimmed" fz="0.72rem" wrap="nowrap">
                   <span>{formatCurrency(priceMin)}</span>
                   <span>{formatCurrency(filters.priceRange[1])}</span>
-                </div>
-                <input
-                  type="range"
+                </Group>
+                <Slider
                   min={priceMin}
                   max={priceMax}
                   value={filters.priceRange[1]}
-                  onChange={e => onChange({ ...filters, priceRange: [priceMin, Number(e.target.value)] })}
-                  className="w-full accent-primary"
+                  onChange={v => onChange({ ...filters, priceRange: [priceMin, Number(v)] })}
+                  label={null}
+                  size="sm"
+                  w="100%"
                 />
-              </div>
+              </Stack>
             </FilterSection>
-          </div>
+          </Stack>
         </>
       )}
 
       {/* Bottom */}
-      <div className="border-t border-sidebar-border p-2">
+      <Box p={8} mt="auto" style={{ borderTop: '1px solid var(--mantine-color-gray-3)', flexShrink: 0 }}>
         {!collapsed ? (
-          <div className="flex items-center gap-2 px-3 py-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${profile === 'rep' ? 'bg-amber-400/20' : 'bg-emerald-400/20'}`}>
+          <Group gap={8} px="sm" py={8} wrap="nowrap">
+            <ThemeIcon
+              size={28}
+              radius="xl"
+              variant="light"
+              color={profile === 'rep' ? 'yellow' : 'teal'}
+              style={{ flexShrink: 0 }}
+            >
               {profile === 'rep'
-                ? <Users className="w-3.5 h-3.5 text-amber-400" />
-                : <Store className="w-3.5 h-3.5 text-emerald-400" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
+                ? <Users size={14} color="var(--mantine-color-yellow-6)" />
+                : <Store size={14} color="var(--mantine-color-teal-6)" />}
+            </ThemeIcon>
+            <Box flex={1} miw={0}>
+              <Text truncate fz="0.78rem" fw={500}>
                 {profile === 'rep' ? 'Representante' : 'Lojista'}
-              </div>
-              <div className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>
+              </Text>
+              <Text c="dimmed" truncate fz="0.7rem">
                 {profile === 'rep' ? 'marcos@tesla.com.br' : 'loja@tesla.com.br'}
-              </div>
-            </div>
-            <button onClick={onLogout} className="text-muted-foreground hover:text-destructive p-1 rounded" title="Sair">
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              </Text>
+            </Box>
+            <UnstyledButton onClick={onLogout} className={classes.logoutBtn} title="Sair">
+              <LogOut size={14} />
+            </UnstyledButton>
+          </Group>
         ) : (
-          <button
+          <UnstyledButton
             onClick={() => setCollapsed(false)}
-            className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60"
+            className={classes.expandBtn}
           >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+            <ChevronRight size={16} />
+          </UnstyledButton>
         )}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   );
 
   return (
     <>
-      <button
+      <UnstyledButton
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
+        className={`${classes.mobileMenuBtn} ${classes.mobileOnly}`}
       >
-        <Menu className="w-4 h-4" />
-      </button>
+        <Menu size={16} />
+      </UnstyledButton>
 
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-72 h-full bg-sidebar border-r border-sidebar-border">
-            <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <X className="w-4 h-4" />
-            </button>
+        <Box className={classes.mobileOnly} pos="fixed" inset={0} style={{ zIndex: 50, display: 'flex' }}>
+          <Box pos="absolute" inset={0} style={{ background: 'rgba(0,0,0,.6)' }} onClick={() => setMobileOpen(false)} />
+          <Box pos="relative" w={288} h="100%" bg="white" style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}>
+            <UnstyledButton onClick={() => setMobileOpen(false)} className={classes.iconBtn} pos="absolute" top={12} right={12}>
+              <X size={16} />
+            </UnstyledButton>
             <Content />
-          </div>
-        </div>
+          </Box>
+        </Box>
       )}
 
-      <aside className={`hidden lg:flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-200 flex-shrink-0 ${collapsed ? 'w-[52px]' : 'w-[280px]'}`}>
+      <aside className={collapsed ? `${classes.aside} ${classes.asideCollapsed}` : classes.aside}>
         <Content />
       </aside>
     </>
@@ -340,7 +368,7 @@ function FilterSection({
   onToggle,
   children,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; size?: number | string; color?: string }>;
   label: string;
   isOpen: boolean;
   onToggle: () => void;
@@ -348,21 +376,21 @@ function FilterSection({
 }) {
   return (
     <div>
-      <button
+      <UnstyledButton
         onClick={onToggle}
-        className="w-full flex items-center justify-between mb-2 group"
+        className={classes.sectionToggle}
       >
-        <div className="flex items-center gap-1.5">
-          <Icon className="w-3 h-3 text-muted-foreground" />
-          <span className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</span>
-        </div>
+        <Group gap={6} wrap="nowrap">
+          <Icon size={12} color="var(--mantine-color-dimmed)" />
+          <Text c="dimmed" fz="0.68rem" fw={600} lts="0.06em" tt="uppercase">{label}</Text>
+        </Group>
         {isOpen ? (
-          <ChevronUp className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <ChevronUp size={12} className={classes.sectionChevron} />
         ) : (
-          <ChevronDown className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <ChevronDown size={12} className={classes.sectionChevron} />
         )}
-      </button>
-      {isOpen && <div className="animate-in fade-in slide-in-from-top-1 duration-200">{children}</div>}
+      </UnstyledButton>
+      {isOpen && <div className={classes.sectionBody}>{children}</div>}
     </div>
   );
 }

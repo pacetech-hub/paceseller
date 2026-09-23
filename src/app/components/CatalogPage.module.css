@@ -1,0 +1,258 @@
+.closeBtn {
+  color: var(--mantine-color-dimmed);
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.closeBtnLg {
+  padding: 4px;
+}
+
+.qtyStep {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-gray-1);
+  color: var(--mantine-color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  line-height: 1;
+  flex-shrink: 0;
+
+  @mixin hover {
+    background: var(--mantine-color-gray-2);
+  }
+}
+
+.qtyStepSm {
+  width: 16px;
+  height: 16px;
+}
+
+/* Product card (grid) */
+.card {
+  background: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  overflow: hidden;
+  transition: all 150ms ease;
+
+  &:hover {
+    border-color: var(--mantine-color-gray-2);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+/* Product card (list) */
+.cardList {
+  background: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  overflow: hidden;
+  transition: border-color 150ms ease;
+
+  &:hover {
+    border-color: var(--mantine-color-gray-2);
+  }
+}
+
+.imageBtn {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding-top: 80%;
+  background: var(--mantine-color-white);
+  overflow: hidden;
+  margin-bottom: -12px;
+}
+
+.favBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px;
+  border-radius: 9999px;
+  border: 1px solid var(--mantine-color-gray-3);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--mantine-color-gray-5);
+  display: inline-flex;
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-red-4);
+  }
+}
+
+.favBadgeActive {
+  background: var(--mantine-color-red-0);
+  border-color: var(--mantine-color-red-2);
+  color: var(--mantine-color-red-4);
+}
+
+.hoverActions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  opacity: 0;
+  transition: all 150ms ease;
+}
+
+.card:hover .hoverActions {
+  opacity: 1;
+}
+
+.hoverAction {
+  flex: 1;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.hoverActionDetails {
+  background: var(--mantine-color-gray-1);
+  color: var(--mantine-color-text);
+
+  @mixin hover {
+    background: var(--mantine-color-gray-2);
+  }
+}
+
+.hoverActionBuy {
+  background: var(--mantine-color-gray-9);
+  color: var(--mantine-color-white);
+
+  @mixin hover {
+    background: var(--mantine-color-gray-8);
+  }
+}
+
+.hoverActionDisabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.favBtn {
+  padding: 8px;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--mantine-color-gray-3);
+  color: var(--mantine-color-dimmed);
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-red-4);
+  }
+}
+
+.favBtnActive {
+  color: var(--mantine-color-red-4);
+  border-color: var(--mantine-color-red-2);
+  background: var(--mantine-color-red-0);
+}
+
+.chip {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--mantine-color-gray-1);
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.chipActive {
+  background: var(--mantine-color-gray-9);
+  color: var(--mantine-color-white);
+
+  @mixin hover {
+    color: var(--mantine-color-white);
+  }
+}
+
+.thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 150ms ease;
+}
+
+.thumbActive {
+  border-color: var(--mantine-color-gray-9);
+}
+
+.cartOption {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--mantine-color-gray-3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    background: var(--mantine-color-gray-0);
+  }
+}
+
+.cartOptionActive {
+  border-color: var(--mantine-color-gray-9);
+  background: var(--mantine-color-gray-0);
+}
+
+.dashedBtn {
+  border: 1px dashed var(--mantine-color-gray-5);
+  border-radius: var(--mantine-radius-md);
+  color: var(--mantine-color-gray-9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background: var(--mantine-color-gray-0);
+  }
+}
+
+.linkBtn {
+  color: var(--mantine-color-gray-9);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+
+  @mixin hover {
+    opacity: 0.8;
+  }
+}
+
+.removeX {
+  cursor: pointer;
+}

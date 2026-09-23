@@ -1,0 +1,59 @@
+.productItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: var(--mantine-radius-md);
+  text-align: left;
+  border: 1px solid transparent;
+  transition: background-color 150ms ease;
+
+  @mixin hover {
+    background: var(--mantine-color-gray-1);
+  }
+}
+
+.productItemActive {
+  background: var(--mantine-color-gray-2);
+  border-color: var(--mantine-color-gray-4);
+
+  @mixin hover {
+    background: var(--mantine-color-gray-2);
+  }
+}
+
+.stepLabel {
+  display: none;
+
+  @media (min-width: $mantine-breakpoint-sm) {
+    display: block;
+  }
+}
+
+.qtyBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--mantine-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mantine-color-gray-1);
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease, background-color 150ms ease;
+
+  @mixin hover {
+    background: var(--mantine-color-gray-2);
+    color: var(--mantine-color-text);
+  }
+}
+
+.linkBtn {
+  color: var(--mantine-color-gray-9);
+  font-size: 0.8rem;
+  transition: opacity 150ms ease;
+
+  @mixin hover {
+    opacity: 0.8;
+  }
+}

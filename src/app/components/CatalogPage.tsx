@@ -1,25 +1,39 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
+import {
+  Box, Stack, Group, Text, Title, Paper, Button, UnstyledButton, ActionIcon, TextInput, NativeSelect,
+  SimpleGrid, Badge, Image, Modal, ThemeIcon,
+} from "@mantine/core";
 import {
   Search, Filter, Grid3X3, List, Heart, Star, ShoppingCart,
   X, Package2, Eye, Zap, Check, Plus, Store, UserCheck,
 } from "lucide-react";
 import { products, Product, formatCurrency, Client } from "../data/mockData";
 import bannerLimitedAsset from "../../assets/banner-edicao-limitada.webp";
+import classes from "./CatalogPage.module.css";
 
 import type { CartContext, CartCreator } from "./CartsListPage";
+
+const tnum = { fontVariantNumeric: 'tabular-nums' } as const;
 
 function CartCreatorTag({ createdBy }: { createdBy?: CartCreator }) {
   if (!createdBy) return null;
   const isLojista = createdBy === 'lojista';
   return (
-    <span
-      className={`inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded ${isLojista ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'}`}
-      style={{ fontSize: '0.62rem', fontWeight: 600 }}
+    <Box
+      component="span"
+      mt={2}
+      px={6}
+      py={2}
+      bg={isLojista ? 'teal.0' : 'yellow.0'}
+      c={isLojista ? 'teal.7' : 'yellow.7'}
+      fz="0.62rem"
+      fw={600}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 4, borderRadius: 'var(--mantine-radius-sm)' }}
     >
-      {isLojista ? <Store className="w-2.5 h-2.5" /> : <UserCheck className="w-2.5 h-2.5" />}
+      {isLojista ? <Store size={10} /> : <UserCheck size={10} />}
       {isLojista ? 'Lojista' : 'Representante'}
-    </span>
+    </Box>
   );
 }
 
@@ -51,19 +65,37 @@ const lines = ['Todos', 'Premium', 'Urban', 'Sport'];
 const categories = ['Todos', 'Social', 'Casual', 'Esportivo', 'Sandália', 'Bota'];
 const collections = ['Todas', 'Inverno 2026', 'Primavera/Verão 2026'];
 
+
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5">
+    <Group gap={2} wrap="nowrap">
       {[1, 2, 3, 4, 5].map(s => (
         <Star
           key={s}
-          className={`w-3 h-3 ${s <= Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30'}`}
+          size={12}
+          color={s <= Math.round(rating) ? 'var(--mantine-color-yellow-5)' : 'var(--mantine-color-gray-4)'}
+          fill={s <= Math.round(rating) ? 'var(--mantine-color-yellow-5)' : 'none'}
         />
       ))}
-      <span className="text-muted-foreground ml-1" style={{ fontSize: '0.68rem' }}>{rating}</span>
-    </div>
+      <Text span c="dimmed" ml={4} fz="0.68rem">{rating}</Text>
+    </Group>
   );
 }
+
+const qtyInputStyles = {
+  input: {
+    width: 32,
+    height: 'auto',
+    minHeight: 0,
+    padding: 0,
+    textAlign: 'center' as const,
+    background: 'transparent',
+    fontSize: '0.72rem',
+    fontWeight: 600,
+  },
+};
+
+const gradeHeaderLabel = { fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' as const };
 
 function GradeCompact({ product, onAdd, onClose }: {
   product: Product; onAdd: (qtys: Record<string, number>) => void; onClose?: () => void;
@@ -77,53 +109,58 @@ function GradeCompact({ product, onAdd, onClose }: {
   const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
 
   return (
-    <div className="px-3 pb-3 pt-2 border-t border-border bg-secondary/30">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-foreground" style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+    <Box px="sm" pb="sm" pt={8} bg="gray.0" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+      <Group justify="space-between" mb={8} wrap="nowrap">
+        <Text fz="0.72rem" fw={600} lts="0.04em" tt="uppercase">
           Compra rápida — Grade
-        </p>
+        </Text>
         {onClose && (
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-0.5">
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <UnstyledButton onClick={onClose} className={classes.closeBtn}>
+            <X size={14} />
+          </UnstyledButton>
         )}
-      </div>
-      <div className="space-y-1">
+      </Group>
+      <Stack gap={4}>
         {sizes.map(s => (
-          <div key={s} className="flex items-center justify-between bg-white/50 rounded-md px-2 py-1">
-            <div className="flex items-center gap-2">
-              <span className="text-foreground" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Nº {s}</span>
-              <span className="text-emerald-600" style={{ fontSize: '0.65rem' }}>{product.grades[s]} disp.</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => set(s, qtys[s] - 1)} className="w-5 h-5 rounded bg-secondary text-foreground hover:bg-secondary/70 flex items-center justify-center" style={{ fontSize: '0.7rem', lineHeight: 1 }}>−</button>
-              <input
+          <Group key={s} justify="space-between" wrap="nowrap" px={8} py={4} style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 'var(--mantine-radius-sm)' }}>
+            <Group gap={8} wrap="nowrap">
+              <Text span fz="0.78rem" fw={600}>Nº {s}</Text>
+              <Text span c="teal.7" fz="0.65rem">{product.grades[s]} disp.</Text>
+            </Group>
+            <Group gap={4} wrap="nowrap">
+              <UnstyledButton onClick={() => set(s, qtys[s] - 1)} className={classes.qtyStep}>−</UnstyledButton>
+              <TextInput
                 type="number"
+                variant="unstyled"
                 value={qtys[s]}
                 onChange={e => set(s, Number(e.target.value) || 0)}
-                className="w-8 text-center bg-transparent text-foreground outline-none"
-                style={{ fontSize: '0.72rem', fontWeight: 600 }}
+                styles={qtyInputStyles}
               />
-              <button onClick={() => set(s, qtys[s] + 1)} className="w-5 h-5 rounded bg-secondary text-foreground hover:bg-secondary/70 flex items-center justify-center" style={{ fontSize: '0.7rem', lineHeight: 1 }}>+</button>
-            </div>
-          </div>
+              <UnstyledButton onClick={() => set(s, qtys[s] + 1)} className={classes.qtyStep}>+</UnstyledButton>
+            </Group>
+          </Group>
         ))}
-      </div>
-      <div className="flex items-center justify-between mt-2 mb-2">
-        <span className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>
+      </Stack>
+      <Group justify="space-between" mt={8} mb={8} wrap="nowrap">
+        <Text span c="dimmed" fz="0.7rem">
           {total} {total === 1 ? 'par' : 'pares'}
-        </span>
-        <span className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(subtotal)}</span>
-      </div>
-      <button
+        </Text>
+        <Text span fz="0.85rem" fw={700} style={tnum}>{formatCurrency(subtotal)}</Text>
+      </Group>
+      <Button
         onClick={() => onAdd(qtys)}
         disabled={total === 0}
-        className="w-full px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5"
-        style={{ fontSize: '0.78rem', fontWeight: 600 }}
+        fullWidth
+        radius="md"
+        size="sm"
+        h={34}
+        leftSection={<ShoppingCart size={14} />}
+        fz="0.78rem"
+        fw={600}
       >
-        <ShoppingCart className="w-3.5 h-3.5" /> Adicionar
-      </button>
-    </div>
+        Adicionar
+      </Button>
+    </Box>
   );
 }
 
@@ -140,74 +177,86 @@ function GradeInline({ product, onAdd, onClose }: {
 
   const colCount = sizes.length;
   const gridTemplate = `90px repeat(${colCount}, minmax(0, 1fr)) 60px`;
+  const row = { display: 'grid', alignItems: 'center', gridTemplateColumns: gridTemplate } as const;
 
   return (
-    <div className="px-3 pb-3 pt-2 border-t border-border bg-secondary/30">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-foreground" style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+    <Box px="sm" pb="sm" pt={8} bg="gray.0" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+      <Group justify="space-between" mb={8} wrap="nowrap">
+        <Text fz="0.72rem" fw={600} lts="0.04em" tt="uppercase">
           Compra rápida — Grade
-        </p>
+        </Text>
         {onClose && (
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-0.5">
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <UnstyledButton onClick={onClose} className={classes.closeBtn}>
+            <X size={14} />
+          </UnstyledButton>
         )}
-      </div>
+      </Group>
 
-      <div className="bg-white border border-border rounded-lg overflow-hidden">
-        <div className="grid items-center bg-secondary/60 border-b border-border" style={{ gridTemplateColumns: gridTemplate }}>
-          <div className="px-2 py-1.5 text-muted-foreground" style={{ fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Numeração</div>
+      <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+        <Box bg="gray.1" style={{ ...row, borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+          <Box px={8} py={6} c="dimmed" style={gradeHeaderLabel}>Numeração</Box>
           {sizes.map(s => (
-            <div key={s} className="px-1 py-1.5 text-center text-foreground" style={{ fontSize: '0.72rem', fontWeight: 600 }}>Nº {s}</div>
+            <Box key={s} px={4} py={6} ta="center" fz="0.72rem" fw={600}>Nº {s}</Box>
           ))}
-          <div className="px-1 py-1.5 text-center text-muted-foreground" style={{ fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Total</div>
-        </div>
+          <Box px={4} py={6} ta="center" c="dimmed" style={gradeHeaderLabel}>Total</Box>
+        </Box>
 
-        <div className="grid items-center border-b border-border" style={{ gridTemplateColumns: gridTemplate }}>
-          <div className="px-2 py-1.5 text-muted-foreground" style={{ fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Estoque</div>
+        <Box style={{ ...row, borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+          <Box px={8} py={6} c="dimmed" style={gradeHeaderLabel}>Estoque</Box>
           {sizes.map(s => (
-            <div key={s} className="px-1 py-1.5 text-center text-emerald-600" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{product.grades[s]}</div>
+            <Box key={s} px={4} py={6} ta="center" c="teal.7" fz="0.72rem" fw={600}>{product.grades[s]}</Box>
           ))}
-          <div className="px-1 py-1.5 text-center text-muted-foreground" style={{ fontSize: '0.7rem' }}>
+          <Box px={4} py={6} ta="center" c="dimmed" fz="0.7rem">
             {Object.values(product.grades).reduce((a, b) => a + b, 0)}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="grid items-center" style={{ gridTemplateColumns: gridTemplate }}>
-          <div className="px-2 py-1.5 text-muted-foreground" style={{ fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Quantidade</div>
+        <Box style={row}>
+          <Box px={8} py={6} c="dimmed" style={gradeHeaderLabel}>Quantidade</Box>
           {sizes.map(s => (
-            <div key={s} className="px-1 py-1.5 flex items-center justify-center gap-0.5">
-              <button onClick={() => set(s, qtys[s] - 1)} className="w-4 h-4 rounded bg-secondary text-foreground hover:bg-secondary/70 flex items-center justify-center" style={{ fontSize: '0.7rem', lineHeight: 1 }}>−</button>
-              <input
+            <Group key={s} px={4} py={6} gap={2} justify="center" wrap="nowrap">
+              <UnstyledButton onClick={() => set(s, qtys[s] - 1)} className={`${classes.qtyStep} ${classes.qtyStepSm}`}>−</UnstyledButton>
+              <TextInput
                 type="number"
+                variant="unstyled"
                 value={qtys[s]}
                 onChange={e => set(s, Number(e.target.value) || 0)}
-                className="w-8 text-center bg-transparent text-foreground outline-none"
-                style={{ fontSize: '0.72rem', fontWeight: 600 }}
+                styles={qtyInputStyles}
               />
-              <button onClick={() => set(s, qtys[s] + 1)} className="w-4 h-4 rounded bg-secondary text-foreground hover:bg-secondary/70 flex items-center justify-center" style={{ fontSize: '0.7rem', lineHeight: 1 }}>+</button>
-            </div>
+              <UnstyledButton onClick={() => set(s, qtys[s] + 1)} className={`${classes.qtyStep} ${classes.qtyStepSm}`}>+</UnstyledButton>
+            </Group>
           ))}
-          <div className="px-1 py-1.5 text-center text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{total}</div>
-        </div>
-      </div>
+          <Box px={4} py={6} ta="center" fz="0.78rem" fw={700} style={tnum}>{total}</Box>
+        </Box>
+      </Paper>
 
-      <div className="flex items-center justify-end gap-3 mt-2 mb-1">
-        <span className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>
-          {total} {total === 1 ? 'par' : 'pares'} · <span className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(subtotal)}</span>
-        </span>
-        <button
+      <Group justify="flex-end" gap="sm" mt={8} mb={4} wrap="nowrap">
+        <Text span c="dimmed" fz="0.7rem">
+          {total} {total === 1 ? 'par' : 'pares'} · <Text span c="var(--mantine-color-text)" fz="0.85rem" fw={700} style={tnum}>{formatCurrency(subtotal)}</Text>
+        </Text>
+        <Button
           onClick={() => onAdd(qtys)}
           disabled={total === 0}
-          className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center gap-1.5"
-          style={{ fontSize: '0.78rem', fontWeight: 600 }}
+          radius="md"
+          size="sm"
+          h={34}
+          px="md"
+          leftSection={<ShoppingCart size={14} />}
+          fz="0.78rem"
+          fw={600}
         >
-          <ShoppingCart className="w-3.5 h-3.5" /> Adicionar
-        </button>
-      </div>
-    </div>
+          Adicionar
+        </Button>
+      </Group>
+    </Box>
   );
 }
+
+const availColors: Record<Product['availability'], string> = {
+  'disponível': 'teal',
+  'baixo estoque': 'yellow',
+  'esgotado': 'red',
+};
 
 function ProductCard({ product, onOrder, onQuickBuy, onOpenDetail, onToggleFav, viewMode, gradeOpen, onAddGrade, onCloseGrade }: {
   product: Product;
@@ -222,61 +271,78 @@ function ProductCard({ product, onOrder, onQuickBuy, onOpenDetail, onToggleFav, 
 }) {
   const [imgError, setImgError] = useState(false);
 
-  const availColor = {
-    'disponível': 'text-emerald-400 bg-emerald-400/10',
-    'baixo estoque': 'text-amber-400 bg-amber-400/10',
-    'esgotado': 'text-red-400 bg-red-400/10',
-  }[product.availability];
+  const availColor = availColors[product.availability];
+  const availBadge = (fz: string, mb?: number) => (
+    <Badge
+      variant="light"
+      color={availColor}
+      c={`${availColor}.7`}
+      radius="xl"
+      tt="none"
+      size="sm"
+      px={8}
+      mb={mb}
+      fz={fz}
+      fw={600}
+    >
+      {product.availability}
+    </Badge>
+  );
 
   if (viewMode === 'list') {
     return (
-      <div className="bg-white border border-border rounded-xl overflow-hidden hover:border-border/60 transition-colors group">
-        <div className="p-4 flex items-center gap-4">
-          <button onClick={onOpenDetail} className="w-20 h-20 rounded-lg overflow-hidden bg-white flex-shrink-0">
+      <div className={classes.cardList}>
+        <Group p="md" gap="md" wrap="nowrap">
+          <UnstyledButton onClick={onOpenDetail} w={80} h={80} bg="white" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', flexShrink: 0 }}>
             {!imgError ? (
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+              <Image src={product.image} alt={product.name} w="100%" h="100%" fit="cover" onError={() => setImgError(true)} />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Package2 className="w-6 h-6 text-muted-foreground/40" />
-              </div>
+              <Box w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Package2 size={24} color="var(--mantine-color-gray-4)" />
+              </Box>
             )}
-          </button>
-          <div className="flex-1 min-w-0 cursor-pointer" onClick={onOpenDetail}>
-            <div className="flex items-start gap-2">
-              <div className="flex-1 min-w-0">
-                <p className="text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 500 }}>{product.reference}</p>
-                <p className="text-foreground" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{product.name}</p>
-                <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>{product.line} · {product.category} · {product.collection}</p>
-              </div>
+          </UnstyledButton>
+          <Box flex={1} miw={0} style={{ cursor: 'pointer' }} onClick={onOpenDetail}>
+            <Group gap={8} align="flex-start" wrap="nowrap">
+              <Box flex={1} miw={0}>
+                <Text c="dimmed" fz="0.7rem" fw={500}>{product.reference}</Text>
+                <Text fz="0.9rem" fw={600}>{product.name}</Text>
+                <Text c="dimmed" fz="0.75rem">{product.line} · {product.category} · {product.collection}</Text>
+              </Box>
               <StarRating rating={product.rating} />
-            </div>
-            <div className="flex items-center gap-3 mt-2">
-              <span className={`px-2 py-0.5 rounded-full ${availColor}`} style={{ fontSize: '0.65rem', fontWeight: 600 }}>{product.availability}</span>
-              <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{product.material}</span>
-              <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{product.soldUnits.toLocaleString('pt-BR')} vendidos</span>
-            </div>
-          </div>
-          <div className="text-right flex-shrink-0 space-y-2">
+            </Group>
+            <Group gap="sm" mt={8}>
+              {availBadge('0.65rem')}
+              <Text span c="dimmed" fz="0.72rem">{product.material}</Text>
+              <Text span c="dimmed" fz="0.72rem">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
+            </Group>
+          </Box>
+          <Stack gap={8} ta="right" style={{ flexShrink: 0 }}>
             <div>
-              <p className="text-foreground mono" style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{formatCurrency(product.price)}</p>
-              <p className="text-muted-foreground line-through" style={{ fontSize: '0.75rem' }}>{formatCurrency(product.priceRetail)}</p>
-              <p className="text-primary" style={{ fontSize: '0.65rem', fontWeight: 600 }}>+ IVA</p>
+              <Text fz="1.1rem" fw={700} lts="-0.01em" style={tnum}>{formatCurrency(product.price)}</Text>
+              <Text c="dimmed" td="line-through" fz="0.75rem">{formatCurrency(product.priceRetail)}</Text>
+              <Text c="gray.9" fz="0.65rem" fw={600}>+ IVA</Text>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={onToggleFav} className={`p-2 rounded-lg border border-border transition-colors ${product.isFavorite ? 'text-red-400 border-red-400/30 bg-red-400/10' : 'text-muted-foreground hover:text-red-400'}`}>
-                <Heart className={`w-3.5 h-3.5 ${product.isFavorite ? 'fill-red-400' : ''}`} />
-              </button>
-              <button
+            <Group gap={8} wrap="nowrap">
+              <UnstyledButton onClick={onToggleFav} className={product.isFavorite ? `${classes.favBtn} ${classes.favBtnActive}` : classes.favBtn}>
+                <Heart size={14} fill={product.isFavorite ? 'var(--mantine-color-red-4)' : 'none'} />
+              </UnstyledButton>
+              <Button
                 onClick={onQuickBuy}
                 disabled={product.availability === 'esgotado'}
-                className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center gap-1.5"
-                style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                radius="md"
+                size="sm"
+                h={32}
+                px="md"
+                leftSection={<Zap size={14} />}
+                fz="0.78rem"
+                fw={600}
               >
-                <Zap className="w-3.5 h-3.5" /> Compra rápida
-              </button>
-            </div>
-          </div>
-        </div>
+                Compra rápida
+              </Button>
+            </Group>
+          </Stack>
+        </Group>
         {gradeOpen && (
           <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
         )}
@@ -285,75 +351,80 @@ function ProductCard({ product, onOrder, onQuickBuy, onOpenDetail, onToggleFav, 
   }
 
   return (
-    <div className="bg-white border border-border rounded-xl overflow-hidden hover:border-border/60 transition-all group hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5">
-      <button onClick={onOpenDetail} className="relative w-full pt-[80%] bg-white overflow-hidden mb-[-12px] block">
+    <div className={classes.card}>
+      <UnstyledButton onClick={onOpenDetail} className={classes.imageBtn}>
         {!imgError ? (
-          <img
+          <Image
             src={product.image}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-contain object-bottom px-2 pt-2"
+            pos="absolute"
+            inset={0}
+            w="100%"
+            h="100%"
+            fit="contain"
+            px={8}
+            pt={8}
+            style={{ objectPosition: 'bottom' }}
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Package2 className="w-10 h-10 text-muted-foreground/30" />
-          </div>
+          <Box pos="absolute" inset={0} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Package2 size={40} color="var(--mantine-color-gray-4)" />
+          </Box>
         )}
         <span
           onClick={(e) => { e.stopPropagation(); onToggleFav(); }}
-          className={`absolute top-3 right-3 p-1.5 rounded-full border transition-colors cursor-pointer ${product.isFavorite ? 'bg-red-50 border-red-200 text-red-400' : 'bg-white/80 border-gray-200 text-gray-400 hover:text-red-400'}`}
+          className={product.isFavorite ? `${classes.favBadge} ${classes.favBadgeActive}` : classes.favBadge}
         >
-          <Heart className={`w-3.5 h-3.5 ${product.isFavorite ? 'fill-red-400' : ''}`} />
+          <Heart size={14} fill={product.isFavorite ? 'var(--mantine-color-red-4)' : 'none'} />
         </span>
-        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-all flex">
+        <div className={classes.hoverActions}>
           <span
             onClick={(e) => { e.stopPropagation(); onOpenDetail(); }}
-            className="flex-1 bg-secondary text-foreground py-2.5 flex items-center justify-center gap-1.5 cursor-pointer hover:bg-secondary/80"
-            style={{ fontSize: '0.78rem', fontWeight: 600 }}
+            className={`${classes.hoverAction} ${classes.hoverActionDetails}`}
           >
-            <Eye className="w-3.5 h-3.5" /> Detalhes
+            <Eye size={14} /> Detalhes
           </span>
           <span
             onClick={(e) => { e.stopPropagation(); if (product.availability !== 'esgotado') onQuickBuy(); }}
-            className={`flex-1 bg-primary text-primary-foreground py-2.5 flex items-center justify-center gap-1.5 cursor-pointer hover:bg-primary/90 ${product.availability === 'esgotado' ? 'opacity-40 pointer-events-none' : ''}`}
-            style={{ fontSize: '0.78rem', fontWeight: 600 }}
+            className={product.availability === 'esgotado'
+              ? `${classes.hoverAction} ${classes.hoverActionBuy} ${classes.hoverActionDisabled}`
+              : `${classes.hoverAction} ${classes.hoverActionBuy}`}
           >
-            <Zap className="w-3.5 h-3.5" /> Compra rápida
+            <Zap size={14} /> Compra rápida
           </span>
         </div>
-      </button>
+      </UnstyledButton>
 
-      <div className="p-3 cursor-pointer" onClick={onOpenDetail}>
-        <span className={`inline-block px-2 py-0.5 rounded-full mb-2 ${availColor}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
-          {product.availability}
-        </span>
-        <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{product.line} · {product.reference}</p>
-        <p className="text-foreground mt-0.5 truncate" style={{ fontSize: '0.95rem', fontWeight: 600 }}>{product.name}</p>
-        <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>{product.material}</p>
+      <Box p="sm" style={{ cursor: 'pointer' }} onClick={onOpenDetail}>
+        {availBadge('0.62rem', 8)}
+        <Text c="dimmed" fz="0.68rem" fw={500} lts="0.05em" tt="uppercase">{product.line} · {product.reference}</Text>
+        <Text mt={2} truncate fz="0.95rem" fw={600}>{product.name}</Text>
+        <Text c="dimmed" fz="0.75rem">{product.material}</Text>
 
-        <div className="flex items-center justify-between mt-2">
+        <Group justify="space-between" mt={8} wrap="nowrap">
           <StarRating rating={product.rating} />
-          <span className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>{product.soldUnits.toLocaleString('pt-BR')} un.</span>
-        </div>
+          <Text span c="dimmed" fz="0.68rem">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
+        </Group>
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+        <Group justify="space-between" mt="sm" pt="sm" wrap="nowrap" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
           <div>
-            <p className="text-foreground mono" style={{ fontSize: '1rem', fontWeight: 700 }}>{formatCurrency(product.price)}</p>
-            <p className="text-muted-foreground line-through" style={{ fontSize: '0.72rem' }}>{formatCurrency(product.priceRetail)}</p>
-            <p className="text-primary" style={{ fontSize: '0.62rem', fontWeight: 600 }}>+ IVA</p>
+            <Text fz="1rem" fw={700} style={tnum}>{formatCurrency(product.price)}</Text>
+            <Text c="dimmed" td="line-through" fz="0.72rem">{formatCurrency(product.priceRetail)}</Text>
+            <Text c="gray.9" fz="0.62rem" fw={600}>+ IVA</Text>
           </div>
-          <div className="flex items-center gap-1.5">
+          <Group gap={6} wrap="nowrap">
             {product.colors.slice(0, 3).map(color => (
-              <span key={color} className="text-muted-foreground" style={{ fontSize: '0.62rem' }}>
+              <Text span key={color} c="dimmed" fz="0.62rem">
                 {color === product.colors[0] ? color : '·'}
-              </span>
+              </Text>
             ))}
             {product.colors.length > 1 && (
-              <span className="text-muted-foreground" style={{ fontSize: '0.62rem' }}>+{product.colors.length - 1}</span>
+              <Text span c="dimmed" fz="0.62rem">+{product.colors.length - 1}</Text>
             )}
-          </div>
-        </div>
-      </div>
+          </Group>
+        </Group>
+      </Box>
 
       {gradeOpen && (
         <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
@@ -369,70 +440,82 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
 }) {
   const [activeImg, setActiveImg] = useState(0);
   const images = [product.image, product.image, product.image];
+  const detailLabel = { fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' } as const;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-          <p className="text-muted-foreground" style={{ fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{product.line} · {product.reference}</p>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1"><X className="w-4 h-4" /></button>
-        </div>
-        <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-0">
-          <div className="bg-gray-50 p-4 flex flex-col gap-3">
-            <div className="relative w-full pt-[90%] bg-white rounded-xl overflow-hidden">
-              <img src={images[activeImg]} alt={product.name} className="absolute inset-0 w-full h-full object-contain p-4" />
+    <Modal
+      opened
+      onClose={onClose}
+      withCloseButton={false}
+      centered
+      size="56rem"
+      radius="xl"
+      padding={0}
+      overlayProps={{ backgroundOpacity: 0.7 }}
+      styles={{
+        content: { display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden', border: '1px solid var(--mantine-color-gray-3)' },
+        body: { display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 },
+      }}
+    >
+      <Group justify="space-between" px={20} py="sm" wrap="nowrap" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)', flexShrink: 0 }}>
+        <Text c="dimmed" fz="0.72rem" fw={500} lts="0.06em" tt="uppercase">{product.line} · {product.reference}</Text>
+        <UnstyledButton onClick={onClose} className={`${classes.closeBtn} ${classes.closeBtnLg}`}><X size={16} /></UnstyledButton>
+      </Group>
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0} verticalSpacing={0} flex={1} style={{ overflowY: 'auto' }}>
+        <Stack gap="sm" bg="gray.0" p="md">
+          <Box pos="relative" w="100%" pt="90%" bg="white" style={{ borderRadius: 'var(--mantine-radius-lg)', overflow: 'hidden' }}>
+            <Image src={images[activeImg]} alt={product.name} pos="absolute" inset={0} w="100%" h="100%" fit="contain" p="md" />
+          </Box>
+          <Group gap={8}>
+            {images.map((img, i) => (
+              <UnstyledButton key={i} onClick={() => setActiveImg(i)} className={activeImg === i ? `${classes.thumb} ${classes.thumbActive}` : classes.thumb}>
+                <Image src={img} alt="" w="100%" h="100%" fit="cover" bg="white" />
+              </UnstyledButton>
+            ))}
+          </Group>
+        </Stack>
+        <Stack gap="md" p={20}>
+          <div>
+            <Group justify="space-between" align="flex-start" gap={8} wrap="nowrap">
+              <Title order={2} fz="1.4rem" fw={700} lts="-0.01em">{product.name}</Title>
+              <UnstyledButton onClick={onToggleFav} className={isFavorite ? `${classes.favBtn} ${classes.favBtnActive}` : classes.favBtn}>
+                <Heart size={16} fill={isFavorite ? 'var(--mantine-color-red-4)' : 'none'} />
+              </UnstyledButton>
+            </Group>
+            <Group gap="sm" mt={4}>
+              <StarRating rating={product.rating} />
+              <Text span c="dimmed" fz="0.75rem">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
+            </Group>
+          </div>
+          <Group gap="sm" align="baseline">
+            <Text fz="1.8rem" fw={700} lts="-0.02em" style={tnum}>{formatCurrency(product.price)}</Text>
+            <Text c="dimmed" td="line-through" fz="0.9rem">{formatCurrency(product.priceRetail)}</Text>
+            <Text c="gray.9" fz="0.72rem" fw={600}>+ IVA</Text>
+          </Group>
+          <Text fz="0.85rem" lh={1.6}>{product.description}</Text>
+          <SimpleGrid cols={2} spacing="sm">
+            <div>
+              <Text c="dimmed" style={detailLabel}>Material</Text>
+              <Text mt={2} fz="0.85rem" fw={500}>{product.material}</Text>
             </div>
-            <div className="flex gap-2">
-              {images.map((img, i) => (
-                <button key={i} onClick={() => setActiveImg(i)} className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${activeImg === i ? 'border-primary' : 'border-transparent'}`}>
-                  <img src={img} alt="" className="w-full h-full object-cover bg-white" />
-                </button>
+            <div>
+              <Text c="dimmed" style={detailLabel}>Coleção</Text>
+              <Text mt={2} fz="0.85rem" fw={500}>{product.collection}</Text>
+            </div>
+          </SimpleGrid>
+          <div>
+            <Text c="dimmed" mb={6} style={detailLabel}>Cores</Text>
+            <Group gap={6}>
+              {product.colors.map(c => (
+                <Badge key={c} variant="light" color="gray" c="var(--mantine-color-text)" bg="gray.1" radius="xl" tt="none" size="lg" px={10} fz="0.75rem" fw={500}>{c}</Badge>
               ))}
-            </div>
+            </Group>
           </div>
-          <div className="p-5 space-y-4">
-            <div>
-              <div className="flex items-start justify-between gap-2">
-                <h2 className="text-foreground" style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{product.name}</h2>
-                <button onClick={onToggleFav} className={`p-2 rounded-lg border border-border transition-colors flex-shrink-0 ${isFavorite ? 'text-red-400 border-red-400/30 bg-red-400/10' : 'text-muted-foreground hover:text-red-400'}`}>
-                  <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-400' : ''}`} />
-                </button>
-              </div>
-              <div className="flex items-center gap-3 mt-1">
-                <StarRating rating={product.rating} />
-                <span className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>{product.soldUnits.toLocaleString('pt-BR')} vendidos</span>
-              </div>
-            </div>
-            <div className="flex items-baseline gap-3">
-              <p className="text-foreground mono" style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{formatCurrency(product.price)}</p>
-              <p className="text-muted-foreground line-through" style={{ fontSize: '0.9rem' }}>{formatCurrency(product.priceRetail)}</p>
-              <p className="text-primary" style={{ fontSize: '0.72rem', fontWeight: 600 }}>+ IVA</p>
-            </div>
-            <p className="text-foreground" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{product.description}</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-muted-foreground" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Material</p>
-                <p className="text-foreground mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{product.material}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Coleção</p>
-                <p className="text-foreground mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{product.collection}</p>
-              </div>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cores</p>
-              <div className="flex flex-wrap gap-1.5">
-                {product.colors.map(c => (
-                  <span key={c} className="px-2.5 py-1 rounded-full bg-secondary text-foreground" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{c}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-border">
-          <GradeInline product={product} onAdd={onAddGrade} />
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </SimpleGrid>
+      <Box style={{ borderTop: '1px solid var(--mantine-color-gray-3)', flexShrink: 0 }}>
+        <GradeInline product={product} onAdd={onAddGrade} />
+      </Box>
+    </Modal>
   );
 }
 
@@ -534,167 +617,180 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
   const hasActiveFilters = selectedLine !== 'Todos' || selectedCategory !== 'Todos' || selectedCollection !== 'Todas';
 
+  const chipClass = (active: boolean) => active ? `${classes.chip} ${classes.chipActive}` : classes.chip;
+  const filtersActive = showFilters || hasActiveFilters;
+
   return (
-    <div className="p-6 space-y-5 max-w-[1400px] mx-auto w-full">
+    <Stack gap={20} p="lg" maw={1400} mx="auto" w="100%">
       {/* Promo Banner */}
-      <div className="rounded-2xl overflow-hidden border border-border shadow-sm">
-        <img
+      <Paper withBorder radius="xl" shadow="xs" style={{ overflow: 'hidden' }}>
+        <Image
           src={bannerLimitedAsset}
           alt="Edição Limitada"
-          className="w-full h-auto object-cover"
+          w="100%"
+          h="auto"
+          fit="cover"
         />
-      </div>
+      </Paper>
 
       {/* Header + Controls */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar produto, referência, linha..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            style={{ fontSize: '0.85rem' }}
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+      <Group gap="sm">
+        <TextInput
+          type="text"
+          placeholder="Buscar produto, referência, linha..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          flex={1}
+          miw={200}
+          size="md"
+          radius="md"
+          leftSection={<Search size={16} />}
+          rightSection={search ? (
+            <UnstyledButton onClick={() => setSearch('')} className={classes.closeBtn}>
+              <X size={14} />
+            </UnstyledButton>
+          ) : null}
+          styles={{ input: { fontSize: '0.85rem' } }}
+        />
 
         {!usingExternal && (
-          <button
+          <Button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg border transition-colors ${showFilters || hasActiveFilters ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
-            style={{ fontSize: '0.83rem', fontWeight: 500 }}
+            variant={filtersActive ? 'light' : 'default'}
+            c={filtersActive ? 'gray.9' : 'dimmed'}
+            radius="md"
+            h={42}
+            px={14}
+            leftSection={<Filter size={16} />}
+            rightSection={hasActiveFilters ? (
+              <Box w={6} h={6} bg="gray.9" style={{ borderRadius: '50%' }} />
+            ) : undefined}
+            fz="0.83rem"
+            fw={500}
+            style={filtersActive ? { border: '1px solid var(--mantine-color-gray-5)' } : undefined}
           >
-            <Filter className="w-4 h-4" />
             Filtros
-            {hasActiveFilters && (
-              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-            )}
-          </button>
+          </Button>
         )}
 
-        <select
+        <NativeSelect
           value={sortBy}
           onChange={e => setSortBy(e.target.value)}
-          className="px-3 py-2.5 rounded-lg border border-border bg-card text-foreground outline-none focus:border-primary"
-          style={{ fontSize: '0.83rem' }}
-        >
-          {['relevância', 'mais vendidos', 'avaliação', 'preço ↑', 'preço ↓'].map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+          size="md"
+          radius="md"
+          styles={{ input: { fontSize: '0.83rem' } }}
+          data={['relevância', 'mais vendidos', 'avaliação', 'preço ↑', 'preço ↓']}
+        />
 
-        <div className="flex items-center border border-border rounded-lg overflow-hidden">
-          <button
+        <ActionIcon.Group>
+          <ActionIcon
             onClick={() => setViewMode('grid')}
-            className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:text-foreground'}`}
+            variant={viewMode === 'grid' ? 'filled' : 'default'}
+            size={42}
+            radius="md"
           >
-            <Grid3X3 className="w-4 h-4" />
-          </button>
-          <button
+            <Grid3X3 size={16} />
+          </ActionIcon>
+          <ActionIcon
             onClick={() => setViewMode('list')}
-            className={`p-2.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:text-foreground'}`}
+            variant={viewMode === 'list' ? 'filled' : 'default'}
+            size={42}
+            radius="md"
           >
-            <List className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+            <List size={16} />
+          </ActionIcon>
+        </ActionIcon.Group>
+      </Group>
 
       {/* Filter Panel */}
       {!usingExternal && showFilters && (
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Paper withBorder radius="lg" p="md">
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
             <div>
-              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.75rem', fontWeight: 500 }}>Linha</p>
-              <div className="flex flex-wrap gap-1.5">
+              <Text c="dimmed" mb={8} fz="0.75rem" fw={500}>Linha</Text>
+              <Group gap={6}>
                 {lines.map(line => (
-                  <button
+                  <UnstyledButton
                     key={line}
                     onClick={() => setSelectedLine(line)}
-                    className={`px-3 py-1 rounded-full transition-colors ${selectedLine === line ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                    className={chipClass(selectedLine === line)}
                   >
                     {line}
-                  </button>
+                  </UnstyledButton>
                 ))}
-              </div>
+              </Group>
             </div>
             <div>
-              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.75rem', fontWeight: 500 }}>Categoria</p>
-              <div className="flex flex-wrap gap-1.5">
+              <Text c="dimmed" mb={8} fz="0.75rem" fw={500}>Categoria</Text>
+              <Group gap={6}>
                 {categories.map(cat => (
-                  <button
+                  <UnstyledButton
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1 rounded-full transition-colors ${selectedCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                    className={chipClass(selectedCategory === cat)}
                   >
                     {cat}
-                  </button>
+                  </UnstyledButton>
                 ))}
-              </div>
+              </Group>
             </div>
             <div>
-              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.75rem', fontWeight: 500 }}>Coleção</p>
-              <div className="flex flex-wrap gap-1.5">
+              <Text c="dimmed" mb={8} fz="0.75rem" fw={500}>Coleção</Text>
+              <Group gap={6}>
                 {collections.map(col => (
-                  <button
+                  <UnstyledButton
                     key={col}
                     onClick={() => setSelectedCollection(col)}
-                    className={`px-3 py-1 rounded-full transition-colors ${selectedCollection === col ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                    className={chipClass(selectedCollection === col)}
                   >
                     {col}
-                  </button>
+                  </UnstyledButton>
                 ))}
-              </div>
+              </Group>
             </div>
-          </div>
+          </SimpleGrid>
           {hasActiveFilters && (
-            <button
+            <UnstyledButton
               onClick={() => { setSelectedLine('Todos'); setSelectedCategory('Todos'); setSelectedCollection('Todas'); }}
-              className="mt-3 text-primary hover:text-primary/80 flex items-center gap-1"
-              style={{ fontSize: '0.75rem' }}
+              className={classes.linkBtn}
+              mt="sm"
             >
-              <X className="w-3 h-3" /> Limpar filtros
-            </button>
+              <X size={12} /> Limpar filtros
+            </UnstyledButton>
           )}
-        </div>
+        </Paper>
       )}
 
       {/* Results header */}
-      <div className="flex items-center justify-between">
+      <Group justify="space-between" wrap="nowrap">
         <div />
         {hasActiveFilters && (
-          <div className="flex items-center gap-1.5">
+          <Group gap={6} wrap="nowrap">
             {selectedLine !== 'Todos' && (
-              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1" style={{ fontSize: '0.72rem' }}>
-                {selectedLine} <X className="w-2.5 h-2.5 cursor-pointer" onClick={() => setSelectedLine('Todos')} />
-              </span>
+              <Badge variant="light" radius="xl" tt="none" c="gray.9" bg="gray.1" px={8} fz="0.72rem" fw={400}
+                rightSection={<X size={10} className={classes.removeX} onClick={() => setSelectedLine('Todos')} />}>
+                {selectedLine}
+              </Badge>
             )}
             {selectedCategory !== 'Todos' && (
-              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1" style={{ fontSize: '0.72rem' }}>
-                {selectedCategory} <X className="w-2.5 h-2.5 cursor-pointer" onClick={() => setSelectedCategory('Todos')} />
-              </span>
+              <Badge variant="light" radius="xl" tt="none" c="gray.9" bg="gray.1" px={8} fz="0.72rem" fw={400}
+                rightSection={<X size={10} className={classes.removeX} onClick={() => setSelectedCategory('Todos')} />}>
+                {selectedCategory}
+              </Badge>
             )}
-          </div>
+          </Group>
         )}
-      </div>
+      </Group>
 
       {/* Products Grid/List */}
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Package2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
-          <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum produto encontrado</p>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros ou a busca</p>
-        </div>
+        <Stack align="center" justify="center" py={80} gap={0} ta="center">
+          <Package2 size={48} color="var(--mantine-color-gray-4)" style={{ marginBottom: 16 }} />
+          <Text fw={600}>Nenhum produto encontrado</Text>
+          <Text c="dimmed" mt={4} fz="0.85rem">Tente ajustar os filtros ou a busca</Text>
+        </Stack>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 items-start">
+        <SimpleGrid cols={{ base: 2, sm: 3, lg: 3 }} spacing="md" verticalSpacing="md" style={{ alignItems: 'start' }}>
           {sorted.map(product => (
             <ProductCard
               key={product.id}
@@ -710,9 +806,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             />
 
           ))}
-        </div>
+        </SimpleGrid>
       ) : (
-        <div className="space-y-3">
+        <Stack gap="sm">
           {sorted.map(product => (
             <ProductCard
               key={product.id}
@@ -728,7 +824,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             />
 
           ))}
-        </div>
+        </Stack>
       )}
 
       {detailProduct && (
@@ -743,159 +839,188 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
 
       {confirmAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setConfirmAdd(null)}>
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-border">
-              <p className="text-foreground" style={{ fontWeight: 700, fontSize: '0.95rem' }}>Adicionar ao carrinho</p>
-              <p className="text-muted-foreground mt-1" style={{ fontSize: '0.78rem' }}>
-                {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <span className="text-foreground font-medium">{confirmAdd.product.name}</span>
-              </p>
-            </div>
-            <div className="px-5 py-4 space-y-2 max-h-[40vh] overflow-y-auto">
-              {(clientCarts ?? []).map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setConfirmAdd(prev => prev ? { ...prev, selectedCartId: c.id } : prev)}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors flex items-center gap-3 ${confirmAdd.selectedCartId === c.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary/50'}`}
-                >
-                  <div className="w-8 h-8 rounded-md bg-primary/15 flex items-center justify-center flex-shrink-0">
-                    <ShoppingCart className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{c.cartName}</p>
-                    <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
-                      <Store className="w-2.5 h-2.5" /> {c.clientName}
-                    </p>
-                    <CartCreatorTag createdBy={c.createdBy} />
-                  </div>
-                  {confirmAdd.selectedCartId === c.id && (
-                    <span className="text-primary" style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Atual</span>
-                  )}
-                </button>
-              ))}
-              {(clientCarts ?? []).length === 0 && (
-                <p className="text-muted-foreground text-center py-3" style={{ fontSize: '0.8rem' }}>Nenhum carrinho disponível.</p>
-              )}
-            </div>
-            <div className="px-5 py-4 border-t border-border flex gap-2">
-              <button
-                onClick={() => {
-                  setConfirmAdd(null);
-                  setPendingAdd({ product: confirmAdd.product, qtys: confirmAdd.qtys });
-                  setCreatingMode(true);
-                  setCreatingNewName('');
-                }}
-                className="flex-1 px-3 py-2 rounded-lg border border-dashed border-primary/40 text-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-1.5"
-                style={{ fontSize: '0.82rem', fontWeight: 500 }}
+        <Modal
+          opened
+          onClose={() => setConfirmAdd(null)}
+          withCloseButton={false}
+          centered
+          size={384}
+          radius="xl"
+          padding={0}
+          overlayProps={{ backgroundOpacity: 0.6 }}
+        >
+          <Box px={20} py="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+            <Text fw={700} fz="0.95rem">Adicionar ao carrinho</Text>
+            <Text c="dimmed" mt={4} fz="0.78rem">
+              {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text span c="var(--mantine-color-text)" fw={500} inherit>{confirmAdd.product.name}</Text>
+            </Text>
+          </Box>
+          <Stack gap={8} px={20} py="md" mah="40vh" style={{ overflowY: 'auto' }}>
+            {(clientCarts ?? []).map(c => (
+              <UnstyledButton
+                key={c.id}
+                onClick={() => setConfirmAdd(prev => prev ? { ...prev, selectedCartId: c.id } : prev)}
+                className={confirmAdd.selectedCartId === c.id ? `${classes.cartOption} ${classes.cartOptionActive}` : classes.cartOption}
               >
-                <Plus className="w-3.5 h-3.5" /> Criar novo carrinho
-              </button>
-              <button
-                onClick={() => {
-                  const chosen = clientCarts?.find(c => c.id === confirmAdd.selectedCartId);
-                  if (chosen) {
-                    onPickCart?.(chosen);
-                    commitAdd(confirmAdd.product, confirmAdd.qtys, chosen.cartName);
-                  }
-                  setConfirmAdd(null);
-                }}
-                className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                style={{ fontSize: '0.82rem', fontWeight: 600 }}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
+                <ThemeIcon size={32} radius="md" variant="light" style={{ flexShrink: 0 }}>
+                  <ShoppingCart size={14} />
+                </ThemeIcon>
+                <Box flex={1} miw={0}>
+                  <Text truncate fz="0.85rem" fw={600}>{c.cartName}</Text>
+                  <Group gap={4} c="dimmed" fz="0.7rem" wrap="nowrap">
+                    <Store size={10} /> {c.clientName}
+                  </Group>
+                  <CartCreatorTag createdBy={c.createdBy} />
+                </Box>
+                {confirmAdd.selectedCartId === c.id && (
+                  <Text span c="gray.9" fz="0.65rem" fw={700} lts="0.05em" tt="uppercase">Atual</Text>
+                )}
+              </UnstyledButton>
+            ))}
+            {(clientCarts ?? []).length === 0 && (
+              <Text c="dimmed" ta="center" py="sm" fz="0.8rem">Nenhum carrinho disponível.</Text>
+            )}
+          </Stack>
+          <Group gap={8} px={20} py="md" wrap="nowrap" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+            <UnstyledButton
+              onClick={() => {
+                setConfirmAdd(null);
+                setPendingAdd({ product: confirmAdd.product, qtys: confirmAdd.qtys });
+                setCreatingMode(true);
+                setCreatingNewName('');
+              }}
+              className={classes.dashedBtn}
+              flex={1}
+              px="sm"
+              py={8}
+              fw={500}
+            >
+              <Plus size={14} /> Criar novo carrinho
+            </UnstyledButton>
+            <Button
+              onClick={() => {
+                const chosen = clientCarts?.find(c => c.id === confirmAdd.selectedCartId);
+                if (chosen) {
+                  onPickCart?.(chosen);
+                  commitAdd(confirmAdd.product, confirmAdd.qtys, chosen.cartName);
+                }
+                setConfirmAdd(null);
+              }}
+              flex={1}
+              radius="md"
+              fz="0.82rem"
+              fw={600}
+            >
+              OK
+            </Button>
+          </Group>
+        </Modal>
       )}
 
       {pendingAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setPendingAdd(null)}>
-          <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-              <div className="min-w-0">
-                <p className="text-foreground" style={{ fontWeight: 700, fontSize: '0.95rem' }}>Adicionar a qual carrinho?</p>
-                <p className="text-muted-foreground truncate" style={{ fontSize: '0.75rem' }}>
-                  {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
-                </p>
-              </div>
-              <button onClick={() => setPendingAdd(null)} className="text-muted-foreground hover:text-foreground p-1">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
-              {(clientCarts ?? []).map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => {
-                    onPickCart?.(c);
-                    commitAdd(pendingAdd.product, pendingAdd.qtys, c.cartName);
-                    setPendingAdd(null);
+        <Modal
+          opened
+          onClose={() => setPendingAdd(null)}
+          withCloseButton={false}
+          centered
+          size={448}
+          radius="xl"
+          padding={0}
+          overlayProps={{ backgroundOpacity: 0.6 }}
+        >
+          <Group justify="space-between" px={20} py="sm" wrap="nowrap" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+            <Box miw={0}>
+              <Text fw={700} fz="0.95rem">Adicionar a qual carrinho?</Text>
+              <Text c="dimmed" truncate fz="0.75rem">
+                {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
+              </Text>
+            </Box>
+            <UnstyledButton onClick={() => setPendingAdd(null)} className={`${classes.closeBtn} ${classes.closeBtnLg}`}>
+              <X size={16} />
+            </UnstyledButton>
+          </Group>
+          <Stack gap={8} p="md" mah="50vh" style={{ overflowY: 'auto' }}>
+            {(clientCarts ?? []).map(c => (
+              <UnstyledButton
+                key={c.id}
+                onClick={() => {
+                  onPickCart?.(c);
+                  commitAdd(pendingAdd.product, pendingAdd.qtys, c.cartName);
+                  setPendingAdd(null);
+                }}
+                className={activeCartId === c.id ? `${classes.cartOption} ${classes.cartOptionActive}` : classes.cartOption}
+              >
+                <ThemeIcon size={32} radius="md" variant="light" style={{ flexShrink: 0 }}>
+                  <ShoppingCart size={14} />
+                </ThemeIcon>
+                <Box flex={1} miw={0}>
+                  <Text truncate fz="0.85rem" fw={600}>{c.cartName}</Text>
+                  <Group gap={4} c="dimmed" fz="0.7rem" wrap="nowrap">
+                    <Store size={10} /> {c.clientName}
+                  </Group>
+                  <CartCreatorTag createdBy={c.createdBy} />
+                </Box>
+                {activeCartId === c.id && (
+                  <Text span c="gray.9" fz="0.65rem" fw={700} lts="0.05em" tt="uppercase">Atual</Text>
+                )}
+              </UnstyledButton>
+            ))}
+            {(clientCarts ?? []).length === 0 && !creatingMode && (
+              <Text c="dimmed" ta="center" py="sm" fz="0.8rem">
+                Nenhum carrinho ainda para este cliente.
+              </Text>
+            )}
+            {creatingMode ? (
+              <Stack gap={8} p="sm" bg="gray.0" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-5)' }}>
+                <TextInput
+                  label="Nome do novo carrinho"
+                  autoFocus
+                  value={creatingNewName}
+                  onChange={e => setCreatingNewName(e.target.value)}
+                  placeholder="Ex.: Reposição Inverno 26"
+                  radius="md"
+                  styles={{
+                    label: { color: 'var(--mantine-color-dimmed)', fontSize: '0.72rem', fontWeight: 400, marginBottom: 8 },
+                    input: { fontSize: '0.82rem', background: 'var(--mantine-color-gray-0)' },
                   }}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors flex items-center gap-3 ${activeCartId === c.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary/50'}`}
-                >
-                  <div className="w-8 h-8 rounded-md bg-primary/15 flex items-center justify-center flex-shrink-0">
-                    <ShoppingCart className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{c.cartName}</p>
-                    <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
-                      <Store className="w-2.5 h-2.5" /> {c.clientName}
-                    </p>
-                    <CartCreatorTag createdBy={c.createdBy} />
-                  </div>
-                  {activeCartId === c.id && (
-                    <span className="text-primary" style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Atual</span>
-                  )}
-                </button>
-              ))}
-              {(clientCarts ?? []).length === 0 && !creatingMode && (
-                <p className="text-muted-foreground text-center py-3" style={{ fontSize: '0.8rem' }}>
-                  Nenhum carrinho ainda para este cliente.
-                </p>
-              )}
-              {creatingMode ? (
-                <div className="p-3 rounded-lg border border-primary/40 bg-primary/5 space-y-2">
-                  <label className="block text-muted-foreground" style={{ fontSize: '0.72rem' }}>Nome do novo carrinho</label>
-                  <input
-                    autoFocus
-                    value={creatingNewName}
-                    onChange={e => setCreatingNewName(e.target.value)}
-                    placeholder="Ex.: Reposição Inverno 26"
-                    className="w-full px-2.5 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-                    style={{ fontSize: '0.82rem' }}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <button onClick={() => { setCreatingMode(false); setCreatingNewName(''); }} className="px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground" style={{ fontSize: '0.78rem' }}>Cancelar</button>
-                    <button
-                      onClick={() => {
-                        const ctx = onCreateCart?.(creatingNewName || 'Novo carrinho');
-                        if (ctx) {
-                          commitAdd(pendingAdd.product, pendingAdd.qtys, ctx.cartName);
-                          setPendingAdd(null);
-                        }
-                      }}
-                      className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-                      style={{ fontSize: '0.78rem', fontWeight: 600 }}
-                    >
-                      Criar e adicionar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setCreatingMode(true)}
-                  className="w-full p-3 rounded-lg border border-dashed border-primary/40 text-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
-                  style={{ fontSize: '0.82rem', fontWeight: 600 }}
-                >
-                  <Plus className="w-3.5 h-3.5" /> Criar novo carrinho
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+                />
+                <Group justify="flex-end" gap={8}>
+                  <Button onClick={() => { setCreatingMode(false); setCreatingNewName(''); }} variant="default" c="dimmed" size="compact-sm" h={30} px="sm" radius="md" fz="0.78rem" fw={400}>Cancelar</Button>
+                  <Button
+                    onClick={() => {
+                      const ctx = onCreateCart?.(creatingNewName || 'Novo carrinho');
+                      if (ctx) {
+                        commitAdd(pendingAdd.product, pendingAdd.qtys, ctx.cartName);
+                        setPendingAdd(null);
+                      }
+                    }}
+                    size="compact-sm"
+                    h={30}
+                    px="sm"
+                    radius="md"
+                    fz="0.78rem"
+                    fw={600}
+                  >
+                    Criar e adicionar
+                  </Button>
+                </Group>
+              </Stack>
+            ) : (
+              <UnstyledButton
+                onClick={() => setCreatingMode(true)}
+                className={classes.dashedBtn}
+                w="100%"
+                p="sm"
+                fw={600}
+                style={{ gap: 8 }}
+              >
+                <Plus size={14} /> Criar novo carrinho
+              </UnstyledButton>
+            )}
+          </Stack>
+        </Modal>
       )}
 
-    </div>
+    </Stack>
   );
 }

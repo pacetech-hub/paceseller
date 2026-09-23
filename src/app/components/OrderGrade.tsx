@@ -1,6 +1,13 @@
 import { useState, useCallback } from "react";
+import {
+  Box, Stack, Group, Text, Title, Paper, Button, UnstyledButton, TextInput, NativeSelect, Textarea,
+  SimpleGrid, Badge, ThemeIcon, Table, Image,
+} from "@mantine/core";
 import { ChevronLeft, ChevronRight, Plus, Minus, Zap, Check, AlertCircle, ShoppingCart, Tag, Store } from "lucide-react";
 import { products, clients, commercialPolicies, Product, Client, formatCurrency } from "../data/mockData";
+import classes from "./OrderGrade.module.css";
+
+const tnum = { fontVariantNumeric: 'tabular-nums' } as const;
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
@@ -13,6 +20,7 @@ const SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
 
 type GradeMap = Record<string, Record<string, number>>;
 
+
 function ProductSelector({ selected, onSelect }: { selected: Product | null; onSelect: (p: Product) => void }) {
   const [search, setSearch] = useState('');
   const filtered = products.filter(p =>
@@ -22,29 +30,32 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
 
   return (
     <div>
-      <input
+      <TextInput
         type="text"
         placeholder="Buscar produto ou referência..."
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary text-sm mb-2"
+        size="sm"
+        radius="md"
+        mb={8}
+        styles={{ input: { background: 'var(--mantine-color-gray-0)' } }}
       />
-      <div className="space-y-1 max-h-48 overflow-y-auto">
+      <Stack gap={4} mah={192} style={{ overflowY: 'auto' }}>
         {filtered.map(p => (
-          <button
+          <UnstyledButton
             key={p.id}
             onClick={() => onSelect(p)}
-            className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${selected?.id === p.id ? 'bg-primary/15 border border-primary/30' : 'hover:bg-secondary/60 border border-transparent'}`}
+            className={selected?.id === p.id ? `${classes.productItem} ${classes.productItemActive}` : classes.productItem}
           >
-            <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover bg-secondary flex-shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            <div className="flex-1 min-w-0">
-              <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{p.name}</p>
-              <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{p.reference} · {formatCurrency(p.price)}</p>
-            </div>
-            {selected?.id === p.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
-          </button>
+            <Image src={p.image} alt={p.name} w={40} h={40} radius="sm" fit="cover" bg="gray.1" style={{ flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <Box flex={1} miw={0}>
+              <Text truncate fz="0.82rem" fw={500}>{p.name}</Text>
+              <Text c="dimmed" fz="0.7rem">{p.reference} · {formatCurrency(p.price)}</Text>
+            </Box>
+            {selected?.id === p.id && <Check size={16} color="var(--mantine-color-gray-9)" style={{ flexShrink: 0 }} />}
+          </UnstyledButton>
         ))}
-      </div>
+      </Stack>
     </div>
   );
 }
@@ -122,401 +133,453 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
     { n: 4, label: 'Revisão' },
   ];
 
+
   if (completed) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-5">
-            <Check className="w-8 h-8 text-emerald-400" />
-          </div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.3rem' }}>Pedido enviado!</h2>
-          <p className="text-muted-foreground mt-2 mb-1" style={{ fontSize: '0.85rem' }}>
-            Pedido <span className="text-foreground font-semibold mono">PED-2026-0413</span> criado com sucesso.
-          </p>
-          <p className="text-muted-foreground" style={{ fontSize: '0.82rem' }}>
+      <Box p="lg" mih="60vh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box ta="center" maw={384}>
+          <ThemeIcon size={64} radius="xl" variant="light" color="teal" mx="auto" mb={20}>
+            <Check size={32} color="var(--mantine-color-teal-6)" />
+          </ThemeIcon>
+          <Title order={2} fw={700} fz="1.3rem">Pedido enviado!</Title>
+          <Text c="dimmed" mt={8} mb={4} fz="0.85rem">
+            Pedido <Text span c="var(--mantine-color-text)" fw={600} inherit style={tnum}>PED-2026-0413</Text> criado com sucesso.
+          </Text>
+          <Text c="dimmed" fz="0.82rem">
             {grandPairs} pares · {formatCurrency(finalTotal)}
-          </p>
-          <div className="flex gap-3 mt-6 justify-center">
-            <button
+          </Text>
+          <Group gap="sm" mt="lg" justify="center">
+            <Button
               onClick={() => { setCompleted(false); setStep(1); setGrades({}); }}
-              className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.85rem', fontWeight: 500 }}
+              variant="default"
+              radius="md"
+              fz="0.85rem"
+              fw={500}
             >
               Novo pedido
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => onNavigate('history')}
-              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              radius="md"
+              fz="0.85rem"
+              fw={600}
             >
               Ver histórico
-            </button>
-          </div>
-        </div>
-      </div>
+            </Button>
+          </Group>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap={20} p="lg" maw={1400} mx="auto" w="100%">
       {/* Client chip — shown when client was pre-selected */}
       {selectedClient && (
-        <div className="bg-card border border-primary/20 rounded-xl px-4 py-3 flex items-center gap-2.5">
-          <Store className="w-4 h-4 text-primary flex-shrink-0" />
-          <p className="text-muted-foreground" style={{ fontSize: '0.82rem' }}>Pedindo para</p>
-          <p className="text-primary" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{selectedClient.name}</p>
-        </div>
+        <Paper radius="lg" px="md" py="sm" style={{ border: '1px solid var(--mantine-color-gray-3)' }}>
+          <Group gap={10} wrap="nowrap">
+            <Store size={16} color="var(--mantine-color-gray-9)" style={{ flexShrink: 0 }} />
+            <Text c="dimmed" fz="0.82rem">Pedindo para</Text>
+            <Text c="gray.9" fz="0.85rem" fw={700}>{selectedClient.name}</Text>
+          </Group>
+        </Paper>
       )}
 
       {/* Stepper */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex items-center justify-between">
+      <Paper withBorder radius="lg" p="md">
+        <Group justify="space-between" wrap="nowrap" gap={0}>
           {steps.map((s, i) => (
-            <div key={s.n} className="flex items-center flex-1">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${step >= s.n ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
-                  style={{ fontSize: '0.75rem', fontWeight: 700 }}
+            <Group key={s.n} flex={1} wrap="nowrap" gap={0}>
+              <Group gap={8} wrap="nowrap">
+                <Box
+                  w={28}
+                  h={28}
+                  bg={step >= s.n ? 'gray.9' : 'gray.1'}
+                  c={step >= s.n ? 'white' : 'dimmed'}
+                  fz="0.75rem"
+                  fw={700}
+                  style={{ borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 150ms ease, color 150ms ease' }}
                 >
-                  {step > s.n ? <Check className="w-3.5 h-3.5" /> : s.n}
-                </div>
-                <span
-                  className={`hidden sm:block ${step >= s.n ? 'text-foreground' : 'text-muted-foreground'}`}
-                  style={{ fontSize: '0.8rem', fontWeight: step === s.n ? 600 : 400 }}
+                  {step > s.n ? <Check size={14} /> : s.n}
+                </Box>
+                <Text
+                  span
+                  className={classes.stepLabel}
+                  c={step >= s.n ? undefined : 'dimmed'}
+                  fz="0.8rem"
+                  fw={step === s.n ? 600 : 400}
                 >
                   {s.label}
-                </span>
-              </div>
+                </Text>
+              </Group>
               {i < steps.length - 1 && (
-                <div className={`flex-1 h-px mx-3 ${step > s.n ? 'bg-primary' : 'bg-border'}`} />
+                <Box flex={1} h={1} mx="sm" bg={step > s.n ? 'gray.9' : 'gray.3'} />
               )}
-            </div>
+            </Group>
           ))}
-        </div>
-      </div>
+        </Group>
+      </Paper>
 
       {/* Step Content */}
-      <div className="bg-card border border-border rounded-xl p-5">
+      <Paper withBorder radius="lg" p={20}>
         {/* Step 1: Cliente */}
         {step === 1 && (
-          <div className="space-y-4">
-            <h3 className="text-foreground" style={{ fontWeight: 600 }}>Selecionar cliente</h3>
-            <div>
-              <label className="block text-muted-foreground mb-1.5" style={{ fontSize: '0.78rem' }}>Cliente</label>
-              <select
-                value={selectedClientId}
-                onChange={e => handleClientChange(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-foreground outline-none focus:border-primary"
-                style={{ fontSize: '0.85rem' }}
-              >
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-muted-foreground mb-1.5" style={{ fontSize: '0.78rem' }}>Condição de pagamento</label>
-              <select
-                value={paymentCond}
-                onChange={e => setPaymentCond(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-foreground outline-none focus:border-primary"
-                style={{ fontSize: '0.85rem' }}
-              >
-                {['3x sem juros', '5x sem juros', '7x sem juros', 'À Vista', '30 DDL', '30/60 DDL', '30/60/90 DDL'].map(c => <option key={c}>{c}</option>)}
-              </select>
-            </div>
+          <Stack gap="md">
+            <Title order={3} fz="md" fw={600}>Selecionar cliente</Title>
+            <NativeSelect
+              label="Cliente"
+              value={selectedClientId}
+              onChange={e => handleClientChange(e.target.value)}
+              radius="md"
+              size="md"
+              styles={{
+                label: { color: 'var(--mantine-color-dimmed)', fontSize: '0.78rem', fontWeight: 400, marginBottom: 6 },
+                input: { fontSize: '0.85rem', background: 'var(--mantine-color-gray-0)' },
+              }}
+              data={clients.map(c => ({ value: c.id, label: c.name }))}
+            />
+            <NativeSelect
+              label="Condição de pagamento"
+              value={paymentCond}
+              onChange={e => setPaymentCond(e.target.value)}
+              radius="md"
+              size="md"
+              styles={{
+                label: { color: 'var(--mantine-color-dimmed)', fontSize: '0.78rem', fontWeight: 400, marginBottom: 6 },
+                input: { fontSize: '0.85rem', background: 'var(--mantine-color-gray-0)' },
+              }}
+              data={['3x sem juros', '5x sem juros', '7x sem juros', 'À Vista', '30 DDL', '30/60 DDL', '30/60/90 DDL']}
+            />
 
             {/* Política comercial dinâmica */}
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-primary" />
-                  <p className="text-muted-foreground" style={{ fontSize: '0.75rem', fontWeight: 500 }}>Política comercial aplicada</p>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.72rem', fontWeight: 700 }}>
-                  {clientPolicy.name}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Desconto</p>
-                  <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                    {clientPolicy.discount > 0 ? (
-                      <span className="text-emerald-400">{clientPolicy.discount}%</span>
-                    ) : (
-                      <span>sem desconto</span>
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Pagamento padrão</p>
-                  <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{clientPolicy.paymentCondition}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Pedido mínimo</p>
-                  <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{formatCurrency(clientPolicy.minOrderValue)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            <Paper radius="md" bg="gray.0" p="sm" style={{ border: '1px solid var(--mantine-color-gray-3)' }}>
+              <Stack gap={8}>
+                <Group justify="space-between" wrap="nowrap">
+                  <Group gap={6} wrap="nowrap">
+                    <Tag size={14} color="var(--mantine-color-gray-9)" />
+                    <Text c="dimmed" fz="0.75rem" fw={500}>Política comercial aplicada</Text>
+                  </Group>
+                  <Badge variant="light" radius="xl" tt="none" c="gray.9" bg="gray.2" fz="0.72rem" fw={700}>
+                    {clientPolicy.name}
+                  </Badge>
+                </Group>
+                <SimpleGrid cols={3} spacing={8}>
+                  <div>
+                    <Text c="dimmed" fz="0.68rem">Desconto</Text>
+                    <Text fz="0.82rem" fw={600}>
+                      {clientPolicy.discount > 0 ? (
+                        <Text span c="teal.7" inherit>{clientPolicy.discount}%</Text>
+                      ) : (
+                        <span>sem desconto</span>
+                      )}
+                    </Text>
+                  </div>
+                  <div>
+                    <Text c="dimmed" fz="0.68rem">Pagamento padrão</Text>
+                    <Text fz="0.82rem" fw={600}>{clientPolicy.paymentCondition}</Text>
+                  </div>
+                  <div>
+                    <Text c="dimmed" fz="0.68rem">Pedido mínimo</Text>
+                    <Text fz="0.82rem" fw={600}>{formatCurrency(clientPolicy.minOrderValue)}</Text>
+                  </div>
+                </SimpleGrid>
+              </Stack>
+            </Paper>
+          </Stack>
         )}
 
         {/* Step 2: Produtos */}
         {step === 2 && (
-          <div className="space-y-4">
-            <h3 className="text-foreground" style={{ fontWeight: 600 }}>Selecionar produto</h3>
+          <Stack gap="md">
+            <Title order={3} fz="md" fw={600}>Selecionar produto</Title>
             <ProductSelector selected={selectedProduct} onSelect={setSelectedProduct} />
-          </div>
+          </Stack>
         )}
 
         {/* Step 3: Grade */}
         {step === 3 && selectedProduct && (
-          <div className="space-y-5">
-            <div className="flex items-start justify-between gap-3">
+          <Stack gap={20}>
+            <Group justify="space-between" align="flex-start" gap="sm" wrap="nowrap">
               <div>
-                <h3 className="text-foreground" style={{ fontWeight: 600 }}>{selectedProduct.name}</h3>
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</p>
+                <Title order={3} fz="md" fw={600}>{selectedProduct.name}</Title>
+                <Text c="dimmed" fz="0.78rem">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </div>
-              <button
+              <Button
                 onClick={handleAutoFill}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors flex-shrink-0"
-                style={{ fontSize: '0.78rem', fontWeight: 600 }}
+                variant="light"
+                color="yellow"
+                c="yellow.7"
+                size="compact-sm"
+                radius="md"
+                px="sm"
+                h={32}
+                leftSection={<Zap size={14} />}
+                fz="0.78rem"
+                fw={600}
+                style={{ flexShrink: 0 }}
               >
-                <Zap className="w-3.5 h-3.5" /> Sugestão IA
-              </button>
-            </div>
+                Sugestão IA
+              </Button>
+            </Group>
 
             {autoFill && (
-              <div className="flex items-center gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 px-3 py-2">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <p className="text-amber-400" style={{ fontSize: '0.78rem' }}>Quantidades sugeridas com base no histórico de giro desta loja.</p>
-              </div>
+              <Group gap={8} wrap="nowrap" bg="yellow.0" px="sm" py={8} style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-yellow-3)' }}>
+                <Zap size={14} color="var(--mantine-color-yellow-7)" />
+                <Text c="yellow.7" fz="0.78rem">Quantidades sugeridas com base no histórico de giro desta loja.</Text>
+              </Group>
             )}
 
             {/* Grade Table */}
-            <div className="overflow-x-auto -mx-1">
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left text-muted-foreground pb-3" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Numeração</th>
+            <Box mx={-4} style={{ overflowX: 'auto' }}>
+              <Table withRowBorders={false} horizontalSpacing={4} verticalSpacing={0} layout="auto">
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th ta="left" c="dimmed" pb="sm" fz="0.72rem" fw={500}>Numeração</Table.Th>
                     {SIZES.map(s => (
-                      <th key={s} className="text-center text-muted-foreground pb-3" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Nº {s}</th>
+                      <Table.Th key={s} ta="center" c="dimmed" pb="sm" fz="0.72rem" fw={500}>Nº {s}</Table.Th>
                     ))}
-                    <th className="text-right text-muted-foreground pb-3" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-t border-border">
-                    <td className="py-2 text-muted-foreground" style={{ fontSize: '0.78rem' }}>Estoque</td>
+                    <Table.Th ta="right" c="dimmed" pb="sm" fz="0.72rem" fw={500}>Total</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  <Table.Tr style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Table.Td py={8} c="dimmed" fz="0.78rem">Estoque</Table.Td>
                     {SIZES.map(s => (
-                      <td key={s} className="py-2 text-center">
-                        <span className={`mono ${(selectedProduct.grades[s] || 0) === 0 ? 'text-red-400' : (selectedProduct.grades[s] || 0) < 5 ? 'text-amber-400' : 'text-emerald-400'}`} style={{ fontSize: '0.78rem' }}>
+                      <Table.Td key={s} py={8} ta="center">
+                        <Text span c={(selectedProduct.grades[s] || 0) === 0 ? 'red.7' : (selectedProduct.grades[s] || 0) < 5 ? 'yellow.7' : 'teal.7'} fz="0.78rem" style={tnum}>
                           {selectedProduct.grades[s] || 0}
-                        </span>
-                      </td>
+                        </Text>
+                      </Table.Td>
                     ))}
-                    <td />
-                  </tr>
-                  <tr className="border-t border-border">
-                    <td className="py-3 text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>Quantidade</td>
+                    <Table.Td />
+                  </Table.Tr>
+                  <Table.Tr style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Table.Td py="sm" fz="0.82rem" fw={500}>Quantidade</Table.Td>
                     {SIZES.map(s => {
                       const qty = currentGrades[s] || 0;
                       const stock = selectedProduct.grades[s] || 0;
                       return (
-                        <td key={s} className="py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
+                        <Table.Td key={s} py="sm" ta="center">
+                          <Group gap={4} justify="center" wrap="nowrap">
+                            <UnstyledButton
                               onClick={() => setQty(s, qty - 1)}
-                              className="w-6 h-6 rounded flex items-center justify-center bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+                              className={classes.qtyBtn}
                               disabled={qty === 0}
                             >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <input
+                              <Minus size={12} />
+                            </UnstyledButton>
+                            <TextInput
                               type="number"
                               min={0}
                               max={stock}
                               value={qty}
                               onChange={e => setQty(s, parseInt(e.target.value) || 0)}
-                              className={`w-10 text-center rounded border text-foreground outline-none py-1 bg-surface transition-colors ${qty > stock ? 'border-red-400/60' : qty > 0 ? 'border-primary/50' : 'border-border'}`}
-                              style={{ fontSize: '0.82rem', fontWeight: 600 }}
+                              w={40}
+                              size="xs"
+                              radius="sm"
+                              styles={{
+                                input: {
+                                  textAlign: 'center',
+                                  paddingInline: 0,
+                                  height: 30,
+                                  minHeight: 30,
+                                  fontSize: '0.82rem',
+                                  fontWeight: 600,
+                                  background: 'var(--mantine-color-gray-0)',
+                                  borderColor: qty > stock ? 'var(--mantine-color-red-4)' : qty > 0 ? 'var(--mantine-color-gray-6)' : 'var(--mantine-color-gray-3)',
+                                  transition: 'border-color 150ms ease',
+                                },
+                              }}
                             />
-                            <button
+                            <UnstyledButton
                               onClick={() => setQty(s, qty + 1)}
-                              className="w-6 h-6 rounded flex items-center justify-center bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors"
+                              className={classes.qtyBtn}
                               disabled={qty >= stock}
                             >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
+                              <Plus size={12} />
+                            </UnstyledButton>
+                          </Group>
                           {qty > stock && (
-                            <p className="text-red-400 mt-0.5" style={{ fontSize: '0.6rem' }}>Sem estoque</p>
+                            <Text c="red.7" mt={2} fz="0.6rem">Sem estoque</Text>
                           )}
-                        </td>
+                        </Table.Td>
                       );
                     })}
-                    <td className="py-3 text-right">
-                      <span className="text-foreground mono" style={{ fontWeight: 700, fontSize: '0.9rem' }}>{totalPairs}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    <Table.Td py="sm" ta="right">
+                      <Text span fw={700} fz="0.9rem" style={tnum}>{totalPairs}</Text>
+                    </Table.Td>
+                  </Table.Tr>
+                </Table.Tbody>
+              </Table>
+            </Box>
 
             {/* Subtotal */}
-            <div className="flex items-center justify-between rounded-lg bg-primary/5 border border-primary/20 px-4 py-3">
+            <Group justify="space-between" wrap="nowrap" bg="gray.0" px="md" py="sm" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-gray-3)' }}>
               <div>
-                <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Subtotal deste produto</p>
-                <p className="text-foreground" style={{ fontSize: '0.82rem' }}>{totalPairs} pares × {formatCurrency(selectedProduct.price)}</p>
+                <Text c="dimmed" fz="0.75rem">Subtotal deste produto</Text>
+                <Text fz="0.82rem">{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
               </div>
-              <p className="text-primary mono" style={{ fontSize: '1.2rem', fontWeight: 700 }}>{formatCurrency(totalValue)}</p>
-            </div>
+              <Text c="gray.9" fz="1.2rem" fw={700} style={tnum}>{formatCurrency(totalValue)}</Text>
+            </Group>
 
-            <button
+            <UnstyledButton
               onClick={() => {
                 setAutoFill(false);
                 setSelectedProduct(null);
                 setStep(2);
               }}
-              className="text-primary hover:text-primary/80 transition-colors"
-              style={{ fontSize: '0.8rem' }}
+              className={classes.linkBtn}
+              style={{ alignSelf: 'flex-start' }}
             >
               + Adicionar outro produto
-            </button>
-          </div>
+            </UnstyledButton>
+          </Stack>
         )}
 
         {/* Step 4: Revisão */}
         {step === 4 && (
-          <div className="space-y-5">
-            <h3 className="text-foreground" style={{ fontWeight: 600 }}>Revisão do pedido</h3>
+          <Stack gap={20}>
+            <Title order={3} fz="md" fw={600}>Revisão do pedido</Title>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Cliente</p>
-                <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{selectedClientObj.name}</p>
-              </div>
-              <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Pagamento</p>
-                <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{paymentCond}</p>
-              </div>
-            </div>
+            <SimpleGrid cols={2} spacing="sm">
+              <Box bg="gray.0" p="sm" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+                <Text c="dimmed" fz="0.72rem">Cliente</Text>
+                <Text fz="0.85rem" fw={600}>{selectedClientObj.name}</Text>
+              </Box>
+              <Box bg="gray.0" p="sm" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+                <Text c="dimmed" fz="0.72rem">Pagamento</Text>
+                <Text fz="0.85rem" fw={600}>{paymentCond}</Text>
+              </Box>
+            </SimpleGrid>
 
             {allGrades.length === 0 ? (
-              <div className="flex items-center gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 px-3 py-3">
-                <AlertCircle className="w-4 h-4 text-amber-400" />
-                <p className="text-amber-400" style={{ fontSize: '0.8rem' }}>Nenhum produto com quantidade adicionado.</p>
-              </div>
+              <Group gap={8} wrap="nowrap" bg="yellow.0" px="sm" py="sm" style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-yellow-3)' }}>
+                <AlertCircle size={16} color="var(--mantine-color-yellow-7)" />
+                <Text c="yellow.7" fz="0.8rem">Nenhum produto com quantidade adicionado.</Text>
+              </Group>
             ) : (
-              <div className="space-y-3">
+              <Stack gap="sm">
                 {allGrades.map(({ product, sizes, pairs, value }) => (
-                  <div key={product.id} className="rounded-lg border border-border p-4">
-                    <div className="flex items-center justify-between mb-3">
+                  <Paper key={product.id} withBorder radius="md" p="md">
+                    <Group justify="space-between" mb="sm" wrap="nowrap">
                       <div>
-                        <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{product.name}</p>
-                        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{product.reference}</p>
+                        <Text fz="0.85rem" fw={600}>{product.name}</Text>
+                        <Text c="dimmed" fz="0.72rem">{product.reference}</Text>
                       </div>
-                      <div className="text-right">
-                        <p className="text-foreground mono" style={{ fontWeight: 700 }}>{formatCurrency(value)}</p>
-                        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{pairs} pares</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
+                      <Box ta="right">
+                        <Text fw={700} style={tnum}>{formatCurrency(value)}</Text>
+                        <Text c="dimmed" fz="0.72rem">{pairs} pares</Text>
+                      </Box>
+                    </Group>
+                    <Group gap={8}>
                       {SIZES.map(s => sizes[s] > 0 && (
-                        <span key={s} className="px-2 py-0.5 rounded bg-primary/10 text-primary mono" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+                        <Badge key={s} variant="light" radius="sm" tt="none" c="gray.9" bg="gray.1" fz="0.72rem" fw={600} px={8} style={tnum}>
                           {s}: {sizes[s]}
-                        </span>
+                        </Badge>
                       ))}
-                    </div>
-                  </div>
+                    </Group>
+                  </Paper>
                 ))}
-              </div>
+              </Stack>
             )}
 
-            <div>
-              <label className="block text-muted-foreground mb-1.5" style={{ fontSize: '0.78rem' }}>Observações</label>
-              <textarea
-                value={obs}
-                onChange={e => setObs(e.target.value)}
-                rows={3}
-                placeholder="Informações adicionais para o pedido..."
-                className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary resize-none"
-                style={{ fontSize: '0.85rem' }}
-              />
-            </div>
+            <Textarea
+              label="Observações"
+              value={obs}
+              onChange={e => setObs(e.target.value)}
+              rows={3}
+              placeholder="Informações adicionais para o pedido..."
+              radius="md"
+              resize="none"
+              styles={{
+                label: { color: 'var(--mantine-color-dimmed)', fontSize: '0.78rem', fontWeight: 400, marginBottom: 6 },
+                input: { fontSize: '0.85rem', background: 'var(--mantine-color-gray-0)' },
+              }}
+            />
 
             {/* Aviso pedido mínimo */}
             {allGrades.length > 0 && finalTotal < clientPolicy.minOrderValue && (
-              <div className="flex items-center gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 px-3 py-2">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                <p className="text-amber-400" style={{ fontSize: '0.78rem' }}>
+              <Group gap={8} wrap="nowrap" bg="yellow.0" px="sm" py={8} style={{ borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-yellow-3)' }}>
+                <AlertCircle size={14} color="var(--mantine-color-yellow-7)" style={{ flexShrink: 0 }} />
+                <Text c="yellow.7" fz="0.78rem">
                   Pedido abaixo do mínimo de {formatCurrency(clientPolicy.minOrderValue)} para {clientPolicy.name}.
-                </p>
-              </div>
+                </Text>
+              </Group>
             )}
 
             {/* Breakdown de valor */}
-            <div className="rounded-xl bg-primary/5 border border-primary/20 px-5 py-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>Subtotal</p>
-                <p className="text-foreground mono" style={{ fontSize: '0.9rem' }}>{formatCurrency(grandTotal)}</p>
-              </div>
+            <Stack gap={8} bg="gray.0" px={20} py="md" style={{ borderRadius: 'var(--mantine-radius-lg)', border: '1px solid var(--mantine-color-gray-3)' }}>
+              <Group justify="space-between" wrap="nowrap">
+                <Text c="dimmed" fz="0.78rem">Subtotal</Text>
+                <Text fz="0.9rem" style={tnum}>{formatCurrency(grandTotal)}</Text>
+              </Group>
               {discountPct > 0 && (
-                <div className="flex items-center justify-between">
-                  <p className="text-emerald-400" style={{ fontSize: '0.78rem' }}>
+                <Group justify="space-between" wrap="nowrap">
+                  <Text c="teal.7" fz="0.78rem">
                     Desconto {clientPolicy.name} ({discountPct}%)
-                  </p>
-                  <p className="text-emerald-400 mono" style={{ fontSize: '0.9rem' }}>-{formatCurrency(discountAmount)}</p>
-                </div>
+                  </Text>
+                  <Text c="teal.7" fz="0.9rem" style={tnum}>-{formatCurrency(discountAmount)}</Text>
+                </Group>
               )}
-              <div className="border-t border-border/60 pt-2 flex items-center justify-between">
+              <Group justify="space-between" wrap="nowrap" pt={8} style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
                 <div>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>Total do pedido</p>
-                  <p className="text-foreground" style={{ fontSize: '0.82rem' }}>{grandPairs} pares · {allGrades.length} produto(s)</p>
+                  <Text c="dimmed" fz="0.78rem">Total do pedido</Text>
+                  <Text fz="0.82rem">{grandPairs} pares · {allGrades.length} produto(s)</Text>
                 </div>
-                <p className="text-primary mono" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatCurrency(finalTotal)}</p>
-              </div>
-            </div>
-          </div>
+                <Text c="gray.9" fz="1.5rem" fw={700} style={tnum}>{formatCurrency(finalTotal)}</Text>
+              </Group>
+            </Stack>
+          </Stack>
         )}
-      </div>
+      </Paper>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <button
+      <Group justify="space-between" wrap="nowrap">
+        <Button
           onClick={() => setStep(s => Math.max(selectedClient ? 2 : 1, s - 1))}
           disabled={step === (selectedClient ? 2 : 1)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-40"
-          style={{ fontSize: '0.85rem', fontWeight: 500 }}
+          variant="default"
+          radius="md"
+          leftSection={<ChevronLeft size={16} />}
+          fz="0.85rem"
+          fw={500}
         >
-          <ChevronLeft className="w-4 h-4" /> Voltar
-        </button>
+          Voltar
+        </Button>
 
-        <div className="flex items-center gap-3">
+        <Group gap="sm" wrap="nowrap">
           {allGrades.length > 0 && step < 4 && (
-            <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>
-              <span className="text-foreground font-semibold">{grandPairs}</span> pares · {formatCurrency(grandTotal)}
-            </span>
+            <Text span c="dimmed" fz="0.78rem">
+              <Text span c="var(--mantine-color-text)" fw={600} inherit>{grandPairs}</Text> pares · {formatCurrency(grandTotal)}
+            </Text>
           )}
           {step < 4 ? (
-            <button
+            <Button
               onClick={() => setStep(s => Math.min(4, s + 1))}
               disabled={step === 3 && totalPairs === 0}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
-              style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              radius="md"
+              px={20}
+              rightSection={<ChevronRight size={16} />}
+              fz="0.85rem"
+              fw={600}
             >
-              {step === 3 ? 'Revisar pedido' : 'Continuar'} <ChevronRight className="w-4 h-4" />
-            </button>
+              {step === 3 ? 'Revisar pedido' : 'Continuar'}
+            </Button>
           ) : (
-            <button
+            <Button
               onClick={() => setCompleted(true)}
               disabled={allGrades.length === 0}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
-              style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              radius="md"
+              px={20}
+              leftSection={<ShoppingCart size={16} />}
+              fz="0.85rem"
+              fw={600}
             >
-              <ShoppingCart className="w-4 h-4" /> Confirmar pedido
-            </button>
+              Confirmar pedido
+            </Button>
           )}
-        </div>
-      </div>
-    </div>
+        </Group>
+      </Group>
+    </Stack>
   );
 }
