@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowRightIcon } from "@phosphor-icons/react";
 import {
   Anchor,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -9,9 +10,7 @@ import {
   Image,
   Paper,
   PasswordInput,
-  Select,
   Text,
-  TextInput,
   Title,
 } from "@mantine/core";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
@@ -23,25 +22,31 @@ interface LoginPageProps {
   onLogin: (profile: Profile) => void;
 }
 
-const profiles: { value: Profile; label: string }[] = [
-  { value: "admin", label: "Indústria" },
-  { value: "rep", label: "Representante" },
-  { value: "lojista", label: "Lojista" },
-];
+// Contas de demonstração: o tipo de usuário vem do servidor, aqui simulado pelo e-mail.
+const demoAccounts: Record<string, Profile> = {
+  "industria@teslafootwear.com.br": "admin",
+  "representante@teslafootwear.com.br": "rep",
+  "lojista@teslafootwear.com.br": "lojista",
+};
 
 export function LoginPage({ onLogin }: LoginPageProps) {
-  const [email, setEmail] = useState("admin@teslafootwear.com.br");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [password, setPassword] = useState("••••••••");
-  const [selectedProfile, setSelectedProfile] = useState<Profile>("admin");
   const [keepLoggedIn, setKeepLoggedIn] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    const profile = demoAccounts[email.trim().toLowerCase()];
+    if (!profile) {
+      setEmailError("Usuário não encontrado");
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      onLogin(selectedProfile);
+      onLogin(profile);
     }, 1000);
   };
 
@@ -60,22 +65,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </Text>
 
         <form onSubmit={handleLogin}>
-          <Select
-            label="Acessando como"
-            data={profiles}
-            value={selectedProfile}
-            onChange={(value) => value && setSelectedProfile(value as Profile)}
-            allowDeselect={false}
-            size="md"
-            radius="md"
-          />
-          <TextInput
+          <Autocomplete
             label="E-mail"
             type="email"
             placeholder="seu@email.com"
+            data={Object.keys(demoAccounts)}
             value={email}
-            onChange={(e) => setEmail(e.currentTarget.value)}
-            mt="md"
+            onChange={(value) => {
+              setEmail(value);
+              setEmailError(null);
+            }}
+            error={emailError}
             size="md"
             radius="md"
           />
