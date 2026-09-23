@@ -1,3 +1,4 @@
+import { Container } from "@mantine/core";
 import { Client } from "../data/mockData";
 import { SalesIndicatorsSection, getRepTeamEntities, getRepMonthlyTotal } from "./SalesIndicatorsSection";
 
@@ -17,7 +18,7 @@ const TICKET = 5000;
 
 export function DashboardRep({ onNavigate, selectedClient, onSelectClient, onOpenOrderStatus }: DashboardRepProps) {
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
+    <Container size={1400} p="lg" w="100%">
       {/* VENDAS */}
       <SalesIndicatorsSection
         scope="own"
@@ -30,6 +31,6 @@ export function DashboardRep({ onNavigate, selectedClient, onSelectClient, onOpe
         onOpenSalesTeam={() => onNavigate('sales-team')}
         onOpenStatus={onOpenOrderStatus}
       />
-    </div>
+    </Container>
   );
 }

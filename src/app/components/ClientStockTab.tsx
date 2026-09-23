@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { MagnifyingGlassIcon, StorefrontIcon, MapPinIcon, XIcon } from "@phosphor-icons/react";
+import { Select, Paper, Group, Text, ThemeIcon, Box, Stack, type ComboboxItem, type OptionsFilter } from "@mantine/core";
+import { MagnifyingGlassIcon, StorefrontIcon, MapPinIcon } from "@phosphor-icons/react";
 import { clients as allClients, type Client } from "../data/mockData";
 import { generateClientStock, type StockItem } from "../data/stockData";
 import { StockTable } from "./StockTable";
@@ -11,87 +12,77 @@ interface ClientStockTabProps {
   scopeClients?: Client[];
 }
 
+// Busca tanto pelo nome (label) quanto pelo código do cliente (value).
+const filterByNameOrId: OptionsFilter = ({ options, search }) => {
+  const t = search.trim().toLowerCase();
+  if (!t) return options;
+  return (options as ComboboxItem[]).filter(o => o.label.toLowerCase().includes(t) || o.value.toLowerCase().includes(t));
+};
+
 export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTabProps) {
   const pool = scopeClients ?? allClients;
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<Client | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [items, setItems] = useState<StockItem[]>([]);
+
+  const selected = useMemo(() => pool.find(c => c.id === selectedId) ?? null, [pool, selectedId]);
+  const options = useMemo(() => pool.map(c => ({ value: c.id, label: c.name })), [pool]);
 
   useEffect(() => {
     if (selected) setItems(generateClientStock(selected));
   }, [selected]);
-
-  const matches = useMemo(() => {
-    const t = query.trim().toLowerCase();
-    if (!t) return [];
-    return pool.filter(c => c.name.toLowerCase().includes(t) || c.id.toLowerCase().includes(t)).slice(0, 8);
-  }, [query, pool]);
 
   const updateStock = (sku: string, stock: number) => {
     setItems(prev => prev.map(it => it.sku === sku ? { ...it, stock, updatedAt: new Date().toISOString().slice(0, 10) } : it));
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative max-w-md">
-        <div className="flex items-center gap-2 rounded-lg bg-card border border-border px-3 py-2.5">
-          <MagnifyingGlassIcon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Buscar cliente por nome ou código..."
-            className="flex-1 bg-transparent outline-none text-foreground placeholder-muted-foreground"
-            style={{ fontSize: '0.85rem' }}
-          />
-          {selected && (
-            <button onClick={() => { setSelected(null); setQuery(''); }} className="text-muted-foreground hover:text-foreground flex-shrink-0">
-              <XIcon className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-        {query && matches.length > 0 && (
-          <div className="absolute z-10 left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-            {matches.map(c => (
-              <button
-                key={c.id}
-                onClick={() => { setSelected(c); setQuery(''); }}
-                className="w-full text-left px-3 py-2 hover:bg-secondary/60 flex items-center gap-2 transition-colors"
-              >
-                <StorefrontIcon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                <span className="text-foreground truncate" style={{ fontSize: '0.82rem' }}>{c.name}</span>
-                <span className="text-muted-foreground ml-auto mono flex-shrink-0" style={{ fontSize: '0.7rem' }}>{c.id}</span>
-              </button>
-            ))}
-          </div>
+    <Stack gap="md">
+      <Select
+        maw={448}
+        searchable
+        clearable
+        value={selectedId}
+        onChange={setSelectedId}
+        data={options}
+        filter={filterByNameOrId}
+        limit={8}
+        placeholder="Buscar cliente por nome ou código..."
+        nothingFoundMessage="Nenhum cliente encontrado."
+        leftSection={<MagnifyingGlassIcon className="w-3.5 h-3.5" />}
+        renderOption={({ option }) => (
+          <Group gap="xs" wrap="nowrap" w="100%">
+            <StorefrontIcon className="w-3.5 h-3.5" style={{ flexShrink: 0, color: 'var(--mantine-color-dimmed)' }} />
+            <Text size="0.82rem" truncate style={{ flex: 1 }}>{option.label}</Text>
+            <Text c="dimmed" size="0.7rem" className="mono">{option.value}</Text>
+          </Group>
         )}
-        {query && matches.length === 0 && (
-          <div className="absolute z-10 left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>
-            Nenhum cliente encontrado.
-          </div>
-        )}
-      </div>
+      />
 
       {!selected && (
-        <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-xl">
-          <StorefrontIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p style={{ fontSize: '0.88rem' }}>Busque um cliente acima para ver o estoque reportado por ele.</p>
-        </div>
+        <Paper withBorder radius="lg" py={64}>
+          <Stack align="center" gap="sm">
+            <StorefrontIcon className="w-10 h-10" style={{ opacity: 0.3 }} />
+            <Text c="dimmed" size="0.88rem">Busque um cliente acima para ver o estoque reportado por ele.</Text>
+          </Stack>
+        </Paper>
       )}
 
       {selected && (
         <>
-          <div className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-              <StorefrontIcon className="w-4 h-4 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-foreground truncate" style={{ fontSize: '0.92rem', fontWeight: 700 }}>{selected.name}</p>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <MapPinIcon className="w-3 h-3" />
-                <span style={{ fontSize: '0.75rem' }}>{selected.city} · {selected.state} · Rep: {selected.rep}</span>
-              </div>
-            </div>
-          </div>
+          <Paper withBorder radius="lg" p="md">
+            <Group gap="sm" wrap="nowrap">
+              <ThemeIcon size={40} radius="md" variant="light">
+                <StorefrontIcon className="w-4 h-4" />
+              </ThemeIcon>
+              <Box miw={0}>
+                <Text size="0.92rem" fw={700} truncate>{selected.name}</Text>
+                <Group gap={6} c="dimmed" wrap="nowrap">
+                  <MapPinIcon className="w-3 h-3" />
+                  <Text size="0.75rem" c="dimmed">{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
+                </Group>
+              </Box>
+            </Group>
+          </Paper>
 
           <StockTable
             items={items}
@@ -100,6 +91,6 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
           />
         </>
       )}
-    </div>
+    </Stack>
   );
 }

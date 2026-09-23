@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { CaretRightIcon } from "@phosphor-icons/react";
 import {
-  ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from "recharts";
+  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, Button, NavLink, ColorSwatch, Box,
+} from "@mantine/core";
+import { CompositeChart } from "@mantine/charts";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import { clients as allClients, type Client } from "../data/mockData";
 
 export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
@@ -88,12 +89,18 @@ function buildSeries(monthlyBase: number, period: Period) {
   });
 }
 
+// `color` é uma cor do tema Mantine (nome.tom)
 const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
-  { key: 'analise', label: 'Em análise', color: '#f59e0b', ratio: 0.10, orderStatus: 'em análise' },
-  { key: 'aprovado', label: 'Aprovado', color: '#111111', ratio: 0.40, orderStatus: 'aprovado' },
-  { key: 'faturado', label: 'Faturado', color: '#3b82f6', ratio: 0.27, orderStatus: 'faturado' },
-  { key: 'entregue', label: 'Entregue', color: '#8b5cf6', ratio: 0.18, orderStatus: 'entregue' },
-  { key: 'cancelado', label: 'Cancelado', color: '#ef4444', ratio: 0.05, orderStatus: 'cancelado' },
+  { key: 'analise', label: 'Em análise', color: 'yellow.6', ratio: 0.10, orderStatus: 'em análise' },
+  { key: 'aprovado', label: 'Aprovado', color: 'neutral.9', ratio: 0.40, orderStatus: 'aprovado' },
+  { key: 'faturado', label: 'Faturado', color: 'blue.5', ratio: 0.27, orderStatus: 'faturado' },
+  { key: 'entregue', label: 'Entregue', color: 'violet.5', ratio: 0.18, orderStatus: 'entregue' },
+  { key: 'cancelado', label: 'Cancelado', color: 'red.5', ratio: 0.05, orderStatus: 'cancelado' },
+];
+
+const SERIES_CHART = [
+  { name: 'current', label: 'Período atual', color: 'neutral.9', type: 'bar' as const },
+  { name: 'lastYear', label: 'Ano passado', color: 'yellow.6', type: 'line' as const },
 ];
 
 // referência fixa de "hoje" usada só para o mock de recência de pedidos
@@ -180,127 +187,142 @@ export function SalesIndicatorsSection({
   const financeDelta = seededPercent(`finance-${scope}-${period}`, 4, 15);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-end flex-wrap gap-2">
-        <div className="inline-flex flex-wrap rounded-lg bg-secondary p-1">
-          {PERIOD_OPTIONS.map(opt => (
-            <button
-              key={opt.id}
-              onClick={() => setPeriod(opt.id)}
-              className={`px-2.5 py-1 rounded-md transition-colors ${period === opt.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
-              style={{ fontSize: '0.7rem', fontWeight: 600 }}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <Stack gap="md">
+      <Group justify="flex-end">
+        <SegmentedControl
+          size="xs"
+          value={period}
+          onChange={v => setPeriod(v as Period)}
+          data={PERIOD_OPTIONS.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </Group>
 
       {/* A + B */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Pedidos no período</p>
-          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{periodOrders.toLocaleString('pt-BR')}</p>
-          <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{ordersDelta}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-primary uppercase tracking-wider" style={{ fontSize: '0.66rem', fontWeight: 700 }}>Faturamento</p>
-          <p className="text-foreground mono mt-1" style={{ fontSize: '1.6rem', fontWeight: 700 }}>{formatCompactCurrency(periodValue)}</p>
-          <p className="text-emerald-600 mt-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{financeDelta}</p>
-        </div>
-      </div>
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <KpiCard label="Pedidos no período" value={periodOrders.toLocaleString('pt-BR')} delta={ordersDelta} />
+        <KpiCard label="Faturamento" value={formatCompactCurrency(periodValue)} delta={financeDelta} />
+      </SimpleGrid>
 
       {/* C: gráfico de colunas x ano anterior + status dos pedidos */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5 lg:col-span-8">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas vs. ano passado</h4>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>Colunas do período atual · linha do mesmo ciclo no ano anterior</p>
-          <ResponsiveContainer width="100%" height={240}>
-            <ComposedChart data={series} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisValue} />
-              <Tooltip formatter={(v: any, name: any) => [brl(v as number), name === 'current' ? 'Período atual' : 'Ano passado']} />
-              <Legend formatter={(v: string) => v === 'current' ? 'Período atual' : 'Ano passado'} wrapperStyle={{ fontSize: '0.72rem' }} />
-              <Bar dataKey="current" name="current" fill="#111" radius={[4, 4, 0, 0]} />
-              <Line type="monotone" dataKey="lastYear" name="lastYear" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: '#f59e0b' }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+      <Grid gutter="md">
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+          <Paper withBorder radius="lg" p="lg" h="100%">
+            <CardTitle title="Vendas vs. ano passado" subtitle="Colunas do período atual · linha do mesmo ciclo no ano anterior" />
+            <CompositeChart
+              h={240}
+              mt="sm"
+              data={series}
+              dataKey="label"
+              series={SERIES_CHART}
+              curveType="monotone"
+              gridAxis="y"
+              tickLine="none"
+              withLegend
+              legendProps={{ verticalAlign: 'bottom' }}
+              valueFormatter={brl}
+              yAxisProps={{ tickFormatter: formatAxisValue }}
+              barProps={{ radius: [4, 4, 0, 0] }}
+              maxBarWidth={48}
+            />
+          </Paper>
+        </Grid.Col>
 
-        <div className="bg-card border border-border rounded-xl p-5 lg:col-span-4">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Pedidos por status</h4>
-          <p className="text-muted-foreground mt-0.5 mb-3" style={{ fontSize: '0.72rem' }}>{periodOrders.toLocaleString('pt-BR')} pedidos no período</p>
-          <div className="space-y-1">
-            {statusRows.map(s => (
-              <button
-                key={s.key}
-                onClick={() => onOpenStatus(s.orderStatus)}
-                className="w-full flex items-center gap-2 py-1 px-1.5 -mx-1.5 rounded-lg hover:bg-primary/5 transition-colors"
-              >
-                <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: s.color }} />
-                <span className="text-foreground flex-1 truncate text-left" style={{ fontSize: '0.8rem' }}>{s.label}</span>
-                <span className="text-foreground mono" style={{ fontSize: '0.82rem', fontWeight: 700 }}>{s.count}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Paper withBorder radius="lg" p="lg" h="100%">
+            <CardTitle title="Pedidos por status" subtitle={`${periodOrders.toLocaleString('pt-BR')} pedidos no período`} />
+            <Stack gap={2} mt="sm">
+              {statusRows.map(s => (
+                <NavLink
+                  key={s.key}
+                  component="button"
+                  onClick={() => onOpenStatus(s.orderStatus)}
+                  label={<Text size="0.8rem">{s.label}</Text>}
+                  leftSection={<ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} radius={2} withShadow={false} />}
+                  rightSection={<Text size="0.82rem" fw={700} className="mono">{s.count}</Text>}
+                  py={6}
+                  style={{ borderRadius: 'var(--mantine-radius-md)' }}
+                />
+              ))}
+            </Stack>
+          </Paper>
+        </Grid.Col>
+      </Grid>
 
       {/* D: top 10 vendedores */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Vendas por representante</h4>
-          <button onClick={onOpenSalesTeam} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-            Ver mais →
-          </button>
-        </div>
-        <div className="space-y-2">
+      <Paper withBorder radius="lg" p="lg">
+        <Group justify="space-between" gap="xs" mb="sm">
+          <CardTitle title="Vendas por representante" />
+          <SeeMoreButton onClick={onOpenSalesTeam} />
+        </Group>
+        <Stack gap="xs">
           {ranked.map((e, i) => (
-            <div key={e.id} className="flex items-center gap-3">
-              <span className="text-muted-foreground w-5 text-right flex-shrink-0" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{i + 1}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{e.name}</p>
-                <p className="text-muted-foreground truncate" style={{ fontSize: '0.68rem' }}>
+            <Group key={e.id} gap="sm" wrap="nowrap">
+              <Text c="dimmed" size="0.75rem" fw={600} w={20} ta="right" style={{ flexShrink: 0 }}>{i + 1}</Text>
+              <Box miw={0} style={{ flex: 1 }}>
+                <Text size="0.82rem" fw={500} truncate>{e.name}</Text>
+                <Text c="dimmed" size="0.68rem" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
-                </p>
-              </div>
-              <span className="text-foreground mono flex-shrink-0" style={{ fontSize: '0.82rem', fontWeight: 700 }}>{brl(e.value)}</span>
-            </div>
+                </Text>
+              </Box>
+              <Text size="0.82rem" fw={700} className="mono" style={{ flexShrink: 0 }}>{brl(e.value)}</Text>
+            </Group>
           ))}
           {ranked.length === 0 && (
-            <p className="text-muted-foreground text-center py-6" style={{ fontSize: '0.8rem' }}>Nenhum vendedor no período</p>
+            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum vendedor no período</Text>
           )}
-        </div>
-      </div>
+        </Stack>
+      </Paper>
 
       {/* E: 5 clientes prioritários */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
-          <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Prioridade de contato</h4>
-          <button onClick={onNavigateClients} className="text-primary flex-shrink-0" style={{ fontSize: '0.78rem', fontWeight: 600 }}>
-            Ver mais →
-          </button>
-        </div>
-        <div className="mt-2 divide-y divide-border">
+      <Paper withBorder radius="lg" p="lg">
+        <Group justify="space-between" gap="xs" mb="xs">
+          <CardTitle title="Prioridade de contato" />
+          <SeeMoreButton onClick={onNavigateClients} />
+        </Group>
+        <Stack gap={2}>
           {priorityClients.map(c => (
-            <button
+            <NavLink
               key={c.id}
+              component="button"
               onClick={() => onOpenClient(c)}
-              className="w-full flex items-center gap-3 py-2.5 px-2 -mx-2 text-left rounded-lg hover:bg-primary/5 transition-colors"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{c.name}</p>
-                <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.reason}</p>
-              </div>
-              <CaretRightIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </button>
+              label={<Text size="0.82rem" fw={600} truncate>{c.name}</Text>}
+              description={<Text c="dimmed" size="0.72rem" truncate>{c.reason}</Text>}
+              rightSection={<CaretRightIcon className="w-4 h-4" style={{ color: 'var(--mantine-color-dimmed)' }} />}
+              style={{ borderRadius: 'var(--mantine-radius-md)' }}
+            />
           ))}
           {priorityClients.length === 0 && (
-            <p className="text-muted-foreground text-center py-6" style={{ fontSize: '0.8rem' }}>Nenhum cliente na carteira</p>
+            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum cliente na carteira</Text>
           )}
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </Paper>
+    </Stack>
+  );
+}
+
+function KpiCard({ label, value, delta }: { label: string; value: string; delta: string }) {
+  return (
+    <Paper withBorder radius="lg" p="md">
+      <Text size="0.66rem" fw={700} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{label}</Text>
+      <Text size="1.6rem" fw={700} mt={4} className="mono">{value}</Text>
+      <Text c="teal.7" size="0.72rem" fw={600} mt={4}>{delta}</Text>
+    </Paper>
+  );
+}
+
+function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <Box>
+      <Title order={4} size="0.85rem" fw={600}>{title}</Title>
+      {subtitle && <Text c="dimmed" size="0.72rem" mt={2}>{subtitle}</Text>}
+    </Box>
+  );
+}
+
+function SeeMoreButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button variant="subtle" size="compact-sm" onClick={onClick} rightSection={<CaretRightIcon className="w-3 h-3" />}>
+      Ver mais
+    </Button>
   );
 }
