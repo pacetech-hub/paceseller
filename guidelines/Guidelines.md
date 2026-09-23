@@ -1,4 +1,15 @@
-**Add your own guidelines here**
+# Design system: Mantine theme is the source of truth
+
+* `src/mantine/theme.ts` is the single source of truth for colors. Change a color there, never in a component.
+* Build UI with Mantine components (`@mantine/core`, `@mantine/dates`, `@mantine/notifications`, `@mantine/charts`, `@mantine/form`, `@mantine/hooks`).
+* In components, take colors only from the theme:
+  * color props: `color="neutral"`, `c="dimmed"`, `bg="gray.0"`, `variant="light"`
+  * Mantine CSS variables: `var(--mantine-color-body)`, `var(--mantine-color-text)`, `var(--mantine-color-dimmed)`, `var(--mantine-color-default-border)`, `var(--mantine-primary-color-filled)`, `var(--mantine-color-blue-6)`
+  * `useMantineTheme()` with `alpha()` / `theme.colors.*` when a computed value is needed (gradients, transparency)
+* Do not use Tailwind color classes (`bg-*`, `text-*`, `border-*`, `from-*`, `ring-*` with a color), the CSS variables in `src/styles/theme.css` (`--primary`, `--muted-foreground`, `--surface`, `--border`, ...), or hard-coded hex/rgb/oklch values in components.
+* Tailwind is still fine for layout (flex, grid, spacing, sizing, responsive visibility).
+* Icons come from `@phosphor-icons/react`.
+
 <!--
 
 System Guidelines

@@ -13,6 +13,8 @@ import {
   Text,
   TextInput,
   Title,
+  alpha,
+  useMantineTheme,
 } from "@mantine/core";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 
@@ -34,16 +36,21 @@ const highlights = [
   "Campanhas criadas com IA generativa",
 ];
 
-// Mantém as cores do design atual (tokens de src/styles/theme.css) em vez dos cinzas padrão do Mantine.
-const muted = "var(--muted-foreground)";
-const fieldInput = { backgroundColor: "var(--surface)", borderColor: "var(--border)" };
+// Cores dos avatares vêm da paleta do tema Mantine (src/mantine/theme.ts).
+const avatars = [
+  { initials: "MA", color: "blue" },
+  { initials: "FL", color: "violet" },
+  { initials: "CM", color: "grape" },
+  { initials: "AS", color: "pink" },
+];
 
 const inputStyles = {
-  label: { fontSize: "0.8rem", fontWeight: 500, color: muted, marginBottom: 6 },
-  input: { ...fieldInput, fontSize: "0.875rem" },
+  label: { fontSize: "0.8rem", fontWeight: 500, color: "var(--mantine-color-dimmed)", marginBottom: 6 },
+  input: { fontSize: "0.875rem" },
 };
 
 export function LoginPage({ onLogin }: LoginPageProps) {
+  const theme = useMantineTheme();
   const [email, setEmail] = useState("admin@teslafootwear.com.br");
   const [password, setPassword] = useState("••••••••");
   const [selectedProfile, setSelectedProfile] = useState<Profile>("admin");
@@ -59,13 +66,19 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex relative">
+    <Box mih="100vh" bg="var(--mantine-color-body)" className="flex relative">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-[45%] relative bg-gradient-to-br from-primary/10 via-background to-background flex-col justify-between p-12 border-r border-border">
+      <div
+        className="hidden lg:flex lg:w-[45%] relative flex-col justify-between p-12"
+        style={{
+          backgroundImage: `linear-gradient(to bottom right, ${alpha(theme.colors.neutral[9], 0.1)}, var(--mantine-color-body), var(--mantine-color-body))`,
+          borderRight: "1px solid var(--mantine-color-default-border)",
+        }}
+      >
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, oklch(0.6 0.22 262 / 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.72 0.15 48 / 0.2) 0%, transparent 40%)`,
+            backgroundImage: `radial-gradient(circle at 20% 50%, ${alpha(theme.colors.blue[6], 0.3)} 0%, transparent 50%), radial-gradient(circle at 80% 20%, ${alpha(theme.colors.orange[5], 0.2)} 0%, transparent 40%)`,
           }}
         />
         <Box pos="relative" style={{ zIndex: 10 }}>
@@ -83,7 +96,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <br />
               Com mais inteligência.
             </Title>
-            <Text c={muted} size="1rem" lh={1.6}>
+            <Text c="dimmed" size="1rem" lh={1.6}>
               Catálogo digital, pedidos por grade, marketing com IA e inteligência de sell-out em
               uma única plataforma.
             </Text>
@@ -93,7 +106,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             {highlights.map((item) => (
               <Group key={item} gap="sm" wrap="nowrap">
                 <Box w={6} h={6} bg="var(--mantine-primary-color-filled)" style={{ borderRadius: "50%" }} />
-                <Text c={muted} size="0.875rem">
+                <Text c="dimmed" size="0.875rem">
                   {item}
                 </Text>
               </Group>
@@ -103,26 +116,23 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         <Group gap="md" pos="relative" style={{ zIndex: 10 }}>
           <Avatar.Group spacing={8}>
-            {["MA", "FL", "CM", "AS"].map((initials, i) => (
+            {avatars.map(({ initials, color }) => (
               <Avatar
                 key={initials}
                 size={32}
                 radius="xl"
+                color={color}
+                variant="filled"
                 styles={{
                   root: { border: "2px solid var(--mantine-color-body)" },
-                  placeholder: {
-                    background: `oklch(${0.55 + i * 0.05} 0.18 ${262 + i * 30})`,
-                    color: "white",
-                    fontSize: "0.65rem",
-                    fontWeight: 600,
-                  },
+                  placeholder: { fontSize: "0.65rem", fontWeight: 600 },
                 }}
               >
                 {initials}
               </Avatar>
             ))}
           </Avatar.Group>
-          <Text c={muted} size="0.8rem">
+          <Text c="dimmed" size="0.8rem">
             <Text span fw={600} c="var(--mantine-color-text)" inherit>
               247 lojistas
             </Text>{" "}
@@ -143,7 +153,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               Bem-vindo
             </Title>
             <Group gap="xs" wrap="nowrap">
-              <Text c={muted} size="0.875rem">
+              <Text c="dimmed" size="0.875rem">
                 Acessando como
               </Text>
               <Select
@@ -155,7 +165,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 size="xs"
                 w={150}
                 comboboxProps={{ withinPortal: true }}
-                styles={{ input: { ...fieldInput, fontSize: "0.8rem", fontWeight: 600 } }}
+                styles={{ input: { fontSize: "0.8rem", fontWeight: 600 } }}
               />
             </Group>
           </Box>
@@ -205,11 +215,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </form>
 
           <Divider mt="lg" mb="lg" />
-          <Text c={muted} ta="center" size="0.78rem">
+          <Text c="dimmed" ta="center" size="0.78rem">
             Pace Seller desenvolvido por Pace Tech
           </Text>
         </Box>
       </div>
-    </div>
+    </Box>
   );
 }
