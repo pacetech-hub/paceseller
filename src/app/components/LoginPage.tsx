@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 
 type Profile = "admin" | "rep" | "lojista";
@@ -126,93 +130,90 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               >
                 Bem-vindo
               </h2>
-              <p
-                className="text-muted-foreground flex items-center gap-2"
-                style={{ fontSize: "0.875rem" }}
-              >
-                Acessando como
-                <select
+              <div className="flex items-center gap-2">
+                <Label htmlFor="login-profile" className="text-muted-foreground font-normal">
+                  Acessando como
+                </Label>
+                <Select
                   value={selectedProfile}
-                  onChange={(e) => setSelectedProfile(e.target.value as Profile)}
-                  className="h-8 rounded-md border border-border bg-surface px-2 text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
-                  style={{ fontSize: "0.8rem", fontWeight: 600 }}
+                  onValueChange={(value) => setSelectedProfile(value as Profile)}
                 >
-                  {profiles.map((profile) => (
-                    <option key={profile.id} value={profile.id}>
-                      {profile.label}
-                    </option>
-                  ))}
-                </select>
-              </p>
+                  <SelectTrigger id="login-profile" size="sm" className="w-auto font-semibold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profiles.map((profile) => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label
-                  className="block text-muted-foreground mb-1.5"
-                  style={{ fontSize: "0.8rem", fontWeight: 500 }}
-                >
+              <div className="space-y-1.5">
+                <Label htmlFor="login-email" className="text-muted-foreground">
                   E-mail
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="login-email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-border px-3.5 py-2.5 bg-surface text-foreground placeholder-muted-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
-                  style={{ fontSize: "0.875rem" }}
+                  className="h-10 rounded-lg"
                   placeholder="seu@email.com"
                 />
               </div>
 
-              <div>
-                <label
-                  className="block text-muted-foreground mb-1.5"
-                  style={{ fontSize: "0.8rem", fontWeight: 500 }}
-                >
+              <div className="space-y-1.5">
+                <Label htmlFor="login-password" className="text-muted-foreground">
                   Senha
-                </label>
+                </Label>
                 <div className="relative">
-                  <input
+                  <Input
+                    id="login-password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 bg-surface text-foreground placeholder-muted-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary pr-10"
-                    style={{ fontSize: "0.875rem" }}
+                    className="h-10 rounded-lg pr-10"
                     placeholder="••••••••"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 size-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </Button>
                 </div>
-                <div className="flex justify-end mt-1.5">
-                  <button
-                    type="button"
-                    className="text-primary hover:text-primary/80 transition-colors"
-                    style={{ fontSize: "0.78rem" }}
-                  >
+                <div className="flex justify-end">
+                  <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs">
                     Esqueceu a senha?
-                  </button>
+                  </Button>
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
+                size="lg"
                 disabled={loading}
-                className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-60"
-                style={{ fontWeight: 600, fontSize: "0.875rem" }}
+                className="w-full rounded-lg font-semibold"
               >
                 {loading ? (
-                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  <Loader2 className="animate-spin" />
                 ) : (
                   <>
-                    Entrar <ArrowRight className="w-4 h-4" />
+                    Entrar <ArrowRight />
                   </>
                 )}
-              </button>
+              </Button>
             </form>
 
             <div className="mt-6 pt-6 border-t border-border">
