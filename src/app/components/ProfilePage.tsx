@@ -1,8 +1,26 @@
 import {
-  Building2, MapPin, FileText, CreditCard, UserCheck, Bell, Lock,
-  Users, Target, TrendingUp, Store, Settings, Database,
-  Activity, Package2, Tag, ShieldCheck, Mail, Phone, CheckCircle2, XCircle,
-} from "lucide-react";
+  BuildingsIcon,
+  MapPinIcon,
+  FileTextIcon,
+  CreditCardIcon,
+  UserCheckIcon,
+  BellIcon,
+  LockIcon,
+  UsersIcon,
+  TargetIcon,
+  TrendUpIcon,
+  StorefrontIcon,
+  GearIcon,
+  DatabaseIcon,
+  PulseIcon,
+  PackageIcon,
+  TagIcon,
+  ShieldCheckIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "@phosphor-icons/react";
 import { SimpleGrid, Paper, Group, Stack, Box, Text, ThemeIcon, Switch, Badge, Button, Progress } from "@mantine/core";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -57,7 +75,7 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
     <Badge
       color={ok ? 'green' : 'red'}
       variant="light"
-      leftSection={ok ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+      leftSection={ok ? <CheckCircleIcon className="w-3 h-3" /> : <XCircleIcon className="w-3 h-3" />}
     >
       {label}
     </Badge>
@@ -68,49 +86,49 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
 function LojistaProfile() {
   return (
     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-      <Section icon={Building2} title="Dados da empresa">
+      <Section icon={BuildingsIcon} title="Dados da empresa">
         <Field label="Razão social" value="Calçados Bella Moda LTDA" />
         <Field label="Nome fantasia" value="Bella Moda" />
         <Field label="CNPJ" value="12.345.678/0001-90" mono />
         <Field label="Inscrição estadual" value="123.456.789.012" mono />
       </Section>
 
-      <Section icon={MapPin} title="Endereço de entrega">
+      <Section icon={MapPinIcon} title="Endereço de entrega">
         <Field label="Logradouro" value="Av. Paulista, 1500 — Sala 802" />
         <Field label="Bairro" value="Bela Vista" />
         <Field label="Cidade / UF" value="São Paulo / SP" />
         <Field label="CEP" value="01310-100" mono />
       </Section>
 
-      <Section icon={FileText} title="Tabela comercial vigente" description="Definida pela indústria para sua conta">
+      <Section icon={FileTextIcon} title="Tabela comercial vigente" description="Definida pela indústria para sua conta">
         <Field label="Tabela" value={<Badge color="neutral" variant="light">Tabela B — Verão 26</Badge>} />
         <Field label="Condição de pagamento" value="30/60/90 dias" />
         <Field label="Pedido mínimo" value="R$ 3.000,00" />
         <Field label="Frete" value="CIF acima de R$ 5.000,00" />
       </Section>
 
-      <Section icon={CreditCard} title="Situação financeira" description="Sincronizado com o ERP">
+      <Section icon={CreditCardIcon} title="Situação financeira" description="Sincronizado com o ERP">
         <Field label="Limite de crédito" value="R$ 25.000,00" />
         <Field label="Utilizado" value="R$ 8.420,00" />
         <Field label="Disponível" value={<Text c="teal" span fw={500} size="0.82rem">R$ 16.580,00</Text>} />
         <Field label="Status" value={<StatusPill ok label="Adimplente" />} />
       </Section>
 
-      <Section icon={UserCheck} title="Representante responsável">
+      <Section icon={UserCheckIcon} title="Representante responsável">
         <Field label="Nome" value="Marina Costa" />
         <Field label="Região" value="Sudeste — SP Capital" />
-        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><Mail className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />marina.costa@tesla.com.br</Group>} />
-        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><Phone className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />(11) 98765-4321</Group>} />
+        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><EnvelopeIcon className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />marina.costa@tesla.com.br</Group>} />
+        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><PhoneIcon className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />(11) 98765-4321</Group>} />
       </Section>
 
-      <Section icon={Bell} title="Preferências de notificação">
+      <Section icon={BellIcon} title="Preferências de notificação">
         <ToggleRow label="Novidades e lançamentos" description="Avise quando novas coleções estiverem disponíveis" defaultChecked />
         <ToggleRow label="Confirmação de pedido" description="Receba um e-mail a cada pedido confirmado" defaultChecked />
         <ToggleRow label="Status de faturamento" description="Atualizações sobre boletos e notas fiscais" defaultChecked />
         <ToggleRow label="Campanhas e ofertas" description="Promoções pontuais da indústria" />
       </Section>
 
-      <Section icon={Lock} title="Senha e acesso">
+      <Section icon={LockIcon} title="Senha e acesso">
         <Field label="E-mail de acesso" value="compras@bellamoda.com.br" />
         <Field label="Última alteração de senha" value="há 3 meses" />
         <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
@@ -125,7 +143,7 @@ function LojistaProfile() {
 function RepProfile() {
   return (
     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-      <Section icon={Users} title="Dados pessoais">
+      <Section icon={UsersIcon} title="Dados pessoais">
         <Field label="Nome" value="Marina Costa" />
         <Field label="CPF" value="123.456.789-00" mono />
         <Field label="E-mail" value="marina.costa@tesla.com.br" />
@@ -133,14 +151,14 @@ function RepProfile() {
         <Field label="Região de atuação" value="Sudeste — SP Capital e Grande SP" />
       </Section>
 
-      <Section icon={Target} title="Metas do período" description="Ciclo Verão 26 · jan–abr">
+      <Section icon={TargetIcon} title="Metas do período" description="Ciclo Verão 26 · jan–abr">
         <Field label="Meta sell-in" value="R$ 480.000,00" />
         <Field label="Realizado" value={<Text c="teal" span fw={500} size="0.82rem">R$ 312.450,00 (65%)</Text>} />
         <Field label="Faltam" value="R$ 167.550,00" />
         <Progress value={65} color="teal" size="sm" radius="xl" mt="sm" />
       </Section>
 
-      <Section icon={Store} title="Carteira de lojas" description="32 lojas vinculadas">
+      <Section icon={StorefrontIcon} title="Carteira de lojas" description="32 lojas vinculadas">
         <SimpleGrid cols={3} spacing="xs" mb="xs">
           <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
             <Text c="teal" fw={700} size="1.1rem">24</Text>
@@ -159,21 +177,21 @@ function RepProfile() {
         <Field label="Cliente sem pedido há +60d" value="7 lojas" />
       </Section>
 
-      <Section icon={TrendingUp} title="Indicadores e comissão">
+      <Section icon={TrendUpIcon} title="Indicadores e comissão">
         <Field label="Comissão acumulada (ciclo)" value="R$ 9.373,50" />
         <Field label="Taxa média" value="3,0% sobre sell-in" />
         <Field label="Ticket médio" value="R$ 4.820,00" />
         <Field label="Mix de produtos" value="68% feminino · 32% masculino" />
       </Section>
 
-      <Section icon={Bell} title="Preferências de notificação">
+      <Section icon={BellIcon} title="Preferências de notificação">
         <ToggleRow label="Novos pedidos da carteira" description="Quando uma loja sua finalizar pedido" defaultChecked />
         <ToggleRow label="Alertas de meta" description="Avisos semanais sobre avanço de meta" defaultChecked />
         <ToggleRow label="Clientes inativos" description="Quando uma loja ficar 30d sem pedido" defaultChecked />
         <ToggleRow label="Novidades de catálogo" description="Lançamentos e reposições" />
       </Section>
 
-      <Section icon={Lock} title="Senha e acesso">
+      <Section icon={LockIcon} title="Senha e acesso">
         <Field label="Usuário" value="marina.costa" />
         <Field label="Última alteração de senha" value="há 1 mês" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Ativa" />} />
@@ -189,21 +207,21 @@ function RepProfile() {
 function AdminProfile() {
   return (
     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-      <Section icon={Building2} title="Dados da conta">
+      <Section icon={BuildingsIcon} title="Dados da conta">
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
         <Field label="Plano" value={<Badge color="neutral" variant="light">Enterprise</Badge>} />
-        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheck className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-teal-6)' }} />Administrador master</Group>} />
+        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheckIcon className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-teal-6)' }} />Administrador master</Group>} />
       </Section>
 
-      <Section icon={Package2} title="Configurações de catálogo">
+      <Section icon={PackageIcon} title="Configurações de catálogo">
         <Field label="Linhas ativas" value="Feminino · Masculino · Infantil" />
         <Field label="SKUs publicados" value="1.284" />
         <Field label="Coleção corrente" value="Verão 26" />
-        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><Tag className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />A · B · C</Group>} />
+        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><TagIcon className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />A · B · C</Group>} />
       </Section>
 
-      <Section icon={Users} title="Usuários cadastrados">
+      <Section icon={UsersIcon} title="Usuários cadastrados">
         <SimpleGrid cols={2} spacing="xs" mb="xs">
           <Paper withBorder radius="md" p="sm">
             <Text fw={700} size="1.2rem">18</Text>
@@ -218,7 +236,7 @@ function AdminProfile() {
         <Field label="Último cadastro" value="hoje, 09:14" />
       </Section>
 
-      <Section icon={Database} title="Integrações ativas">
+      <Section icon={DatabaseIcon} title="Integrações ativas">
         <Field label="ERP (Senior)" value={<StatusPill ok label="Sincronizado" />} />
         <Field label="API Sell-out" value={<StatusPill ok label="Online" />} />
         <Field label="Gateway pagamento" value={<StatusPill ok label="Ativo" />} />
@@ -226,7 +244,7 @@ function AdminProfile() {
         <Field label="Última sincronização" value="há 6 minutos" />
       </Section>
 
-      <Section icon={Activity} title="Logs de atividade" description="Últimas ações no painel">
+      <Section icon={PulseIcon} title="Logs de atividade" description="Últimas ações no painel">
         <Stack gap="xs">
           {[
             { who: 'marina.costa', what: 'criou pedido #4821', when: '5 min atrás' },
@@ -245,7 +263,7 @@ function AdminProfile() {
         </Stack>
       </Section>
 
-      <Section icon={Settings} title="Segurança e acesso">
+      <Section icon={GearIcon} title="Segurança e acesso">
         <Field label="E-mail" value="admin@tesla.com.br" />
         <Field label="Última alteração de senha" value="há 14 dias" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Obrigatória" />} />

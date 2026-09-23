@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Group, Button, SegmentedControl, Paper, Text } from "@mantine/core";
-import { ChevronLeft } from "lucide-react";
+import { CaretLeftIcon } from "@phosphor-icons/react";
 import { PERIOD_OPTIONS, scaleValue, brl, type Period, type SalesEntity } from "./SalesIndicatorsSection";
 
 interface SalesTeamPageProps {
@@ -18,7 +18,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
 
   return (
     <Stack gap="lg" maw={1400} mx="auto" p="lg">
-      <Button onClick={onBack} variant="subtle" color="neutral" size="sm" leftSection={<ChevronLeft className="w-4 h-4" />} px={0}>
+      <Button onClick={onBack} variant="subtle" color="neutral" size="sm" leftSection={<CaretLeftIcon className="w-4 h-4" />} px={0}>
         Voltar
       </Button>
 

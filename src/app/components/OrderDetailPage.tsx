@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { ChevronLeft, Download, ArrowRight, Package2 } from "lucide-react";
+import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
 import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
 import { statusColors, statusIcon, statusSupportText, orderProductNames } from "./OrderHistory";
 
@@ -46,14 +46,14 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
     return (
       <div className="p-6 max-w-[1000px] mx-auto w-full">
         <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-          <Package2 className="w-10 h-10 text-muted-foreground/30 mb-3" />
+          <PackageIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
           <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido selecionado</p>
           <button
             onClick={() => onNavigate('history')}
             className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
             style={{ fontSize: '0.78rem', fontWeight: 500 }}
           >
-            <ChevronLeft className="w-3.5 h-3.5" /> Voltar para Pedidos
+            <CaretLeftIcon className="w-3.5 h-3.5" /> Voltar para Pedidos
           </button>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         style={{ fontSize: '0.82rem', fontWeight: 500 }}
       >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Pedidos
+        <CaretLeftIcon className="w-4 h-4" /> Voltar para Pedidos
       </button>
 
       {/* Cliente — admin/rep only */}
@@ -122,7 +122,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           ) : (
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-secondary/60 border border-border flex items-center justify-center flex-shrink-0">
-                <Package2 className="w-5 h-5 text-muted-foreground" />
+                <PackageIcon className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{productName}</p>
@@ -165,7 +165,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 className="flex items-center gap-1 text-primary hover:underline"
                 style={{ fontSize: '0.78rem', fontWeight: 600 }}
               >
-                Ver em Pagamentos e Boletos <ArrowRight className="w-3.5 h-3.5" />
+                Ver em Pagamentos e Boletos <ArrowRightIcon className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -181,7 +181,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                 style={{ fontSize: '0.78rem', fontWeight: 500 }}
               >
-                <Download className="w-3.5 h-3.5" /> Baixar NF
+                <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar NF
               </button>
             ) : (
               <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>NF indisponível</p>

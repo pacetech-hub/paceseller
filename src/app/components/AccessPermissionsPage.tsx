@@ -3,7 +3,13 @@ import {
   Stack, Group, Box, Paper, ThemeIcon, Text, Alert, Button, TextInput,
   Table, Avatar, Badge, Select, ActionIcon, SimpleGrid,
 } from "@mantine/core";
-import { Users, Store, Info, UserPlus, Trash2 } from "lucide-react";
+import {
+  UsersIcon,
+  StorefrontIcon,
+  InfoIcon,
+  UserPlusIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import { visoes, defaultPermissions, type VisaoKey, type PermissionsState } from "../data/permissions";
 import { linkedUsers as initialLinkedUsers, type LinkedUser } from "../data/linkedUsers";
 import { clients, formatDate } from "../data/mockData";
@@ -34,7 +40,7 @@ const scopeCopy: Record<Profile, {
     title: 'Usuários e permissões da minha equipe',
     subtitle: 'Gerencie os prepostos vinculados à sua conta e o que cada um pode acessar',
     usersHint: 'Usuários vinculados à sua conta de representante (ex.: prepostos que vendem em seu nome).',
-    icon: Users,
+    icon: UsersIcon,
   },
   lojista: {
     visao: 'lojista',
@@ -44,7 +50,7 @@ const scopeCopy: Record<Profile, {
     title: 'Usuários e permissões da minha loja',
     subtitle: 'Gerencie os compradores vinculados à sua conta e o que cada um pode acessar',
     usersHint: 'Usuários vinculados à sua conta de lojista (ex.: compradores que fazem pedidos pela loja).',
-    icon: Store,
+    icon: StorefrontIcon,
   },
 };
 
@@ -117,7 +123,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         </Box>
       </Group>
 
-      <Alert icon={<Info className="w-4 h-4" />} color="neutral" radius="md" variant="light">
+      <Alert icon={<InfoIcon className="w-4 h-4" />} color="neutral" radius="md" variant="light">
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
       </Alert>
 
@@ -132,7 +138,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             onClick={() => setShowInvite(v => !v)}
             color="neutral"
             size="sm"
-            leftSection={<UserPlus className="w-3.5 h-3.5" />}
+            leftSection={<UserPlusIcon className="w-3.5 h-3.5" />}
           >
             Convidar usuário
           </Button>
@@ -206,7 +212,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 </Table.Td>
                 <Table.Td>
                   <ActionIcon onClick={() => removeUser(u.id)} variant="subtle" color="red" title="Remover vínculo">
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <TrashIcon className="w-3.5 h-3.5" />
                   </ActionIcon>
                 </Table.Td>
               </Table.Tr>

@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Area, AreaChart,
 } from "recharts";
@@ -265,7 +265,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </div>
           </div>
           <button onClick={() => onNavigate('catalog')} className="mt-3 flex items-center gap-1 text-primary" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
-            Ver no catálogo <ChevronRight className="w-3.5 h-3.5" />
+            Ver no catálogo <CaretRightIcon className="w-3.5 h-3.5" />
           </button>
         </Card>
 

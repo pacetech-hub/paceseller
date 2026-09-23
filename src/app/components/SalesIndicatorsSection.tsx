@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
@@ -293,7 +293,7 @@ export function SalesIndicatorsSection({
                 <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{c.name}</p>
                 <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.reason}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <CaretRightIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             </button>
           ))}
           {priorityClients.length === 0 && (

@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Boxes, Store, Eye } from "lucide-react";
+import { WarehouseIcon, StorefrontIcon, EyeIcon } from "@phosphor-icons/react";
 import { clients } from "../data/mockData";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 
 const tabs = [
-  { id: 'industrial', label: 'Estoque Industrial', icon: Boxes },
-  { id: 'cliente', label: 'Estoque do Cliente', icon: Store },
+  { id: 'industrial', label: 'Estoque Industrial', icon: WarehouseIcon },
+  { id: 'cliente', label: 'Estoque do Cliente', icon: StorefrontIcon },
 ] as const;
 
 export function RepStockPage() {
@@ -33,7 +33,7 @@ export function RepStockPage() {
           })}
         </div>
         <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/60 text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-          <Eye className="w-3 h-3" /> Somente visualização
+          <EyeIcon className="w-3 h-3" /> Somente visualização
         </span>
       </div>
 

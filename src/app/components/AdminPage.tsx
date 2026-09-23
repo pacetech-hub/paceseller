@@ -1,5 +1,27 @@
 import React, { useState, useMemo } from "react";
-import { Users, Boxes, Tag, Settings, Shield, Plus, Edit3, Trash2, Search, ChevronRight, ArrowLeft, Info, MapPin, UserCircle2, Layers, Package, Lock, Building2, Briefcase, Store, PlugZap } from "lucide-react";
+import {
+  UsersIcon,
+  WarehouseIcon,
+  TagIcon,
+  GearIcon,
+  ShieldIcon,
+  PlusIcon,
+  PencilSimpleLineIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+  CaretRightIcon,
+  ArrowLeftIcon,
+  InfoIcon,
+  MapPinIcon,
+  UserCircleIcon,
+  StackIcon,
+  PackageIcon,
+  LockIcon,
+  BuildingsIcon,
+  BriefcaseIcon,
+  StorefrontIcon,
+  PlugChargingIcon,
+} from "@phosphor-icons/react";
 
 import { clients, formatDate } from "../data/mockData";
 import { visoes, profileDescriptions, defaultPermissions, type VisaoKey, type PermissionsState } from "../data/permissions";
@@ -9,18 +31,18 @@ import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 
 const tabs = [
-  { id: 'industry-stock', label: 'Estoque Industrial', icon: Boxes },
-  { id: 'client-stock', label: 'Estoque do Cliente', icon: Store },
-  { id: 'pricing', label: 'Campanhas Comerciais', icon: Tag },
-  { id: 'policies', label: 'Políticas', icon: Lock },
-  { id: 'permissions', label: 'Permissões', icon: Shield },
-  { id: 'settings', label: 'Configurações', icon: Settings },
+  { id: 'industry-stock', label: 'Estoque Industrial', icon: WarehouseIcon },
+  { id: 'client-stock', label: 'Estoque do Cliente', icon: StorefrontIcon },
+  { id: 'pricing', label: 'Campanhas Comerciais', icon: TagIcon },
+  { id: 'policies', label: 'Políticas', icon: LockIcon },
+  { id: 'permissions', label: 'Permissões', icon: ShieldIcon },
+  { id: 'settings', label: 'Configurações', icon: GearIcon },
 ];
 
 function ErpSyncNotice({ text }: { text: string }) {
   return (
     <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
-      <PlugZap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+      <PlugChargingIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
       <p className="text-foreground" style={{ fontSize: '0.78rem', lineHeight: 1.55 }}>{text}</p>
     </div>
   );
@@ -137,7 +159,7 @@ export function AdminPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>{policy.name}</h3>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <CaretRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
                 </div>
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   {[
@@ -192,7 +214,7 @@ export function AdminPage() {
         return (
           <div className="space-y-5">
             <button onClick={() => setSelectedPolicyId(null)} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.78rem' }}>
-              <ArrowLeft className="w-3.5 h-3.5" /> Voltar para políticas
+              <ArrowLeftIcon className="w-3.5 h-3.5" /> Voltar para políticas
             </button>
 
             <ErpSyncNotice text="Esta política é somente leitura — a regra ativa vem do ERP da Tesla." />
@@ -220,7 +242,7 @@ export function AdminPage() {
 
             {/* Aviso precedência */}
             <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/30 bg-amber-400/5 p-3.5">
-              <Info className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+              <InfoIcon className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-foreground" style={{ fontSize: '0.78rem', lineHeight: 1.55 }}>
                 <span style={{ fontWeight: 600 }}>Precedência:</span> critérios mais específicos sobrepõem os mais amplos.
                 Clientes específicos &gt; Representantes &gt; Regiões. Produtos específicos &gt; Linhas de produto.
@@ -231,24 +253,24 @@ export function AdminPage() {
             <div>
               <h3 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Critérios de aplicação</h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Section icon={UserCircle2} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
+                <Section icon={UserCircleIcon} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
                   <Chips items={criteria.clients} />
                 </Section>
 
-                <Section icon={MapPin} title="Regiões" hint="Vale para todos os clientes da região.">
+                <Section icon={MapPinIcon} title="Regiões" hint="Vale para todos os clientes da região.">
                   <Chips items={criteria.regions} />
                 </Section>
 
-                <Section icon={Users} title="Representantes" hint="Aplica a toda a carteira do rep.">
+                <Section icon={UsersIcon} title="Representantes" hint="Aplica a toda a carteira do rep.">
                   <Chips items={criteria.reps} />
                 </Section>
 
-                <Section icon={Layers} title="Linhas de produto" hint="A política se aplica apenas a estas linhas.">
+                <Section icon={StackIcon} title="Linhas de produto" hint="A política se aplica apenas a estas linhas.">
                   <Chips items={criteria.lines} />
                 </Section>
 
                 <div className="lg:col-span-2">
-                  <Section icon={Package} title="Produtos específicos (SKU)" hint="Granularidade por SKU. Se vazio, vale para todas as linhas marcadas acima.">
+                  <Section icon={PackageIcon} title="Produtos específicos (SKU)" hint="Granularidade por SKU. Se vazio, vale para todas as linhas marcadas acima.">
                     <Chips items={criteria.products} />
                   </Section>
                 </div>
@@ -337,7 +359,7 @@ export function AdminPage() {
               <h3 className="text-foreground" style={{ fontWeight: 600 }}>Usuários</h3>
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Buscar usuário..."
@@ -352,7 +374,7 @@ export function AdminPage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                   style={{ fontSize: '0.82rem', fontWeight: 600 }}
                 >
-                  <Plus className="w-3.5 h-3.5" /> Novo usuário
+                  <PlusIcon className="w-3.5 h-3.5" /> Novo usuário
                 </button>
               </div>
             </div>
@@ -419,8 +441,8 @@ export function AdminPage() {
                       <td className="px-4 py-3 text-muted-foreground mono" style={{ fontSize: '0.75rem' }}>{formatDate(user.lastLogin)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <button className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"><Edit3 className="w-3.5 h-3.5" /></button>
-                          <button className="p-1.5 rounded text-muted-foreground hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <button className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"><PencilSimpleLineIcon className="w-3.5 h-3.5" /></button>
+                          <button className="p-1.5 rounded text-muted-foreground hover:text-red-400 transition-colors"><TrashIcon className="w-3.5 h-3.5" /></button>
                         </div>
                       </td>
                     </tr>

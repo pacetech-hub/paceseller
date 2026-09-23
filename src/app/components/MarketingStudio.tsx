@@ -1,10 +1,24 @@
 import { useState, useEffect, type CSSProperties } from "react";
 import { toast } from "sonner";
 import {
-  Sparkles, Check, ChevronRight, ChevronLeft, Instagram, MessageCircle, Printer,
-  Wand2, RefreshCw, Download, Pencil, Plus, Image as ImageIcon,
-  Music2, Smartphone, Trash2, Upload,
-} from "lucide-react";
+  SparkleIcon,
+  CheckIcon,
+  CaretRightIcon,
+  CaretLeftIcon,
+  InstagramLogoIcon,
+  ChatCircleIcon,
+  PrinterIcon,
+  MagicWandIcon,
+  ArrowsClockwiseIcon,
+  DownloadSimpleIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  ImageIcon,
+  MusicNoteIcon,
+  DeviceMobileIcon,
+  TrashIcon,
+  UploadSimpleIcon,
+} from "@phosphor-icons/react";
 import { products, formatCurrency, type Product } from "../data/mockData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "./ui/alert-dialog";
@@ -16,13 +30,13 @@ type Profile = 'admin' | 'rep' | 'lojista';
 const FORMAT_GROUPS = ['WhatsApp', 'Instagram', 'TikTok', 'Impressão'] as const;
 
 const FORMATS = [
-  { id: 'whatsapp', group: 'WhatsApp', label: 'WhatsApp', description: 'Status e disparo para lista de clientes', spec: '1080 × 1080', icon: MessageCircle },
-  { id: 'instagram-feed', group: 'Instagram', label: 'Instagram Feed 4:5', description: 'Publicação no feed, formato vertical', spec: '1080 × 1350 · 4:5', icon: Instagram },
-  { id: 'story', group: 'Instagram', label: 'Instagram Story 9:16', description: 'Tela cheia, com espaço para o dedo tocar', spec: '1080 × 1920 · 9:16', icon: Smartphone },
-  { id: 'tiktok', group: 'TikTok', label: 'TikTok', description: 'Vertical cheia, texto grande para vídeo', spec: '1080 × 1920 · 9:16 · 5s', icon: Music2 },
-  { id: 'impressao-a3', group: 'Impressão', label: 'Impressão A3', description: 'Cartaz grande para vitrine', spec: '29,7 × 42 cm · PDF', icon: Printer },
-  { id: 'impressao-a4', group: 'Impressão', label: 'Impressão A4', description: 'Cartaz para parede e balcão', spec: '21 × 29,7 cm · PDF', icon: Printer },
-  { id: 'impressao-a5', group: 'Impressão', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: Printer },
+  { id: 'whatsapp', group: 'WhatsApp', label: 'WhatsApp', description: 'Status e disparo para lista de clientes', spec: '1080 × 1080', icon: ChatCircleIcon },
+  { id: 'instagram-feed', group: 'Instagram', label: 'Instagram Feed 4:5', description: 'Publicação no feed, formato vertical', spec: '1080 × 1350 · 4:5', icon: InstagramLogoIcon },
+  { id: 'story', group: 'Instagram', label: 'Instagram Story 9:16', description: 'Tela cheia, com espaço para o dedo tocar', spec: '1080 × 1920 · 9:16', icon: DeviceMobileIcon },
+  { id: 'tiktok', group: 'TikTok', label: 'TikTok', description: 'Vertical cheia, texto grande para vídeo', spec: '1080 × 1920 · 9:16 · 5s', icon: MusicNoteIcon },
+  { id: 'impressao-a3', group: 'Impressão', label: 'Impressão A3', description: 'Cartaz grande para vitrine', spec: '29,7 × 42 cm · PDF', icon: PrinterIcon },
+  { id: 'impressao-a4', group: 'Impressão', label: 'Impressão A4', description: 'Cartaz para parede e balcão', spec: '21 × 29,7 cm · PDF', icon: PrinterIcon },
+  { id: 'impressao-a5', group: 'Impressão', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: PrinterIcon },
 ];
 
 interface Campaign {
@@ -118,7 +132,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
       <div className="rounded-xl bg-secondary/40 border border-border p-5 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <SparkleIcon className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Estúdio de Marketing com IA</h2>
@@ -131,14 +145,14 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
             style={{ fontSize: '0.82rem', fontWeight: 600 }}
           >
-            <Pencil className="w-4 h-4" /> Gerenciar campanhas
+            <PencilSimpleIcon className="w-4 h-4" /> Gerenciar campanhas
           </button>
           <button
             onClick={onCreate}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
-            <Sparkles className="w-4 h-4" /> Criar campanha
+            <SparkleIcon className="w-4 h-4" /> Criar campanha
           </button>
         </div>
       </div>
@@ -159,7 +173,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                     aria-label="Excluir"
                     className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <TrashIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <div className="p-3">
@@ -170,7 +184,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                     className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                     style={{ fontSize: '0.78rem', fontWeight: 500 }}
                   >
-                    <Download className="w-3.5 h-3.5" /> Baixar
+                    <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar
                   </button>
                 </div>
               </div>
@@ -228,7 +242,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         style={{ fontSize: '0.82rem', fontWeight: 500 }}
       >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Marketing IA
+        <CaretLeftIcon className="w-4 h-4" /> Voltar para Marketing IA
       </button>
 
       <div>
@@ -258,7 +272,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                   aria-label={`Excluir ${c.name}`}
                   className="mr-1.5 p-1.5 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <TrashIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
@@ -268,7 +282,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             className="w-full flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-primary hover:bg-primary/10 transition-colors mt-1"
             style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
-            <Plus className="w-4 h-4" /> Nova campanha
+            <PlusIcon className="w-4 h-4" /> Nova campanha
           </button>
         </div>
 
@@ -292,7 +306,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors cursor-pointer"
                     style={{ fontSize: '0.78rem', fontWeight: 500 }}
                   >
-                    <Upload className="w-3.5 h-3.5" /> Enviar cenário
+                    <UploadSimpleIcon className="w-3.5 h-3.5" /> Enviar cenário
                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
                   </label>
                 </div>
@@ -307,7 +321,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                           aria-label="Excluir cenário"
                           className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <TrashIcon className="w-3 h-3" />
                         </button>
                       </div>
                     ))}
@@ -479,7 +493,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         style={{ fontSize: '0.82rem', fontWeight: 500 }}
       >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Marketing IA
+        <CaretLeftIcon className="w-4 h-4" /> Voltar para Marketing IA
       </button>
 
       {/* Stepper */}
@@ -493,7 +507,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                   className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${step > s.n ? 'bg-primary text-primary-foreground' : step === s.n ? 'bg-primary text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card' : 'bg-secondary text-muted-foreground'}`}
                   style={{ fontSize: '0.72rem', fontWeight: 700 }}
                 >
-                  {step > s.n ? <Check className="w-3.5 h-3.5" /> : s.n}
+                  {step > s.n ? <CheckIcon className="w-3.5 h-3.5" /> : s.n}
                 </button>
                 <span className={`hidden sm:block ${step >= s.n ? 'text-foreground' : 'text-muted-foreground'}`} style={{ fontSize: '0.76rem', fontWeight: step === s.n ? 600 : 400 }}>
                   {s.label}
@@ -532,7 +546,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                         <p className="text-foreground truncate" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</p>
                         <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.description || 'Sem descrição'}</p>
                       </div>
-                      {campaignId === c.id && <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />}
+                      {campaignId === c.id && <CheckIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />}
                     </div>
                   </button>
                 ))}
@@ -577,7 +591,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                           <p className="text-foreground mt-2" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{f.label}</p>
                           <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{f.description}</p>
                           <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.68rem' }}>{f.spec}</p>
-                          {isSelected && <Check className="w-4 h-4 text-primary mt-2" />}
+                          {isSelected && <CheckIcon className="w-4 h-4 text-primary mt-2" />}
                         </button>
                       );
                     })}
@@ -612,7 +626,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       {isSelected && (
                         <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                          <Check className="w-6 h-6 text-white" />
+                          <CheckIcon className="w-6 h-6 text-white" />
                         </div>
                       )}
                     </div>
@@ -651,7 +665,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     </div>
                     <div className="p-3 bg-secondary/20 flex items-center justify-between">
                       <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>Cenário {idx + 1}</span>
-                      {scenarioIndex === idx && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+                      {scenarioIndex === idx && <CheckIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
                     </div>
                   </button>
                 ))}
@@ -694,7 +708,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               </div>
             </div>
             <div className="rounded-lg bg-secondary/40 p-3 text-muted-foreground" style={{ fontSize: '0.75rem' }}>
-              <Wand2 className="inline w-3.5 h-3.5 mr-1.5 text-purple-400" />
+              <MagicWandIcon className="inline w-3.5 h-3.5 mr-1.5 text-purple-400" />
               A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
             </div>
           </div>
@@ -715,7 +729,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
                 style={{ fontSize: '0.78rem' }}
               >
-                <RefreshCw className="w-3.5 h-3.5" /> Regenerar
+                <ArrowsClockwiseIcon className="w-3.5 h-3.5" /> Regenerar
               </button>
             </div>
 
@@ -733,7 +747,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
                       style={{ fontSize: '0.78rem', fontWeight: 500 }}
                     >
-                      <Download className="w-3.5 h-3.5" /> Baixar
+                      <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar
                     </button>
                   </div>
                 </div>
@@ -751,7 +765,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-40"
           style={{ fontSize: '0.85rem', fontWeight: 500 }}
         >
-          <ChevronLeft className="w-4 h-4" /> Voltar
+          <CaretLeftIcon className="w-4 h-4" /> Voltar
         </button>
 
         {step < 5 ? (
@@ -766,7 +780,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
             style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
-            Continuar <ChevronRight className="w-4 h-4" />
+            Continuar <CaretRightIcon className="w-4 h-4" />
           </button>
         ) : step === 5 ? (
           <button
@@ -782,7 +796,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" /> Gerar com IA
+                <SparkleIcon className="w-4 h-4" /> Gerar com IA
               </>
             )}
           </button>
@@ -792,7 +806,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             style={{ fontSize: '0.85rem', fontWeight: 600 }}
           >
-            <Check className="w-4 h-4" /> Concluir
+            <CheckIcon className="w-4 h-4" /> Concluir
           </button>
         )}
       </div>

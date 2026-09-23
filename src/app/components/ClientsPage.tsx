@@ -3,7 +3,14 @@ import {
   Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
   Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box,
 } from "@mantine/core";
-import { Search, MapPin, Users, Filter, ArrowUpDown, ChevronRight } from "lucide-react";
+import {
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  UsersIcon,
+  FunnelIcon,
+  ArrowsDownUpIcon,
+  CaretRightIcon,
+} from "@phosphor-icons/react";
 import { clients, Client } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
@@ -110,7 +117,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         <Group gap="sm" wrap="wrap">
           <TextInput
             placeholder="Buscar cliente, cidade, rep..."
-            leftSection={<Search size={14} />}
+            leftSection={<MagnifyingGlassIcon size={14} />}
             value={search}
             onChange={e => setSearch(e.currentTarget.value)}
             style={{ flex: 1, minWidth: 200 }}
@@ -121,7 +128,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               <Button
                 variant={activeFilterCount > 0 ? 'light' : 'default'}
                 color="neutral"
-                leftSection={<Filter size={14} />}
+                leftSection={<FunnelIcon size={14} />}
                 rightSection={activeFilterCount > 0 ? (
                   <Badge circle size="sm" color="neutral">{activeFilterCount}</Badge>
                 ) : undefined}
@@ -167,7 +174,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               <Button
                 variant={sortActive ? 'light' : 'default'}
                 color="neutral"
-                leftSection={<ArrowUpDown size={14} />}
+                leftSection={<ArrowsDownUpIcon size={14} />}
                 rightSection={sortActive ? <Badge circle size="sm" color="neutral">1</Badge> : undefined}
               >
                 Ordenar
@@ -234,13 +241,13 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                     </Table.Td>
                     <Table.Td>
                       <Group gap={4} wrap="nowrap">
-                        <MapPin size={12} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                        <MapPinIcon size={12} style={{ color: 'var(--mantine-color-dimmed)' }} />
                         <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
                       </Group>
                     </Table.Td>
                     <Table.Td><Text size="sm" c="dimmed">{client.rep}</Text></Table.Td>
                     <Table.Td ta="right">
-                      <ChevronRight size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                      <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
                     </Table.Td>
                   </Table.Tr>
                 );
@@ -251,7 +258,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
           {filtered.length === 0 && (
             <Stack align="center" py="xl" gap={4}>
               <ThemeIcon variant="light" color="neutral" size={48} radius="xl">
-                <Users size={24} />
+                <UsersIcon size={24} />
               </ThemeIcon>
               <Text fw={600}>Nenhum cliente encontrado</Text>
               <Text c="dimmed" size="sm">Tente ajustar os filtros</Text>

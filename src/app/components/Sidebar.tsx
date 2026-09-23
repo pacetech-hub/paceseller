@@ -1,11 +1,32 @@
 import { useState, useEffect } from "react";
 import { Group, Button, ActionIcon, Indicator, Menu, Text, Box } from "@mantine/core";
 import {
-  LayoutDashboard, Package2, ShoppingBag, ShoppingBasket, Clock,
-  Sparkles, BarChart3, Settings, Users, Store, ChevronDown, ChevronRight,
-  Bell, Search, Menu as MenuIcon, X, Building2, LogOut, ChevronLeft,
-  UserCheck, Tag, Shield, Boxes, Receipt, FileText,
-} from "lucide-react";
+  SquaresFourIcon,
+  PackageIcon,
+  ShoppingBagIcon,
+  BasketIcon,
+  ClockIcon,
+  SparkleIcon,
+  ChartBarIcon,
+  GearIcon,
+  UsersIcon,
+  StorefrontIcon,
+  CaretDownIcon,
+  CaretRightIcon,
+  BellIcon,
+  MagnifyingGlassIcon,
+  ListIcon,
+  XIcon,
+  BuildingsIcon,
+  SignOutIcon,
+  CaretLeftIcon,
+  UserCheckIcon,
+  TagIcon,
+  ShieldIcon,
+  WarehouseIcon,
+  ReceiptIcon,
+  FileTextIcon,
+} from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 
@@ -24,9 +45,9 @@ interface NavItem {
 }
 
 const profileLabels: Record<Profile, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  admin: { label: 'Indústria Admin', icon: Building2, color: 'text-black' },
-  rep: { label: 'Representante', icon: Users, color: 'text-amber-400' },
-  lojista: { label: 'Lojista', icon: Store, color: 'text-emerald-400' },
+  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'text-black' },
+  rep: { label: 'Representante', icon: UsersIcon, color: 'text-amber-400' },
+  lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'text-emerald-400' },
 };
 
 interface SidebarProps {
@@ -56,27 +77,27 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
     if (profile === 'rep') {
       if (!selectedClient) {
         return [
-          { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-          { id: 'clients', label: 'Selecionar Cliente', icon: Store },
+          { id: 'dashboard', label: 'Dashboard', icon: SquaresFourIcon },
+          { id: 'clients', label: 'Selecionar Cliente', icon: StorefrontIcon },
         ];
       }
       return [
-        { id: 'catalog', label: 'Catálogo', icon: Package2 },
-        { id: 'order-grade', label: 'Novo Pedido', icon: ShoppingBag },
+        { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
+        { id: 'order-grade', label: 'Novo Pedido', icon: ShoppingBagIcon },
       ];
     }
     if (profile === 'lojista') {
       return [
-        { id: 'dashboard', label: 'Indicadores', icon: LayoutDashboard },
-        { id: 'catalog', label: 'Catálogo', icon: Package2 },
+        { id: 'dashboard', label: 'Indicadores', icon: SquaresFourIcon },
+        { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
       ];
     }
     return [
-      { id: 'catalog', label: 'Catálogo', icon: Package2 },
-      { id: 'history', label: 'Pedidos', icon: ShoppingBag },
-      { id: 'clients', label: 'Clientes', icon: Users },
-      { id: 'admin', label: 'Representantes', icon: UserCheck },
-      { id: 'admin', label: 'Política Comercial', icon: Tag },
+      { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
+      { id: 'history', label: 'Pedidos', icon: ShoppingBagIcon },
+      { id: 'clients', label: 'Clientes', icon: UsersIcon },
+      { id: 'admin', label: 'Representantes', icon: UserCheckIcon },
+      { id: 'admin', label: 'Política Comercial', icon: TagIcon },
     ];
   };
 
@@ -91,7 +112,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         </div>
         {!collapsed && (
           <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground transition-colors p-1 rounded">
-            <ChevronLeft className="w-4 h-4" />
+            <CaretLeftIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -118,7 +139,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       {!collapsed && (
         <div className="mx-3 mt-3">
           <div className="flex items-center gap-2 rounded-lg bg-secondary/40 border border-border px-3 py-2 text-muted-foreground">
-            <Search className="w-3.5 h-3.5 flex-shrink-0" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 flex-shrink-0" />
             <span style={{ fontSize: '0.78rem' }}>Buscar...</span>
             <kbd className="ml-auto text-muted-foreground/60 border border-border rounded px-1" style={{ fontSize: '0.6rem' }}>⌘K</kbd>
           </div>
@@ -168,7 +189,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
               <div className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>admin@tesla.com.br</div>
             </div>
             <button onClick={onLogout} className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded" title="Sair">
-              <LogOut className="w-3.5 h-3.5" />
+              <SignOutIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
@@ -177,7 +198,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
             onClick={() => setCollapsed(false)}
             className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-secondary/60"
           >
-            <ChevronRight className="w-4 h-4" />
+            <CaretRightIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -190,7 +211,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
       >
-        <MenuIcon className="w-4 h-4" />
+        <ListIcon className="w-4 h-4" />
       </button>
 
       {mobileOpen && (
@@ -198,7 +219,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
           <div className="relative w-64 h-full bg-sidebar border-r border-sidebar-border">
             <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <X className="w-4 h-4" />
+              <XIcon className="w-4 h-4" />
             </button>
             <SidebarContent />
           </div>
@@ -235,51 +256,51 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const headerItems: HeaderItem[] =
     profile === 'admin'
       ? [
-          { icon: BarChart3, label: 'Indicadores', view: 'dashboard' as View },
-          { icon: Users, label: 'Clientes', view: 'clients' as View },
-          { icon: Package2, label: 'Catálogo', view: 'catalog' as View },
-          { icon: Sparkles, label: 'Marketing IA', view: 'marketing' as View },
-          { icon: Shield, label: 'Administração', view: 'admin' as View },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          { icon: UsersIcon, label: 'Clientes', view: 'clients' as View },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
+          { icon: ShieldIcon, label: 'Administração', view: 'admin' as View },
         ]
       : profile === 'rep'
       ? [
-          { icon: BarChart3, label: 'Indicadores', view: 'dashboard' as View },
-          { icon: Store, label: 'Clientes', view: 'clients' as View },
-          { icon: Package2, label: 'Catálogo', view: 'catalog' as View },
-          { icon: Boxes, label: 'Estoque', view: 'industry-stock' as View },
-          { icon: Sparkles, label: 'Marketing IA', view: 'marketing' as View },
-          { icon: Shield, label: 'Permissões', view: 'permissions' as View },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          { icon: StorefrontIcon, label: 'Clientes', view: 'clients' as View },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
+          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' as View },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
+          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' as View },
         ]
       : [
-          { icon: BarChart3, label: 'Indicadores', view: 'dashboard' },
-          { icon: Package2, label: 'Catálogo', view: 'catalog' },
-          { icon: Boxes, label: 'Meu Estoque', view: 'stock' },
-          { icon: Sparkles, label: 'Marketing IA', view: 'marketing' },
-          { icon: Shield, label: 'Permissões', view: 'permissions' },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+          { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
         ];
 
   const dropdownItems: DropdownItem[] =
     profile === 'admin'
       ? [
-          { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: Users, label: 'Meu Perfil', view: 'profile' },
-          { icon: LogOut, label: 'Sair', action: onLogout },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
+          { icon: SignOutIcon, label: 'Sair', action: onLogout },
         ]
       : profile === 'rep'
       ? [
-          { icon: Clock, label: 'Pedidos', view: 'history' },
-          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: Users, label: 'Meu Perfil', view: 'profile' },
-          { icon: LogOut, label: 'Sair', action: onLogout },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
+          { icon: SignOutIcon, label: 'Sair', action: onLogout },
         ]
       : [
-          { icon: ShoppingBag, label: 'Pedidos', view: 'history' },
-          { icon: Receipt, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileText, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: Users, label: 'Meu Perfil', view: 'profile' },
-          { icon: LogOut, label: 'Sair', action: onLogout },
+          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
+          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
+          { icon: SignOutIcon, label: 'Sair', action: onLogout },
         ];
 
   const handleDropdownItem = (item: DropdownItem) => {
@@ -332,14 +353,14 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           {/* Cart(s) — todos os perfis usam multi-carrinhos */}
           <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
             <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" title="Carrinhos">
-              <ShoppingBasket className="w-4 h-4" />
+              <BasketIcon className="w-4 h-4" />
             </ActionIcon>
           </Indicator>
 
           {/* Notifications */}
           <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
             <ActionIcon variant="subtle" color="neutral" size="lg" title="Notificações">
-              <Bell className="w-4 h-4" />
+              <BellIcon className="w-4 h-4" />
             </ActionIcon>
           </Indicator>
 
@@ -350,7 +371,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               variant="default"
               color="neutral"
               size="sm"
-              leftSection={<Store className="w-3.5 h-3.5" />}
+              leftSection={<StorefrontIcon className="w-3.5 h-3.5" />}
               title="Ver histórico de pedidos deste cliente"
             >
               {selectedClient.name}

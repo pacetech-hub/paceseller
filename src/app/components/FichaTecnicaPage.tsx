@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  Search, ChevronLeft, Download, ZoomIn,
-  FileText, Package2, CheckCircle2, RefreshCw,
-} from "lucide-react";
+  MagnifyingGlassIcon,
+  CaretLeftIcon,
+  DownloadSimpleIcon,
+  MagnifyingGlassPlusIcon,
+  FileTextIcon,
+  PackageIcon,
+  CheckCircleIcon,
+  ArrowsClockwiseIcon,
+} from "@phosphor-icons/react";
 import { products, type Product } from "../data/mockData";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
@@ -209,7 +215,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Buscar por nome ou referência..."
@@ -277,7 +283,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-          <Package2 className="w-10 h-10 text-muted-foreground/30 mb-3" />
+          <PackageIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
           <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum produto encontrado</p>
           <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
         </div>
@@ -307,7 +313,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         style={{ fontSize: '0.82rem', fontWeight: 500 }}
       >
-        <ChevronLeft className="w-4 h-4" /> Voltar para Ficha Técnica
+        <CaretLeftIcon className="w-4 h-4" /> Voltar para Ficha Técnica
       </button>
 
       <div className="flex items-center justify-end gap-2 flex-wrap">
@@ -316,14 +322,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
           style={{ fontSize: '0.78rem', fontWeight: 500 }}
         >
-          <Download className="w-3.5 h-3.5" /> Baixar imagens
+          <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar imagens
         </button>
         <button
           onClick={() => toast.success('PDF gerado')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           style={{ fontSize: '0.78rem', fontWeight: 600 }}
         >
-          <FileText className="w-3.5 h-3.5" /> Baixar PDF
+          <FileTextIcon className="w-3.5 h-3.5" /> Baixar PDF
         </button>
       </div>
 
@@ -337,14 +343,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           >
             <img src={img} alt={`${product.name} — foto ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
-              <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              <MagnifyingGlassPlusIcon className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <button
               onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
               aria-label="Baixar imagem"
               className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
             >
-              <Download className="w-3.5 h-3.5" />
+              <DownloadSimpleIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
@@ -378,7 +384,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             <ul className="space-y-2.5">
               {highlights.items.map((h, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
                   <p className="text-foreground" style={{ fontSize: '0.82rem', lineHeight: 1.5 }}>
                     <span style={{ fontWeight: 600 }}>{h.title}: </span>
                     {h.description}
@@ -431,7 +437,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                                 className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex-shrink-0"
                                 style={{ fontSize: '0.65rem', fontWeight: 600 }}
                               >
-                                <RefreshCw className="w-3 h-3" /> Reposição rápida
+                                <ArrowsClockwiseIcon className="w-3 h-3" /> Reposição rápida
                               </button>
                             )}
                           </div>

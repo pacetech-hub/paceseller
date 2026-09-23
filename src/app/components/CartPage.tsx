@@ -1,5 +1,22 @@
 import { useState, useMemo, useEffect } from "react";
-import { ShoppingCart, Trash2, Plus, Minus, CreditCard, FileText, Check, ChevronRight, Tag, Sparkles, Percent, Store, ChevronLeft, FolderPlus, List, UserCheck } from "lucide-react";
+import {
+  ShoppingCartIcon,
+  TrashIcon,
+  PlusIcon,
+  MinusIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  CheckIcon,
+  CaretRightIcon,
+  TagIcon,
+  SparkleIcon,
+  PercentIcon,
+  StorefrontIcon,
+  CaretLeftIcon,
+  FolderPlusIcon,
+  ListBulletsIcon,
+  UserCheckIcon,
+} from "@phosphor-icons/react";
 import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./LojistaFiltersSidebar";
 import type { CartContext, CartCreator } from "./CartsListPage";
@@ -145,7 +162,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-sm">
           <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-5">
-            <Check className="w-8 h-8 text-emerald-400" />
+            <CheckIcon className="w-8 h-8 text-emerald-400" />
           </div>
           <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.3rem' }}>Pedido enviado para aprovação!</h2>
           <p className="text-muted-foreground mt-2" style={{ fontSize: '0.85rem' }}>
@@ -178,7 +195,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
               style={{ fontSize: '0.78rem' }}
             >
-              <ChevronLeft className="w-3.5 h-3.5" /> Carrinhos
+              <CaretLeftIcon className="w-3.5 h-3.5" /> Carrinhos
             </button>
             <div className="w-px h-5 bg-border" />
             <div className="min-w-0">
@@ -190,13 +207,13 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     style={{ fontSize: '0.65rem', fontWeight: 600 }}
                     title={cartContext.createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante'}
                   >
-                    {cartContext.createdBy === 'lojista' ? <Store className="w-2.5 h-2.5" /> : <UserCheck className="w-2.5 h-2.5" />}
+                    {cartContext.createdBy === 'lojista' ? <StorefrontIcon className="w-2.5 h-2.5" /> : <UserCheckIcon className="w-2.5 h-2.5" />}
                     {cartContext.createdBy === viewerRole ? 'Você' : cartContext.createdBy === 'lojista' ? 'Lojista' : 'Representante'}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Store className="w-3 h-3" />
+                <StorefrontIcon className="w-3 h-3" />
                 <span className="truncate" style={{ fontSize: '0.75rem' }}>Cliente: <span className="text-foreground" style={{ fontWeight: 600 }}>{cartContext.clientName}</span></span>
               </div>
             </div>
@@ -209,7 +226,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 style={{ fontSize: '0.75rem', fontWeight: 500 }}
                 title="Selecionar outro carrinho"
               >
-                <List className="w-3.5 h-3.5" /> Outros carrinhos
+                <ListBulletsIcon className="w-3.5 h-3.5" /> Outros carrinhos
               </button>
               <button
                 onClick={() => {
@@ -220,7 +237,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 style={{ fontSize: '0.75rem', fontWeight: 600 }}
                 title="Criar outro carrinho para este cliente"
               >
-                <FolderPlus className="w-3.5 h-3.5" /> Novo carrinho
+                <FolderPlusIcon className="w-3.5 h-3.5" /> Novo carrinho
               </button>
             </div>
           )}
@@ -275,21 +292,21 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${step === 'cart' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
           style={{ fontSize: '0.82rem', fontWeight: 600 }}
         >
-          <ShoppingCart className="w-3.5 h-3.5" /> Carrinho ({cart.length})
+          <ShoppingCartIcon className="w-3.5 h-3.5" /> Carrinho ({cart.length})
         </button>
-        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        <CaretRightIcon className="w-4 h-4 text-muted-foreground" />
         <button
           onClick={() => cart.length > 0 && setStep('checkout')}
           className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${step === 'checkout' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
           style={{ fontSize: '0.82rem', fontWeight: 600 }}
         >
-          <CreditCard className="w-3.5 h-3.5" /> Checkout
+          <CreditCardIcon className="w-3.5 h-3.5" /> Checkout
         </button>
       </div>
 
       {cart.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ShoppingCart className="w-12 h-12 text-muted-foreground/30 mb-4" />
+          <ShoppingCartIcon className="w-12 h-12 text-muted-foreground/30 mb-4" />
           <p className="text-foreground" style={{ fontWeight: 600 }}>Carrinho vazio</p>
           <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Adicione produtos do catálogo para criar um pedido.</p>
           <button
@@ -322,7 +339,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                         onClick={() => removeItem(item.product.id)}
                         className="text-muted-foreground hover:text-red-400 transition-colors p-1"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -330,11 +347,11 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                         <div key={size} className="flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 bg-secondary/40">
                           <span className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Nº {size}</span>
                           <button onClick={() => updateQty(item.product.id, size, -1)} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                            <Minus className="w-2.5 h-2.5" />
+                            <MinusIcon className="w-2.5 h-2.5" />
                           </button>
                           <span className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 600, minWidth: 16, textAlign: 'center' }}>{qty}</span>
                           <button onClick={() => updateQty(item.product.id, size, 1)} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                            <Plus className="w-2.5 h-2.5" />
+                            <PlusIcon className="w-2.5 h-2.5" />
                           </button>
                         </div>
                       ))}
@@ -350,7 +367,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 <div className="bg-card border border-border rounded-xl p-5">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-foreground flex items-center gap-2" style={{ fontWeight: 600 }}>
-                      <Tag className="w-4 h-4 text-primary" /> Política comercial aplicada
+                      <TagIcon className="w-4 h-4 text-primary" /> Política comercial aplicada
                     </h3>
                     <select
                       value={tableId}
@@ -380,7 +397,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 {/* Condições de pagamento disponíveis */}
                 <div className="bg-card border border-border rounded-xl p-5">
                   <h3 className="text-foreground flex items-center gap-2 mb-3" style={{ fontWeight: 600 }}>
-                    <CreditCard className="w-4 h-4 text-primary" /> Condições de pagamento disponíveis
+                    <CreditCardIcon className="w-4 h-4 text-primary" /> Condições de pagamento disponíveis
                   </h3>
                   <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>
                     Opções habilitadas para a <span className="text-foreground" style={{ fontWeight: 600 }}>{policy.label}</span>.
@@ -415,7 +432,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 {campaigns.length > 0 && (
                   <div className="bg-card border border-border rounded-xl p-5">
                     <h3 className="text-foreground flex items-center gap-2 mb-3" style={{ fontWeight: 600 }}>
-                      <Sparkles className="w-4 h-4 text-primary" /> Campanhas disponíveis
+                      <SparkleIcon className="w-4 h-4 text-primary" /> Campanhas disponíveis
                     </h3>
                     <div className="space-y-2">
                       {campaigns.map(c => {
@@ -434,7 +451,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
                                 <p className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                                  <Percent className="w-3 h-3 text-emerald-400" /> {c.name}
+                                  <PercentIcon className="w-3 h-3 text-emerald-400" /> {c.name}
                                 </p>
                                 <span className="text-emerald-400 mono" style={{ fontSize: '0.75rem', fontWeight: 600 }}>-{c.discount}%</span>
                               </div>
@@ -462,7 +479,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
                 {approvalRequired && (
                   <div className="flex items-start gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 p-3">
-                    <FileText className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <FileTextIcon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-amber-400" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Aprovação necessária</p>
                       <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Este pedido passará pela aprovação do representante antes de ser faturado.</p>
@@ -534,7 +551,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 style={{ fontWeight: 600, fontSize: '0.9rem' }}
               >
-                Ir para checkout <ChevronRight className="w-4 h-4" />
+                Ir para checkout <CaretRightIcon className="w-4 h-4" />
               </button>
             ) : (
               <button
@@ -542,7 +559,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 style={{ fontWeight: 600, fontSize: '0.9rem' }}
               >
-                <Check className="w-4 h-4" /> Confirmar pedido
+                <CheckIcon className="w-4 h-4" /> Confirmar pedido
               </button>
             )}
 

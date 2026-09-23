@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { AlertTriangle, UserX, PackageX, TrendingDown, Settings2, ChevronRight, MapPin, Box, AlertOctagon } from "lucide-react";
+import {
+  WarningIcon,
+  UserMinusIcon,
+  EmptyIcon,
+  TrendDownIcon,
+  SlidersHorizontalIcon,
+  CaretRightIcon,
+  MapPinIcon,
+  CubeIcon,
+  WarningOctagonIcon,
+} from "@phosphor-icons/react";
 import { formatCurrency } from "../data/mockData";
 
 type Profile = 'rep' | 'admin';
@@ -73,10 +83,10 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
   const [ruptureGroupBy, setRuptureGroupBy] = useState<'linha' | 'marca' | 'regiao'>('linha');
 
   const tabs: { key: TabKey; label: string; icon: any; count: number }[] = [
-    { key: 'risco', label: 'Risco de Cliente', icon: UserX, count: profile === 'rep' ? riskClientsRep.length : 99 },
-    { key: 'encalhe', label: 'Encalhe de Produto', icon: PackageX, count: profile === 'rep' ? stalledProductsRep.length : 35 },
-    { key: 'meta', label: 'Meta Inatingível', icon: TrendingDown, count: profile === 'rep' ? 1 : repsBelowAdmin.length },
-    { key: 'ruptura', label: 'Ruptura no Catálogo', icon: AlertOctagon, count: profile === 'rep' ? catalogRuptureRep.length : 10 },
+    { key: 'risco', label: 'Risco de Cliente', icon: UserMinusIcon, count: profile === 'rep' ? riskClientsRep.length : 99 },
+    { key: 'encalhe', label: 'Encalhe de Produto', icon: EmptyIcon, count: profile === 'rep' ? stalledProductsRep.length : 35 },
+    { key: 'meta', label: 'Meta Inatingível', icon: TrendDownIcon, count: profile === 'rep' ? 1 : repsBelowAdmin.length },
+    { key: 'ruptura', label: 'Ruptura no Catálogo', icon: WarningOctagonIcon, count: profile === 'rep' ? catalogRuptureRep.length : 10 },
   ];
 
   return (
@@ -85,7 +95,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <WarningIcon className="w-4 h-4 text-amber-400" />
           </div>
           <div>
             <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alerta de Riscos</h3>
@@ -95,7 +105,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
           </div>
         </div>
         <button className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.72rem' }}>
-          <Settings2 className="w-3.5 h-3.5" /> Limiares
+          <SlidersHorizontalIcon className="w-3.5 h-3.5" /> Limiares
         </button>
       </div>
 
@@ -137,14 +147,14 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
                     </span>
                   </div>
                   <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>
-                    <MapPin className="inline w-3 h-3 mr-0.5" />{c.city} · sem visita há <span className="text-amber-400 font-semibold">{c.lastVisit}d</span> · sem pedido há <span className="text-amber-400 font-semibold">{c.lastOrder}d</span>
+                    <MapPinIcon className="inline w-3 h-3 mr-0.5" />{c.city} · sem visita há <span className="text-amber-400 font-semibold">{c.lastVisit}d</span> · sem pedido há <span className="text-amber-400 font-semibold">{c.lastOrder}d</span>
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-foreground mono" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{formatCurrency(c.value)}</p>
                   <p className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>histórico 12m</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <CaretRightIcon className="w-4 h-4 text-muted-foreground" />
               </div>
             ))}
           </div>
@@ -172,7 +182,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
             {stalledProductsRep.map(p => (
               <div key={p.sku} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 transition-colors cursor-pointer">
                 <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                  <PackageX className="w-4 h-4 text-muted-foreground" />
+                  <EmptyIcon className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-foreground truncate" style={{ fontSize: '0.83rem', fontWeight: 500 }}>{p.name}</p>
@@ -211,7 +221,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
         {tab === 'meta' && (profile === 'rep' ? (
           <div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-400/5 border border-amber-400/20 mb-3">
-              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+              <WarningIcon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>3 meses consecutivos abaixo da meta</p>
                 <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Risco estrutural identificado. Gap médio: -15%</p>
@@ -258,7 +268,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
         {tab === 'ruptura' && (profile === 'rep' ? (
           <div className="space-y-2">
             <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-400/5 border border-amber-400/20 mb-2">
-              <AlertOctagon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+              <WarningOctagonIcon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Produtos indisponíveis para compra</p>
                 <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Notifique clientes da sua carteira para evitar vendas perdidas e frustração.</p>
@@ -267,7 +277,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
             {catalogRuptureRep.map(p => (
               <div key={p.sku} className="flex items-center gap-3 p-3 rounded-lg border border-border/60 hover:border-amber-400/30 hover:bg-amber-400/5 transition-colors cursor-pointer">
                 <div className="w-9 h-9 rounded-lg bg-amber-400/15 flex items-center justify-center flex-shrink-0">
-                  <Box className="w-4 h-4 text-amber-400" />
+                  <CubeIcon className="w-4 h-4 text-amber-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -280,7 +290,7 @@ export function RuptureAlerts({ profile }: RuptureAlertsProps) {
                   <p className="text-amber-400" style={{ fontSize: '0.8rem', fontWeight: 700 }}>{p.clientsAffected} clientes</p>
                   <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>última venda há {p.lastSale}d</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <CaretRightIcon className="w-4 h-4 text-muted-foreground" />
               </div>
             ))}
           </div>

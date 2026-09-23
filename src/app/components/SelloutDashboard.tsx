@@ -2,7 +2,15 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { AlertTriangle, TrendingDown, TrendingUp, Zap, RefreshCw, BarChart3, Download } from "lucide-react";
+import {
+  WarningIcon,
+  TrendDownIcon,
+  TrendUpIcon,
+  LightningIcon,
+  ArrowsClockwiseIcon,
+  ChartBarIcon,
+  DownloadSimpleIcon,
+} from "@phosphor-icons/react";
 import { selloutData, regionData, topProducts, formatCurrency } from "../data/mockData";
 
 const encalheAlerts = [
@@ -69,7 +77,7 @@ export function SelloutDashboard() {
             <p className={`text-foreground mono`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{kpi.value}</p>
             <div className="flex items-center gap-1.5 mt-1.5">
               <span className={kpi.color} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                {kpi.trend === 'up' ? <TrendingUp className="inline w-3 h-3 mr-0.5" /> : <TrendingDown className="inline w-3 h-3 mr-0.5" />}
+                {kpi.trend === 'up' ? <TrendUpIcon className="inline w-3 h-3 mr-0.5" /> : <TrendDownIcon className="inline w-3 h-3 mr-0.5" />}
                 {kpi.trendVal}
               </span>
               <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{kpi.sub}</span>
@@ -88,7 +96,7 @@ export function SelloutDashboard() {
               <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Jan–Jun 2026 · em R$</p>
             </div>
             <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.75rem' }}>
-              <Download className="w-3.5 h-3.5" /> Exportar
+              <DownloadSimpleIcon className="w-3.5 h-3.5" /> Exportar
             </button>
           </div>
           <ResponsiveContainer width="100%" height={200}>
@@ -195,14 +203,14 @@ export function SelloutDashboard() {
       <div className="bg-card border border-border rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <WarningIcon className="w-4 h-4 text-amber-400" />
             <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alertas de Encalhe</h3>
             <span className="px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400" style={{ fontSize: '0.65rem', fontWeight: 700 }}>
               {encalheAlerts.length} alertas
             </span>
           </div>
           <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.78rem' }}>
-            <RefreshCw className="w-3.5 h-3.5" /> Atualizar
+            <ArrowsClockwiseIcon className="w-3.5 h-3.5" /> Atualizar
           </button>
         </div>
         <div className="overflow-x-auto">
@@ -239,7 +247,7 @@ export function SelloutDashboard() {
                   </td>
                   <td className="py-3">
                     <button className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                      <Zap className="w-3 h-3" /> {alert.action}
+                      <LightningIcon className="w-3 h-3" /> {alert.action}
                     </button>
                   </td>
                 </tr>
