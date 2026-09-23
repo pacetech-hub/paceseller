@@ -129,7 +129,6 @@ export default function App() {
   if (!authenticated) {
     return (
       <div>
-        {/* MARKER-MAKE-KIT-INVOKED */}
         <LoginPage onLogin={handleLogin} />
       </div>
     );

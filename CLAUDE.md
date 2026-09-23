@@ -1,7 +1,20 @@
 # Pace Seller
 
-React + Vite app (`npm run dev`, `npm run build`). Pages live in `src/app/components/`, screen switching in `src/app/App.tsx`.
+React + Vite app (`npm run dev`, `npm run build`). Pages live in `src/app/components/`; `src/app/App.tsx` switches screens by role (`admin` = Indústria, `rep` = Representante, `lojista`).
 
-## UI rules
+## UI: Mantine only
 
-Follow `guidelines/Guidelines.md`. In short: the Mantine theme in `src/mantine/theme.ts` is the source of truth for colors. Use Mantine components and theme colors (color props, `--mantine-*` variables, `useMantineTheme()`), not Tailwind color classes, `src/styles/theme.css` variables or hard-coded color values. Tailwind is for layout only. Icons come from `@phosphor-icons/react`. Breakpoints are Mantine's defaults (xs 576, sm 768, md 992, lg 1200, xl 1408 px); Tailwind's `sm:`/`md:`/`lg:`… use the same values (`src/styles/tailwind.css`), and JS reads `theme.breakpoints`.
+The project uses **Mantine UI (v7) as the only UI and styling system**. Tailwind, shadcn/Radix and MUI are being removed and must not be used in new or changed code.
+
+- **Components:** `@mantine/core`, `@mantine/dates`, `@mantine/notifications`, `@mantine/charts`, `@mantine/form`, `@mantine/hooks`. Icons: `@phosphor-icons/react`.
+- **Theme = source of truth:** `src/mantine/theme.ts` defines colors, fonts, radius, spacing and component defaults. Change a value there, never in a page.
+- **Colors:** only from the theme: color props (`color="neutral"`, `c="dimmed"`, `bg="gray.0"`), `var(--mantine-*)` CSS variables, or `useMantineTheme()` + `alpha()`. No hex/rgb/oklch values in components.
+- **Layout and spacing:** Mantine layout components (`Stack`, `Group`, `Flex`, `Grid`, `SimpleGrid`, `Container`, `Box`, `AppShell`) and style props (`p`, `m`, `gap`, `w`, `maw`, `display`, ...).
+- **Custom styles:** the component's `styles`/`classNames` API or a CSS Module (`*.module.css`) using `var(--mantine-*)` variables.
+- **Breakpoints:** Mantine defaults: xs 36em (576px), sm 48em (768px), md 62em (992px), lg 75em (1200px), xl 88em (1408px). Use responsive props (`{ base: 1, md: 3 }`), `visibleFrom`/`hiddenFrom`, and `useMediaQuery` with `theme.breakpoints`. Never hard-code pixel breakpoints.
+- **Feedback:** notifications via `@mantine/notifications`, dialogs via `Modal`, charts via `@mantine/charts`.
+- **Do not use:** `className` with Tailwind utilities, `src/styles/*.css` variables (`--primary`, `--muted-foreground`, ...), `src/app/components/ui/*` (shadcn), `sonner`, `recharts` directly, `@radix-ui/*`, `clsx`/`tailwind-merge`/`cva`.
+
+## Migration status
+
+Pages not yet migrated still contain Tailwind classes and shadcn imports; they stay installed only until the migration ends. Plan: (0) cleanup, done → (1) Mantine foundation: complete the theme, move toasts/dialogs to Mantine, delete `src/app/components/ui/` and the Radix/shadcn packages → (2..N) migrate one page per step → (last) remove Tailwind (`src/styles/tailwind.css`, `theme.css`, `default_shadcn_theme.css`, the Tailwind packages and Vite plugin).
