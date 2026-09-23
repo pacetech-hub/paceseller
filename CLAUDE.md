@@ -18,4 +18,4 @@ The project uses **Mantine UI (v7) as the only UI and styling system**. Tailwind
 
 ## Migration status
 
-shadcn/Radix and MUI are fully removed. Pages not yet migrated still contain Tailwind classes; Tailwind stays installed only until the migration ends. Plan: (0) cleanup, done → (1) Mantine foundation, done → (2..N) migrate one page per step, including the pages not linked from any screen yet (`SelloutDashboard`, `LojistaHistoryDashboard`, `RuptureAlerts`) → (last) remove Tailwind (`src/styles/tailwind.css`, `theme.css`, `default_shadcn_theme.css`, the Tailwind packages and Vite plugin).
+shadcn/Radix and MUI are fully removed. Pages not yet migrated still contain Tailwind classes; Tailwind stays installed only until the migration ends. Plan: (0) cleanup, done → (1) Mantine foundation, done → (2..N) migrate one page per step, including the pages not linked from any screen yet (`SelloutDashboard`, `LojistaHistoryDashboard`, `RuptureAlerts`) → (last) remove Tailwind (`src/styles/tailwind.css`, `theme.css`, the Tailwind packages and Vite plugin).
