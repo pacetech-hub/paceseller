@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Toaster } from "./components/ui/sonner";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
@@ -286,7 +285,6 @@ export default function App() {
 
   return (
     <div className="h-screen flex bg-background text-foreground overflow-hidden">
-      <Toaster position="top-center" duration={4000} />
       {isFiltersCatalog ? (
         <LojistaFiltersSidebar
           filters={catalogFilters}
