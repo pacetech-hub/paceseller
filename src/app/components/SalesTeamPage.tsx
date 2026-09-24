@@ -18,8 +18,9 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
 
   return (
     <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
-      <Button onClick={onBack} variant="subtle" color="neutral" size="sm" leftSection={<CaretLeftIcon size={16} />} px={0}>
-        Voltar
+      {/* Link de voltar: margem negativa só para alinhar o texto ao conteúdo */}
+      <Button onClick={onBack} variant="subtle" color="neutral" size="sm" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
+        Voltar para indicadores
       </Button>
 
       <Group justify="space-between" wrap="wrap" gap="sm">
@@ -41,7 +42,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
             <Group key={e.id} gap="sm" wrap="nowrap">
               <Text c="dimmed" fw={600} size="0.75rem" ta="right" w={24} flex="none">{i + 1}</Text>
               <Stack gap={0} miw={0} flex={1}>
-                <Text fw={500} size="0.85rem" truncate>{e.name}</Text>
+                <Text fw={600} size="0.85rem" truncate>{e.name}</Text>
                 <Text c="dimmed" size="0.7rem" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>

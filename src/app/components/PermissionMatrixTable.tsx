@@ -1,6 +1,5 @@
-import { Paper, Group, Stack, Text, Badge, Table, Checkbox, Card, Divider } from "@mantine/core";
+import { Group, Stack, Text, Badge, Table, Checkbox, Card, Divider, Button } from "@mantine/core";
 import { profileDescriptions } from "../data/permissions";
-import interactive from "./interactive.module.css";
 
 interface PermissionMatrixTableProps {
   matrix: Record<string, Record<string, boolean>>;
@@ -23,7 +22,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
         <Stack gap={2}>
           {perfis.map(perfil => (
             <Text key={perfil} c="dimmed" size="0.72rem">
-              <Text component="span" fw={500} c="var(--mantine-color-text)">{perfil}:</Text> {profileDescriptions[perfil]}
+              <Text component="span" fw={600} c="var(--mantine-color-text)">{perfil}:</Text> {profileDescriptions[perfil]}
             </Text>
           ))}
         </Stack>
@@ -53,6 +52,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
                       onChange={() => onToggle(perfil, modulo)}
                       color="neutral"
                       title={allowed ? 'Clique para revogar' : 'Clique para conceder'}
+                      aria-label={`${modulo} · ${perfil}`}
                       styles={{ input: { cursor: 'pointer' } }}
                     />
                   </Table.Td>
@@ -67,17 +67,10 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
       <Divider color="var(--mantine-color-default-border)" />
       <Group justify="space-between" gap="xs" p={{ base: 'md', sm: 'lg' }}>
         <Text c="dimmed" size="0.72rem">Clique em qualquer célula para alternar a permissão</Text>
-        <Text
-          component="button"
-          onClick={onReset}
-          c="dimmed"
-          size="0.72rem"
-          bg="none"
-          bd="none"
-          className={`${interactive.clickable} ${interactive.hoverText}`}
-        >
-          Restaurar padrões
-        </Text>
+        {/* Ação de baixa ênfase: não compete com as demais ações da página */}
+        <Button onClick={onReset} variant="subtle" color="gray" size="xs">
+          Restaurar permissões padrão
+        </Button>
       </Group>
     </Card>
   );
