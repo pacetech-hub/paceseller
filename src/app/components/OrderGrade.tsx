@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, ThemeIcon,
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, Anchor, ThemeIcon,
   SimpleGrid, Stepper, Table, NumberInput, ActionIcon, Alert, Image, ScrollArea, Divider,
 } from "@mantine/core";
 import {
@@ -56,7 +56,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
   return (
     <Box>
       <TextInput
-        placeholder="Buscar produto ou referência..."
+        placeholder="Buscar por nome ou referência (ex.: 2502-19)"
         value={search}
         onChange={e => setSearch(e.currentTarget.value)}
         mb={8}
@@ -194,14 +194,16 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             O pedido fica "em análise" até a aprovação comercial. Depois de aprovado, segue para faturamento e o cliente recebe a confirmação por e-mail.
           </Text>
           <Text c="dimmed" size="sm" mt={4}>
-            Acompanhe o status em Histórico de pedidos.
+            Acompanhe o status em{' '}
+            <Anchor component="button" type="button" inherit onClick={() => onNavigate('history')}>Histórico de pedidos</Anchor>
+            .
           </Text>
           <Group gap="sm" mt="xl" justify="center">
             <Button onClick={() => { setCompleted(false); setStep(1); setGrades({}); }} variant="default">
-              Criar novo pedido
+              Criar Novo Pedido
             </Button>
             <Button onClick={() => onNavigate('history')}>
-              Acompanhar no histórico
+              Acompanhar no Histórico
             </Button>
           </Group>
         </Stack>
@@ -320,7 +322,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 <Text c="dimmed" size="sm">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </Box>
               <Button onClick={handleAutoFill} variant="default" leftSection={<LightningIcon size={14} />} flex="none">
-                Sugerir quantidades
+                Sugerir Quantidades
               </Button>
             </Group>
 
@@ -427,7 +429,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 ml={-12}
                 leftSection={<PlusIcon size={16} />}
               >
-                Adicionar outro produto
+                Adicionar Outro Produto
               </Button>
             </Box>
           </Stack>
@@ -474,11 +476,13 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             )}
 
             <Textarea
-              label="Observações"
+              label="Observações (opcional)"
+              description="Até 500 caracteres"
               value={obs}
               onChange={e => setObs(e.currentTarget.value)}
               rows={3}
-              placeholder="Informações adicionais para o pedido..."
+              maxLength={500}
+              placeholder="ex.: Entregar pela manhã, separar por loja"
             />
 
             {/* Aviso pedido mínimo */}
@@ -525,7 +529,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           variant="default"
           leftSection={<CaretLeftIcon size={16} />}
         >
-          {step > firstStep ? `Voltar para ${stepLabel(step - 1).toLowerCase()}` : 'Voltar'}
+          {step > firstStep ? `Voltar para ${stepLabel(step - 1)}` : 'Voltar'}
         </Button>
 
         <Group gap="sm">
@@ -540,7 +544,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               disabled={step === 3 && totalPairs === 0}
               rightSection={<CaretRightIcon size={16} />}
             >
-              {step === 3 ? 'Revisar pedido' : `Ir para ${stepLabel(step + 1).toLowerCase()}`}
+              {step === 3 ? 'Revisar Pedido' : `Ir para ${stepLabel(step + 1)}`}
             </Button>
           ) : (
             <Button
@@ -548,7 +552,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               disabled={allGrades.length === 0}
               leftSection={<ShoppingCartIcon size={16} />}
             >
-              Enviar pedido
+              Enviar Pedido
             </Button>
           )}
         </Group>

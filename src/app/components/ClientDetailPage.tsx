@@ -46,11 +46,12 @@ function seededOrderCount(clientId: string): number {
 
 type StockStatusKey = 'zerado' | 'alto-giro' | 'chegando-ao-fim' | 'parado';
 
-const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; color: string; icon: Icon }> = {
-  'zerado': { label: 'Estoque zerado', color: 'red', icon: EmptyIcon },
-  'alto-giro': { label: 'Alto giro', color: 'teal', icon: TrendUpIcon },
-  'chegando-ao-fim': { label: 'Estoque chegando ao fim', color: 'yellow', icon: HourglassLowIcon },
-  'parado': { label: 'Parado no estoque', color: 'gray', icon: ListMagnifyingGlassIcon },
+// label: badge e textos (sentence case); filterLabel: botão de filtro (Title Case)
+const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; filterLabel: string; color: string; icon: Icon }> = {
+  'zerado': { label: 'Estoque zerado', filterLabel: 'Estoque Zerado', color: 'red', icon: EmptyIcon },
+  'alto-giro': { label: 'Alto giro', filterLabel: 'Alto Giro', color: 'teal', icon: TrendUpIcon },
+  'chegando-ao-fim': { label: 'Estoque chegando ao fim', filterLabel: 'Estoque Chegando ao Fim', color: 'yellow', icon: HourglassLowIcon },
+  'parado': { label: 'Parado no estoque', filterLabel: 'Parado no Estoque', color: 'gray', icon: ListMagnifyingGlassIcon },
 };
 
 // mock: classificação determinística do status de estoque por produto
@@ -146,7 +147,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <Stack align="flex-start" gap="sm">
             <Text fw={600}>Nenhum cliente selecionado</Text>
             <Text c="dimmed" size="sm">Escolha um cliente na lista para ver dados cadastrais, desempenho e sugestões de venda.</Text>
-            <Button variant="default" onClick={() => onNavigate('clients')}>Ver lista de clientes</Button>
+            <Button variant="default" onClick={() => onNavigate('clients')}>Ver Lista de Clientes</Button>
           </Stack>
         </Paper>
       </Stack>
@@ -194,7 +195,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             <CaretDownIcon size={14} className={detail.caret} data-expanded={expanded || undefined} />
           }
         >
-          {expanded ? 'Ocultar dados cadastrais' : 'Mostrar dados cadastrais'}
+          {expanded ? 'Ocultar Dados Cadastrais' : 'Mostrar Dados Cadastrais'}
         </Button>
 
         <Collapse in={expanded}>
@@ -268,7 +269,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             items={colorRanks}
             renderLabel={c => (
               <Group gap={6} wrap="nowrap">
-                <ColorSwatch color={COLOR_SWATCH[c.key] ?? '#999'} size={10} withShadow={false} bd="1px solid var(--mantine-color-default-border)" />
+                <ColorSwatch color={COLOR_SWATCH[c.key] ?? 'var(--mantine-color-gray-5)'} size={10} withShadow={false} bd="1px solid var(--mantine-color-default-border)" />
                 {c.label}
               </Group>
             )}
@@ -315,7 +316,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Title order={2} fw={600} mb="sm">Sugestões de venda</Title>
 
-        <Group gap={6} mb="md">
+        <Group gap="sm" mb="md">
           <Button
             onClick={() => setStockFilter('todos')}
             variant={stockFilter === 'todos' ? 'filled' : 'default'}
@@ -332,7 +333,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                 variant={active ? 'filled' : 'default'}
                 color="neutral"
               >
-                {STOCK_STATUS_CONFIG[key].label}
+                {STOCK_STATUS_CONFIG[key].filterLabel}
               </Button>
             );
           })}
@@ -349,7 +350,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             <Text c="dimmed" size="sm" ta="center">
               Nenhum produto deste cliente está em “{stockFilter !== 'todos' ? STOCK_STATUS_CONFIG[stockFilter].label : 'Todos'}” agora.
             </Text>
-            <Button variant="default" onClick={() => setStockFilter('todos')}>Ver todos os produtos</Button>
+            <Button variant="default" onClick={() => setStockFilter('todos')}>Ver Todos os Produtos</Button>
           </Stack>
         )}
       </Paper>
@@ -410,8 +411,8 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
             color={cfg.color}
             leftSection={<StatusIcon size={12} />}
             pos="absolute"
-            top={8}
-            left={8}
+            top={12}
+            left={12}
           >
             {cfg.label}
           </Badge>
@@ -423,7 +424,7 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
         <Divider mt={8} color="var(--mantine-color-default-border)" />
         {/* preço acima e ação principal no rodapé do cartão, em largura total (cabe nos cartões estreitos do mobile) */}
         <Text className="mono" size="lg" fw={700} pt={8}>{formatCurrency(product.price)}</Text>
-        <Button onClick={onBuy} fullWidth mt="sm">Montar pedido</Button>
+        <Button onClick={onBuy} fullWidth mt="sm">Montar Pedido</Button>
       </Stack>
     </Card>
   );

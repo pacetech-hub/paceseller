@@ -69,3 +69,8 @@ body {
   --badge-fz-lg: var(--mantine-font-size-sm);
   --badge-fz-xl: var(--mantine-font-size-md);
 }
+
+/* Links: mesmo azul também no hover/visitado, sublinhado mais grosso no hover */
+.mantine-Anchor-root:hover {
+  text-decoration-thickness: 2px;
+}

@@ -74,7 +74,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <Autocomplete
             label="E-mail"
             type="email"
-            placeholder="seu@email.com"
+            placeholder="nome@loja.com.br"
             data={Object.keys(demoAccounts)}
             value={email}
             onChange={(value) => {
@@ -97,7 +97,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               checked={keepLoggedIn}
               onChange={(e) => setKeepLoggedIn(e.currentTarget.checked)}
             />
-            <Anchor component="button" type="button" fw={600} py={8}>
+            <Anchor component="button" type="button">
               Esqueceu a senha?
             </Anchor>
           </Group>

@@ -3,7 +3,7 @@ import { toast } from "../lib/toast";
 import { useSmallerThan } from "../lib/responsive";
 import {
   ActionIcon, Badge, Box, Button, Card, Chip, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
-  Paper, ScrollArea, SegmentedControl, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
@@ -42,7 +42,7 @@ function CartCreatorTag({ createdBy }: { createdBy?: CartCreator }) {
     <Badge
       mt={4}
       variant="light"
-      color={isLojista ? 'teal' : 'yellow'}
+      color="neutral"
       leftSection={isLojista ? <StorefrontIcon size={14} /> : <UserCheckIcon size={14} />}
     >
       {isLojista ? 'Lojista' : 'Representante'}
@@ -77,6 +77,13 @@ interface CatalogPageProps {
 const lines = ['Todos', 'Premium', 'Urban', 'Sport'];
 const categories = ['Todos', 'Social', 'Casual', 'Esportivo', 'Sandália', 'Bota'];
 const collections = ['Todas', 'Inverno 2026', 'Primavera/Verão 2026'];
+const SORT_OPTIONS = [
+  { value: 'relevância', label: 'Relevância' },
+  { value: 'mais vendidos', label: 'Mais vendidos' },
+  { value: 'avaliação', label: 'Melhor avaliação' },
+  { value: 'menor preço', label: 'Menor preço' },
+  { value: 'maior preço', label: 'Maior preço' },
+];
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -86,7 +93,7 @@ function StarRating({ rating }: { rating: number }) {
           key={s}
           size={14}
           weight={s <= Math.round(rating) ? 'fill' : 'regular'}
-          color={s <= Math.round(rating) ? 'var(--mantine-color-yellow-5)' : DIMMED}
+          color={s <= Math.round(rating) ? 'var(--mantine-color-neutral-9)' : DIMMED}
           opacity={s <= Math.round(rating) ? 1 : 0.3}
         />
       ))}
@@ -98,7 +105,7 @@ function StarRating({ rating }: { rating: number }) {
 // Stepper de quantidade: botões de 36px (área de clique confortável também no desktop)
 function QtyStepper({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <Group gap={4} wrap="nowrap">
+    <Group gap="sm" wrap="nowrap">
       <ActionIcon size="input-sm" variant="default" onClick={() => onChange(value - 1)} aria-label="Diminuir quantidade">
         <MinusIcon size={16} />
       </ActionIcon>
@@ -106,6 +113,7 @@ function QtyStepper({ value, onChange }: { value: number; onChange: (v: number) 
         value={value}
         onChange={v => onChange(Number(v) || 0)}
         hideControls
+        placeholder="0"
         w={56}
         aria-label="Quantidade"
         styles={{ input: { textAlign: 'center', fontWeight: 600, height: 36, minHeight: 36, paddingInline: 4 } }}
@@ -174,7 +182,7 @@ function GradeCompact({ product, onAdd, onClose }: {
           disabled={total === 0}
           leftSection={<ShoppingCartIcon size={18} />}
         >
-          Adicionar ao carrinho
+          Adicionar ao Carrinho
         </Button>
       </Box>
     </>
@@ -183,7 +191,7 @@ function GradeCompact({ product, onAdd, onClose }: {
 
 // larguras da grade: rótulo · uma coluna por numeração (cabe o stepper de 36px) · total
 const GRADE_LABEL_W = 110;
-const GRADE_COL_W = 148;
+const GRADE_COL_W = 164;
 const GRADE_TOTAL_W = 70;
 
 function GradeInline({ product, onAdd, onClose }: {
@@ -251,7 +259,7 @@ function GradeInline({ product, onAdd, onClose }: {
             disabled={total === 0}
             leftSection={<ShoppingCartIcon size={18} />}
           >
-            Adicionar ao carrinho
+            Adicionar ao Carrinho
           </Button>
         </Group>
       </Box>
@@ -325,11 +333,11 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
               <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
             </Box>
             {/* Secundária (favoritar) à esquerda, principal (compra rápida) à direita */}
-            <Group gap={8} justify="flex-end">
+            <Group gap="sm" justify="flex-end">
               <Button
                 onClick={onToggleFav}
                 variant={product.isFavorite ? 'light' : 'default'}
-                color={product.isFavorite ? 'red' : 'gray'}
+                color={product.isFavorite ? 'neutral' : 'gray'}
                 leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />}
                 aria-pressed={product.isFavorite}
               >
@@ -340,7 +348,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
                 disabled={product.availability === 'esgotado'}
                 leftSection={<LightningIcon size={18} />}
               >
-                Compra rápida
+                Compra Rápida
               </Button>
             </Group>
           </Flex>
@@ -354,7 +362,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
 
   return (
     <Card withBorder padding={0} className={classes.card}>
-      <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" mb={-12} bg="white">
+      <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" bg="white">
         {!imgError ? (
           <Image
             src={product.image}
@@ -403,7 +411,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             className={`${classes.overlayAction} ${classes.overlayBuy}`}
             data-disabled={product.availability === 'esgotado' || undefined}
           >
-            <LightningIcon size={18} /> Compra rápida
+            <LightningIcon size={18} /> Compra Rápida
           </Box>
         </Box>
       </UnstyledButton>
@@ -517,7 +525,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                 <Button
                   onClick={onToggleFav}
                   variant={isFavorite ? 'light' : 'default'}
-                  color={isFavorite ? 'red' : 'gray'}
+                  color={isFavorite ? 'neutral' : 'gray'}
                   flex="none"
                   leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />}
                   aria-pressed={isFavorite}
@@ -702,7 +710,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
     <Box>
       <Text lh={1.5} mb={8} fw={600}>{label}</Text>
       <Chip.Group multiple={false} value={value} onChange={onSelect}>
-        <Group gap={6}>
+        <Group gap="sm">
           {options.map(o => (
             <Chip
               key={o}
@@ -743,11 +751,11 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
       {/* Header + Controls */}
       <Group gap="sm" wrap="wrap">
-        {/* Abaixo de sm a busca ocupa a linha inteira; ordenação e modo de exibição ficam na linha de baixo */}
+        {/* Abaixo de sm a busca ocupa a linha inteira; filtros e modo de exibição ficam na linha de baixo */}
         <TextInput
           flex={{ base: '1 1 100%', sm: 1 }}
           miw={{ sm: 200 }}
-          placeholder="Buscar produto, referência, linha..."
+          placeholder="Buscar por nome, referência ou linha"
           aria-label="Buscar produtos"
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
@@ -769,25 +777,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             ) : undefined}
             aria-expanded={showFilters}
           >
-            {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
           </Button>
         )}
-
-        <Select
-          flex={{ base: 1, sm: 'none' }}
-          w={{ sm: 200 }}
-          allowDeselect={false}
-          value={sortBy}
-          onChange={v => v && setSortBy(v)}
-          aria-label="Ordenar produtos"
-          data={[
-            { value: 'relevância', label: 'Relevância' },
-            { value: 'mais vendidos', label: 'Mais vendidos' },
-            { value: 'avaliação', label: 'Melhor avaliação' },
-            { value: 'menor preço', label: 'Menor preço' },
-            { value: 'maior preço', label: 'Maior preço' },
-          ]}
-        />
 
         {/* Modo de exibição com ícone + texto */}
         <SegmentedControl
@@ -800,6 +792,25 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           ]}
         />
       </Group>
+
+      {/* Ordenação: 5 opções fixas → chips de escolha única (radio), sempre visíveis; quebram linha em telas estreitas */}
+      <Input.Wrapper label="Ordenar por" labelElement="div" id="catalog-sort">
+        <Chip.Group multiple={false} value={sortBy} onChange={v => v && setSortBy(v)}>
+          <Group gap="sm" mt={4} role="radiogroup" aria-labelledby="catalog-sort-label">
+            {SORT_OPTIONS.map(o => (
+              <Chip
+                key={o.value}
+                value={o.value}
+                variant="filled"
+                icon={null}
+                styles={{ iconWrapper: { display: 'none' } }}
+              >
+                {o.label}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </Input.Wrapper>
 
       {/* Filter Panel */}
       {!usingExternal && showFilters && (
@@ -817,7 +828,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
               color="neutral"
               leftSection={<XIcon size={16} />}
             >
-              Limpar filtros
+              Limpar Filtros
             </Button>
           )}
         </Paper>
@@ -825,7 +836,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
       {/* Filtros ativos: cada um é um botão que remove o filtro */}
       {hasActiveFilters && (
-        <Group justify="flex-end" gap={6}>
+        <Group justify="flex-end" gap="sm">
           {selectedLine !== 'Todos' && (
             <Button
               variant="light"
@@ -881,7 +892,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
               leftSection={<XIcon size={16} />}
               onClick={() => { setSearch(''); if (!usingExternal) clearInternalFilters(); }}
             >
-              {!usingExternal && hasActiveFilters ? 'Limpar busca e filtros' : 'Limpar busca'}
+              {!usingExternal && hasActiveFilters ? 'Limpar Busca e Filtros' : 'Limpar Busca'}
             </Button>
           )}
         </Stack>
@@ -925,7 +936,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             </Box>
             <Divider color={BORDER_COLOR} />
             <ScrollArea.Autosize mah="40vh" type="auto">
-              <Stack gap={8} px="lg" py="md">
+              <Stack gap="sm" px="lg" py="md">
                 {(clientCarts ?? []).map(c => (
                   <CartOption
                     key={c.id}
@@ -936,14 +947,14 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 ))}
                 {(clientCarts ?? []).length === 0 && (
                   <Text lh={1.5} c="dimmed" ta="center" py="sm">
-                    Este cliente ainda não tem carrinhos. Use "Criar novo carrinho" abaixo.
+                    Este cliente ainda não tem carrinhos. Use "Criar Novo Carrinho" abaixo.
                   </Text>
                 )}
               </Stack>
             </ScrollArea.Autosize>
             <Divider color={BORDER_COLOR} />
             {/* Secundária à esquerda, principal à direita */}
-            <Group px="lg" py="md" gap={8} grow>
+            <Group px="lg" py="md" gap="sm" grow>
               <Button
                 onClick={() => {
                   setConfirmAdd(null);
@@ -955,7 +966,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 bd={DASHED_BORDER}
                 leftSection={<PlusIcon size={16} />}
               >
-                Criar novo carrinho
+                Criar Novo Carrinho
               </Button>
               <Button
                 onClick={() => {
@@ -967,7 +978,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   setConfirmAdd(null);
                 }}
               >
-                Adicionar ao carrinho
+                Adicionar ao Carrinho
               </Button>
             </Group>
           </>
@@ -998,7 +1009,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             </Group>
             <Divider color={BORDER_COLOR} />
             <ScrollArea.Autosize mah="50vh" type="auto">
-              <Stack gap={8} p="md">
+              <Stack gap="sm" p="md">
                 {(clientCarts ?? []).map(c => (
                   <CartOption
                     key={c.id}
@@ -1028,9 +1039,11 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                         label="Nome do novo carrinho"
                         value={creatingNewName}
                         onChange={e => setCreatingNewName(e.currentTarget.value)}
-                        placeholder="Ex.: Reposição Inverno 26"
+                        placeholder="ex.: Reposição Inverno 26"
+                        maxLength={40}
+                        description="Até 40 caracteres"
                       />
-                      <Group justify="flex-end" gap={8}>
+                      <Group justify="flex-end" gap="sm">
                         <Button
                           onClick={() => { setCreatingMode(false); setCreatingNewName(''); }}
                           variant="default"
@@ -1046,7 +1059,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                             }
                           }}
                         >
-                          Criar carrinho e adicionar
+                          Criar Carrinho e Adicionar
                         </Button>
                       </Group>
                     </Stack>
@@ -1059,7 +1072,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                     fullWidth
                     leftSection={<PlusIcon size={16} />}
                   >
-                    Criar novo carrinho
+                    Criar Novo Carrinho
                   </Button>
                 )}
               </Stack>

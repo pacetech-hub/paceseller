@@ -26,13 +26,15 @@ interface OrderHistoryProps {
   initialStatusFilter?: string;
 }
 
-// cor Mantine do badge de cada status do pedido
+// cor Mantine do badge de cada status do pedido (somente cores da paleta):
+// etapas intermediárias em neutro, atenção em amarelo, concluído em verde-azulado, cancelado em vermelho.
+// O ícone de cada status diferencia os neutros entre si.
 export const statusColors: Record<string, string> = {
-  'aprovado': 'dark',
+  'aprovado': 'neutral',
   'em análise': 'yellow',
-  'faturado': 'teal',
+  'faturado': 'neutral',
   'cancelado': 'red',
-  'entregue': 'violet',
+  'entregue': 'teal',
 };
 
 export const statusIcon: Record<string, Icon> = {
@@ -193,7 +195,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
       {/* Filters */}
       <Group gap="sm" wrap="wrap">
         <TextInput
-          placeholder="Buscar pedido, cliente, rep..."
+          placeholder="Buscar por nº do pedido, cliente ou representante"
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
@@ -201,7 +203,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           miw={{ sm: 160 }}
         />
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
-          <Group gap={6}>
+          <Group gap="sm">
             {statuses.map(s => (
               <Chip key={s} value={s} variant="filled" color="neutral" styles={{ label: { textTransform: 'capitalize' } }}>
                 {s}
@@ -257,14 +259,14 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
                 <>
                   <Text c="dimmed" ta="center">Nenhum pedido corresponde à busca ou ao status selecionado.</Text>
                   <Button onClick={() => { setSearch(''); setStatusFilter('todos'); }} variant="default" mt="md">
-                    Limpar filtros
+                    Limpar Filtros
                   </Button>
                 </>
               ) : (
                 <>
                   <Text c="dimmed" ta="center">Os pedidos enviados aparecem aqui. Monte um carrinho a partir do catálogo para criar o primeiro.</Text>
                   <Button onClick={() => onNavigate('catalog')} mt="md">
-                    Ir ao catálogo
+                    Ir ao Catálogo
                   </Button>
                 </>
               )}

@@ -335,13 +335,13 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               <Stack gap="sm">
                 <CodeBlock label="Linha digitável" code={payment.boletoLine} />
                 {/* secundária à esquerda, principal (copiar) à direita */}
-                <Group gap={8} justify="flex-end">
+                <Group gap="sm" justify="flex-end">
                   <Button
                     onClick={() => toast.success('Download da fatura iniciado', 'O PDF vai para a pasta Downloads do seu dispositivo')}
                     variant="default"
                     leftSection={<DownloadSimpleIcon size={16} />}
                   >
-                    Baixar fatura
+                    Baixar Fatura
                   </Button>
                   <Button
                     onClick={() => handleCopy('boleto')}
@@ -349,7 +349,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                     color={justCopied === 'boleto' ? 'teal' : undefined}
                     leftSection={justCopied === 'boleto' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
                   >
-                    {justCopied === 'boleto' ? 'Código copiado' : 'Copiar código de barras'}
+                    {justCopied === 'boleto' ? 'Código Copiado' : 'Copiar Código de Barras'}
                   </Button>
                 </Group>
                 {copyHint('boleto')}
@@ -358,7 +358,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               <Stack gap="sm">
                 <CodeBlock label="Pix Copia e Cola" code={payment.pixCode} />
                 {/* secundária à esquerda, principal (copiar) à direita */}
-                <Group gap={8} justify="flex-end">
+                <Group gap="sm" justify="flex-end">
                   <Button
                     onClick={() => setShowQr(v => !v)}
                     variant="default"
@@ -372,7 +372,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                     color={justCopied === 'pix' ? 'teal' : undefined}
                     leftSection={justCopied === 'pix' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
                   >
-                    {justCopied === 'pix' ? 'Código copiado' : 'Copiar código Pix'}
+                    {justCopied === 'pix' ? 'Código Copiado' : 'Copiar Código Pix'}
                   </Button>
                 </Group>
                 {copyHint('pix')}
@@ -475,7 +475,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
       {/* Filters */}
       <Group gap="sm" wrap="wrap">
         <TextInput
-          placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
+          placeholder={isLojista ? 'Buscar por boleto, pedido ou produto' : 'Buscar por boleto, pedido, cliente ou produto'}
           leftSection={<MagnifyingGlassIcon size={16} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
@@ -483,7 +483,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           miw={{ sm: 160 }}
         />
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
-          <Group gap={6}>
+          <Group gap="sm">
             {statuses.map(s => (
               <Chip key={s} value={s} variant="filled" color="neutral">
                 {s === 'todos' ? 'Todos' : statusLabel[s]}
@@ -510,7 +510,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
                 Nenhum boleto corresponde à busca ou ao status selecionado. Limpe-os para ver todos os seus boletos.
               </Text>
               <Button variant="default" mt="sm" onClick={() => { setSearch(''); setStatusFilter('todos'); }}>
-                Limpar busca e filtros
+                Limpar Busca e Filtros
               </Button>
             </Stack>
           </Paper>

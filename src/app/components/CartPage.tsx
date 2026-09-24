@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, ThemeIcon,
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Textarea, Anchor, Badge, ThemeIcon,
   SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider, Card,
 } from "@mantine/core";
 import {
@@ -25,7 +25,6 @@ import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./LojistaFiltersSidebar";
 import type { CartContext, CartCreator } from "./CartsListPage";
 import classes from "./interactive.module.css";
-import cartClasses from "./CartPage.module.css";
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -191,11 +190,13 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             O representante vai revisar o pedido antes do faturamento. Você recebe um e-mail quando ele for aprovado.
           </Text>
           <Text c="dimmed" size="sm" mt={4}>
-            Acompanhe o status em Histórico de pedidos, onde ele aparece como "em análise".
+            Acompanhe o status em{' '}
+            <Anchor component="button" type="button" inherit onClick={() => onNavigate('history')}>Histórico de pedidos</Anchor>
+            , onde ele aparece como "em análise".
           </Text>
           <Group gap="sm" mt="xl" justify="center">
-            <Button onClick={() => onNavigate('catalog')} variant="default">Voltar ao catálogo</Button>
-            <Button onClick={() => onNavigate('history')}>Acompanhar no histórico</Button>
+            <Button onClick={() => onNavigate('catalog')} variant="default">Voltar ao Catálogo</Button>
+            <Button onClick={() => onNavigate('history')}>Acompanhar no Histórico</Button>
           </Group>
         </Stack>
       </Stack>
@@ -214,7 +215,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               ml={-12}
               leftSection={<CaretLeftIcon size={14} />}
             >
-              Voltar para carrinhos
+              Voltar para Carrinhos
             </Button>
             <Divider orientation="vertical" h={20} my="auto" />
             <Box miw={0}>
@@ -241,14 +242,14 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             </Box>
           </Group>
           {multiCart && (
-            <Group gap={8} w={{ base: '100%', xs: 'auto' }} grow>
+            <Group gap="sm" w={{ base: '100%', xs: 'auto' }} grow>
               <Button
                 onClick={() => onNavigate('carts')}
                 variant="default"
                 leftSection={<ListBulletsIcon size={14} />}
                 title="Selecionar outro carrinho"
               >
-                Outros carrinhos
+                Outros Carrinhos
               </Button>
               <Button
                 onClick={() => {
@@ -258,7 +259,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 leftSection={<FolderPlusIcon size={14} />}
                 title="Criar outro carrinho para este cliente"
               >
-                Criar carrinho
+                Criar Carrinho
               </Button>
             </Group>
           )}
@@ -283,9 +284,11 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           label="Nome do carrinho"
           value={newCartName}
           onChange={e => setNewCartName(e.currentTarget.value)}
-          placeholder="Ex.: Reposição Inverno 26"
+          placeholder="ex.: Reposição Inverno 26"
+          maxLength={60}
+          description="Até 60 caracteres"
         />
-        <Group justify="flex-end" gap={8} mt="lg" grow>
+        <Group justify="flex-end" gap="sm" mt="lg" grow>
           <Button onClick={() => setShowNewCartDialog(false)} variant="default">Cancelar</Button>
           <Button
             onClick={() => {
@@ -294,13 +297,13 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               setNewCartName('');
             }}
           >
-            Criar carrinho
+            Criar Carrinho
           </Button>
         </Group>
       </Modal>
 
       {/* Step indicator */}
-      <Group gap="xs" mb="lg" wrap="nowrap">
+      <Group gap="sm" mb="lg" wrap="nowrap">
         <Button
           onClick={() => setStep('cart')}
           variant={step === 'cart' ? 'filled' : 'subtle'}
@@ -325,7 +328,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           <ShoppingCartIcon size={48} color="var(--mantine-color-dimmed)" opacity={0.3} />
           <Text fw={600} mt="sm">Carrinho vazio</Text>
           <Text c="dimmed">Adicione produtos do catálogo para criar um pedido.</Text>
-          <Button onClick={() => onNavigate('catalog')} mt="md">Ir ao catálogo</Button>
+          <Button onClick={() => onNavigate('catalog')} mt="md">Ir ao Catálogo</Button>
         </Stack>
       ) : (
         <Grid gutter="lg">
@@ -383,20 +386,26 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               <Stack gap="md">
                 {/* Tabela de preço aplicada */}
                 <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-                  <Group justify="space-between" mb="sm" gap="sm">
-                    <Group gap={8}>
-                      <TagIcon size={16} />
-                      <Title order={3} fw={600}>Política comercial aplicada</Title>
-                    </Group>
-                    <Select
-                      value={tableId}
-                      onChange={v => v && handleTableChange(v)}
-                      data={priceTables.map(pt => ({ value: pt.id, label: `${pt.label} — ${pt.desc}` }))}
-                      allowDeselect={false}
-                      w={{ base: '100%', xs: 260 }}
-                      aria-label="Tabela de preço"
-                    />
+                  <Group gap={8} mb="sm">
+                    <TagIcon size={16} />
+                    <Title order={3} fw={600}>Política comercial aplicada</Title>
                   </Group>
+                  {/* Poucas tabelas fixas: cartões de opção em vez de lista suspensa */}
+                  <Radio.Group value={tableId} onChange={handleTableChange} name="price-table" label="Tabela de preço" mb="md">
+                    <Stack gap="sm">
+                      {priceTables.map(pt => (
+                        <Radio.Card key={pt.id} value={pt.id} p="sm" className={classes.choiceCard}>
+                          <Group align="flex-start" gap="sm" wrap="nowrap">
+                            <Radio.Indicator color="neutral" mt={2} />
+                            <Box flex={1} miw={0}>
+                              <Text fw={600}>{pt.label}</Text>
+                              <Text c="dimmed" size="sm" mt={2}>{pt.desc}</Text>
+                            </Box>
+                          </Group>
+                        </Radio.Card>
+                      ))}
+                    </Stack>
+                  </Radio.Group>
                   <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="sm">
                     <Box>
                       <Text c="dimmed" size="sm">Desconto da tabela</Text>
@@ -460,11 +469,11 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                             key={c.id}
                             value={c.id}
                             p="sm"
-                            className={`${classes.choiceCard} ${cartClasses.tealChoice}`}
+                            className={classes.choiceCard}
                           >
                             <Group align="flex-start" gap="sm" wrap="nowrap">
-                              <Checkbox.Indicator color="teal" mt={2} />
-                              <Box flex={1}>
+                              <Checkbox.Indicator color="neutral" mt={2} />
+                              <Box flex={1} miw={0}>
                                 <Group justify="space-between">
                                   <Group gap={6}>
                                     <PercentIcon size={12} color="var(--mantine-color-teal-6)" />
@@ -485,11 +494,13 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 {/* Observações */}
                 <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
                   <Textarea
-                    label="Observações"
+                    label="Observações (opcional)"
+                    description="Até 500 caracteres"
                     value={obs}
                     onChange={e => setObs(e.currentTarget.value)}
                     rows={3}
-                    placeholder="Informações adicionais..."
+                    maxLength={500}
+                    placeholder="ex.: Entregar pela manhã, separar por loja"
                   />
                 </Paper>
 
@@ -561,16 +572,16 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
               {step === 'cart' ? (
                 <Button onClick={() => setStep('checkout')} fullWidth rightSection={<CaretRightIcon size={16} />}>
-                  Ir para checkout
+                  Ir para Checkout
                 </Button>
               ) : (
                 <Button onClick={() => setStep('done')} fullWidth leftSection={<CheckIcon size={16} />}>
-                  Enviar para aprovação
+                  Enviar para Aprovação
                 </Button>
               )}
 
               <Button onClick={() => onNavigate('catalog')} variant="default" fullWidth>
-                Voltar ao catálogo
+                Voltar ao Catálogo
               </Button>
             </Stack>
           </Grid.Col>

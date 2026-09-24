@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, ThemeIcon, Text, Title, Alert, Button, TextInput,
-  Table, Avatar, Badge, Select, Card, Divider,
+  Table, Avatar, Badge, SegmentedControl, Card, Divider,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -151,7 +151,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             color="neutral"
             leftSection={<UserPlusIcon size={16} />}
           >
-            Convidar usuário
+            Convidar Usuário
           </Button>
         </Group>
         <Divider color="var(--mantine-color-default-border)" />
@@ -164,14 +164,15 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 label="Nome completo"
                 value={inviteName}
                 onChange={e => { setInviteName(e.currentTarget.value); setInviteErrors(p => ({ ...p, name: undefined })); }}
-                placeholder="Nome do usuário"
+                placeholder="ex.: Maria Silva"
+                maxLength={100}
                 error={inviteErrors.name}
               />
               <TextInput
                 label="E-mail"
                 value={inviteEmail}
                 onChange={e => { setInviteEmail(e.currentTarget.value); setInviteErrors(p => ({ ...p, email: undefined })); }}
-                placeholder="email@exemplo.com.br"
+                placeholder={profile === 'lojista' ? 'nome@loja.com.br' : 'nome@empresa.com.br'}
                 error={inviteErrors.email}
               />
             <Text c="dimmed" size="sm">
@@ -179,7 +180,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             </Text>
             <Group justify="flex-end" gap="sm">
               <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default" color="neutral">Cancelar</Button>
-              <Button onClick={inviteUser} color="neutral">Enviar convite</Button>
+              <Button onClick={inviteUser} color="neutral">Enviar Convite</Button>
             </Group>
           </Stack>
           <Divider color="var(--mantine-color-default-border)" />
@@ -210,17 +211,17 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   </Group>
                 </Table.Td>
                 <Table.Td>
-                  <Select
+                  {/* Poucos perfis fixos: opções visíveis em vez de lista suspensa */}
+                  <SegmentedControl
                     value={u.profile}
-                    onChange={v => v && changeUserProfile(u.id, v)}
+                    onChange={v => changeUserProfile(u.id, v)}
                     data={availableProfiles}
-                    w={180}
+                    color="neutral"
                     aria-label={`Perfil de acesso de ${u.name}`}
-                    allowDeselect={false}
                   />
                 </Table.Td>
                 <Table.Td>
-                  <Badge color={u.status === 'ativo' ? 'green' : 'gray'} variant="light">{u.status}</Badge>
+                  <Badge color={u.status === 'ativo' ? 'teal' : 'gray'} variant="light">{u.status}</Badge>
                 </Table.Td>
                 <Table.Td>
                   <Text c="dimmed" size="sm" className="mono">
@@ -251,7 +252,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                     </Text>
                     {!showInvite && (
                       <Button onClick={() => setShowInvite(true)} variant="default" color="neutral" leftSection={<UserPlusIcon size={16} />}>
-                        Convidar usuário
+                        Convidar Usuário
                       </Button>
                     )}
                   </Stack>

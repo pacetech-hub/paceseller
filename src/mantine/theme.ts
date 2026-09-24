@@ -2,6 +2,11 @@ import { createTheme, type MantineColorsTuple } from "@mantine/core";
 
 // Escala neutra (preto/cinza) equivalente ao --primary do design atual (oklch(0 0 0)),
 // já que o app usa preto como cor de ação principal em vez de uma cor de marca saturada.
+// Paleta do app (evita cores que brigam entre si):
+// - neutral: ações, navegação e seleção (preto/cinza);
+// - blue: somente links;
+// - teal: sucesso / disponível; yellow: atenção / baixo estoque; red: erro / esgotado / excluir.
+// Cores de produto (swatches de cor do calçado) são dados, não parte da paleta de interface.
 const neutral: MantineColorsTuple = [
   "#f5f5f5",
   "#e7e7e7",
@@ -86,6 +91,8 @@ export const mantineTheme = createTheme({
     },
   },
   components: {
+    // Links sempre reconhecíveis: azul e sublinhados (nunca parecem texto comum).
+    Anchor: { defaultProps: { underline: "always", c: "blue.7" } },
     Button: {
       defaultProps: { size: CONTROL_SIZE },
       styles: { label: { fontWeight: SEMIBOLD } },

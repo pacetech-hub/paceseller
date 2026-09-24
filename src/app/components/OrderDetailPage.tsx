@@ -1,4 +1,4 @@
-import { Stack, Group, Box, Paper, Text, Title, Button, Badge, Image, ThemeIcon, Grid } from "@mantine/core";
+import { Stack, Group, Box, Paper, Text, Title, Button, Anchor, Badge, Image, ThemeIcon, Grid } from "@mantine/core";
 import { toast } from "../lib/toast";
 import classes from "./OrderDetailPage.module.css";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
@@ -69,7 +69,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
               mt="md"
               leftSection={<CaretLeftIcon size={16} />}
             >
-              Voltar para pedidos
+              Voltar para Pedidos
             </Button>
           </Stack>
         </Paper>
@@ -92,7 +92,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           ml={-12}
           leftSection={<CaretLeftIcon size={16} />}
         >
-          Voltar para pedidos
+          Voltar para Pedidos
         </Button>
       </Box>
 
@@ -174,15 +174,17 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             <Text className="mono" size="xl" fw={700}>{formatCurrency(order.total)}</Text>
             <Text c="dimmed" size="sm" mb={6}>{order.paymentCondition}</Text>
             {profile !== 'rep' && (
-              <Button
+              // Navegação para outra página: link, não botão
+              <Anchor
+                component="button"
+                type="button"
                 onClick={() => onNavigate('boletos')}
-                variant="subtle"
-                color="neutral"
-                ml={-12}
-                rightSection={<ArrowRightIcon size={16} />}
+                display="inline-flex"
+                style={{ alignItems: 'center', gap: 4 }}
               >
                 Abrir Pagamentos e Boletos
-              </Button>
+                <ArrowRightIcon size={16} />
+              </Anchor>
             )}
           </Grid.Col>
 
@@ -197,7 +199,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 variant="default"
                 leftSection={<DownloadSimpleIcon size={16} />}
               >
-                Baixar nota fiscal
+                Baixar Nota Fiscal
               </Button>
             ) : (
               <Text c="dimmed" size="sm">A nota fiscal fica disponível aqui quando o pedido for faturado.</Text>

@@ -22,7 +22,8 @@ import {
   XCircleIcon,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
-import { SimpleGrid, Grid, Paper, Group, Stack, Box, Text, ThemeIcon, Switch, Badge, Button, Progress } from "@mantine/core";
+import { SimpleGrid, Grid, Paper, Group, Stack, Box, Text, ThemeIcon, Checkbox, Badge, Button, Progress } from "@mantine/core";
+import { toast } from "../lib/toast";
 import interactive from "./interactive.module.css";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -63,24 +64,38 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
   );
 }
 
-function ToggleRow({ label, description, defaultChecked = false }: { label: string; description?: string; defaultChecked?: boolean }) {
+// Preferência de notificação: vale na hora (não há botão Salvar), por isso confirma com toast.
+// Vários itens juntos → lista de checkboxes; a linha inteira é clicável e a caixa fica na 1ª linha.
+function PreferenceRow({ label, description, defaultChecked = false }: { label: string; description?: string; defaultChecked?: boolean }) {
   return (
-    <Switch
-      color="neutral"
-      labelPosition="left"
+    <Checkbox.Card
+      withBorder={false}
       defaultChecked={defaultChecked}
+      onChange={(checked) =>
+        toast.success(
+          checked ? `Aviso "${label}" ativado` : `Aviso "${label}" desativado`,
+          checked ? 'Você passa a receber este aviso a partir de agora' : 'Você pode reativar quando quiser nesta mesma lista',
+        )
+      }
       py="xs"
-      styles={{ body: { justifyContent: 'space-between', alignItems: 'flex-start' }, labelWrapper: { flex: 1 } }}
-      label={<Text fw={600}>{label}</Text>}
-      description={description && <Text size="sm" c="dimmed">{description}</Text>}
-    />
+      mih={40}
+      className={`${interactive.rowDivider} ${interactive.hoverable}`}
+    >
+      <Group align="flex-start" wrap="nowrap" gap="sm">
+        <Checkbox.Indicator color="neutral" flex="none" />
+        <Box flex={1} miw={0}>
+          <Text fw={600}>{label}</Text>
+          {description && <Text size="sm" c="dimmed">{description}</Text>}
+        </Box>
+      </Group>
+    </Checkbox.Card>
   );
 }
 
 function StatusPill({ ok, label }: { ok: boolean; label: string }) {
   return (
     <Badge
-      color={ok ? 'green' : 'red'}
+      color={ok ? 'teal' : 'red'}
       variant="light"
       leftSection={ok ? <CheckCircleIcon size={12} /> : <XCircleIcon size={12} />}
     >
@@ -129,17 +144,17 @@ function LojistaProfile() {
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
-        <ToggleRow label="Novidades e lançamentos" description="Avise quando novas coleções estiverem disponíveis" defaultChecked />
-        <ToggleRow label="Confirmação de pedido" description="Receba um e-mail a cada pedido confirmado" defaultChecked />
-        <ToggleRow label="Status de faturamento" description="Atualizações sobre boletos e notas fiscais" defaultChecked />
-        <ToggleRow label="Campanhas e ofertas" description="Promoções pontuais da indústria" />
+        <PreferenceRow label="Novidades e lançamentos" description="Avise quando novas coleções estiverem disponíveis" defaultChecked />
+        <PreferenceRow label="Confirmação de pedido" description="Receba um e-mail a cada pedido confirmado" defaultChecked />
+        <PreferenceRow label="Status de faturamento" description="Atualizações sobre boletos e notas fiscais" defaultChecked />
+        <PreferenceRow label="Campanhas e ofertas" description="Promoções pontuais da indústria" />
       </Section>
 
       <Section icon={LockIcon} title="Senha e acesso">
         <Field label="E-mail de acesso" value="compras@bellamoda.com.br" />
         <Field label="Última alteração de senha" value="há 3 meses" />
         <Button variant="default" color="neutral" mt="sm" mr="auto">
-          Alterar senha
+          Alterar Senha
         </Button>
       </Section>
     </SimpleGrid>
@@ -172,7 +187,7 @@ function RepProfile() {
             <Text c="dimmed" size="sm">Ativas</Text>
           </Paper>
           <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
-            <Text c="orange" fw={700} size="xl">5</Text>
+            <Text c="yellow.8" fw={700} size="xl">5</Text>
             <Text c="dimmed" size="sm">Inativas</Text>
           </Paper>
           <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
@@ -192,10 +207,10 @@ function RepProfile() {
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
-        <ToggleRow label="Novos pedidos da carteira" description="Quando uma loja sua finalizar pedido" defaultChecked />
-        <ToggleRow label="Alertas de meta" description="Avisos semanais sobre avanço de meta" defaultChecked />
-        <ToggleRow label="Clientes inativos" description="Quando uma loja ficar 30d sem pedido" defaultChecked />
-        <ToggleRow label="Novidades de catálogo" description="Lançamentos e reposições" />
+        <PreferenceRow label="Novos pedidos da carteira" description="Quando uma loja sua finalizar pedido" defaultChecked />
+        <PreferenceRow label="Alertas de meta" description="Avisos semanais sobre avanço de meta" defaultChecked />
+        <PreferenceRow label="Clientes inativos" description="Quando uma loja ficar 30d sem pedido" defaultChecked />
+        <PreferenceRow label="Novidades de catálogo" description="Lançamentos e reposições" />
       </Section>
 
       <Section icon={LockIcon} title="Senha e acesso">
@@ -203,7 +218,7 @@ function RepProfile() {
         <Field label="Última alteração de senha" value="há 1 mês" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Ativa" />} />
         <Button variant="default" color="neutral" mt="sm" mr="auto">
-          Alterar senha
+          Alterar Senha
         </Button>
       </Section>
     </SimpleGrid>
@@ -276,7 +291,7 @@ function AdminProfile() {
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Obrigatória" />} />
         <Field label="Sessões ativas" value="2 dispositivos" />
         <Button variant="default" color="neutral" mt="sm" mr="auto">
-          Alterar senha
+          Alterar Senha
         </Button>
       </Section>
     </SimpleGrid>

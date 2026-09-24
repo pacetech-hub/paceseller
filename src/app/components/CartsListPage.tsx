@@ -145,11 +145,11 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           <Button
             onClick={() => canCreate && setNewOpen(true)}
             disabled={!canCreate}
-            title={canCreate ? 'Criar novo carrinho' : 'Selecione um cliente para criar um carrinho'}
+            title={canCreate ? 'Criar Novo Carrinho' : 'Selecione um cliente para criar um carrinho'}
             leftSection={<PlusIcon size={16} />}
             w={{ base: '100%', xs: 'auto' }}
           >
-            Criar carrinho
+            Criar Carrinho
           </Button>
         )}
       </Group>
@@ -166,13 +166,13 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
               <Text c="dimmed" size="sm">Busque pelo nome ou abra sua carteira de clientes.</Text>
             </Box>
           </Group>
-          <Group gap={8} align="stretch" wrap="wrap">
+          <Group gap="sm" align="stretch" wrap="wrap">
             <Popover opened={!!clientQuery} width="target" position="bottom-start" offset={4} shadow="md">
               <Popover.Target>
                 <TextInput
                   value={clientQuery}
                   onChange={e => setClientQuery(e.currentTarget.value)}
-                  placeholder="Buscar cliente por nome ou código..."
+                  placeholder="Buscar cliente por nome ou código (ex.: CLI-001)"
                   leftSection={<MagnifyingGlassIcon size={14} />}
                   flex={{ base: '1 1 100%', sm: 1 }}
                   miw={{ sm: 220 }}
@@ -209,7 +209,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             </Popover>
             {onNavigateClients && (
               <Button onClick={onNavigateClients} variant="default" w={{ base: '100%', sm: 'auto' }} leftSection={<UsersIcon size={14} />}>
-                Buscar clientes em carteira
+                Buscar Clientes em Carteira
               </Button>
             )}
           </Group>
@@ -254,11 +254,13 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             label="Nome do carrinho"
             value={newName}
             onChange={e => setNewName(e.currentTarget.value)}
-            placeholder="Ex.: Reposição Inverno 26"
+            placeholder="ex.: Reposição Inverno 26"
+            maxLength={60}
+            description="Até 60 caracteres"
           />
-          <Group justify="flex-end" gap={8} mt="sm">
+          <Group justify="flex-end" gap="sm" mt="sm">
             <Button onClick={() => setNewOpen(false)} variant="default">Cancelar</Button>
-            <Button onClick={handleCreate}>Criar e abrir carrinho</Button>
+            <Button onClick={handleCreate}>Criar e Abrir Carrinho</Button>
           </Group>
         </Paper>
       )}
@@ -266,7 +268,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
       <TextInput
         value={q}
         onChange={e => setQ(e.currentTarget.value)}
-        placeholder="Buscar por cliente ou nome do carrinho..."
+        placeholder="Buscar por nome do cliente ou do carrinho"
         leftSection={<MagnifyingGlassIcon size={14} />}
         maw={448}
         mb="lg"
@@ -323,13 +325,13 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                 </Group>
               </UnstyledButton>
               <Divider color="var(--mantine-color-default-border)" />
-              <Group gap={8} p="md" pt="sm" grow>
+              <Group gap="sm" p="md" pt="sm" grow>
                 <Button onClick={() => onOpenCart(ctx)} variant="default" leftSection={<EyeIcon size={14} />}>
-                  Abrir carrinho
+                  Abrir Carrinho
                 </Button>
                 {onGoToCatalog && (
                   <Button onClick={() => onGoToCatalog(ctx)} leftSection={<ShoppingBagIcon size={14} />}>
-                    Adicionar produtos
+                    Adicionar Produtos
                   </Button>
                 )}
               </Group>
@@ -353,17 +355,17 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           {/* Ações para sair do estado vazio: secundária à esquerda, principal à direita */}
           <Group gap="sm" justify="center" mt="sm">
             {q ? (
-              <Button onClick={() => setQ('')} variant="default">Limpar busca</Button>
+              <Button onClick={() => setQ('')} variant="default">Limpar Busca</Button>
             ) : (
               <>
                 {!lockClient && selectedClient && !showAll && (
                   <Button onClick={() => setShowAll(true)} variant="default" leftSection={<ArrowsLeftRightIcon size={16} />}>
-                    Ver todos os clientes
+                    Ver Todos os Clientes
                   </Button>
                 )}
                 {canCreate && !newOpen && (
                   <Button onClick={() => setNewOpen(true)} leftSection={<PlusIcon size={16} />}>
-                    Criar carrinho
+                    Criar Carrinho
                   </Button>
                 )}
               </>

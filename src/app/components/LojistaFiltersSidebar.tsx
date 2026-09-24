@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Accordion, ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Divider, Drawer, Group, Image,
-  ScrollArea, Select, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
+  Radio, ScrollArea, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -24,6 +24,7 @@ import type { Client } from "../data/mockData";
 import { products, formatCurrency } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 import classes from "./LojistaFiltersSidebar.module.css";
+import interactive from "./interactive.module.css";
 
 export type CatalogFilters = {
   search: string;
@@ -102,7 +103,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
   const renderChips = (options: string[], value: string, onSelect: (v: string) => void) => (
     <Chip.Group multiple={false} value={value} onChange={onSelect}>
-      <Group gap={6}>
+      <Group gap="sm">
         {options.map(o => (
           <Chip
             key={o}
@@ -162,27 +163,39 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         </Stack>
       ) : (
         <>
-          {/* Tabela de Preço */}
+          {/* Tabela de Preço — 4 opções fixas: lista de rádios com descrição em vez de lista suspensa */}
           <Box px="sm" py="sm" flex="none">
-            <Group gap={6} mb={6} wrap="nowrap">
-              <CurrencyDollarIcon size={16} />
-              <Text lh={1.5} c="dimmed" size="sm" fw={600}>
-                Tabela de preço
-              </Text>
-            </Group>
-            <Select
-              aria-label="Tabela de preço"
-              allowDeselect={false}
+            <Radio.Group
+              name="tabela-preco"
               value={filters.priceTable}
-              onChange={v => v && onChange({ ...filters, priceTable: v })}
-              data={priceTables.map(t => ({ value: t.id, label: `${t.label} — ${t.desc}` }))}
-              comboboxProps={{ withinPortal: true }}
-            />
+              onChange={v => onChange({ ...filters, priceTable: v })}
+              label={
+                <Group gap={6} wrap="nowrap" component="span">
+                  <CurrencyDollarIcon size={16} />
+                  <span>Tabela de preço</span>
+                </Group>
+              }
+            >
+              <Stack gap={4} mt={6}>
+                {priceTables.map(t => (
+                  <Radio.Card key={t.id} value={t.id} px="sm" py={8} className={interactive.choiceCard}>
+                    {/* indicador alinhado à primeira linha do texto */}
+                    <Group align="flex-start" gap="sm" wrap="nowrap">
+                      <Radio.Indicator color="neutral" mt={2} />
+                      <Box flex={1} miw={0}>
+                        <Text lh={1.5} fw={600}>{t.label}</Text>
+                        <Text lh={1.5} c="dimmed" size="sm">{t.desc}</Text>
+                      </Box>
+                    </Group>
+                  </Radio.Card>
+                ))}
+              </Stack>
+            </Radio.Group>
           </Box>
           <Divider color={BORDER_COLOR} />
 
           {/* Em 280px o "Limpar filtros" pode descer para a linha de baixo */}
-          <Group px="md" pt="md" pb={8} justify="space-between" gap={4} flex="none">
+          <Group px="md" pt="md" pb={8} justify="space-between" gap="sm" flex="none">
             <Group gap={8} wrap="nowrap">
               <FunnelIcon size={18} />
               <Text lh={1.5} fw={600}>Filtros</Text>
@@ -199,7 +212,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
                 color="gray"
                 leftSection={<XIcon size={16} />}
               >
-                Limpar filtros
+                Limpar Filtros
               </Button>
             )}
           </Group>
@@ -209,7 +222,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             <TextInput
               value={filters.search}
               onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
-              placeholder="Buscar produto..."
+              placeholder="Buscar por nome, referência ou linha"
               aria-label="Buscar produto"
               leftSection={<MagnifyingGlassIcon size={18} />}
             />
@@ -305,7 +318,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             <ThemeIcon
               size={36}
               variant="light"
-              color={profile === 'rep' ? 'yellow' : 'teal'}
+              color="neutral"
             >
               {profile === 'rep' ? <UsersIcon size={18} /> : <StorefrontIcon size={18} />}
             </ThemeIcon>
