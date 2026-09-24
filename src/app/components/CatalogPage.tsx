@@ -2,8 +2,8 @@ import { useState } from "react";
 import { toast } from "../lib/toast";
 import { useSmallerThan } from "../lib/responsive";
 import {
-  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
-  Paper, ScrollArea, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, Tooltip, UnstyledButton,
+  ActionIcon, Badge, Box, Button, Card, Chip, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
+  Paper, ScrollArea, SegmentedControl, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
@@ -40,13 +40,10 @@ function CartCreatorTag({ createdBy }: { createdBy?: CartCreator }) {
   const isLojista = createdBy === 'lojista';
   return (
     <Badge
-      mt={2}
-      size="xs"
-      radius="sm"
+      mt={4}
       variant="light"
       color={isLojista ? 'teal' : 'yellow'}
-      leftSection={isLojista ? <StorefrontIcon size={10} /> : <UserCheckIcon size={10} />}
-      styles={{ label: { textTransform: 'none', fontSize: '0.62rem', fontWeight: 600 } }}
+      leftSection={isLojista ? <StorefrontIcon size={14} /> : <UserCheckIcon size={14} />}
     >
       {isLojista ? 'Lojista' : 'Representante'}
     </Badge>
@@ -87,34 +84,34 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map(s => (
         <StarIcon
           key={s}
-          size={12}
+          size={14}
           weight={s <= Math.round(rating) ? 'fill' : 'regular'}
           color={s <= Math.round(rating) ? 'var(--mantine-color-yellow-5)' : DIMMED}
           opacity={s <= Math.round(rating) ? 1 : 0.3}
         />
       ))}
-      <Text lh={1.5} c="dimmed" ml={4} size="0.68rem">{rating}</Text>
+      <Text lh={1.5} c="dimmed" ml={4} size="sm">{rating}</Text>
     </Group>
   );
 }
 
-function QtyStepper({ value, onChange, buttonSize, inputWidth = 32 }: { value: number; onChange: (v: number) => void; buttonSize: number; inputWidth?: number }) {
+// Stepper de quantidade: botões de 36px (área de clique confortável também no desktop)
+function QtyStepper({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <Group gap={2} wrap="nowrap">
-      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value - 1)} aria-label="Diminuir quantidade">
-        <MinusIcon size={Math.round(buttonSize * 0.6)} />
+    <Group gap={4} wrap="nowrap">
+      <ActionIcon size="input-sm" variant="default" onClick={() => onChange(value - 1)} aria-label="Diminuir quantidade">
+        <MinusIcon size={16} />
       </ActionIcon>
       <NumberInput
         value={value}
         onChange={v => onChange(Number(v) || 0)}
         hideControls
-        w={inputWidth}
-        size="xs"
+        w={56}
         aria-label="Quantidade"
-        styles={{ input: { textAlign: 'center', fontSize: '0.72rem', fontWeight: 600, minHeight: 0, height: 22, paddingInline: 2 } }}
+        styles={{ input: { textAlign: 'center', fontWeight: 600, height: 36, minHeight: 36, paddingInline: 4 } }}
       />
-      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value + 1)} aria-label="Aumentar quantidade">
-        <PlusIcon size={Math.round(buttonSize * 0.6)} />
+      <ActionIcon size="input-sm" variant="default" onClick={() => onChange(value + 1)} aria-label="Aumentar quantidade">
+        <PlusIcon size={16} />
       </ActionIcon>
     </Group>
   );
@@ -123,12 +120,12 @@ function QtyStepper({ value, onChange, buttonSize, inputWidth = 32 }: { value: n
 function GradeHeader({ onClose }: { onClose?: () => void }) {
   return (
     <Group justify="space-between" mb={8} wrap="nowrap">
-      <Text lh={1.5} size="0.72rem" fw={600} tt="uppercase" lts="0.04em">
-        Compra rápida — Grade
+      <Text lh={1.5} fw={600}>
+        Compra rápida — grade
       </Text>
       {onClose && (
-        <ActionIcon onClick={onClose} variant="subtle" color="gray" size="sm" aria-label="Fechar compra rápida">
-          <XIcon size={14} />
+        <ActionIcon onClick={onClose} variant="subtle" color="gray" aria-label="Fechar compra rápida">
+          <XIcon size={18} />
         </ActionIcon>
       )}
     </Group>
@@ -153,29 +150,29 @@ function GradeCompact({ product, onAdd, onClose }: {
         <GradeHeader onClose={onClose} />
         <Stack gap={4}>
           {sizes.map(s => (
-            <Paper key={s} radius="md" px={8} py={4}>
-              <Group justify="space-between" wrap="nowrap">
-                <Group gap={8} wrap="nowrap">
-                  <Text lh={1.5} size="0.78rem" fw={600}>Nº {s}</Text>
-                  <Text lh={1.5} c="teal.6" size="0.65rem">{product.grades[s]} disp.</Text>
-                </Group>
-                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={20} />
+            <Paper key={s} px={8} py={4}>
+              {/* Em cards estreitos o stepper desce para baixo da numeração em vez de estourar */}
+              <Group justify="space-between" gap={4}>
+                <Box>
+                  <Text lh={1.5} fw={600}>Nº {s}</Text>
+                  <Text lh={1.5} c="teal.6" size="sm">{product.grades[s]} disp.</Text>
+                </Box>
+                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} />
               </Group>
             </Paper>
           ))}
         </Stack>
         <Group justify="space-between" mt={8} mb={8}>
-          <Text lh={1.5} c="dimmed" size="0.7rem">
+          <Text lh={1.5} c="dimmed" size="sm">
             {total} {total === 1 ? 'par' : 'pares'}
           </Text>
-          <Text lh={1.5} className="mono" size="0.85rem" fw={700}>{formatCurrency(subtotal)}</Text>
+          <Text lh={1.5} className="mono" fw={700}>{formatCurrency(subtotal)}</Text>
         </Group>
         <Button
           fullWidth
           onClick={() => onAdd(qtys)}
           disabled={total === 0}
-          leftSection={<ShoppingCartIcon size={14} />}
-          styles={{ label: { fontSize: '0.78rem' } }}
+          leftSection={<ShoppingCartIcon size={18} />}
         >
           Adicionar ao carrinho
         </Button>
@@ -183,6 +180,11 @@ function GradeCompact({ product, onAdd, onClose }: {
     </>
   );
 }
+
+// larguras da grade: rótulo · uma coluna por numeração (cabe o stepper de 36px) · total
+const GRADE_LABEL_W = 110;
+const GRADE_COL_W = 148;
+const GRADE_TOTAL_W = 70;
 
 function GradeInline({ product, onAdd, onClose }: {
   product: Product; onAdd: (qtys: Record<string, number>) => void; onClose?: () => void;
@@ -195,9 +197,8 @@ function GradeInline({ product, onAdd, onClose }: {
   const subtotal = total * product.price;
   const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
 
-  // colunas: rótulo (90px) · uma por numeração, de largura igual · total (60px)
   const rowLabel = (text: string) => (
-    <Text lh={1.5} w={90} flex="none" px={8} py={6} c="dimmed" size="0.62rem" fw={600} tt="uppercase" lts="0.05em">{text}</Text>
+    <Text lh={1.5} w={GRADE_LABEL_W} flex="none" px={8} py={8} c="dimmed" size="sm" fw={600}>{text}</Text>
   );
 
   return (
@@ -206,24 +207,24 @@ function GradeInline({ product, onAdd, onClose }: {
       <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
         <GradeHeader onClose={onClose} />
 
-        {/* Em telas estreitas a grade rola na horizontal em vez de espremer os steppers */}
+        {/* A grade rola na horizontal quando não cabe, em vez de espremer os steppers */}
         <ScrollArea type="auto" offsetScrollbars="x">
-        <Card withBorder radius="md" padding={0} miw={150 + sizes.length * 66}>
+        <Card withBorder padding={0} miw={GRADE_LABEL_W + GRADE_TOTAL_W + sizes.length * GRADE_COL_W}>
           <Group gap={0} wrap="nowrap" bg="var(--mantine-color-default-hover)">
             {rowLabel('Numeração')}
             {sizes.map(s => (
-              <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" size="0.72rem" fw={600}>Nº {s}</Text>
+              <Text lh={1.5} key={s} flex={1} miw={GRADE_COL_W} px={4} py={8} ta="center" fw={600}>Nº {s}</Text>
             ))}
-            <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.62rem" fw={600} tt="uppercase" lts="0.05em">Total</Text>
+            <Text lh={1.5} w={GRADE_TOTAL_W} flex="none" px={4} py={8} ta="center" c="dimmed" size="sm" fw={600}>Total</Text>
           </Group>
           <Divider color={BORDER_COLOR} />
 
           <Group gap={0} wrap="nowrap">
             {rowLabel('Estoque')}
             {sizes.map(s => (
-              <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" c="teal.6" size="0.72rem" fw={600}>{product.grades[s]}</Text>
+              <Text lh={1.5} key={s} flex={1} miw={GRADE_COL_W} px={4} py={8} ta="center" c="teal.6" fw={600}>{product.grades[s]}</Text>
             ))}
-            <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.7rem">
+            <Text lh={1.5} w={GRADE_TOTAL_W} flex="none" px={4} py={8} ta="center" c="dimmed">
               {Object.values(product.grades).reduce((a, b) => a + b, 0)}
             </Text>
           </Group>
@@ -232,24 +233,23 @@ function GradeInline({ product, onAdd, onClose }: {
           <Group gap={0} wrap="nowrap">
             {rowLabel('Quantidade')}
             {sizes.map(s => (
-              <Group key={s} flex={1} miw={0} px={4} py={6} gap={2} justify="center" wrap="nowrap">
-                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={16} inputWidth={26} />
+              <Group key={s} flex={1} miw={GRADE_COL_W} px={4} py={8} justify="center" wrap="nowrap">
+                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} />
               </Group>
             ))}
-            <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" className="mono" size="0.78rem" fw={700}>{total}</Text>
+            <Text lh={1.5} w={GRADE_TOTAL_W} flex="none" px={4} py={8} ta="center" className="mono" fw={700}>{total}</Text>
           </Group>
         </Card>
         </ScrollArea>
 
-        <Group justify="flex-end" gap="sm" mt={8} mb={4} wrap="nowrap">
-          <Text lh={1.5} c="dimmed" size="0.7rem">
-            {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" size="0.85rem" fw={700}>{formatCurrency(subtotal)}</Text>
+        <Group justify="flex-end" gap="sm" mt={8} mb={4}>
+          <Text lh={1.5} c="dimmed" size="sm">
+            {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" fw={700}>{formatCurrency(subtotal)}</Text>
           </Text>
           <Button
             onClick={() => onAdd(qtys)}
             disabled={total === 0}
-            leftSection={<ShoppingCartIcon size={14} />}
-            styles={{ label: { fontSize: '0.78rem' } }}
+            leftSection={<ShoppingCartIcon size={18} />}
           >
             Adicionar ao carrinho
           </Button>
@@ -281,13 +281,13 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
 
   if (viewMode === 'list') {
     return (
-      <Card withBorder radius="lg" padding={0}>
+      <Card withBorder padding={0}>
         {/* Abaixo de sm o bloco de preço/ações desce para uma linha própria */}
         <Flex p={{ base: 'sm', sm: 'md' }} gap={{ base: 'sm', sm: 'md' }} wrap={{ base: 'wrap', sm: 'nowrap' }} align="center">
           <UnstyledButton onClick={onOpenDetail} w={{ base: 64, sm: 80 }} h={{ base: 64, sm: 80 }} flex="none">
-            <Paper radius="md" bg="#fff" h="100%">
+            <Paper bg="#fff" h="100%">
               {!imgError ? (
-                <Image src={product.image} alt={product.name} h="100%" radius="md" onError={() => setImgError(true)} />
+                <Image src={product.image} alt={product.name} h="100%" onError={() => setImgError(true)} />
               ) : (
                 <Group w="100%" h="100%" justify="center">
                   <PackageIcon size={24} color={DIMMED} opacity={0.4} />
@@ -298,16 +298,16 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
           <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
             <Group gap={8} align="flex-start" wrap="nowrap">
               <Box flex={1} miw={0}>
-                <Text lh={1.5} c="dimmed" size="0.7rem" fw={600}>{product.reference}</Text>
-                <Text lh={1.5} size="0.9rem" fw={600}>{product.name}</Text>
-                <Text lh={1.5} c="dimmed" size="0.75rem">{product.line} · {product.category} · {product.collection}</Text>
+                <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.reference}</Text>
+                <Text lh={1.5} fw={600}>{product.name}</Text>
+                <Text lh={1.5} c="dimmed" size="sm">{product.line} · {product.category} · {product.collection}</Text>
               </Box>
               <Box visibleFrom="xs"><StarRating rating={product.rating} /></Box>
             </Group>
             <Group gap="sm" mt={8}>
-              <Badge variant="light" color={availBadgeColor} size="sm" styles={{ label: { textTransform: 'none', fontSize: '0.65rem', fontWeight: 600 } }}>{product.availability}</Badge>
-              <Text lh={1.5} c="dimmed" size="0.72rem">{product.material}</Text>
-              <Text lh={1.5} c="dimmed" size="0.72rem">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
+              <Badge variant="light" color={availBadgeColor}>{product.availability}</Badge>
+              <Text lh={1.5} c="dimmed" size="sm">{product.material}</Text>
+              <Text lh={1.5} c="dimmed" size="sm">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
             </Group>
           </UnstyledButton>
           <Flex
@@ -315,30 +315,30 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             direction={{ base: 'row', sm: 'column' }}
             align={{ base: 'center', sm: 'flex-end' }}
             justify="space-between"
+            wrap="wrap"
             w={{ base: '100%', sm: 'auto' }}
             flex="none"
           >
             <Box ta={{ base: 'left', sm: 'right' }}>
-              <Text lh={1.5} className="mono" size="1.1rem" fw={700} lts="-0.01em">{formatCurrency(product.price)}</Text>
-              <Text lh={1.5} c="dimmed" td="line-through" size="0.75rem">{formatCurrency(product.priceRetail)}</Text>
-              <Text lh={1.5} c={PRIMARY_TEXT} size="0.65rem" fw={600}>+ IVA</Text>
+              <Text lh={1.5} className="mono" size="lg" fw={700}>{formatCurrency(product.price)}</Text>
+              <Text lh={1.5} c="dimmed" td="line-through" size="sm">{formatCurrency(product.priceRetail)}</Text>
+              <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
             </Box>
-            <Group gap={8} wrap="nowrap">
-              <ActionIcon
+            {/* Secundária (favoritar) à esquerda, principal (compra rápida) à direita */}
+            <Group gap={8} justify="flex-end">
+              <Button
                 onClick={onToggleFav}
-                size={32}
                 variant={product.isFavorite ? 'light' : 'default'}
                 color={product.isFavorite ? 'red' : 'gray'}
-                aria-label={product.isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />}
+                aria-pressed={product.isFavorite}
               >
-                <HeartIcon size={14} weight={product.isFavorite ? 'fill' : 'regular'} />
-              </ActionIcon>
+                {product.isFavorite ? 'Favoritado' : 'Favoritar'}
+              </Button>
               <Button
                 onClick={onQuickBuy}
                 disabled={product.availability === 'esgotado'}
-                size="compact-md"
-                leftSection={<LightningIcon size={14} />}
-                styles={{ label: { fontSize: '0.78rem' } }}
+                leftSection={<LightningIcon size={18} />}
               >
                 Compra rápida
               </Button>
@@ -353,7 +353,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
   }
 
   return (
-    <Card withBorder radius="lg" padding={0} className={classes.card}>
+    <Card withBorder padding={0} className={classes.card}>
       <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" mb={-12} bg="white">
         {!imgError ? (
           <Image
@@ -373,15 +373,21 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             <PackageIcon size={40} color={DIMMED} opacity={0.3} />
           </Group>
         )}
+        {/* Favoritar com ícone + texto, compacto para caber no card estreito */}
         <Box
           component="span"
           onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleFav(); }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onToggleFav(); }
+          }}
           className={classes.favToggle}
           data-active={product.isFavorite || undefined}
           role="button"
-          aria-label={product.isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          tabIndex={0}
+          aria-pressed={!!product.isFavorite}
         >
-          <HeartIcon size={14} weight={product.isFavorite ? 'fill' : 'regular'} />
+          <HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />
+          {product.isFavorite ? 'Favoritado' : 'Favoritar'}
         </Box>
         <Box className={classes.overlay}>
           <Box
@@ -389,7 +395,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             onClick={(e: React.MouseEvent) => { e.stopPropagation(); onOpenDetail(); }}
             className={`${classes.overlayAction} ${classes.overlayDetails}`}
           >
-            <EyeIcon size={14} /> Detalhes
+            <EyeIcon size={18} /> Detalhes
           </Box>
           <Box
             component="span"
@@ -397,40 +403,40 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             className={`${classes.overlayAction} ${classes.overlayBuy}`}
             data-disabled={product.availability === 'esgotado' || undefined}
           >
-            <LightningIcon size={14} /> Compra rápida
+            <LightningIcon size={18} /> Compra rápida
           </Box>
         </Box>
       </UnstyledButton>
 
       <UnstyledButton onClick={onOpenDetail} display="block" w="100%" p="sm">
-        <Badge variant="light" color={availBadgeColor} size="sm" mb={8} styles={{ label: { textTransform: 'none', fontSize: '0.62rem', fontWeight: 600 } }}>
+        <Badge variant="light" color={availBadgeColor} mb={8}>
           {product.availability}
         </Badge>
-        <Text lh={1.5} c="dimmed" size="0.68rem" fw={600} tt="uppercase" lts="0.05em">{product.line} · {product.reference}</Text>
-        <Text lh={1.5} mt={2} truncate size="0.95rem" fw={600}>{product.name}</Text>
-        <Text lh={1.5} c="dimmed" size="0.75rem">{product.material}</Text>
+        <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
+        <Text lh={1.5} mt={2} truncate fw={600}>{product.name}</Text>
+        <Text lh={1.5} c="dimmed" size="sm">{product.material}</Text>
 
         <Group justify="space-between" mt={8} gap={4} wrap="nowrap">
           <StarRating rating={product.rating} />
-          <Text lh={1.5} c="dimmed" size="0.68rem" flex="none" visibleFrom="xs">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
+          <Text lh={1.5} c="dimmed" size="sm" flex="none" visibleFrom="xs">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
         </Group>
 
         <Divider mt="sm" color={BORDER_COLOR} />
         <Group justify="space-between" pt="sm" wrap="nowrap">
           <Box>
-            <Text lh={1.5} className="mono" size="1rem" fw={700}>{formatCurrency(product.price)}</Text>
-            <Text lh={1.5} c="dimmed" td="line-through" size="0.72rem">{formatCurrency(product.priceRetail)}</Text>
-            <Text lh={1.5} c={PRIMARY_TEXT} size="0.62rem" fw={600}>+ IVA</Text>
+            <Text lh={1.5} className="mono" fw={700}>{formatCurrency(product.price)}</Text>
+            <Text lh={1.5} c="dimmed" td="line-through" size="sm">{formatCurrency(product.priceRetail)}</Text>
+            <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
           </Box>
           {/* Nos cards estreitos do celular (2 colunas) as cores ficam só no detalhe */}
           <Group gap={6} wrap="nowrap" visibleFrom="sm">
             {product.colors.slice(0, 3).map(color => (
-              <Text lh={1.5} key={color} c="dimmed" size="0.62rem">
+              <Text lh={1.5} key={color} c="dimmed" size="sm">
                 {color === product.colors[0] ? color : '·'}
               </Text>
             ))}
             {product.colors.length > 1 && (
-              <Text lh={1.5} c="dimmed" size="0.62rem">+{product.colors.length - 1}</Text>
+              <Text lh={1.5} c="dimmed" size="sm">+{product.colors.length - 1}</Text>
             )}
           </Group>
         </Group>
@@ -464,11 +470,11 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
       centered
       size="56rem"
       fullScreen={fullScreen}
-      radius={fullScreen ? 0 : 'xl'}
+      radius={fullScreen ? 0 : undefined}
       padding={0}
       overlayProps={{ backgroundOpacity: 0.7 }}
       title={
-        <Text lh={1.5} component="span" c="dimmed" size="0.72rem" fw={600} tt="uppercase" lts="0.06em">
+        <Text lh={1.5} component="span" c="dimmed" size="sm" fw={600}>
           {product.line} · {product.reference}
         </Text>
       }
@@ -481,7 +487,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
       <Box className={classes.detailBody}>
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
           <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
-            <Paper pos="relative" w="100%" pt="90%" radius="lg" bg="#fff">
+            <Paper pos="relative" w="100%" pt="90%" bg="#fff">
               <Image src={images[activeImg].src} alt={`${product.name} — vista ${images[activeImg].label.toLowerCase()}`} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
             </Paper>
             <Group gap={8} role="tablist" aria-label="Vistas do produto">
@@ -497,7 +503,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                   <Box className={classes.thumb}>
                     <Image src={img.src} alt="" h="100%" />
                   </Box>
-                  <Text lh={1.5} ta="center" size="0.72rem" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
+                  <Text lh={1.5} ta="center" size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
                     {img.label}
                   </Text>
                 </UnstyledButton>
@@ -507,44 +513,44 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
           <Stack gap="md" p={{ base: 'md', sm: 'lg' }}>
             <Box>
               <Group justify="space-between" align="flex-start" gap={8} wrap="nowrap">
-                <Title order={2} size="1.4rem" fw={700} lts="-0.01em">{product.name}</Title>
-                <ActionIcon
+                <Title order={2}>{product.name}</Title>
+                <Button
                   onClick={onToggleFav}
-                  size={36}
                   variant={isFavorite ? 'light' : 'default'}
                   color={isFavorite ? 'red' : 'gray'}
                   flex="none"
-                  aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                  leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />}
+                  aria-pressed={isFavorite}
                 >
-                  <HeartIcon size={16} weight={isFavorite ? 'fill' : 'regular'} />
-                </ActionIcon>
+                  {isFavorite ? 'Favoritado' : 'Favoritar'}
+                </Button>
               </Group>
               <Group gap="sm" mt={4}>
                 <StarRating rating={product.rating} />
-                <Text lh={1.5} c="dimmed" size="0.75rem">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
+                <Text lh={1.5} c="dimmed" size="sm">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
               </Group>
             </Box>
             <Group gap="sm" align="baseline">
-              <Text lh={1.5} className="mono" size="1.8rem" fw={700} lts="-0.02em">{formatCurrency(product.price)}</Text>
-              <Text lh={1.5} c="dimmed" td="line-through" size="0.9rem">{formatCurrency(product.priceRetail)}</Text>
-              <Text lh={1.5} c={PRIMARY_TEXT} size="0.72rem" fw={600}>+ IVA</Text>
+              <Text lh={1.5} className="mono" size="xl" fw={700}>{formatCurrency(product.price)}</Text>
+              <Text lh={1.5} c="dimmed" td="line-through">{formatCurrency(product.priceRetail)}</Text>
+              <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
             </Group>
-            <Text size="0.85rem" lh={1.6}>{product.description}</Text>
+            <Text lh={1.6}>{product.description}</Text>
             <SimpleGrid cols={2} spacing="sm">
               <Box>
-                <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" lts="0.05em">Material</Text>
-                <Text lh={1.5} mt={2} size="0.85rem" fw={600}>{product.material}</Text>
+                <Text lh={1.5} c="dimmed" size="sm">Material</Text>
+                <Text lh={1.5} mt={2} fw={600}>{product.material}</Text>
               </Box>
               <Box>
-                <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" lts="0.05em">Coleção</Text>
-                <Text lh={1.5} mt={2} size="0.85rem" fw={600}>{product.collection}</Text>
+                <Text lh={1.5} c="dimmed" size="sm">Coleção</Text>
+                <Text lh={1.5} mt={2} fw={600}>{product.collection}</Text>
               </Box>
             </SimpleGrid>
             <Box>
-              <Text lh={1.5} c="dimmed" mb={6} size="0.7rem" tt="uppercase" lts="0.05em">Cores</Text>
+              <Text lh={1.5} c="dimmed" mb={6} size="sm">Cores</Text>
               <Group gap={6}>
                 {product.colors.map(c => (
-                  <Badge key={c} variant="light" color="gray" size="lg" styles={{ label: { textTransform: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--mantine-color-text)' } }}>{c}</Badge>
+                  <Badge key={c} variant="light" color="gray">{c}</Badge>
                 ))}
               </Group>
             </Box>
@@ -565,25 +571,24 @@ function CartOption({ cart, selected, onClick }: { cart: CartContext; selected: 
       type="button"
       onClick={onClick}
       withBorder
-      radius="md"
       p="sm"
       className={`${interactive.cardButton} ${interactive.choiceCard}`}
       data-checked={selected || undefined}
     >
       <Group gap="sm" wrap="nowrap">
-        <ThemeIcon size={32} radius="md" variant="light" color="neutral">
-          <ShoppingCartIcon size={14} />
+        <ThemeIcon size={36} variant="light" color="neutral">
+          <ShoppingCartIcon size={18} />
         </ThemeIcon>
         <Box flex={1} miw={0}>
-          <Text lh={1.5} truncate size="0.85rem" fw={600}>{cart.cartName}</Text>
+          <Text lh={1.5} truncate fw={600}>{cart.cartName}</Text>
           <Group gap={4} wrap="nowrap">
-            <StorefrontIcon size={10} color={DIMMED} />
-            <Text lh={1.5} c="dimmed" size="0.7rem">{cart.clientName}</Text>
+            <StorefrontIcon size={14} color={DIMMED} />
+            <Text lh={1.5} c="dimmed" size="sm">{cart.clientName}</Text>
           </Group>
           <CartCreatorTag createdBy={cart.createdBy} />
         </Box>
         {selected && (
-          <Text lh={1.5} c={PRIMARY_TEXT} size="0.65rem" fw={700} tt="uppercase" lts="0.05em">Atual</Text>
+          <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={700}>Atual</Text>
         )}
       </Group>
     </Paper>
@@ -619,7 +624,10 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   const commitAdd = (p: Product, qtys: Record<string, number>, cartName?: string) => {
     const total = Object.values(qtys).reduce((a, b) => a + b, 0);
     setGradeOpenId(null);
-    toast.success(`${total} ${total === 1 ? 'par' : 'pares'} de ${p.name} adicionados${cartName ? ` em "${cartName}"` : ''}`);
+    toast.success(
+      `${total} ${total === 1 ? 'par' : 'pares'} de ${p.name} adicionados${cartName ? ` em "${cartName}"` : ' ao carrinho'}`,
+      'Revise as quantidades e envie o pedido em Carrinho',
+    );
   };
   const addGrade = (p: Product, qtys: Record<string, number>) => {
     const total = Object.values(qtys).reduce((a, b) => a + b, 0);
@@ -687,20 +695,21 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   };
 
   const hasActiveFilters = selectedLine !== 'Todos' || selectedCategory !== 'Todos' || selectedCollection !== 'Todas';
+  const clearInternalFilters = () => { setSelectedLine('Todos'); setSelectedCategory('Todos'); setSelectedCollection('Todas'); };
+  const canClearFromEmpty = !!search || (!usingExternal && hasActiveFilters);
 
   const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void) => (
     <Box>
-      <Text lh={1.5} c="dimmed" mb={8} size="0.75rem" fw={600}>{label}</Text>
+      <Text lh={1.5} mb={8} fw={600}>{label}</Text>
       <Chip.Group multiple={false} value={value} onChange={onSelect}>
         <Group gap={6}>
           {options.map(o => (
             <Chip
               key={o}
               value={o}
-              size="xs"
               variant="filled"
               icon={null}
-              styles={{ label: { fontSize: '0.75rem', fontWeight: 400, paddingInline: 12 }, iconWrapper: { display: 'none' } }}
+              styles={{ iconWrapper: { display: 'none' } }}
             >
               {o}
             </Chip>
@@ -728,7 +737,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Promo Banner */}
-      <Card withBorder radius="xl" shadow="xs" padding={0}>
+      <Card withBorder shadow="xs" padding={0}>
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
       </Card>
 
@@ -739,27 +748,26 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           flex={{ base: '1 1 100%', sm: 1 }}
           miw={{ sm: 200 }}
           placeholder="Buscar produto, referência, linha..."
+          aria-label="Buscar produtos"
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          leftSection={<MagnifyingGlassIcon size={16} />}
+          leftSection={<MagnifyingGlassIcon size={18} />}
           rightSection={search ? (
-            <ActionIcon onClick={() => setSearch('')} variant="subtle" color="gray" size="sm" aria-label="Limpar busca">
-              <XIcon size={14} />
+            <ActionIcon onClick={() => setSearch('')} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
+              <XIcon size={16} />
             </ActionIcon>
           ) : null}
-          styles={{ input: { fontSize: '0.85rem' } }}
         />
 
         {!usingExternal && (
           <Button
             onClick={() => setShowFilters(!showFilters)}
             variant="default"
-            leftSection={<FunnelIcon size={16} />}
+            leftSection={<FunnelIcon size={18} />}
             rightSection={hasActiveFilters ? (
-              <ColorSwatch color="var(--mantine-color-neutral-9)" size={6} withShadow={false} />
+              <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} withShadow={false} />
             ) : undefined}
             aria-expanded={showFilters}
-            styles={{ label: { fontSize: '0.83rem' } }}
           >
             {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
           </Button>
@@ -767,7 +775,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
         <Select
           flex={{ base: 1, sm: 'none' }}
-          w={{ sm: 170 }}
+          w={{ sm: 200 }}
           allowDeselect={false}
           value={sortBy}
           onChange={v => v && setSortBy(v)}
@@ -779,38 +787,23 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             { value: 'menor preço', label: 'Menor preço' },
             { value: 'maior preço', label: 'Maior preço' },
           ]}
-          styles={{ input: { fontSize: '0.83rem' } }}
         />
 
-        <ActionIcon.Group>
-          <Tooltip label="Ver em grade">
-            <ActionIcon
-              onClick={() => setViewMode('grid')}
-              variant={viewMode === 'grid' ? 'filled' : 'default'}
-              size={36}
-              aria-label="Ver em grade"
-              aria-pressed={viewMode === 'grid'}
-            >
-              <GridNineIcon size={16} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Ver em lista">
-            <ActionIcon
-              onClick={() => setViewMode('list')}
-              variant={viewMode === 'list' ? 'filled' : 'default'}
-              size={36}
-              aria-label="Ver em lista"
-              aria-pressed={viewMode === 'list'}
-            >
-              <ListBulletsIcon size={16} />
-            </ActionIcon>
-          </Tooltip>
-        </ActionIcon.Group>
+        {/* Modo de exibição com ícone + texto */}
+        <SegmentedControl
+          value={viewMode}
+          onChange={v => setViewMode(v as 'grid' | 'list')}
+          aria-label="Modo de exibição"
+          data={[
+            { value: 'grid', label: <Group gap={6} wrap="nowrap" justify="center"><GridNineIcon size={18} /><span>Grade</span></Group> },
+            { value: 'list', label: <Group gap={6} wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><span>Lista</span></Group> },
+          ]}
+        />
       </Group>
 
       {/* Filter Panel */}
       {!usingExternal && showFilters && (
-        <Paper withBorder radius="lg" p="md">
+        <Paper withBorder p="md">
           <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
             {renderChipFilter('Linha', lines, selectedLine, setSelectedLine)}
             {renderChipFilter('Categoria', categories, selectedCategory, setSelectedCategory)}
@@ -818,13 +811,11 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           </SimpleGrid>
           {hasActiveFilters && (
             <Button
-              onClick={() => { setSelectedLine('Todos'); setSelectedCategory('Todos'); setSelectedCollection('Todas'); }}
+              onClick={clearInternalFilters}
               mt="sm"
               variant="subtle"
               color="neutral"
-              size="compact-sm"
-              leftSection={<XIcon size={12} />}
-              styles={{ label: { fontSize: '0.75rem', fontWeight: 400 } }}
+              leftSection={<XIcon size={16} />}
             >
               Limpar filtros
             </Button>
@@ -832,28 +823,41 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         </Paper>
       )}
 
-      {/* Results header */}
+      {/* Filtros ativos: cada um é um botão que remove o filtro */}
       {hasActiveFilters && (
         <Group justify="flex-end" gap={6}>
           {selectedLine !== 'Todos' && (
-            <Badge
+            <Button
               variant="light"
               color="neutral"
-              rightSection={<CloseButton size={14} iconSize={10} variant="transparent" onClick={() => setSelectedLine('Todos')} aria-label="Remover filtro de linha" />}
-              styles={{ label: { textTransform: 'none', fontSize: '0.72rem', fontWeight: 400 } }}
+              rightSection={<XIcon size={16} />}
+              onClick={() => setSelectedLine('Todos')}
+              aria-label={`Remover filtro de linha: ${selectedLine}`}
             >
-              {selectedLine}
-            </Badge>
+              Linha: {selectedLine}
+            </Button>
           )}
           {selectedCategory !== 'Todos' && (
-            <Badge
+            <Button
               variant="light"
               color="neutral"
-              rightSection={<CloseButton size={14} iconSize={10} variant="transparent" onClick={() => setSelectedCategory('Todos')} aria-label="Remover filtro de categoria" />}
-              styles={{ label: { textTransform: 'none', fontSize: '0.72rem', fontWeight: 400 } }}
+              rightSection={<XIcon size={16} />}
+              onClick={() => setSelectedCategory('Todos')}
+              aria-label={`Remover filtro de categoria: ${selectedCategory}`}
             >
-              {selectedCategory}
-            </Badge>
+              Categoria: {selectedCategory}
+            </Button>
+          )}
+          {selectedCollection !== 'Todas' && (
+            <Button
+              variant="light"
+              color="neutral"
+              rightSection={<XIcon size={16} />}
+              onClick={() => setSelectedCollection('Todas')}
+              aria-label={`Remover filtro de coleção: ${selectedCollection}`}
+            >
+              Coleção: {selectedCollection}
+            </Button>
           )}
         </Group>
       )}
@@ -865,7 +869,21 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             <PackageIcon size={48} color={DIMMED} opacity={0.3} />
           </Box>
           <Text lh={1.5} fw={600}>Nenhum produto encontrado</Text>
-          <Text lh={1.5} c="dimmed" mt={4} size="0.85rem">Tente ajustar os filtros ou a busca</Text>
+          <Text lh={1.5} c="dimmed" mt={4}>
+            {usingExternal
+              ? 'Nenhum produto combina com a busca e os filtros da barra lateral. Mude a busca ou ajuste os filtros.'
+              : 'Nenhum produto combina com a busca e os filtros atuais.'}
+          </Text>
+          {canClearFromEmpty && (
+            <Button
+              mt="md"
+              variant="default"
+              leftSection={<XIcon size={16} />}
+              onClick={() => { setSearch(''); if (!usingExternal) clearInternalFilters(); }}
+            >
+              {!usingExternal && hasActiveFilters ? 'Limpar busca e filtros' : 'Limpar busca'}
+            </Button>
+          )}
         </Stack>
       ) : viewMode === 'grid' ? (
         <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={{ base: 'sm', sm: 'md' }} className={classes.grid}>
@@ -893,7 +911,6 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         onClose={() => setConfirmAdd(null)}
         centered
         size="26rem"
-        radius="xl"
         withCloseButton={false}
         overlayProps={{ backgroundOpacity: 0.6 }}
         styles={CART_MODAL_STYLES}
@@ -901,9 +918,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         {confirmAdd && (
           <>
             <Box px="lg" py="md">
-              <Text lh={1.5} fw={700} size="0.95rem">Adicionar ao carrinho</Text>
-              <Text lh={1.5} c="dimmed" mt={4} size="0.78rem">
-                {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>
+              <Text lh={1.5} fw={700} size="lg">Adicionar ao carrinho</Text>
+              <Text lh={1.5} c="dimmed" mt={4} size="sm">
+                {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>. Escolha o carrinho de destino.
               </Text>
             </Box>
             <Divider color={BORDER_COLOR} />
@@ -918,11 +935,14 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   />
                 ))}
                 {(clientCarts ?? []).length === 0 && (
-                  <Text lh={1.5} c="dimmed" ta="center" py="sm" size="0.8rem">Nenhum carrinho disponível.</Text>
+                  <Text lh={1.5} c="dimmed" ta="center" py="sm">
+                    Este cliente ainda não tem carrinhos. Use "Criar novo carrinho" abaixo.
+                  </Text>
                 )}
               </Stack>
             </ScrollArea.Autosize>
             <Divider color={BORDER_COLOR} />
+            {/* Secundária à esquerda, principal à direita */}
             <Group px="lg" py="md" gap={8} grow>
               <Button
                 onClick={() => {
@@ -933,8 +953,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 }}
                 variant="default"
                 bd={DASHED_BORDER}
-                leftSection={<PlusIcon size={14} />}
-                styles={{ label: { fontSize: '0.82rem' }, section: { marginInlineEnd: 6 } }}
+                leftSection={<PlusIcon size={16} />}
               >
                 Criar novo carrinho
               </Button>
@@ -947,7 +966,6 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   }
                   setConfirmAdd(null);
                 }}
-                styles={{ label: { fontSize: '0.82rem' } }}
               >
                 Adicionar ao carrinho
               </Button>
@@ -961,7 +979,6 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         onClose={() => setPendingAdd(null)}
         centered
         size="28rem"
-        radius="xl"
         withCloseButton={false}
         overlayProps={{ backgroundOpacity: 0.6 }}
         styles={CART_MODAL_STYLES}
@@ -970,13 +987,13 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           <>
             <Group justify="space-between" px="lg" py="sm" wrap="nowrap">
               <Box miw={0}>
-                <Text lh={1.5} fw={700} size="0.95rem">Adicionar a qual carrinho?</Text>
-                <Text lh={1.5} c="dimmed" truncate size="0.75rem">
+                <Text lh={1.5} fw={700} size="lg">Adicionar a qual carrinho?</Text>
+                <Text lh={1.5} c="dimmed" truncate size="sm">
                   {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
                 </Text>
               </Box>
               <ActionIcon onClick={() => setPendingAdd(null)} variant="subtle" color="gray" aria-label="Fechar seleção de carrinho">
-                <XIcon size={16} />
+                <XIcon size={18} />
               </ActionIcon>
             </Group>
             <Divider color={BORDER_COLOR} />
@@ -995,13 +1012,12 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   />
                 ))}
                 {(clientCarts ?? []).length === 0 && !creatingMode && (
-                  <Text lh={1.5} c="dimmed" ta="center" py="sm" size="0.8rem">
-                    Nenhum carrinho ainda para este cliente.
+                  <Text lh={1.5} c="dimmed" ta="center" py="sm">
+                    Este cliente ainda não tem carrinhos. Crie um abaixo para adicionar os pares.
                   </Text>
                 )}
                 {creatingMode ? (
                   <Paper
-                    radius="md"
                     p="sm"
                     bg="var(--mantine-color-neutral-0)"
                     bd="1px solid var(--mantine-color-neutral-3)"
@@ -1013,17 +1029,11 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                         value={creatingNewName}
                         onChange={e => setCreatingNewName(e.currentTarget.value)}
                         placeholder="Ex.: Reposição Inverno 26"
-                        styles={{
-                          label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' },
-                          input: { fontSize: '0.82rem' },
-                        }}
                       />
                       <Group justify="flex-end" gap={8}>
                         <Button
                           onClick={() => { setCreatingMode(false); setCreatingNewName(''); }}
                           variant="default"
-                          size="xs"
-                          styles={{ label: { fontSize: '0.78rem' } }}
                         >
                           Cancelar
                         </Button>
@@ -1035,8 +1045,6 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                               setPendingAdd(null);
                             }
                           }}
-                          size="xs"
-                          styles={{ label: { fontSize: '0.78rem' } }}
                         >
                           Criar carrinho e adicionar
                         </Button>
@@ -1049,8 +1057,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                     variant="default"
                     bd={DASHED_BORDER}
                     fullWidth
-                    leftSection={<PlusIcon size={14} />}
-                    styles={{ label: { fontSize: '0.82rem' } }}
+                    leftSection={<PlusIcon size={16} />}
                   >
                     Criar novo carrinho
                   </Button>

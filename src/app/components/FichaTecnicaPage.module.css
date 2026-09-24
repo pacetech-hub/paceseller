@@ -43,7 +43,7 @@
 
 /* Grade de imagens com cantos arredondados */
 .bento {
-  border-radius: var(--mantine-radius-lg);
+  border-radius: var(--mantine-radius-md);
   overflow: hidden;
 }
 
@@ -58,7 +58,7 @@
   left: 8px;
   bottom: 8px;
   padding: 2px 8px;
-  border-radius: var(--mantine-radius-sm);
+  border-radius: var(--mantine-radius-md);
   background-color: rgba(0, 0, 0, 0.6);
   color: var(--mantine-color-white);
   backdrop-filter: blur(4px);
