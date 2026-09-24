@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
   Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
-  Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box,
+  Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box, Card,
 } from "@mantine/core";
+import classes from "./ClientsPage.module.css";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -106,7 +107,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
           ].map(stat => (
             <Paper key={stat.suffix} withBorder radius="md" p="md">
               <Group gap={8} align="baseline">
-                <Text fw={700} style={{ fontSize: '1.75rem', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{stat.count}</Text>
+                <Text fw={700} fz="1.75rem" lh={1} className={classes.tabular}>{stat.count}</Text>
                 <Text c="dimmed" size="sm" fw={500}>{stat.suffix}</Text>
               </Group>
             </Paper>
@@ -120,7 +121,8 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             leftSection={<MagnifyingGlassIcon size={14} />}
             value={search}
             onChange={e => setSearch(e.currentTarget.value)}
-            style={{ flex: 1, minWidth: 200 }}
+            flex={1}
+            miw={200}
           />
 
           <Popover position="bottom-end" withArrow shadow="md">
@@ -206,7 +208,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         </Group>
 
         {/* Client table */}
-        <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+        <Card withBorder radius="md" padding={0}>
           <Table highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
@@ -223,12 +225,13 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   <Table.Tr
                     key={client.id}
                     onClick={() => handleSelectClient(client)}
-                    style={{ cursor: 'pointer', backgroundColor: isSelected ? 'var(--mantine-color-neutral-0)' : undefined }}
+                    bg={isSelected ? 'var(--mantine-color-neutral-0)' : undefined}
+                    className={classes.row}
                   >
                     <Table.Td>
                       <Group gap="sm" wrap="nowrap">
                         <Avatar radius="xl" size={36} color="neutral">{client.avatar}</Avatar>
-                        <Box style={{ minWidth: 0 }}>
+                        <Box miw={0}>
                           <Group gap={6} mb={2}>
                             <Badge size="xs" color={statusColor[client.status]} variant="light">{client.status}</Badge>
                             {client.inadimplente && <Badge size="xs" color="yellow" variant="light">inadimplente</Badge>}
@@ -241,13 +244,13 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                     </Table.Td>
                     <Table.Td>
                       <Group gap={4} wrap="nowrap">
-                        <MapPinIcon size={12} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                        <MapPinIcon size={12} color="var(--mantine-color-dimmed)" />
                         <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
                       </Group>
                     </Table.Td>
                     <Table.Td><Text size="sm" c="dimmed">{client.rep}</Text></Table.Td>
                     <Table.Td ta="right">
-                      <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                      <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
                     </Table.Td>
                   </Table.Tr>
                 );
@@ -264,7 +267,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               <Text c="dimmed" size="sm">Tente ajustar os filtros</Text>
             </Stack>
           )}
-        </Paper>
+        </Card>
       </Stack>
     </Container>
   );
