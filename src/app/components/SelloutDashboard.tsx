@@ -1,6 +1,7 @@
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, Badge, SimpleGrid, Grid, Table, Progress, Center,
+  Stack, Group, Box, Paper, Card, Text, Title, Button, Badge, SimpleGrid, Grid, Table, Progress, Center,
 } from "@mantine/core";
+import classes from "./SelloutDashboard.module.css";
 import { BarChart, DonutChart } from "@mantine/charts";
 import {
   WarningIcon,
@@ -49,13 +50,13 @@ const kpis = [
 ] as const;
 
 function ChartTitle({ children }: { children: React.ReactNode }) {
-  return <Title order={3} fw={600} style={{ fontSize: '0.9rem' }}>{children}</Title>;
+  return <Title order={3} fw={600} fz="0.9rem">{children}</Title>;
 }
 
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <Group gap={6} wrap="nowrap">
-      <Box w={12} h={12} bg={color} style={{ borderRadius: 3 }} />
+      <Paper w={12} h={12} bg={color} radius={3} />
       <Text c="dimmed" size="0.72rem">{label}</Text>
     </Group>
   );
@@ -71,9 +72,9 @@ export function SelloutDashboard() {
           return (
             <Paper key={kpi.label} withBorder radius="lg" p="lg">
               <Text c="dimmed" size="0.78rem" fw={500} mb={8}>{kpi.label}</Text>
-              <Text className="mono" fw={700} style={{ fontSize: '1.4rem', letterSpacing: '-0.02em' }}>{kpi.value}</Text>
+              <Text className="mono" fw={700} fz="1.4rem" lts="-0.02em">{kpi.value}</Text>
               <Group gap={6} mt={6} wrap="nowrap">
-                <Group gap={2} c={kpi.color} wrap="nowrap" style={{ flexShrink: 0 }}>
+                <Group gap={2} c={kpi.color} wrap="nowrap" flex="none">
                   <TrendIcon size={12} />
                   <Text size="0.72rem" fw={600} c={kpi.color}>{kpi.trendVal}</Text>
                 </Group>
@@ -123,9 +124,9 @@ export function SelloutDashboard() {
 
         {/* Donut giro */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Paper withBorder radius="lg" p="lg" h="100%" style={{ display: 'flex', flexDirection: 'column' }}>
+          <Card withBorder radius="lg" padding="lg" h="100%">
             <Box mb="md"><ChartTitle>Giro da Coleção</ChartTitle></Box>
-            <Center style={{ flex: 1 }}>
+            <Center flex={1}>
               <Box pos="relative">
                 <DonutChart
                   data={pieData}
@@ -136,24 +137,24 @@ export function SelloutDashboard() {
                   strokeWidth={0}
                   withTooltip={false}
                 />
-                <Center pos="absolute" inset={0} style={{ flexDirection: 'column', pointerEvents: 'none' }}>
-                  <Text fw={700} style={{ fontSize: '1.4rem', lineHeight: 1.1 }}>78%</Text>
+                <Stack gap={0} align="center" justify="center" pos="absolute" inset={0} className={classes.donutLabel}>
+                  <Text fw={700} fz="1.4rem" lh={1.1}>78%</Text>
                   <Text c="dimmed" size="0.65rem">girado</Text>
-                </Center>
+                </Stack>
               </Box>
             </Center>
             <Stack gap={8} mt="md">
               {pieData.map(d => (
                 <Group key={d.name} justify="space-between" wrap="nowrap">
                   <Group gap={8} wrap="nowrap">
-                    <Box w={10} h={10} bg={d.color} style={{ borderRadius: '50%' }} />
+                    <Paper w={10} h={10} bg={d.color} radius="50%" />
                     <Text c="dimmed" size="0.75rem">{d.name}</Text>
                   </Group>
                   <Text className="mono" size="0.78rem" fw={600}>{formatCurrency(d.value)}</Text>
                 </Group>
               ))}
             </Stack>
-          </Paper>
+          </Card>
         </Grid.Col>
       </Grid>
 
@@ -205,7 +206,7 @@ export function SelloutDashboard() {
       <Paper withBorder radius="lg" p="lg">
         <Group justify="space-between" mb="md">
           <Group gap={8}>
-            <WarningIcon size={16} style={{ color: 'var(--mantine-color-yellow-6)' }} />
+            <WarningIcon size={16} color="var(--mantine-color-yellow-6)" />
             <ChartTitle>Alertas de Encalhe</ChartTitle>
             <Badge size="sm" variant="light" color="yellow" styles={{ label: { textTransform: 'none' } }}>
               {encalheAlerts.length} alertas
@@ -220,7 +221,7 @@ export function SelloutDashboard() {
             <Table.Thead>
               <Table.Tr>
                 {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ação sugerida'].map(col => (
-                  <Table.Th key={col} c="dimmed" fw={500} pr="md" style={{ fontSize: '0.72rem' }}>{col}</Table.Th>
+                  <Table.Th key={col} c="dimmed" fw={500} pr="md" fz="0.72rem">{col}</Table.Th>
                 ))}
               </Table.Tr>
             </Table.Thead>
