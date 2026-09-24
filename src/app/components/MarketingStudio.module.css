@@ -1,0 +1,80 @@
+/* Botão de excluir sobre imagem (escuro, fica vermelho no hover) */
+.overlayDelete.overlayDelete {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  transition: background-color 150ms ease;
+}
+
+.overlayDelete.overlayDelete:hover {
+  background: rgba(239, 68, 68, 0.8);
+  color: #fff;
+}
+
+/* Linha da lista de campanhas: botão de excluir aparece no hover */
+.campaignRow {
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+}
+
+.campaignRow:hover {
+  background-color: var(--mantine-color-default-hover);
+}
+
+.campaignRow[data-active] {
+  background-color: var(--mantine-color-neutral-0);
+}
+
+.rowDelete {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.campaignRow:hover .rowDelete,
+.rowDelete:focus-visible {
+  opacity: 1;
+}
+
+/* Cartão selecionável do assistente */
+.option {
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+  overflow: hidden;
+}
+
+.option:hover {
+  border-color: var(--mantine-color-gray-5);
+}
+
+.option[data-selected] {
+  border-color: var(--mantine-color-neutral-9);
+  box-shadow: 0 0 0 1px var(--mantine-color-neutral-9);
+}
+
+.optionTinted[data-selected] {
+  background-color: var(--mantine-color-neutral-0);
+  box-shadow: none;
+}
+
+/* Sugestões de IA */
+.suggestion {
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  color: var(--mantine-color-dimmed);
+}
+
+.suggestion:hover {
+  color: var(--mantine-color-text);
+  border-color: var(--mantine-color-gray-5);
+}
+
+.suggestion[data-selected] {
+  color: var(--mantine-color-text);
+  border-color: var(--mantine-color-violet-3);
+  background-color: var(--mantine-color-violet-0);
+}
+
+.imgCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
