@@ -1,10 +1,11 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code,
-  SimpleGrid, ThemeIcon, UnstyledButton, Collapse, List,
+  SimpleGrid, ThemeIcon, UnstyledButton, Collapse, List, Card, Divider,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import classes from "./interactive.module.css";
+import boletos from "./BoletosPage.module.css";
 import {
   MagnifyingGlassIcon,
   DownloadSimpleIcon,
@@ -208,7 +209,7 @@ function CodeBlock({ label, code, size }: { label: string; code: string; size: s
   return (
     <Box>
       <Text c="dimmed" size="0.7rem" mb={4}>{label}</Text>
-      <Code block className="mono" style={{ fontSize: size, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+      <Code block className={`mono ${boletos.wrap}`} fz={size}>
         {code}
       </Code>
     </Box>
@@ -233,7 +234,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 
   const summary = (
     <Group gap="md" wrap="wrap" p="md">
-      <Box miw={0} style={{ flex: 1 }}>
+      <Box miw={0} flex={1}>
         {/* line 1: status + due/payment date */}
         <Group gap={8} mb={4}>
           <Badge
@@ -245,7 +246,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
           >
             {statusLabel[payment.status]}
           </Badge>
-          <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>
+          <Text c="dimmed" size="0.72rem" flex="none">
             {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
           </Text>
         </Group>
@@ -255,26 +256,23 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
         <Text c="dimmed" size="0.72rem" truncate>{metaParts.join(' · ')}</Text>
       </Box>
 
-      <Text className="mono" size="0.95rem" fw={700} ta="right" style={{ flexShrink: 0 }}>
+      <Text className="mono" size="0.95rem" fw={700} ta="right" flex="none">
         {formatCurrency(payment.amount)}
       </Text>
 
       {!isPago && (
         <CaretDownIcon
           size={16}
-          style={{
-            flexShrink: 0,
-            color: 'var(--mantine-color-dimmed)',
-            transition: 'transform 150ms ease',
-            transform: expanded ? 'rotate(180deg)' : undefined,
-          }}
+          color="var(--mantine-color-dimmed)"
+          className={boletos.caret}
+          data-expanded={expanded || undefined}
         />
       )}
     </Group>
   );
 
   return (
-    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+    <Card withBorder radius="lg" padding={0}>
       {isPago ? summary : (
         <UnstyledButton onClick={() => setExpanded(e => !e)} className={classes.hoverable} w="100%" aria-expanded={expanded}>
           {summary}
@@ -283,7 +281,8 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 
       {!isPago && (
         <Collapse in={expanded}>
-          <Box p="md" bg="var(--mantine-color-default-hover)" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+          <Divider color="var(--mantine-color-default-border)" />
+          <Box p="md" bg="var(--mantine-color-default-hover)">
             <SegmentedControl
               value={method}
               onChange={v => setMethod(v as PaymentMethod)}
@@ -344,12 +343,12 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 
                 {showQr && (
                   <Group gap="md" align="flex-start" pt={4}>
-                    <Paper withBorder radius="md" p="sm" bg="white" style={{ flexShrink: 0 }}>
+                    <Paper withBorder radius="md" p="sm" bg="white" flex="none">
                       <PixQrCode data={payment.pixCode} />
                     </Paper>
-                    <Box style={{ flex: 1, minWidth: 220 }}>
+                    <Box flex={1} miw={220}>
                       <Text size="0.8rem" fw={600} mb={4}>Como pagar</Text>
-                      <List type="ordered" withPadding listStyleType="decimal" size="xs" c="dimmed" spacing={4} style={{ fontSize: "0.75rem" }}>
+                      <List type="ordered" withPadding listStyleType="decimal" size="xs" c="dimmed" spacing={4} fz="0.75rem">
                         <List.Item>Abra o app do seu banco</List.Item>
                         <List.Item>Escolha pagar via Pix com QR Code ou Copia e Cola</List.Item>
                         <List.Item>Escaneie o código ao lado ou cole o código copiado</List.Item>
@@ -363,7 +362,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
           </Box>
         </Collapse>
       )}
-    </Paper>
+    </Card>
   );
 }
 export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
@@ -421,7 +420,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
             withBorder
             radius="lg"
             p="md"
-            style={stat.tone === 'danger' ? { borderColor: 'var(--mantine-color-red-3)' } : undefined}
+            bd={stat.tone === 'danger' ? '1px solid var(--mantine-color-red-3)' : undefined}
           >
             <Text c="dimmed" size="0.75rem" fw={500} mb={4}>{stat.label}</Text>
             <Text
@@ -429,7 +428,8 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
               c={stat.tone === 'danger' ? 'red.6' : undefined}
               fw={700}
               mb={stat.caption ? 4 : 0}
-              style={{ fontSize: '1.4rem', letterSpacing: '-0.01em' }}
+              fz="1.4rem"
+              lts="-0.01em"
             >
               {stat.value}
             </Text>
@@ -445,7 +445,8 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          style={{ flex: 1, minWidth: 160 }}
+          flex={1}
+          miw={160}
         />
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
           <Group gap={6}>

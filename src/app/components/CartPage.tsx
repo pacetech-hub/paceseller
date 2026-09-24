@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, ThemeIcon,
-  SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider,
+  SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider, Card,
 } from "@mantine/core";
 import {
   ShoppingCartIcon,
@@ -25,6 +25,7 @@ import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./LojistaFiltersSidebar";
 import type { CartContext, CartCreator } from "./CartsListPage";
 import classes from "./interactive.module.css";
+import cartClasses from "./CartPage.module.css";
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -178,7 +179,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           <ThemeIcon variant="light" color="teal" size={64} radius="xl" mb="lg">
             <CheckIcon size={32} />
           </ThemeIcon>
-          <Title order={2} fw={700} style={{ fontSize: '1.3rem' }}>Pedido enviado para aprovação!</Title>
+          <Title order={2} fw={700} fz="1.3rem">Pedido enviado para aprovação!</Title>
           <Text c="dimmed" size="0.85rem" mt={8}>
             Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>PED-2026-0413</Text>
           </Text>
@@ -211,7 +212,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             >
               Carrinhos
             </Button>
-            <Divider orientation="vertical" h={20} style={{ alignSelf: 'center' }} />
+            <Divider orientation="vertical" h={20} my="auto" />
             <Box miw={0}>
               <Group gap={8}>
                 <Text size="1rem" fw={700} truncate>{cartContext.cartName}</Text>
@@ -310,7 +311,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
         >
           Carrinho ({cart.length})
         </Button>
-        <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+        <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
         <Button
           onClick={() => cart.length > 0 && setStep('checkout')}
           variant={step === 'checkout' ? 'filled' : 'subtle'}
@@ -324,7 +325,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
       {cart.length === 0 ? (
         <Stack align="center" gap={4} py={80} ta="center">
-          <ShoppingCartIcon size={48} style={{ opacity: 0.3, color: 'var(--mantine-color-dimmed)' }} />
+          <ShoppingCartIcon size={48} color="var(--mantine-color-dimmed)" opacity={0.3} />
           <Text fw={600} mt="sm">Carrinho vazio</Text>
           <Text c="dimmed" size="0.85rem">Adicione produtos do catálogo para criar um pedido.</Text>
           <Button onClick={() => onNavigate('catalog')} mt="md">Ir ao catálogo</Button>
@@ -340,10 +341,10 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                   return (
                     <Paper key={item.product.id} withBorder radius="lg" p="md">
                       <Group align="flex-start" gap="sm" mb="sm" wrap="nowrap">
-                        <Box w={64} h={64} bg="var(--mantine-color-default-hover)" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', flexShrink: 0 }}>
+                        <Card w={64} h={64} radius="md" padding={0} flex="none" bg="var(--mantine-color-default-hover)">
                           <Image src={item.product.image} alt={item.product.name} w="100%" h="100%" fit="cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        </Box>
-                        <Box miw={0} style={{ flex: 1 }}>
+                        </Card>
+                        <Box miw={0} flex={1}>
                           <Text size="0.88rem" fw={600}>{item.product.name}</Text>
                           <Text c="dimmed" size="0.72rem">{item.product.reference} · {formatCurrency(item.product.price)}/par</Text>
                           <Text className="mono" size="0.85rem" fw={700} mt={2}>{formatCurrency(value)}</Text>
@@ -424,7 +425,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                         <Radio.Card key={opt.id} value={opt.id} radius="md" p="sm" className={classes.choiceCard}>
                           <Group align="flex-start" gap="sm" wrap="nowrap">
                             <Radio.Indicator color="neutral" mt={2} />
-                            <Box style={{ flex: 1 }}>
+                            <Box flex={1}>
                               <Group justify="space-between">
                                 <Text size="0.85rem" fw={600}>{opt.label}</Text>
                                 {opt.surcharge !== 0 && (
@@ -457,15 +458,14 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                             value={c.id}
                             radius="md"
                             p="sm"
-                            className={classes.choiceCard}
-                            style={{ '--choice-color': 'var(--mantine-color-teal-4)', '--choice-bg': 'var(--mantine-color-teal-0)' } as React.CSSProperties}
+                            className={`${classes.choiceCard} ${cartClasses.tealChoice}`}
                           >
                             <Group align="flex-start" gap="sm" wrap="nowrap">
                               <Checkbox.Indicator color="teal" mt={2} />
-                              <Box style={{ flex: 1 }}>
+                              <Box flex={1}>
                                 <Group justify="space-between">
                                   <Group gap={6}>
-                                    <PercentIcon size={12} style={{ color: 'var(--mantine-color-teal-6)' }} />
+                                    <PercentIcon size={12} color="var(--mantine-color-teal-6)" />
                                     <Text size="0.85rem" fw={600}>{c.name}</Text>
                                   </Group>
                                   <Text c="teal.6" className="mono" size="0.75rem" fw={600}>-{c.discount}%</Text>
@@ -510,10 +510,10 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack gap="md">
               <Paper withBorder radius="lg" p="lg">
-                <Title order={3} fw={600} mb="md" style={{ fontSize: '0.9rem' }}>Resumo do pedido</Title>
+                <Title order={3} fw={600} mb="md" fz="0.9rem">Resumo do pedido</Title>
                 <Stack gap={8}>
                   <Group justify="space-between" wrap="nowrap">
-                    <Text c="dimmed" size="0.72rem" tt="uppercase" style={{ letterSpacing: '0.05em' }}>Valor bruto · {grandPairs} pares</Text>
+                    <Text c="dimmed" size="0.72rem" tt="uppercase" lts="0.05em">Valor bruto · {grandPairs} pares</Text>
                     <Text className="mono" size="0.82rem">{formatCurrency(grandTotal)}</Text>
                   </Group>
                   {tableDiscount > 0 && (
