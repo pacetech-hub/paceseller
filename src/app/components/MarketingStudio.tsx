@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from "react";
-import { toast } from "sonner";
+import { toast } from "../lib/toast";
 import {
   SparkleIcon,
   CheckIcon,

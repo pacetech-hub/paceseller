@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { Group, Button, ActionIcon, Indicator, Menu, Text, Box } from "@mantine/core";
+import {
+  Group, Button, ActionIcon, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
+  Avatar, Kbd, Tooltip, Drawer, ScrollArea, UnstyledButton,
+} from "@mantine/core";
 import {
   SquaresFourIcon,
   PackageIcon,
@@ -16,7 +19,6 @@ import {
   BellIcon,
   MagnifyingGlassIcon,
   ListIcon,
-  XIcon,
   BuildingsIcon,
   SignOutIcon,
   CaretLeftIcon,
@@ -26,6 +28,7 @@ import {
   WarehouseIcon,
   ReceiptIcon,
   FileTextIcon,
+  type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
@@ -40,15 +43,17 @@ type Profile = 'admin' | 'rep' | 'lojista';
 interface NavItem {
   id: View;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: Icon;
   badge?: number;
 }
 
-const profileLabels: Record<Profile, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'text-black' },
-  rep: { label: 'Representante', icon: UsersIcon, color: 'text-amber-400' },
-  lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'text-emerald-400' },
+const profileLabels: Record<Profile, { label: string; icon: Icon; color: string }> = {
+  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'var(--mantine-color-black)' },
+  rep: { label: 'Representante', icon: UsersIcon, color: 'var(--mantine-color-yellow-5)' },
+  lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'var(--mantine-color-teal-4)' },
 };
+
+const SIDEBAR_BORDER = '1px solid var(--mantine-color-default-border)';
 
 interface SidebarProps {
   currentView: View;
@@ -103,132 +108,177 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
 
   const visibleItems = getVisibleItems();
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+  // No drawer mobile o menu sempre aparece expandido
+  const renderContent = (isCollapsed: boolean) => (
+    <Stack gap={0} h="100%">
       {/* Logo */}
-      <div className={`flex items-center border-b border-sidebar-border px-4 h-14 ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className={`flex items-center justify-center flex-shrink-0 ${collapsed ? 'w-7 h-7' : 'h-8'}`}>
-          <img src={teslaLogo} alt="Tesla Footwear" className={collapsed ? 'h-6 w-auto object-contain' : 'h-7 w-auto object-contain'} />
-        </div>
-        {!collapsed && (
-          <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground transition-colors p-1 rounded">
-            <CaretLeftIcon className="w-4 h-4" />
-          </button>
+      <Group
+        h={56}
+        px="md"
+        gap="sm"
+        wrap="nowrap"
+        justify={isCollapsed ? 'center' : 'flex-start'}
+        style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}
+      >
+        <img
+          src={teslaLogo}
+          alt="Tesla Footwear"
+          style={{ height: isCollapsed ? 24 : 28, width: 'auto', objectFit: 'contain' }}
+        />
+        {!isCollapsed && (
+          <ActionIcon
+            onClick={() => setCollapsed(true)}
+            variant="subtle"
+            color="gray"
+            size="sm"
+            ml="auto"
+            visibleFrom="lg"
+            title="Recolher menu"
+          >
+            <CaretLeftIcon size={16} />
+          </ActionIcon>
         )}
-      </div>
+      </Group>
 
       {/* Profile pill */}
-      {!collapsed && (
-        <div className="mx-3 mt-3 rounded-lg bg-secondary/60 border border-border px-3 py-2">
-          <div className="flex items-center gap-2">
-            <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
-            <span className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>{profileInfo.label}</span>
-          </div>
-        </div>
+      {!isCollapsed && (
+        <Paper withBorder radius="md" mx="sm" mt="sm" px="sm" py={8} bg="var(--mantine-color-default-hover)">
+          <Group gap={8} wrap="nowrap">
+            <ProfileIcon size={14} color={profileInfo.color} />
+            <Text size="0.78rem" fw={500} truncate>{profileInfo.label}</Text>
+          </Group>
+        </Paper>
       )}
 
       {/* Selected client chip — rep only */}
-      {!collapsed && profile === 'rep' && selectedClient && (
-        <div className="mx-3 mt-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2">
-          <p className="text-muted-foreground" style={{ fontSize: '0.62rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pedindo para</p>
-          <p className="text-primary truncate mt-0.5" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{selectedClient.name}</p>
-        </div>
+      {!isCollapsed && profile === 'rep' && selectedClient && (
+        <Paper withBorder radius="md" mx="sm" mt={8} px="sm" py={8}>
+          <Text c="dimmed" size="0.62rem" fw={500} tt="uppercase" style={{ letterSpacing: '0.06em' }}>Pedindo para</Text>
+          <Text size="0.82rem" fw={600} truncate mt={2}>{selectedClient.name}</Text>
+        </Paper>
       )}
 
       {/* Search */}
-      {!collapsed && (
-        <div className="mx-3 mt-3">
-          <div className="flex items-center gap-2 rounded-lg bg-secondary/40 border border-border px-3 py-2 text-muted-foreground">
-            <MagnifyingGlassIcon className="w-3.5 h-3.5 flex-shrink-0" />
-            <span style={{ fontSize: '0.78rem' }}>Buscar...</span>
-            <kbd className="ml-auto text-muted-foreground/60 border border-border rounded px-1" style={{ fontSize: '0.6rem' }}>⌘K</kbd>
-          </div>
-        </div>
+      {!isCollapsed && (
+        <UnstyledButton mx="sm" mt="sm">
+          <Paper withBorder radius="md" px="sm" py={8}>
+            <Group gap={8} wrap="nowrap" c="dimmed">
+              <MagnifyingGlassIcon size={14} style={{ flexShrink: 0 }} />
+              <Text size="0.78rem" c="dimmed">Buscar...</Text>
+              <Kbd size="xs" ml="auto">⌘K</Kbd>
+            </Group>
+          </Paper>
+        </UnstyledButton>
       )}
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-        {visibleItems.map(item => {
-          const Icon = item.icon;
-          const active = currentView === item.id;
-          return (
-            <button
-              key={item.label}
-              onClick={() => { onNavigate(item.id); setMobileOpen(false); }}
-              className={`w-full flex items-center rounded-md transition-all duration-150 ${collapsed ? 'justify-center p-2.5' : 'gap-2.5 px-3 py-2.5'} ${
-                active ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-              }`}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left truncate" style={{ fontSize: '0.83rem', fontWeight: active ? 600 : 400 }}>
-                    {item.label}
-                  </span>
-                  {item.badge && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary" style={{ fontSize: '0.65rem', fontWeight: 600 }}>
-                      {item.badge}
-                    </span>
-                  )}
-                </>
-              )}
-            </button>
-          );
-        })}
-      </nav>
+      <ScrollArea component="nav" style={{ flex: 1 }} px={8} py="sm">
+        <Stack gap={2} align={isCollapsed ? 'center' : 'stretch'}>
+          {visibleItems.map(item => {
+            const ItemIcon = item.icon;
+            const active = currentView === item.id;
+            const handleClick = () => { onNavigate(item.id); setMobileOpen(false); };
+
+            if (isCollapsed) {
+              return (
+                <Tooltip key={item.label} label={item.label} position="right" withArrow>
+                  <ActionIcon
+                    onClick={handleClick}
+                    variant={active ? 'light' : 'subtle'}
+                    color={active ? 'neutral' : 'gray'}
+                    size={36}
+                    aria-label={item.label}
+                  >
+                    <ItemIcon size={16} />
+                  </ActionIcon>
+                </Tooltip>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.label}
+                onClick={handleClick}
+                active={active}
+                color="neutral"
+                variant="light"
+                label={item.label}
+                leftSection={<ItemIcon size={16} />}
+                rightSection={item.badge ? <Badge size="xs" variant="light" color="neutral" circle>{item.badge}</Badge> : undefined}
+                styles={{
+                  root: { borderRadius: 'var(--mantine-radius-sm)' },
+                  label: { fontSize: '0.83rem', fontWeight: active ? 600 : 400 },
+                }}
+              />
+            );
+          })}
+        </Stack>
+      </ScrollArea>
 
       {/* Bottom */}
-      <div className="border-t border-sidebar-border p-2 space-y-1">
-        {!collapsed && (
-          <div className="flex items-center gap-2 px-3 py-2">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary" style={{ fontSize: '0.65rem', fontWeight: 700 }}>TF</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>Tesla Footwear</div>
-              <div className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>admin@tesla.com.br</div>
-            </div>
-            <button onClick={onLogout} className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded" title="Sair">
-              <SignOutIcon className="w-3.5 h-3.5" />
-            </button>
-          </div>
+      <Box p={8} style={{ borderTop: SIDEBAR_BORDER, flexShrink: 0 }}>
+        {isCollapsed ? (
+          <Group justify="center">
+            <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} title="Expandir menu">
+              <CaretRightIcon size={16} />
+            </ActionIcon>
+          </Group>
+        ) : (
+          <Group gap={8} px="sm" py={8} wrap="nowrap">
+            <Avatar size={28} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '0.65rem', fontWeight: 700 } }}>
+              TF
+            </Avatar>
+            <Box style={{ flex: 1, minWidth: 0 }}>
+              <Text size="0.78rem" fw={500} truncate>Tesla Footwear</Text>
+              <Text size="0.7rem" c="dimmed" truncate>admin@tesla.com.br</Text>
+            </Box>
+            <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" title="Sair">
+              <SignOutIcon size={14} />
+            </ActionIcon>
+          </Group>
         )}
-        {collapsed && (
-          <button
-            onClick={() => setCollapsed(false)}
-            className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-secondary/60"
-          >
-            <CaretRightIcon className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   );
 
   return (
     <>
-      <button
+      <ActionIcon
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
+        hiddenFrom="lg"
+        variant="default"
+        size="lg"
+        pos="fixed"
+        top={16}
+        left={16}
+        style={{ zIndex: 50 }}
+        aria-label="Abrir menu"
       >
-        <ListIcon className="w-4 h-4" />
-      </button>
+        <ListIcon size={16} />
+      </ActionIcon>
 
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-64 h-full bg-sidebar border-r border-sidebar-border">
-            <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <XIcon className="w-4 h-4" />
-            </button>
-            <SidebarContent />
-          </div>
-        </div>
-      )}
+      <Drawer
+        opened={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        hiddenFrom="lg"
+        size={256}
+        padding={0}
+        withCloseButton={false}
+        styles={{ body: { height: '100%' } }}
+      >
+        {renderContent(false)}
+      </Drawer>
 
-      <aside className={`hidden lg:flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-200 flex-shrink-0 ${collapsed ? 'w-[52px]' : 'w-[260px]'}`}>
-        <SidebarContent />
-      </aside>
+      <Box
+        component="aside"
+        visibleFrom="lg"
+        h="100%"
+        w={collapsed ? 52 : 260}
+        bg="var(--mantine-color-body)"
+        style={{ borderRight: SIDEBAR_BORDER, flexShrink: 0, transition: 'width 200ms ease' }}
+      >
+        {renderContent(collapsed)}
+      </Box>
     </>
   );
 }
@@ -390,7 +440,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 className="border-l border-border"
                 style={{ borderRadius: '50%' }}
               >
-                <ProfileIcon className={`w-3.5 h-3.5 ${profileInfo.color}`} />
+                <ProfileIcon className="w-3.5 h-3.5" color={profileInfo.color} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>

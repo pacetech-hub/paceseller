@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { toast } from "../lib/toast";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
 import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
 import { statusColors, statusIcon, statusSupportText, orderProductNames } from "./OrderHistory";
