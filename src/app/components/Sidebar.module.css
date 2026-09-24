@@ -20,3 +20,13 @@
 .avatarButton.avatarButton {
   border-left: 1px solid var(--mantine-color-default-border);
 }
+
+/* Itens de navegação: 42px de altura e rótulo de 16px, como os demais controles
+   (classes duplicadas para vencer os tamanhos padrão do próprio NavLink) */
+.navLink.navLink {
+  min-height: 42px;
+}
+
+.navLabel.navLabel {
+  font-size: var(--mantine-font-size-md);
+}

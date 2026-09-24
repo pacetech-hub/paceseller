@@ -125,50 +125,35 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         flex="none"
       >
         <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
-        {!isCollapsed && (
-          <Tooltip label="Recolher menu" withArrow>
-            <ActionIcon
-              onClick={() => setCollapsed(true)}
-              variant="subtle"
-              color="gray"
-              size="sm"
-              ml="auto"
-              visibleFrom="lg"
-              aria-label="Recolher menu"
-            >
-              <CaretLeftIcon size={16} />
-            </ActionIcon>
-          </Tooltip>
-        )}
       </Group>
       <Divider color={BORDER_COLOR} />
 
       {/* Profile pill */}
       {!isCollapsed && (
-        <Paper withBorder radius="md" mx="sm" mt="sm" px="sm" py={8} bg="var(--mantine-color-default-hover)">
+        <Paper withBorder mx="sm" mt="sm" px="sm" py={8} bg="var(--mantine-color-default-hover)">
           <Group gap={8} wrap="nowrap">
-            <ProfileIcon size={14} color={profileInfo.color} />
-            <Text size="0.78rem" fw={600} truncate>{profileInfo.label}</Text>
+            <ProfileIcon size={16} color={profileInfo.color} />
+            <Text size="sm" fw={600} truncate>{profileInfo.label}</Text>
           </Group>
         </Paper>
       )}
 
       {/* Selected client chip — rep only */}
       {!isCollapsed && profile === 'rep' && selectedClient && (
-        <Paper withBorder radius="md" mx="sm" mt={8} px="sm" py={8}>
-          <Text c="dimmed" size="0.62rem" fw={600} tt="uppercase" lts="0.06em">Pedindo para</Text>
-          <Text size="0.82rem" fw={600} truncate mt={2}>{selectedClient.name}</Text>
+        <Paper withBorder mx="sm" mt={8} px="sm" py={8}>
+          <Text c="dimmed" size="sm" fw={600}>Pedindo para</Text>
+          <Text fw={600} truncate mt={2}>{selectedClient.name}</Text>
         </Paper>
       )}
 
       {/* Search */}
       {!isCollapsed && (
         <UnstyledButton mx="sm" mt="sm">
-          <Paper withBorder radius="md" px="sm" py={8}>
-            <Group gap={8} wrap="nowrap" c="dimmed">
-              <MagnifyingGlassIcon size={14} />
-              <Text size="0.78rem" c="dimmed">Buscar...</Text>
-              <Kbd size="xs" ml="auto">⌘K</Kbd>
+          <Paper withBorder px="sm" mih={42} display="flex" style={{ alignItems: 'center' }}>
+            <Group gap={8} wrap="nowrap" c="dimmed" w="100%">
+              <MagnifyingGlassIcon size={16} />
+              <Text c="dimmed">Buscar...</Text>
+              <Kbd ml="auto">⌘K</Kbd>
             </Group>
           </Paper>
         </UnstyledButton>
@@ -189,7 +174,6 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
                     onClick={handleClick}
                     variant={active ? 'light' : 'subtle'}
                     color={active ? 'neutral' : 'gray'}
-                    size={36}
                     aria-label={item.label}
                   >
                     <ItemIcon size={16} />
@@ -207,11 +191,9 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
                 variant="light"
                 label={item.label}
                 leftSection={<ItemIcon size={16} />}
-                rightSection={item.badge ? <Badge size="xs" variant="light" color="neutral" circle>{item.badge}</Badge> : undefined}
-                styles={{
-                  root: { borderRadius: 'var(--mantine-radius-sm)' },
-                  label: { fontSize: '0.83rem', fontWeight: active ? 600 : 400 },
-                }}
+                rightSection={item.badge ? <Badge variant="light" color="neutral">{item.badge}</Badge> : undefined}
+                classNames={{ root: classes.navLink, label: classes.navLabel }}
+                styles={{ label: { fontWeight: active ? 600 : 400 } }}
               />
             );
           })}
@@ -224,26 +206,48 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         {isCollapsed ? (
           <Group justify="center">
             <Tooltip label="Expandir menu" position="right" withArrow>
-              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} aria-label="Expandir menu">
+              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" aria-label="Expandir menu">
                 <CaretRightIcon size={16} />
               </ActionIcon>
             </Tooltip>
           </Group>
         ) : (
+          <>
+          {/* Recolher fica embaixo, no mesmo lugar do "Expandir menu" do modo recolhido
+              (no topo não cabe ícone + texto ao lado do logo) */}
+          <Button
+            onClick={() => setCollapsed(true)}
+            variant="subtle"
+            color="gray"
+            fullWidth
+            justify="flex-start"
+            px="sm"
+            visibleFrom="lg"
+            leftSection={<CaretLeftIcon size={16} />}
+          >
+            Recolher menu
+          </Button>
           <Group gap={8} px="sm" py={8} wrap="nowrap">
-            <Avatar size={28} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '0.65rem', fontWeight: 700 } }}>
+            <Avatar size={32} color="neutral" variant="light">
               TF
             </Avatar>
             <Box flex={1} miw={0}>
-              <Text size="0.78rem" fw={600} truncate>Tesla Footwear</Text>
-              <Text size="0.7rem" c="dimmed" truncate>admin@tesla.com.br</Text>
+              <Text size="sm" fw={600} truncate>Tesla Footwear</Text>
+              <Text size="sm" c="dimmed" truncate>admin@tesla.com.br</Text>
             </Box>
-            <Tooltip label="Sair da conta" withArrow>
-              <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" aria-label="Sair da conta">
-                <SignOutIcon size={14} />
-              </ActionIcon>
-            </Tooltip>
+            <Button
+              onClick={onLogout}
+              variant="subtle"
+              color="red"
+              px="sm"
+              flex="none"
+              leftSection={<SignOutIcon size={16} />}
+              aria-label="Sair da conta"
+            >
+              Sair
+            </Button>
           </Group>
+          </>
         )}
       </Box>
     </Stack>
@@ -255,7 +259,6 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         <ActionIcon
           onClick={() => setMobileOpen(true)}
           variant="default"
-          size="lg"
           aria-label="Abrir menu"
         >
           <ListIcon size={16} />
@@ -278,7 +281,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         component="aside"
         visibleFrom="lg"
         h="100%"
-        w={collapsed ? 52 : 260}
+        w={collapsed ? 60 : 260}
         bg="var(--mantine-color-body)"
         flex="none"
         className={classes.aside}
@@ -384,22 +387,33 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               opened={navOpened}
               onClick={toggleNav}
               hiddenFrom="sm"
-              size="sm"
               aria-label="Abrir navegação"
             />
           )}
+          {/* Filtros: ícone + texto quando há espaço; só ícone (com tooltip) no celular */}
           {onOpenFilters && (
-            <Tooltip label="Abrir filtros" withArrow>
-              <ActionIcon
+            <>
+              <Button
                 onClick={onOpenFilters}
+                visibleFrom="sm"
                 hiddenFrom="lg"
                 variant="default"
-                size="lg"
-                aria-label="Abrir filtros"
+                flex="none"
+                leftSection={<FunnelIcon size={16} />}
               >
-                <FunnelIcon size={16} />
-              </ActionIcon>
-            </Tooltip>
+                Filtros
+              </Button>
+              <Tooltip label="Abrir filtros" withArrow>
+                <ActionIcon
+                  onClick={onOpenFilters}
+                  hiddenFrom="sm"
+                  variant="default"
+                  aria-label="Abrir filtros"
+                >
+                  <FunnelIcon size={16} />
+                </ActionIcon>
+              </Tooltip>
+            </>
           )}
           {currentView !== 'catalog' && (
             <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
@@ -418,9 +432,9 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                     onClick={() => onNavigate(item.view)}
                     variant={active ? 'light' : 'subtle'}
                     color="neutral"
-                    size="sm"
-                    leftSection={<Icon size={14} />}
+                    leftSection={<Icon size={16} />}
                     title={item.label}
+                    aria-label={item.label}
                     styles={{ label: { fontWeight: active ? 600 : 400 } }}
                   >
                     <Text span visibleFrom="md" inherit>{item.label}</Text>
@@ -430,8 +444,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             </Group>
           ) : (
             <Box miw={0}>
-              <Text truncate fw={600} size="0.95rem" lts="-0.01em">{title}</Text>
-              {subtitle && <Text truncate c="dimmed" size="0.75rem" visibleFrom="sm">{subtitle}</Text>}
+              <Text truncate fw={600}>{title}</Text>
+              {subtitle && <Text truncate c="dimmed" size="sm" visibleFrom="sm">{subtitle}</Text>}
             </Box>
           )}
         </Group>
@@ -439,19 +453,30 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         <Group gap={4} wrap="nowrap" flex="none">
           {actions}
 
-          {/* Cart(s) — todos os perfis usam multi-carrinhos */}
-          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
+          {/* Cart(s) — todos os perfis usam multi-carrinhos.
+              Ícone + texto a partir de lg; abaixo disso a barra fica apertada e vira só ícone com tooltip */}
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} visibleFrom="lg">
+            <Button onClick={() => onNavigate('carts')} variant="subtle" color="neutral" px="sm" leftSection={<BasketIcon size={16} />}>
+              Carrinhos
+            </Button>
+          </Indicator>
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} hiddenFrom="lg">
             <Tooltip label="Ver carrinhos" withArrow>
-              <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" aria-label="Ver carrinhos">
+              <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" aria-label="Ver carrinhos">
                 <BasketIcon size={16} />
               </ActionIcon>
             </Tooltip>
           </Indicator>
 
-          {/* Notifications */}
-          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
+          {/* Notifications — mesma regra do carrinho */}
+          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} visibleFrom="lg">
+            <Button variant="subtle" color="neutral" px="sm" leftSection={<BellIcon size={16} />}>
+              Notificações
+            </Button>
+          </Indicator>
+          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} hiddenFrom="lg">
             <Tooltip label="Ver notificações" withArrow>
-              <ActionIcon variant="subtle" color="neutral" size="lg" aria-label="Ver notificações">
+              <ActionIcon variant="subtle" color="neutral" aria-label="Ver notificações">
                 <BellIcon size={16} />
               </ActionIcon>
             </Tooltip>
@@ -464,10 +489,9 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 onClick={() => onNavigate('history')}
                 variant="default"
                 color="neutral"
-                size="sm"
                 maw={{ sm: 180, lg: 260 }}
                 visibleFrom="sm"
-                leftSection={<StorefrontIcon size={14} />}
+                leftSection={<StorefrontIcon size={16} />}
                 title="Ver histórico de pedidos deste cliente"
                 styles={{ label: { overflow: 'hidden', textOverflow: 'ellipsis' } }}
               >
@@ -479,7 +503,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                   hiddenFrom="sm"
                   variant="default"
                   color="neutral"
-                  size="lg"
                   aria-label={`Ver histórico de pedidos de ${selectedClient.name}`}
                 >
                   <StorefrontIcon size={16} />
@@ -494,13 +517,11 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               <ActionIcon
                 variant="light"
                 color="neutral"
-                radius="xl"
-                size={32}
                 ml={4}
                 aria-label="Abrir menu da conta"
                 className={classes.avatarButton}
               >
-                <ProfileIcon size={14} color={profileInfo.color} />
+                <ProfileIcon size={16} color={profileInfo.color} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
@@ -510,7 +531,9 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 return (
                   <Menu.Item
                     key={item.label}
-                    leftSection={<Icon size={14} />}
+                    leftSection={<Icon size={16} />}
+                    fz="md"
+                    mih={42}
                     color={item.label === 'Sair' ? 'red' : undefined}
                     onClick={() => handleDropdownItem(item)}
                   >
@@ -544,10 +567,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 variant="light"
                 label={item.label}
                 leftSection={<Icon size={16} />}
-                styles={{
-                  root: { borderRadius: 'var(--mantine-radius-sm)' },
-                  label: { fontSize: '0.88rem', fontWeight: active ? 600 : 400 },
-                }}
+                classNames={{ root: classes.navLink, label: classes.navLabel }}
+                styles={{ label: { fontWeight: active ? 600 : 400 } }}
               />
             );
           })}
