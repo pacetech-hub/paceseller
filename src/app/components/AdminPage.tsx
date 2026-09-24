@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  Tabs, Table, ActionIcon, Avatar, Collapse, Alert,
+  Stack, Group, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
+  Tabs, Table, ActionIcon, Avatar, Collapse, Alert, Divider,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -33,6 +33,7 @@ import { PermissionMatrixTable } from "./PermissionMatrixTable";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 import classes from "./interactive.module.css";
+import admin from "./AdminPage.module.css";
 
 const tabs = [
   { id: 'industry-stock', label: 'Estoque Industrial', icon: WarehouseIcon },
@@ -45,8 +46,6 @@ const tabs = [
 
 const badgeStyles = { label: { textTransform: 'none' as const } };
 
-// cabeçalho de tabela: texto pequeno e discreto sobre fundo levemente tingido
-const thStyle = { fontSize: '0.72rem', fontWeight: 500 };
 
 const initials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2);
 
@@ -63,7 +62,7 @@ function PolicySection({ icon: SectionIcon, title, hint, children }: { icon: Ico
     <Paper withBorder radius="lg" p="lg" h="100%">
       <Group gap={8} mb={4}>
         <SectionIcon size={14} />
-        <Title order={4} fw={600} style={{ fontSize: '0.85rem' }}>{title}</Title>
+        <Title order={4} fw={600} fz="0.85rem">{title}</Title>
       </Group>
       {hint && <Text c="dimmed" size="0.72rem">{hint}</Text>}
       <Box mt="sm">{children}</Box>
@@ -182,7 +181,7 @@ export function AdminPage() {
       {/* Tab bar */}
       <Paper withBorder radius="lg" p={4}>
         <Tabs value={activeTab} onChange={v => v && setActiveTab(v)} variant="pills" color="gray">
-          <Tabs.List style={{ flexWrap: 'nowrap', overflowX: 'auto' }}>
+          <Tabs.List className={admin.tabList}>
             {tabs.map(tab => {
               const TabIcon = tab.icon;
               const active = activeTab === tab.id;
@@ -191,7 +190,7 @@ export function AdminPage() {
                   key={tab.id}
                   value={tab.id}
                   leftSection={<TabIcon size={14} />}
-                  style={{ flexShrink: 0 }}
+                  flex="none"
                   styles={{
                     tab: {
                       fontSize: '0.82rem',
@@ -237,8 +236,8 @@ export function AdminPage() {
                 className={`${classes.cardButton} ${classes.hoverable}`}
               >
                 <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
-                  <Title order={3} fw={600} style={{ fontSize: '0.9rem' }}>{policy.name}</Title>
-                  <CaretRightIcon size={14} style={{ color: 'var(--mantine-color-dimmed)', flexShrink: 0 }} />
+                  <Title order={3} fw={600} fz="0.9rem">{policy.name}</Title>
+                  <CaretRightIcon size={14} color="var(--mantine-color-dimmed)" />
                 </Group>
                 <SimpleGrid cols={3} spacing="sm" mb="sm">
                   {[
@@ -289,7 +288,7 @@ export function AdminPage() {
             {/* Identidade */}
             <Paper withBorder radius="lg" p="lg">
               <Box mb="md">
-                <Title order={2} fw={700} mb={4} style={{ fontSize: '1.15rem' }}>{policy.name}</Title>
+                <Title order={2} fw={700} mb={4} fz="1.15rem">{policy.name}</Title>
                 <Text c="dimmed" size="0.78rem">Configuração da política comercial</Text>
               </Box>
               <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
@@ -300,7 +299,7 @@ export function AdminPage() {
                   { label: 'Clientes cobertos', value: String(policy.clients) },
                 ].map(d => (
                   <Paper key={d.label} radius="md" p="sm" bg="var(--mantine-color-default-hover)">
-                    <Text c="dimmed" size="0.7rem" tt="uppercase" mb={4} style={{ letterSpacing: '0.05em' }}>{d.label}</Text>
+                    <Text c="dimmed" size="0.7rem" tt="uppercase" mb={4} lts="0.05em">{d.label}</Text>
                     <Text className={d.mono ? 'mono' : undefined} size="1rem" fw={d.highlight ? 700 : 600}>{d.value}</Text>
                   </Paper>
                 ))}
@@ -317,7 +316,7 @@ export function AdminPage() {
 
             {/* Critérios */}
             <Box>
-              <Title order={3} fw={600} mb="sm" style={{ fontSize: '0.95rem' }}>Critérios de aplicação</Title>
+              <Title order={3} fw={600} mb="sm" fz="0.95rem">Critérios de aplicação</Title>
               <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
                 <PolicySection icon={UserCircleIcon} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
                   <CriteriaChips items={criteria.clients} />
@@ -343,32 +342,33 @@ export function AdminPage() {
             </Box>
 
             {/* Clientes cobertos */}
-            <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
-              <Box p="lg" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
-                <Title order={3} fw={600} style={{ fontSize: '0.95rem' }}>Clientes cobertos</Title>
+            <Card withBorder radius="lg" padding={0}>
+              <Box p="lg">
+                <Title order={3} fw={600} fz="0.95rem">Clientes cobertos</Title>
                 <Text c="dimmed" size="0.75rem" mt={4}>
                   Resultado consolidado dos critérios acima · {policy.clients} lojistas · somente leitura
                 </Text>
               </Box>
+              <Divider color="var(--mantine-color-default-border)" />
               <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Lojista', 'Cidade/UF', 'Representante'].map(c => (
-                      <Table.Th key={c} c="dimmed" tt="uppercase" style={{ ...thStyle, fontSize: '0.7rem', letterSpacing: '0.05em' }}>{c}</Table.Th>
+                      <Table.Th key={c} c="dimmed" tt="uppercase" fz="0.7rem" fw={500} lts="0.05em">{c}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {covered.map(c => (
                     <Table.Tr key={c.name}>
-                      <Table.Td fw={500} style={{ fontSize: '0.82rem' }}>{c.name}</Table.Td>
-                      <Table.Td c="dimmed" style={{ fontSize: '0.78rem' }}>{c.city}</Table.Td>
-                      <Table.Td c="dimmed" style={{ fontSize: '0.78rem' }}>{c.rep}</Table.Td>
+                      <Table.Td fw={500} fz="0.82rem">{c.name}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{c.city}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{c.rep}</Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
               </Table>
-            </Paper>
+            </Card>
           </Stack>
         );
       })()}
@@ -386,7 +386,7 @@ export function AdminPage() {
                 { label: 'Desconto máximo por rep', desc: 'Desconto máximo que um representante pode conceder', value: '15%' },
               ].map(setting => (
                 <SettingRow key={setting.label} label={setting.label} desc={setting.desc}>
-                  <Text className="mono" fw={700} style={{ flexShrink: 0 }}>{setting.value}</Text>
+                  <Text className="mono" fw={700} flex="none">{setting.value}</Text>
                 </SettingRow>
               ))}
             </Stack>
@@ -396,7 +396,7 @@ export function AdminPage() {
             <Title order={3} fw={600} size="1rem" mb={4}>Inadimplência</Title>
             <Text c="dimmed" size="0.78rem" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
             <SettingRow label="Clientes inadimplentes" desc="Condição de pagamento aplicada automaticamente a clientes com débitos em aberto">
-              <Paper withBorder radius="md" px="sm" py={8} style={{ flexShrink: 0 }}>
+              <Paper withBorder radius="md" px="sm" py={8} flex="none">
                 <Text size="0.82rem" fw={500}>Apenas pagamento à vista</Text>
               </Paper>
             </SettingRow>
@@ -426,7 +426,7 @@ export function AdminPage() {
             </Group>
             <Collapse in={showAddUser}>
               <Paper withBorder radius="lg" p="md" mb="md" bg="var(--mantine-color-default-hover)">
-                <Title order={4} fw={600} mb="sm" style={{ fontSize: '0.88rem' }}>Adicionar usuário</Title>
+                <Title order={4} fw={600} mb="sm" fz="0.88rem">Adicionar usuário</Title>
                 <SimpleGrid cols={2} spacing="sm">
                   <TextInput label="Nome completo" placeholder="Nome do usuário" size="xs" />
                   <TextInput label="E-mail" placeholder="email@tesla.com.br" size="xs" />
@@ -456,7 +456,7 @@ export function AdminPage() {
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Nome', 'E-mail', 'Perfil', 'Região', 'Status', 'Último acesso', ''].map(col => (
-                      <Table.Th key={col} c="dimmed" style={thStyle}>{col}</Table.Th>
+                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={500}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -464,15 +464,15 @@ export function AdminPage() {
                   {filteredUsers.map(user => (
                     <Table.Tr key={user.id}>
                       <Table.Td><UserCell name={user.name} /></Table.Td>
-                      <Table.Td c="dimmed" style={{ fontSize: '0.78rem' }}>{user.email}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{user.email}</Table.Td>
                       <Table.Td>
                         <Badge size="xs" variant="light" color={user.role === 'Admin' ? 'violet' : 'dark'} styles={badgeStyles}>{user.role}</Badge>
                       </Table.Td>
-                      <Table.Td c="dimmed" style={{ fontSize: '0.78rem' }}>{user.region}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{user.region}</Table.Td>
                       <Table.Td>
                         <Badge size="xs" variant="light" color="teal" styles={badgeStyles}>{user.status}</Badge>
                       </Table.Td>
-                      <Table.Td c="dimmed" className="mono" style={{ fontSize: '0.75rem' }}>{formatDate(user.lastLogin)}</Table.Td>
+                      <Table.Td c="dimmed" className="mono" fz="0.75rem">{formatDate(user.lastLogin)}</Table.Td>
                       <Table.Td>
                         <Group gap={4} wrap="nowrap">
                           <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Editar usuário"><PencilSimpleLineIcon size={14} /></ActionIcon>
@@ -497,7 +497,7 @@ export function AdminPage() {
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Usuário', 'E-mail', 'Perfil', 'Vinculado a', 'Status', 'Último acesso'].map(col => (
-                      <Table.Th key={col} c="dimmed" style={thStyle}>{col}</Table.Th>
+                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={500}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -505,7 +505,7 @@ export function AdminPage() {
                   {linkedUsers.map(user => (
                     <Table.Tr key={user.id}>
                       <Table.Td><UserCell name={user.name} /></Table.Td>
-                      <Table.Td c="dimmed" style={{ fontSize: '0.78rem' }}>{user.email}</Table.Td>
+                      <Table.Td c="dimmed" fz="0.78rem">{user.email}</Table.Td>
                       <Table.Td>
                         <Badge size="xs" variant="light" color="neutral" styles={badgeStyles}>{user.profile}</Badge>
                       </Table.Td>
@@ -517,7 +517,7 @@ export function AdminPage() {
                       <Table.Td>
                         <Badge size="xs" variant="light" color={user.status === 'ativo' ? 'teal' : 'gray'} styles={badgeStyles}>{user.status}</Badge>
                       </Table.Td>
-                      <Table.Td c="dimmed" className="mono" style={{ fontSize: '0.75rem' }}>{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
+                      <Table.Td c="dimmed" className="mono" fz="0.75rem">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
@@ -565,7 +565,8 @@ export function AdminPage() {
                   radius="lg"
                   p="md"
                   className={`${classes.cardButton} ${active ? '' : classes.hoverable}`}
-                  style={active ? { borderColor: 'var(--mantine-color-neutral-9)', backgroundColor: 'var(--mantine-color-neutral-0)' } : undefined}
+                  bd={active ? '1px solid var(--mantine-color-neutral-9)' : undefined}
+                  bg={active ? 'var(--mantine-color-neutral-0)' : undefined}
                 >
                   <Group gap="sm" wrap="nowrap">
                     <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'neutral' : 'gray'} size={36} radius="md">

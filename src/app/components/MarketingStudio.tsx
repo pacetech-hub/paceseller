@@ -1,6 +1,6 @@
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge,
+  Stack, Group, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
   Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
@@ -122,25 +122,20 @@ const WIZARD_STEPS = [
   { n: 6, label: 'Resultado' },
 ];
 
-const clampStyle: CSSProperties = {
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
-};
-
 type Mode = 'home' | 'wizard' | 'campaigns';
 
 
-const sectionLabelStyle: CSSProperties = { textTransform: 'uppercase', letterSpacing: '0.04em' };
-const faintIcon: CSSProperties = { color: 'var(--mantine-color-dimmed)', opacity: 0.3 };
+const DIMMED = 'var(--mantine-color-dimmed)';
+const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
 function EmptyState({ title, subtitle, iconSize = 32, withCard = false, py = 40, strongTitle = false }: {
   title: string; subtitle?: string; iconSize?: number; withCard?: boolean; py?: number; strongTitle?: boolean;
 }) {
   const content = (
     <Stack align="center" justify="center" gap={0} py={py} ta="center">
-      <ImageIcon size={iconSize} style={{ ...faintIcon, marginBottom: strongTitle ? 12 : 8 }} />
+      <Box mb={strongTitle ? 12 : 8} lh={0}>
+        <ImageIcon size={iconSize} color={DIMMED} opacity={0.3} />
+      </Box>
       {strongTitle ? (
         <Text fw={600}>{title}</Text>
       ) : (
@@ -174,7 +169,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
   return (
     <Box p="sm">
       <Text size="0.82rem" fw={600} truncate>{label}</Text>
-      <Text c="dimmed" size="0.72rem" mb={8} style={clampStyle}>{copy}</Text>
+      <Text c="dimmed" size="0.72rem" mb={8} lineClamp={2}>{copy}</Text>
       <Button
         onClick={() => toast.success('Arquivo baixado')}
         variant="default"
@@ -200,11 +195,11 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               <SparkleIcon size={20} />
             </ThemeIcon>
             <Box>
-              <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Estúdio de Marketing com IA</Title>
+              <Title order={2} fw={700} fz="1rem">Estúdio de Marketing com IA</Title>
               <Text c="dimmed" size="0.8rem">Crie campanhas profissionais em menos de 2 minutos</Text>
             </Box>
           </Group>
-          <Group gap={8} wrap="nowrap" style={{ flexShrink: 0 }}>
+          <Group gap={8} wrap="nowrap" flex="none">
             <Button
               onClick={onManageCampaigns}
               variant="subtle"
@@ -226,13 +221,13 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
 
       {/* Histórico */}
       <Box>
-        <Text c="dimmed" size="0.7rem" fw={600} mb="sm" style={sectionLabelStyle}>
+        <Text c="dimmed" size="0.7rem" fw={600} mb="sm" tt="uppercase" lts="0.04em">
           Histórico
         </Text>
         {history.length > 0 ? (
           <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
             {history.map(item => (
-              <Paper key={item.id} withBorder radius="lg" style={{ overflow: 'hidden' }}>
+              <Card key={item.id} withBorder radius="lg" padding={0}>
                 <AspectRatio ratio={1}>
                   <Box pos="relative" bg="var(--mantine-color-default-hover)">
                     <Image src={item.image} alt={item.formatLabel} h="100%" />
@@ -252,7 +247,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                   </Box>
                 </AspectRatio>
                 <PieceInfo label={item.formatLabel} copy={item.copy} />
-              </Paper>
+              </Card>
             ))}
           </SimpleGrid>
         ) : (
@@ -304,13 +299,13 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
       <BackLink onClick={onBack} />
 
       <Box>
-        <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Gerenciar campanhas</Title>
+        <Title order={2} fw={700} fz="1rem">Gerenciar campanhas</Title>
         <Text c="dimmed" size="0.8rem">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
       </Box>
 
       <Group align="flex-start" gap="lg" wrap="nowrap">
         {/* Left panel: campaign list */}
-        <Paper withBorder radius="lg" p={8} w={256} style={{ flexShrink: 0 }}>
+        <Paper withBorder radius="lg" p={8} w={256} flex="none">
           <Stack gap={2}>
             {campaigns.map(c => {
               const active = selectedId === c.id;
@@ -322,7 +317,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                   className={classes.campaignRow}
                   data-active={active || undefined}
                 >
-                  <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py={10} style={{ flex: 1, minWidth: 0 }}>
+                  <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py={10} flex={1} miw={0}>
                     <Text size="0.85rem" fw={active ? 600 : 500} truncate>
                       {c.name}
                     </Text>
@@ -357,11 +352,11 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         </Paper>
 
         {/* Main content: selected campaign detail */}
-        <Stack gap="md" style={{ flex: 1, minWidth: 0 }}>
+        <Stack gap="md" flex={1} miw={0}>
           {selected ? (
             <>
               <Paper withBorder radius="lg" p="md">
-                <Title order={3} fw={700} style={{ fontSize: '0.95rem' }}>{selected.name}</Title>
+                <Title order={3} fw={700} fz="0.95rem">{selected.name}</Title>
                 <Text c="dimmed" size="0.82rem" mt={4}>
                   {selected.description || 'Sem descrição.'}
                 </Text>
@@ -369,7 +364,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
 
               <Paper withBorder radius="lg" p="md">
                 <Group justify="space-between" wrap="wrap" gap={8} mb="sm">
-                  <Text c="dimmed" size="0.7rem" fw={600} style={sectionLabelStyle}>
+                  <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" lts="0.04em">
                     {selected.photos.length} {selected.photos.length === 1 ? 'cenário fotográfico' : 'cenários fotográficos'}
                   </Text>
                   <FileButton onChange={handleFiles} accept="image/*" multiple>
@@ -391,11 +386,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                   <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
                     {selected.photos.map((photo, idx) => (
                       <AspectRatio key={idx} ratio={1}>
-                        <Box
-                          pos="relative"
-                          bg="var(--mantine-color-default-hover)"
-                          style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', border: '1px solid var(--mantine-color-default-border)' }}
-                        >
+                        <Card bd={`1px solid ${BORDER_COLOR}`} radius="md" padding={0} pos="relative" bg="var(--mantine-color-default-hover)">
                           <Image src={photo} alt={`${selected.name} — cenário ${idx + 1}`} h="100%" />
                           <ActionIcon
                             onClick={() => onDeletePhoto(selected.id, idx)}
@@ -410,7 +401,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                           >
                             <TrashIcon size={12} />
                           </ActionIcon>
-                        </Box>
+                        </Card>
                       </AspectRatio>
                     ))}
                   </SimpleGrid>
@@ -510,7 +501,7 @@ function StepHeader({ title, subtitle, right, mb = 'md' }: { title: string; subt
   return (
     <Group justify="space-between" align={right ? 'center' : 'flex-start'} wrap="wrap" gap={8} mb={mb}>
       <Box>
-        <Title order={3} fw={600} style={{ fontSize: '1rem' }}>{title}</Title>
+        <Title order={3} fw={600} fz="1rem">{title}</Title>
         {subtitle && <Text c="dimmed" size="0.78rem" mt={4}>{subtitle}</Text>}
       </Box>
       {right}
@@ -587,7 +578,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             const done = step > s.n;
             const current = step === s.n;
             return (
-              <Group key={s.n} gap={0} wrap="nowrap" style={{ flex: 1 }}>
+              <Group key={s.n} gap={0} wrap="nowrap" flex={1}>
                 <Group gap={8} wrap="nowrap">
                   <ActionIcon
                     onClick={() => s.n <= step && setStep(s.n)}
@@ -596,13 +587,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     variant={done || current ? 'filled' : 'light'}
                     color={done || current ? 'neutral' : 'gray'}
                     aria-label={s.label}
-                    style={{
-                      flexShrink: 0,
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      ...(done || current ? {} : { color: 'var(--mantine-color-dimmed)' }),
-                      ...(current ? { boxShadow: '0 0 0 2px var(--mantine-color-body), 0 0 0 4px var(--mantine-color-neutral-3)' } : {}),
-                    }}
+                    flex="none"
+                    fz="0.72rem"
+                    fw={700}
+                    c={done || current ? undefined : 'dimmed'}
+                    className={classes.stepDot}
+                    data-current={current || undefined}
                   >
                     {done ? <CheckIcon size={14} /> : s.n}
                   </ActionIcon>
@@ -616,11 +606,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                   </Text>
                 </Group>
                 {i < WIZARD_STEPS.length - 1 && (
-                  <Box
-                    mx={8}
-                    h={1}
-                    style={{ flex: 1, backgroundColor: done ? 'var(--mantine-color-neutral-9)' : 'var(--mantine-color-default-border)' }}
-                  />
+                  <Divider mx={8} flex={1} color={done ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR} />
                 )}
               </Group>
             );
@@ -654,7 +640,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                           {c.photos.length > 0 ? (
                             <Image src={c.photos[0]} alt={c.name} h="100%" flex={1} />
                           ) : (
-                            <ImageIcon size={32} style={faintIcon} />
+                            <ImageIcon size={32} color={DIMMED} opacity={0.3} />
                           )}
                         </Center>
                       </AspectRatio>
@@ -663,7 +649,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                           <Text size="0.85rem" fw={600} truncate>{c.name}</Text>
                           <Text c="dimmed" size="0.72rem" truncate>{c.description || 'Sem descrição'}</Text>
                         </Box>
-                        {isSelected && <CheckIcon size={16} style={{ flexShrink: 0, marginTop: 2 }} />}
+                        {isSelected && <Box display="flex" mt={2}><CheckIcon size={16} /></Box>}
                       </Group>
                     </Paper>
                   );
@@ -679,14 +665,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         {step === 2 && (
           <Box>
             <Group justify="space-between" wrap="wrap" gap={8} mb={4}>
-              <Title order={3} fw={600} style={{ fontSize: '1rem' }}>Formato da peça</Title>
+              <Title order={3} fw={600} fz="1rem">Formato da peça</Title>
               <Text c="dimmed" size="0.78rem">{selectedFormats.size} selecionado(s)</Text>
             </Group>
             <Text c="dimmed" size="0.78rem" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
             <Stack gap="lg">
               {FORMAT_GROUPS.map(group => (
                 <Box key={group}>
-                  <Text c="dimmed" size="0.7rem" fw={600} mb={8} style={sectionLabelStyle}>
+                  <Text c="dimmed" size="0.7rem" fw={600} mb={8} tt="uppercase" lts="0.04em">
                     {group}
                   </Text>
                   <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
@@ -711,7 +697,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                           <Text size="0.85rem" fw={600} mt={8}>{f.label}</Text>
                           <Text c="dimmed" size="0.72rem">{f.description}</Text>
                           <Text c="dimmed" size="0.68rem" mt={2}>{f.spec}</Text>
-                          {isSelected && <CheckIcon size={16} style={{ marginTop: 8 }} />}
+                          {isSelected && <Box mt={8}><CheckIcon size={16} /></Box>}
                         </Paper>
                       );
                     })}
@@ -747,14 +733,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     data-selected={isSelected || undefined}
                     bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
                   >
-                    <Box pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden' }}>
+                    <Card radius="md" padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
                       <Image src={p.image} alt={p.name} h="100%" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       {isSelected && (
                         <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
                           <CheckIcon size={24} color="#fff" />
                         </Center>
                       )}
-                    </Box>
+                    </Card>
                     {meta && (
                       <Badge
                         variant="light"
@@ -805,7 +791,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       </AspectRatio>
                       <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
                         <Text size="0.8rem" fw={500}>Cenário {idx + 1}</Text>
-                        {isSelected && <CheckIcon size={14} style={{ flexShrink: 0 }} />}
+                        {isSelected && <CheckIcon size={14} />}
                       </Group>
                     </Paper>
                   );
@@ -843,19 +829,20 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     onClick={() => setPrompt(sugg)}
                     className={`${interactive.cardButton} ${classes.suggestion}`}
                     data-selected={prompt === sugg || undefined}
-                    style={{ fontSize: '0.78rem', lineHeight: 1.5 }}
+                    fz="0.78rem"
+                    lh={1.5}
                   >
                     {sugg}
                   </Paper>
                 ))}
               </Stack>
             </Box>
-            <Box p="sm" bg="var(--mantine-color-default-hover)" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+            <Paper radius="md" p="sm" bg="var(--mantine-color-default-hover)">
               <Text c="dimmed" size="0.75rem">
-                <MagicWandIcon size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6, color: 'var(--mantine-color-violet-5)' }} />
+                <MagicWandIcon size={14} color="var(--mantine-color-violet-5)" className={classes.inlineIcon} />
                 A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
               </Text>
-            </Box>
+            </Paper>
           </Box>
         )}
 
@@ -881,14 +868,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
 
             <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
               {selectedFormatList.map(f => (
-                <Paper key={f.id} withBorder radius="lg" style={{ overflow: 'hidden' }}>
+                <Card key={f.id} withBorder radius="lg" padding={0}>
                   <AspectRatio ratio={1}>
                     <Box bg="var(--mantine-color-default-hover)">
                       <Image src={campaignPreviewMock} alt={f.label} h="100%" />
                     </Box>
                   </AspectRatio>
                   <PieceInfo label={f.label} copy={prompt} />
-                </Paper>
+                </Card>
               ))}
             </SimpleGrid>
           </Box>
