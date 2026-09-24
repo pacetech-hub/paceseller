@@ -1,5 +1,9 @@
 import { useState } from "react";
 import {
+  Accordion, ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Drawer, Group, ScrollArea,
+  Select, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
+} from "@mantine/core";
+import {
   FunnelIcon,
   TagIcon,
   StackIcon,
@@ -12,9 +16,10 @@ import {
   CaretRightIcon,
   StorefrontIcon,
   MagnifyingGlassIcon,
-  CaretUpIcon,
   CaretDownIcon,
   UsersIcon,
+  CheckIcon,
+  type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import { products, formatCurrency } from "../data/mockData";
@@ -63,6 +68,8 @@ export const defaultFilters: CatalogFilters = {
   priceTable: 'padrao',
 };
 
+const SIDEBAR_BORDER = '1px solid var(--mantine-color-default-border)';
+const SECTION_LABEL_STYLE = { letterSpacing: '0.06em' } as const;
 
 interface Props {
   filters: CatalogFilters;
@@ -72,7 +79,7 @@ interface Props {
   selectedClient?: Client | null;
 }
 
-export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = 'lojista', selectedClient }: Props) {
+export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = 'lojista' }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
@@ -84,15 +91,6 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
     onChange({ ...filters, colors: next });
   };
 
-  const toggleSection = (label: string) => {
-    setOpenSections(prev => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
-  };
-
   const reset = () => onChange(defaultFilters);
 
   const activeCount =
@@ -101,280 +99,324 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
     filters.colors.length +
     (filters.priceRange[0] !== priceMin || filters.priceRange[1] !== priceMax ? 1 : 0);
 
-  const Content = () => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className={`flex items-center border-b border-sidebar-border px-4 h-14 ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className={`flex items-center justify-center flex-shrink-0 ${collapsed ? 'w-7 h-7' : 'h-8'}`}>
-          <img src={teslaLogo} alt="Tesla Footwear" className={collapsed ? 'h-6 w-auto object-contain' : 'h-7 w-auto object-contain'} />
-        </div>
-        {!collapsed && (
-          <button onClick={() => setCollapsed(true)} className="ml-auto text-muted-foreground hover:text-foreground p-1 rounded">
-            <CaretLeftIcon className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+  const renderChips = (options: string[], value: string, onSelect: (v: string) => void) => (
+    <Chip.Group multiple={false} value={value} onChange={onSelect}>
+      <Group gap={6}>
+        {options.map(o => (
+          <Chip
+            key={o}
+            value={o}
+            size="xs"
+            variant="filled"
+            icon={null}
+            styles={{
+              label: { fontSize: '0.72rem', fontWeight: 500, paddingInline: 10 },
+              iconWrapper: { display: 'none' },
+            }}
+          >
+            {o}
+          </Chip>
+        ))}
+      </Group>
+    </Chip.Group>
+  );
 
-      {collapsed ? (
-        <div className="flex-1 flex flex-col items-center pt-4 gap-3">
-          <button onClick={() => setCollapsed(false)} className="p-2 rounded-md bg-primary/15 text-primary" title="Filtros">
-            <FunnelIcon className="w-4 h-4" />
-          </button>
+  const renderContent = (isCollapsed: boolean) => (
+    <Stack gap={0} h="100%">
+      {/* Logo */}
+      <Group
+        h={56}
+        px={isCollapsed ? 12 : 'md'}
+        gap="sm"
+        wrap="nowrap"
+        justify={isCollapsed ? 'center' : 'flex-start'}
+        style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}
+      >
+        <img
+          src={teslaLogo}
+          alt="Tesla Footwear"
+          style={{ height: isCollapsed ? 24 : 28, width: 'auto', objectFit: 'contain' }}
+        />
+        {!isCollapsed && (
+          <ActionIcon
+            onClick={() => setCollapsed(true)}
+            variant="subtle"
+            color="gray"
+            size="sm"
+            ml="auto"
+            visibleFrom="lg"
+            title="Recolher filtros"
+          >
+            <CaretLeftIcon size={16} />
+          </ActionIcon>
+        )}
+      </Group>
+
+      {isCollapsed ? (
+        <Stack align="center" pt="md" gap="sm" style={{ flex: 1 }}>
+          <Tooltip label="Filtros" position="right" withArrow>
+            <ActionIcon onClick={() => setCollapsed(false)} variant="light" color="neutral" size={32} aria-label="Filtros">
+              <FunnelIcon size={16} />
+            </ActionIcon>
+          </Tooltip>
           {activeCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground" style={{ fontSize: '0.6rem', fontWeight: 700 }}>
+            <Badge size="xs" variant="filled" color="neutral" circle styles={{ label: { fontSize: '0.6rem', fontWeight: 700 } }}>
               {activeCount}
-            </span>
+            </Badge>
           )}
-        </div>
+        </Stack>
       ) : (
         <>
-
           {/* Tabela de Preço */}
-          <div className="px-3 pt-3 pb-3 border-b border-sidebar-border">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <CurrencyDollarIcon className="w-3 h-3 text-primary" />
-              <span className="text-muted-foreground" style={{ fontSize: '0.66rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <Box px="sm" py="sm" style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}>
+            <Group gap={6} mb={6} wrap="nowrap">
+              <CurrencyDollarIcon size={12} />
+              <Text lh={1.5} c="dimmed" size="0.66rem" fw={600} tt="uppercase" style={SECTION_LABEL_STYLE}>
                 Tabela de preço
-              </span>
-            </div>
-            <select
+              </Text>
+            </Group>
+            <Select
+              size="xs"
+              allowDeselect={false}
               value={filters.priceTable}
-              onChange={e => onChange({ ...filters, priceTable: e.target.value })}
-              className="w-full px-2.5 py-2 rounded-md bg-secondary/40 border border-border text-foreground outline-none focus:border-primary cursor-pointer"
-              style={{ fontSize: '0.78rem', fontWeight: 500 }}
-            >
-              {priceTables.map(t => (
-                <option key={t.id} value={t.id}>{t.label} — {t.desc}</option>
-              ))}
-            </select>
-          </div>
+              onChange={v => v && onChange({ ...filters, priceTable: v })}
+              data={priceTables.map(t => ({ value: t.id, label: `${t.label} — ${t.desc}` }))}
+              comboboxProps={{ withinPortal: true }}
+              styles={{ input: { fontSize: '0.78rem', fontWeight: 500 } }}
+            />
+          </Box>
 
-
-          <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FunnelIcon className="w-3.5 h-3.5 text-primary" />
-              <span className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>Filtros</span>
+          <Group px="md" pt="md" pb={8} justify="space-between" wrap="nowrap" style={{ flexShrink: 0 }}>
+            <Group gap={8} wrap="nowrap">
+              <FunnelIcon size={14} />
+              <Text lh={1.5} size="0.82rem" fw={600}>Filtros</Text>
               {activeCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.62rem', fontWeight: 700 }}>
+                <Badge size="xs" variant="light" color="neutral" circle styles={{ label: { fontSize: '0.62rem', fontWeight: 700 } }}>
                   {activeCount}
-                </span>
+                </Badge>
               )}
-            </div>
+            </Group>
             {activeCount > 0 && (
-              <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
-                <XIcon className="w-3 h-3" /> Limpar
-              </button>
+              <Button
+                onClick={reset}
+                variant="subtle"
+                color="gray"
+                size="compact-xs"
+                leftSection={<XIcon size={12} />}
+                styles={{ label: { fontSize: '0.7rem', fontWeight: 400 } }}
+              >
+                Limpar
+              </Button>
             )}
-          </div>
+          </Group>
 
           {/* Search */}
-          <div className="px-3 pb-3">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                value={filters.search}
-                onChange={e => onChange({ ...filters, search: e.target.value })}
-                placeholder="Buscar produto..."
-                className="w-full pl-8 pr-3 py-2 rounded-md bg-secondary/40 border border-border text-foreground outline-none focus:border-primary"
-                style={{ fontSize: '0.78rem' }}
-              />
-            </div>
-          </div>
+          <Box px="sm" pb="sm" style={{ flexShrink: 0 }}>
+            <TextInput
+              size="xs"
+              value={filters.search}
+              onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
+              placeholder="Buscar produto..."
+              leftSection={<MagnifyingGlassIcon size={14} />}
+              styles={{ input: { fontSize: '0.78rem' } }}
+            />
+          </Box>
 
-          <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-5">
-            {/* Modelo / Linha */}
-            <FilterSection
-              icon={TagIcon}
-              label="Modelo / Linha"
-              isOpen={openSections.has('Modelo / Linha')}
-              onToggle={() => toggleSection('Modelo / Linha')}
+          <ScrollArea style={{ flex: 1 }} px="sm" pb="sm">
+            <Accordion
+              multiple
+              value={Array.from(openSections)}
+              onChange={v => setOpenSections(new Set(v))}
+              chevron={<CaretDownIcon size={12} />}
+              chevronSize={12}
+              transitionDuration={200}
+              styles={{
+                item: { border: 0, background: 'transparent' },
+                control: { padding: 0, background: 'transparent', marginBottom: 8 },
+                label: { padding: 0 },
+                content: { padding: 0 },
+                chevron: { color: 'var(--mantine-color-dimmed)' },
+              }}
             >
-              <div className="flex flex-wrap gap-1.5">
-                {lines.map(l => (
-                  <button
-                    key={l}
-                    onClick={() => onChange({ ...filters, line: l })}
-                    className={`px-2.5 py-1 rounded-full transition-colors ${filters.line === l ? 'bg-primary text-primary-foreground' : 'bg-secondary/60 text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.72rem', fontWeight: 500 }}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-            </FilterSection>
+              <Stack gap={20} pb={4}>
+                <FilterSection value="Modelo / Linha" icon={TagIcon} label="Modelo / Linha">
+                  {renderChips(lines, filters.line, l => onChange({ ...filters, line: l }))}
+                </FilterSection>
 
-            {/* Categoria */}
-            <FilterSection
-              icon={StackIcon}
-              label="Categoria"
-              isOpen={openSections.has('Categoria')}
-              onToggle={() => toggleSection('Categoria')}
-            >
-              <div className="flex flex-wrap gap-1.5">
-                {categories.map(c => (
-                  <button
-                    key={c}
-                    onClick={() => onChange({ ...filters, category: c })}
-                    className={`px-2.5 py-1 rounded-full transition-colors ${filters.category === c ? 'bg-primary text-primary-foreground' : 'bg-secondary/60 text-muted-foreground hover:text-foreground'}`}
-                    style={{ fontSize: '0.72rem', fontWeight: 500 }}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </FilterSection>
+                <FilterSection value="Categoria" icon={StackIcon} label="Categoria">
+                  {renderChips(categories, filters.category, c => onChange({ ...filters, category: c }))}
+                </FilterSection>
 
-            {/* Cores */}
-            <FilterSection
-              icon={PaletteIcon}
-              label="Cores"
-              isOpen={openSections.has('Cores')}
-              onToggle={() => toggleSection('Cores')}
-            >
-              <div className="grid grid-cols-6 gap-1.5">
-                {allColors.map(c => {
-                  const active = filters.colors.includes(c);
-                  const bg = colorSwatch[c] || '#94a3b8';
-                  return (
-                    <button
-                      key={c}
-                      onClick={() => toggleColor(c)}
-                      title={c}
-                      className={`relative w-5 h-5 rounded-full border-2 transition-all ${active ? 'border-primary scale-110' : 'border-border hover:border-foreground/40'}`}
-                      style={{ background: bg }}
-                    >
-                      {active && (
-                        <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold" style={{ color: bg === '#fff' ? '#111' : '#fff' }}>✓</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {filters.colors.length > 0 && (
-                <p className="mt-2 text-muted-foreground" style={{ fontSize: '0.68rem' }}>
-                  {filters.colors.join(', ')}
-                </p>
-              )}
-            </FilterSection>
+                <FilterSection value="Cores" icon={PaletteIcon} label="Cores">
+                  <SimpleGrid cols={6} spacing={6} verticalSpacing={6} style={{ justifyItems: 'start' }}>
+                    {allColors.map(c => {
+                      const active = filters.colors.includes(c);
+                      const bg = colorSwatch[c] || '#94a3b8';
+                      return (
+                        <ColorSwatch
+                          key={c}
+                          component="button"
+                          type="button"
+                          onClick={() => toggleColor(c)}
+                          title={c}
+                          color={bg}
+                          size={20}
+                          withShadow={false}
+                          style={{
+                            cursor: 'pointer',
+                            border: active
+                              ? '2px solid var(--mantine-color-neutral-9)'
+                              : '2px solid var(--mantine-color-default-border)',
+                            transform: active ? 'scale(1.1)' : undefined,
+                            transition: 'transform 150ms ease, border-color 150ms ease',
+                            color: bg === '#fff' ? '#111' : '#fff',
+                          }}
+                        >
+                          {active && <CheckIcon size={9} weight="bold" />}
+                        </ColorSwatch>
+                      );
+                    })}
+                  </SimpleGrid>
+                  {filters.colors.length > 0 && (
+                    <Text lh={1.5} mt={8} c="dimmed" size="0.68rem">
+                      {filters.colors.join(', ')}
+                    </Text>
+                  )}
+                </FilterSection>
 
-            {/* Preço */}
-            <FilterSection
-              icon={CurrencyDollarIcon}
-              label="Faixa de preço"
-              isOpen={openSections.has('Faixa de preço')}
-              onToggle={() => toggleSection('Faixa de preço')}
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-muted-foreground" style={{ fontSize: '0.72rem' }}>
-                  <span>{formatCurrency(priceMin)}</span>
-                  <span>{formatCurrency(filters.priceRange[1])}</span>
-                </div>
-                <input
-                  type="range"
-                  min={priceMin}
-                  max={priceMax}
-                  value={filters.priceRange[1]}
-                  onChange={e => onChange({ ...filters, priceRange: [priceMin, Number(e.target.value)] })}
-                  className="w-full accent-primary"
-                />
-              </div>
-            </FilterSection>
-          </div>
+                <FilterSection value="Faixa de preço" icon={CurrencyDollarIcon} label="Faixa de preço">
+                  <Stack gap={8}>
+                    <Group justify="space-between">
+                      <Text lh={1.5} c="dimmed" size="0.72rem">{formatCurrency(priceMin)}</Text>
+                      <Text lh={1.5} c="dimmed" size="0.72rem">{formatCurrency(filters.priceRange[1])}</Text>
+                    </Group>
+                    <Slider
+                      size="sm"
+                      min={priceMin}
+                      max={priceMax}
+                      value={filters.priceRange[1]}
+                      onChange={v => onChange({ ...filters, priceRange: [priceMin, v] })}
+                      label={v => formatCurrency(v)}
+                      mb={4}
+                    />
+                  </Stack>
+                </FilterSection>
+              </Stack>
+            </Accordion>
+          </ScrollArea>
         </>
       )}
 
       {/* Bottom */}
-      <div className="border-t border-sidebar-border p-2">
-        {!collapsed ? (
-          <div className="flex items-center gap-2 px-3 py-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${profile === 'rep' ? 'bg-amber-400/20' : 'bg-emerald-400/20'}`}>
-              {profile === 'rep'
-                ? <UsersIcon className="w-3.5 h-3.5 text-amber-400" />
-                : <StorefrontIcon className="w-3.5 h-3.5 text-emerald-400" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-foreground truncate" style={{ fontSize: '0.78rem', fontWeight: 500 }}>
+      <Box p={8} style={{ borderTop: SIDEBAR_BORDER, flexShrink: 0 }}>
+        {!isCollapsed ? (
+          <Group gap={8} px="sm" py={8} wrap="nowrap">
+            <ThemeIcon
+              size={28}
+              radius="xl"
+              variant="light"
+              color={profile === 'rep' ? 'yellow' : 'teal'}
+            >
+              {profile === 'rep' ? <UsersIcon size={14} /> : <StorefrontIcon size={14} />}
+            </ThemeIcon>
+            <Box style={{ flex: 1, minWidth: 0 }}>
+              <Text lh={1.5} size="0.78rem" fw={500} truncate>
                 {profile === 'rep' ? 'Representante' : 'Lojista'}
-              </div>
-              <div className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>
+              </Text>
+              <Text lh={1.5} size="0.7rem" c="dimmed" truncate>
                 {profile === 'rep' ? 'marcos@tesla.com.br' : 'loja@tesla.com.br'}
-              </div>
-            </div>
-            <button onClick={onLogout} className="text-muted-foreground hover:text-destructive p-1 rounded" title="Sair">
-              <SignOutIcon className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              </Text>
+            </Box>
+            <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" title="Sair">
+              <SignOutIcon size={14} />
+            </ActionIcon>
+          </Group>
         ) : (
-          <button
-            onClick={() => setCollapsed(false)}
-            className="w-full flex items-center justify-center p-2.5 text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60"
-          >
-            <CaretRightIcon className="w-4 h-4" />
-          </button>
+          <Group justify="center">
+            <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} title="Expandir filtros">
+              <CaretRightIcon size={16} />
+            </ActionIcon>
+          </Group>
         )}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   );
 
   return (
     <>
-      <button
+      <ActionIcon
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border text-foreground"
+        hiddenFrom="lg"
+        variant="default"
+        size="lg"
+        pos="fixed"
+        top={16}
+        left={16}
+        style={{ zIndex: 50 }}
+        aria-label="Abrir filtros"
       >
-        <ListIcon className="w-4 h-4" />
-      </button>
+        <ListIcon size={16} />
+      </ActionIcon>
 
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-72 h-full bg-sidebar border-r border-sidebar-border">
-            <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1">
-              <XIcon className="w-4 h-4" />
-            </button>
-            <Content />
-          </div>
-        </div>
-      )}
+      <Drawer
+        opened={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        hiddenFrom="lg"
+        size={288}
+        padding={0}
+        withCloseButton={false}
+        styles={{ body: { height: '100%' } }}
+      >
+        <ActionIcon
+          onClick={() => setMobileOpen(false)}
+          variant="subtle"
+          color="gray"
+          size="sm"
+          pos="absolute"
+          top={12}
+          right={12}
+          style={{ zIndex: 1 }}
+          aria-label="Fechar"
+        >
+          <XIcon size={16} />
+        </ActionIcon>
+        {renderContent(false)}
+      </Drawer>
 
-      <aside className={`hidden lg:flex flex-col h-full bg-sidebar border-r border-sidebar-border transition-all duration-200 flex-shrink-0 ${collapsed ? 'w-[52px]' : 'w-[280px]'}`}>
-        <Content />
-      </aside>
+      <Box
+        component="aside"
+        visibleFrom="lg"
+        h="100%"
+        w={collapsed ? 52 : 280}
+        bg="var(--mantine-color-body)"
+        style={{ borderRight: SIDEBAR_BORDER, flexShrink: 0, transition: 'width 200ms ease' }}
+      >
+        {renderContent(collapsed)}
+      </Box>
     </>
   );
 }
 
 function FilterSection({
-  icon: Icon,
+  value,
+  icon: SectionIcon,
   label,
-  isOpen,
-  onToggle,
   children,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  value: string;
+  icon: Icon;
   label: string;
-  isOpen: boolean;
-  onToggle: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between mb-2 group"
-      >
-        <div className="flex items-center gap-1.5">
-          <Icon className="w-3 h-3 text-muted-foreground" />
-          <span className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</span>
-        </div>
-        {isOpen ? (
-          <CaretUpIcon className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-        ) : (
-          <CaretDownIcon className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-        )}
-      </button>
-      {isOpen && <div className="animate-in fade-in slide-in-from-top-1 duration-200">{children}</div>}
-    </div>
+    <Accordion.Item value={value}>
+      <Accordion.Control>
+        <Group gap={6} wrap="nowrap">
+          <SectionIcon size={12} style={{ color: 'var(--mantine-color-dimmed)' }} />
+          <Text lh={1.5} c="dimmed" size="0.68rem" fw={600} tt="uppercase" style={SECTION_LABEL_STYLE}>{label}</Text>
+        </Group>
+      </Accordion.Control>
+      <Accordion.Panel>{children}</Accordion.Panel>
+    </Accordion.Item>
   );
 }

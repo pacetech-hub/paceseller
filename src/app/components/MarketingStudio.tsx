@@ -1,4 +1,8 @@
 import { useState, useEffect, type CSSProperties } from "react";
+import {
+  Stack, Group, Box, Paper, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge,
+  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center,
+} from "@mantine/core";
 import { toast } from "../lib/toast";
 import {
   SparkleIcon,
@@ -20,8 +24,8 @@ import {
   UploadSimpleIcon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency, type Product } from "../data/mockData";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "./ui/alert-dialog";
+import interactive from "./interactive.module.css";
+import classes from "./MarketingStudio.module.css";
 import campaignPreviewMock from "@/assets/campaign-preview-mock.png";
 import bannerLimitedEdition from "@/assets/banner-edicao-limitada.webp";
 
@@ -70,11 +74,13 @@ const productMeta: Record<string, { tag: ProductTag; stock: number }> = {
   'P008': { tag: 'lançamento', stock: 160 },
 };
 
+
 const tagColors: Record<ProductTag, string> = {
-  'lançamento': 'text-primary bg-primary/10',
-  'alto giro': 'text-emerald-400 bg-emerald-400/10',
-  'estoque parado': 'text-amber-400 bg-amber-400/10',
+  'lançamento': 'neutral',
+  'alto giro': 'teal',
+  'estoque parado': 'yellow',
 };
+
 
 function sortProductsForProfile(profile: Profile): Product[] {
   const priority = (id: string): number => {
@@ -125,80 +131,135 @@ const clampStyle: CSSProperties = {
 
 type Mode = 'home' | 'wizard' | 'campaigns';
 
+
+const sectionLabelStyle: CSSProperties = { textTransform: 'uppercase', letterSpacing: '0.04em' };
+const faintIcon: CSSProperties = { color: 'var(--mantine-color-dimmed)', opacity: 0.3 };
+
+function EmptyState({ title, subtitle, iconSize = 32, withCard = false, py = 40, strongTitle = false }: {
+  title: string; subtitle?: string; iconSize?: number; withCard?: boolean; py?: number; strongTitle?: boolean;
+}) {
+  const content = (
+    <Stack align="center" justify="center" gap={0} py={py} ta="center">
+      <ImageIcon size={iconSize} style={{ ...faintIcon, marginBottom: strongTitle ? 12 : 8 }} />
+      {strongTitle ? (
+        <Text fw={600}>{title}</Text>
+      ) : (
+        <Text c="dimmed" size="0.8rem">{title}</Text>
+      )}
+      {subtitle && <Text c="dimmed" size={strongTitle ? '0.85rem' : '0.72rem'} mt={4}>{subtitle}</Text>}
+    </Stack>
+  );
+  return withCard ? <Paper withBorder radius="lg">{content}</Paper> : content;
+}
+
+function BackLink({ onClick }: { onClick: () => void }) {
+  return (
+    <Group>
+      <Button
+        onClick={onClick}
+        variant="subtle"
+        color="gray"
+        size="compact-sm"
+        px={4}
+        leftSection={<CaretLeftIcon size={16} />}
+        styles={{ label: { fontSize: '0.82rem', fontWeight: 500 } }}
+      >
+        Voltar para Marketing IA
+      </Button>
+    </Group>
+  );
+}
+
+function PieceInfo({ label, copy }: { label: string; copy: string }) {
+  return (
+    <Box p="sm">
+      <Text size="0.82rem" fw={600} truncate>{label}</Text>
+      <Text c="dimmed" size="0.72rem" mb={8} style={clampStyle}>{copy}</Text>
+      <Button
+        onClick={() => toast.success('Arquivo baixado')}
+        variant="default"
+        size="xs"
+        fullWidth
+        leftSection={<DownloadSimpleIcon size={14} />}
+        styles={{ label: { fontSize: '0.78rem', fontWeight: 500 } }}
+      >
+        Baixar
+      </Button>
+    </Box>
+  );
+}
+
 function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* Header */}
-      <div className="rounded-xl bg-secondary/40 border border-border p-5 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <SparkleIcon className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Estúdio de Marketing com IA</h2>
-            <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Crie campanhas profissionais em menos de 2 minutos</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={onManageCampaigns}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
-            style={{ fontSize: '0.82rem', fontWeight: 600 }}
-          >
-            <PencilSimpleIcon className="w-4 h-4" /> Gerenciar campanhas
-          </button>
-          <button
-            onClick={onCreate}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            style={{ fontSize: '0.85rem', fontWeight: 600 }}
-          >
-            <SparkleIcon className="w-4 h-4" /> Criar campanha
-          </button>
-        </div>
-      </div>
+      <Paper withBorder radius="lg" p="lg" bg="var(--mantine-color-default-hover)">
+        <Group justify="space-between" wrap="wrap" gap="md">
+          <Group gap="sm" wrap="nowrap">
+            <ThemeIcon variant="light" color="neutral" size={40} radius="md">
+              <SparkleIcon size={20} />
+            </ThemeIcon>
+            <div>
+              <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Estúdio de Marketing com IA</Title>
+              <Text c="dimmed" size="0.8rem">Crie campanhas profissionais em menos de 2 minutos</Text>
+            </div>
+          </Group>
+          <Group gap={8} wrap="nowrap" style={{ flexShrink: 0 }}>
+            <Button
+              onClick={onManageCampaigns}
+              variant="subtle"
+              leftSection={<PencilSimpleIcon size={16} />}
+              styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+            >
+              Gerenciar campanhas
+            </Button>
+            <Button
+              onClick={onCreate}
+              leftSection={<SparkleIcon size={16} />}
+              styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
+            >
+              Criar campanha
+            </Button>
+          </Group>
+        </Group>
+      </Paper>
 
       {/* Histórico */}
       <div>
-        <p className="text-muted-foreground mb-3" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <Text c="dimmed" size="0.7rem" fw={600} mb="sm" style={sectionLabelStyle}>
           Histórico
-        </p>
+        </Text>
         {history.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
             {history.map(item => (
-              <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="relative aspect-square bg-secondary/40">
-                  <img src={item.image} alt={item.formatLabel} className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => onDelete(item.id)}
-                    aria-label="Excluir"
-                    className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
-                  >
-                    <TrashIcon className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <div className="p-3">
-                  <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{item.formatLabel}</p>
-                  <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem', ...clampStyle }}>{item.copy}</p>
-                  <button
-                    onClick={() => toast.success('Arquivo baixado')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                    style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                  >
-                    <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar
-                  </button>
-                </div>
-              </div>
+              <Paper key={item.id} withBorder radius="lg" style={{ overflow: 'hidden' }}>
+                <AspectRatio ratio={1}>
+                  <Box pos="relative" bg="var(--mantine-color-default-hover)">
+                    <img src={item.image} alt={item.formatLabel} className={classes.imgCover} />
+                    <ActionIcon
+                      onClick={() => onDelete(item.id)}
+                      aria-label="Excluir"
+                      size={28}
+                      radius="md"
+                      variant="transparent"
+                      pos="absolute"
+                      top={8}
+                      right={8}
+                      className={classes.overlayDelete}
+                    >
+                      <TrashIcon size={14} />
+                    </ActionIcon>
+                  </Box>
+                </AspectRatio>
+                <PieceInfo label={item.formatLabel} copy={item.copy} />
+              </Paper>
             ))}
-          </div>
+          </SimpleGrid>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-            <ImageIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhuma campanha criada ainda</p>
-            <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Clique em "Criar campanha" para começar</p>
-          </div>
+          <EmptyState withCard strongTitle iconSize={40} py={64} title="Nenhuma campanha criada ainda" subtitle={'Clique em "Criar campanha" para começar'} />
         )}
       </div>
-    </div>
+    </Stack>
   );
 }
 
@@ -227,206 +288,233 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
     setCreating(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFiles = (files: File[]) => {
     if (!selected) return;
-    const files = e.target.files;
     if (!files || files.length === 0) return;
-    onAddPhotos(selected.id, Array.from(files).map(f => URL.createObjectURL(f)));
-    e.target.value = '';
+    onAddPhotos(selected.id, files.map(f => URL.createObjectURL(f)));
+  };
+
+  const inputStyles = {
+    label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)', marginBottom: 4 },
+    input: { fontSize: '0.82rem' },
   };
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        style={{ fontSize: '0.82rem', fontWeight: 500 }}
-      >
-        <CaretLeftIcon className="w-4 h-4" /> Voltar para Marketing IA
-      </button>
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+      <BackLink onClick={onBack} />
 
       <div>
-        <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1rem' }}>Gerenciar campanhas</h2>
-        <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</p>
+        <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Gerenciar campanhas</Title>
+        <Text c="dimmed" size="0.8rem">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
       </div>
 
-      <div className="flex items-start gap-5">
+      <Group align="flex-start" gap="lg" wrap="nowrap">
         {/* Left panel: campaign list */}
-        <div className="w-64 flex-shrink-0 bg-card border border-border rounded-xl p-2">
-          <div className="space-y-0.5">
-            {campaigns.map(c => (
-              <div
-                key={c.id}
-                className={`group flex items-center rounded-lg transition-colors ${selectedId === c.id ? 'bg-primary/15' : 'hover:bg-secondary/60'}`}
-              >
-                <button
-                  onClick={() => onSelect(c.id)}
-                  className="flex-1 min-w-0 text-left px-3 py-2.5"
+        <Paper withBorder radius="lg" p={8} w={256} style={{ flexShrink: 0 }}>
+          <Stack gap={2}>
+            {campaigns.map(c => {
+              const active = selectedId === c.id;
+              return (
+                <Group
+                  key={c.id}
+                  gap={0}
+                  wrap="nowrap"
+                  className={classes.campaignRow}
+                  data-active={active || undefined}
                 >
-                  <span className={`block truncate ${selectedId === c.id ? 'text-primary' : 'text-foreground'}`} style={{ fontSize: '0.85rem', fontWeight: selectedId === c.id ? 600 : 500 }}>
-                    {c.name}
-                  </span>
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(c)}
-                  aria-label={`Excluir ${c.name}`}
-                  className="mr-1.5 p-1.5 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0"
-                >
-                  <TrashIcon className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-          <button
+                  <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py={10} style={{ flex: 1, minWidth: 0 }}>
+                    <Text size="0.85rem" fw={active ? 600 : 500} truncate>
+                      {c.name}
+                    </Text>
+                  </UnstyledButton>
+                  <ActionIcon
+                    onClick={() => setDeleteTarget(c)}
+                    aria-label={`Excluir ${c.name}`}
+                    variant="subtle"
+                    color="red"
+                    size={26}
+                    mr={6}
+                    className={classes.rowDelete}
+                  >
+                    <TrashIcon size={14} />
+                  </ActionIcon>
+                </Group>
+              );
+            })}
+          </Stack>
+          <Button
             onClick={() => setCreating(true)}
-            className="w-full flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-primary hover:bg-primary/10 transition-colors mt-1"
-            style={{ fontSize: '0.85rem', fontWeight: 600 }}
+            variant="subtle"
+            fullWidth
+            justify="flex-start"
+            mt={4}
+            px="sm"
+            leftSection={<PlusIcon size={16} />}
+            styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
           >
-            <PlusIcon className="w-4 h-4" /> Nova campanha
-          </button>
-        </div>
+            Nova campanha
+          </Button>
+        </Paper>
 
         {/* Main content: selected campaign detail */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <Stack gap="md" style={{ flex: 1, minWidth: 0 }}>
           {selected ? (
             <>
-              <div className="bg-card border border-border rounded-xl p-4">
-                <h3 className="text-foreground" style={{ fontWeight: 700, fontSize: '0.95rem' }}>{selected.name}</h3>
-                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>
+              <Paper withBorder radius="lg" p="md">
+                <Title order={3} fw={700} style={{ fontSize: '0.95rem' }}>{selected.name}</Title>
+                <Text c="dimmed" size="0.82rem" mt={4}>
                   {selected.description || 'Sem descrição.'}
-                </p>
-              </div>
+                </Text>
+              </Paper>
 
-              <div className="bg-card border border-border rounded-xl p-4">
-                <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-                  <p className="text-muted-foreground" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <Paper withBorder radius="lg" p="md">
+                <Group justify="space-between" wrap="wrap" gap={8} mb="sm">
+                  <Text c="dimmed" size="0.7rem" fw={600} style={sectionLabelStyle}>
                     {selected.photos.length} {selected.photos.length === 1 ? 'cenário fotográfico' : 'cenários fotográficos'}
-                  </p>
-                  <label
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors cursor-pointer"
-                    style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                  >
-                    <UploadSimpleIcon className="w-3.5 h-3.5" /> Enviar cenário
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
-                  </label>
-                </div>
+                  </Text>
+                  <FileButton onChange={handleFiles} accept="image/*" multiple>
+                    {props => (
+                      <Button
+                        {...props}
+                        variant="default"
+                        size="xs"
+                        leftSection={<UploadSimpleIcon size={14} />}
+                        styles={{ label: { fontSize: '0.78rem', fontWeight: 500 } }}
+                      >
+                        Enviar cenário
+                      </Button>
+                    )}
+                  </FileButton>
+                </Group>
 
                 {selected.photos.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
                     {selected.photos.map((photo, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-secondary/40">
-                        <img src={photo} alt={`${selected.name} — cenário ${idx + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          onClick={() => onDeletePhoto(selected.id, idx)}
-                          aria-label="Excluir cenário"
-                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
+                      <AspectRatio key={idx} ratio={1}>
+                        <Box
+                          pos="relative"
+                          bg="var(--mantine-color-default-hover)"
+                          style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', border: '1px solid var(--mantine-color-default-border)' }}
                         >
-                          <TrashIcon className="w-3 h-3" />
-                        </button>
-                      </div>
+                          <img src={photo} alt={`${selected.name} — cenário ${idx + 1}`} className={classes.imgCover} />
+                          <ActionIcon
+                            onClick={() => onDeletePhoto(selected.id, idx)}
+                            aria-label="Excluir cenário"
+                            size={24}
+                            radius="sm"
+                            variant="transparent"
+                            pos="absolute"
+                            top={6}
+                            right={6}
+                            className={classes.overlayDelete}
+                          >
+                            <TrashIcon size={12} />
+                          </ActionIcon>
+                        </Box>
+                      </AspectRatio>
                     ))}
-                  </div>
+                  </SimpleGrid>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-10 text-center">
-                    <ImageIcon className="w-8 h-8 text-muted-foreground/30 mb-2" />
-                    <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Nenhum cenário enviado ainda</p>
-                  </div>
+                  <EmptyState title="Nenhum cenário enviado ainda" />
                 )}
-              </div>
+              </Paper>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-              <ImageIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
-              <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhuma campanha selecionada</p>
-              <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Selecione uma campanha à esquerda ou crie uma nova</p>
-            </div>
+            <EmptyState withCard strongTitle iconSize={40} py={64} title="Nenhuma campanha selecionada" subtitle="Selecione uma campanha à esquerda ou crie uma nova" />
           )}
-        </div>
-      </div>
+        </Stack>
+      </Group>
 
       {/* Create campaign dialog */}
-      <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle style={{ fontSize: '0.95rem' }}>Nova campanha</DialogTitle>
-            <DialogDescription style={{ fontSize: '0.78rem' }}>
-              Defina o nome e a descrição deste objetivo de campanha
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <div>
-              <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Nome</label>
-              <input
-                autoFocus
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                placeholder="Ex.: Dia dos Pais"
-                className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-                style={{ fontSize: '0.82rem' }}
-              />
-            </div>
-            <div>
-              <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Descrição</label>
-              <textarea
-                value={newDescription}
-                onChange={e => setNewDescription(e.target.value)}
-                rows={3}
-                placeholder="Descreva o objetivo desta campanha"
-                className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary resize-none"
-                style={{ fontSize: '0.82rem' }}
-              />
-            </div>
+      <Modal
+        opened={creating}
+        onClose={() => setCreating(false)}
+        size="sm"
+        centered
+        title={
+          <div>
+            <Text fw={600} size="0.95rem">Nova campanha</Text>
+            <Text c="dimmed" size="0.78rem">Defina o nome e a descrição deste objetivo de campanha</Text>
           </div>
-          <DialogFooter>
-            <button
-              onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleCreate}
-              className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
-            >
-              Salvar
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <Stack gap="sm" py={4}>
+          <TextInput
+            data-autofocus
+            label="Nome"
+            value={newName}
+            onChange={e => setNewName(e.currentTarget.value)}
+            placeholder="Ex.: Dia dos Pais"
+            styles={inputStyles}
+          />
+          <Textarea
+            label="Descrição"
+            value={newDescription}
+            onChange={e => setNewDescription(e.currentTarget.value)}
+            rows={3}
+            placeholder="Descreva o objetivo desta campanha"
+            styles={inputStyles}
+          />
+        </Stack>
+        <Group justify="flex-end" gap={8} mt="lg">
+          <Button
+            onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}
+            variant="default"
+            styles={{ label: { fontSize: '0.82rem', fontWeight: 500 } }}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={handleCreate} styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}>
+            Salvar
+          </Button>
+        </Group>
+      </Modal>
 
       {/* Delete campaign confirmation */}
-      <AlertDialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="sm:max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle style={{ fontSize: '0.95rem' }}>Excluir campanha</AlertDialogTitle>
-            <AlertDialogDescription style={{ fontSize: '0.78rem' }}>
-              Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <button
-              onClick={() => setDeleteTarget(null)}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={() => {
-                if (deleteTarget) onDeleteCampaign(deleteTarget.id);
-                setDeleteTarget(null);
-              }}
-              className="px-3 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
-            >
-              Excluir
-            </button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+      <Modal
+        opened={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        size="sm"
+        centered
+        withCloseButton={false}
+      >
+        <Text fw={600} size="0.95rem">Excluir campanha</Text>
+        <Text c="dimmed" size="0.78rem" mt={6}>
+          Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
+        </Text>
+        <Group justify="flex-end" gap={8} mt="lg">
+          <Button
+            onClick={() => setDeleteTarget(null)}
+            variant="default"
+            styles={{ label: { fontSize: '0.82rem', fontWeight: 500 } }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              if (deleteTarget) onDeleteCampaign(deleteTarget.id);
+              setDeleteTarget(null);
+            }}
+            color="red"
+            styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+          >
+            Excluir
+          </Button>
+        </Group>
+      </Modal>
+    </Stack>
+  );
+}
+
+function StepHeader({ title, subtitle, right, mb = 'md' }: { title: string; subtitle?: string; right?: React.ReactNode; mb?: string }) {
+  return (
+    <Group justify="space-between" align={right ? 'center' : 'flex-start'} wrap="wrap" gap={8} mb={mb}>
+      <div>
+        <Title order={3} fw={600} style={{ fontSize: '1rem' }}>{title}</Title>
+        {subtitle && <Text c="dimmed" size="0.78rem" mt={4}>{subtitle}</Text>}
+      </div>
+      {right}
+    </Group>
   );
 }
 
@@ -486,77 +574,103 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
     onBack();
   };
 
+  const optionClass = `${interactive.cardButton} ${classes.option}`;
+
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        style={{ fontSize: '0.82rem', fontWeight: 500 }}
-      >
-        <CaretLeftIcon className="w-4 h-4" /> Voltar para Marketing IA
-      </button>
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+      <BackLink onClick={onBack} />
 
       {/* Stepper */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          {WIZARD_STEPS.map((s, i) => (
-            <div key={s.n} className="flex items-center flex-1">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => s.n <= step && setStep(s.n)}
-                  className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${step > s.n ? 'bg-primary text-primary-foreground' : step === s.n ? 'bg-primary text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-card' : 'bg-secondary text-muted-foreground'}`}
-                  style={{ fontSize: '0.72rem', fontWeight: 700 }}
-                >
-                  {step > s.n ? <CheckIcon className="w-3.5 h-3.5" /> : s.n}
-                </button>
-                <span className={`hidden sm:block ${step >= s.n ? 'text-foreground' : 'text-muted-foreground'}`} style={{ fontSize: '0.76rem', fontWeight: step === s.n ? 600 : 400 }}>
-                  {s.label}
-                </span>
-              </div>
-              {i < WIZARD_STEPS.length - 1 && <div className={`flex-1 h-px mx-2 ${step > s.n ? 'bg-primary' : 'bg-border'}`} />}
-            </div>
-          ))}
-        </div>
-      </div>
+      <Paper withBorder radius="lg" p="md">
+        <Group justify="space-between" wrap="nowrap" gap={0}>
+          {WIZARD_STEPS.map((s, i) => {
+            const done = step > s.n;
+            const current = step === s.n;
+            return (
+              <Group key={s.n} gap={0} wrap="nowrap" style={{ flex: 1 }}>
+                <Group gap={8} wrap="nowrap">
+                  <ActionIcon
+                    onClick={() => s.n <= step && setStep(s.n)}
+                    size={28}
+                    radius="xl"
+                    variant={done || current ? 'filled' : 'light'}
+                    color={done || current ? 'neutral' : 'gray'}
+                    aria-label={s.label}
+                    style={{
+                      flexShrink: 0,
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      ...(done || current ? {} : { color: 'var(--mantine-color-dimmed)' }),
+                      ...(current ? { boxShadow: '0 0 0 2px var(--mantine-color-body), 0 0 0 4px var(--mantine-color-neutral-3)' } : {}),
+                    }}
+                  >
+                    {done ? <CheckIcon size={14} /> : s.n}
+                  </ActionIcon>
+                  <Text
+                    visibleFrom="sm"
+                    size="0.76rem"
+                    fw={current ? 600 : 400}
+                    c={step >= s.n ? undefined : 'dimmed'}
+                  >
+                    {s.label}
+                  </Text>
+                </Group>
+                {i < WIZARD_STEPS.length - 1 && (
+                  <Box
+                    mx={8}
+                    h={1}
+                    style={{ flex: 1, backgroundColor: done ? 'var(--mantine-color-neutral-9)' : 'var(--mantine-color-default-border)' }}
+                  />
+                )}
+              </Group>
+            );
+          })}
+        </Group>
+      </Paper>
 
       {/* Step Content */}
-      <div className="bg-card border border-border rounded-xl p-5">
+      <Paper withBorder radius="lg" p="lg">
         {/* Step 1: Campanha */}
         {step === 1 && (
           <div>
-            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Campanha</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Para qual campanha esta peça será criada?</p>
+            <StepHeader title="Campanha" subtitle="Para qual campanha esta peça será criada?" />
             {campaigns.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {campaigns.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => setCampaignId(c.id)}
-                    className={`rounded-xl border overflow-hidden text-left transition-all ${campaignId === c.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
-                  >
-                    <div className="aspect-[4/5] bg-secondary/40 flex items-center justify-center">
-                      {c.photos.length > 0 ? (
-                        <img src={c.photos[0]} alt={c.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
-                      )}
-                    </div>
-                    <div className="p-3 bg-secondary/20 flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-foreground truncate" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</p>
-                        <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{c.description || 'Sem descrição'}</p>
-                      </div>
-                      {campaignId === c.id && <CheckIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
+                {campaigns.map(c => {
+                  const isSelected = campaignId === c.id;
+                  return (
+                    <Paper
+                      key={c.id}
+                      component="button"
+                      type="button"
+                      withBorder
+                      radius="lg"
+                      onClick={() => setCampaignId(c.id)}
+                      className={optionClass}
+                      data-selected={isSelected || undefined}
+                    >
+                      <AspectRatio ratio={4 / 5}>
+                        <Center bg="var(--mantine-color-default-hover)">
+                          {c.photos.length > 0 ? (
+                            <img src={c.photos[0]} alt={c.name} className={classes.imgCover} />
+                          ) : (
+                            <ImageIcon size={32} style={faintIcon} />
+                          )}
+                        </Center>
+                      </AspectRatio>
+                      <Group p="sm" justify="space-between" align="flex-start" gap={8} wrap="nowrap" bg="var(--mantine-color-default-hover)">
+                        <Box miw={0}>
+                          <Text size="0.85rem" fw={600} truncate>{c.name}</Text>
+                          <Text c="dimmed" size="0.72rem" truncate>{c.description || 'Sem descrição'}</Text>
+                        </Box>
+                        {isSelected && <CheckIcon size={16} style={{ flexShrink: 0, marginTop: 2 }} />}
+                      </Group>
+                    </Paper>
+                  );
+                })}
+              </SimpleGrid>
             ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <ImageIcon className="w-8 h-8 text-muted-foreground/30 mb-2" />
-                <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Nenhuma campanha cadastrada</p>
-                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.72rem' }}>Crie uma em Gerenciar campanhas</p>
-              </div>
+              <EmptyState title="Nenhuma campanha cadastrada" subtitle="Crie uma em Gerenciar campanhas" />
             )}
           </div>
         )}
@@ -564,118 +678,141 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         {/* Step 2: Formato (multi-select) */}
         {step === 2 && (
           <div>
-            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <h3 className="text-foreground" style={{ fontWeight: 600 }}>Formato da peça</h3>
-              <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedFormats.size} selecionado(s)</span>
-            </div>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Onde esta campanha será usada? Selecione um ou mais formatos.</p>
-            <div className="space-y-5">
+            <Group justify="space-between" wrap="wrap" gap={8} mb={4}>
+              <Title order={3} fw={600} style={{ fontSize: '1rem' }}>Formato da peça</Title>
+              <Text c="dimmed" size="0.78rem">{selectedFormats.size} selecionado(s)</Text>
+            </Group>
+            <Text c="dimmed" size="0.78rem" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
+            <Stack gap="lg">
               {FORMAT_GROUPS.map(group => (
                 <div key={group}>
-                  <p className="text-muted-foreground mb-2" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <Text c="dimmed" size="0.7rem" fw={600} mb={8} style={sectionLabelStyle}>
                     {group}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  </Text>
+                  <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
                     {FORMATS.filter(f => f.group === group).map(f => {
                       const Icon = f.icon;
                       const isSelected = selectedFormats.has(f.id);
                       return (
-                        <button
+                        <Paper
                           key={f.id}
+                          component="button"
+                          type="button"
+                          withBorder
+                          radius="lg"
+                          p="md"
                           onClick={() => toggleFormat(f.id)}
-                          className={`rounded-xl border p-4 text-left transition-all ${isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60'}`}
+                          className={`${optionClass} ${classes.optionTinted}`}
+                          data-selected={isSelected || undefined}
                         >
-                          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <p className="text-foreground mt-2" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{f.label}</p>
-                          <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{f.description}</p>
-                          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.68rem' }}>{f.spec}</p>
-                          {isSelected && <CheckIcon className="w-4 h-4 text-primary mt-2" />}
-                        </button>
+                          <ThemeIcon variant="light" color="neutral" size={36} radius="md">
+                            <Icon size={20} />
+                          </ThemeIcon>
+                          <Text size="0.85rem" fw={600} mt={8}>{f.label}</Text>
+                          <Text c="dimmed" size="0.72rem">{f.description}</Text>
+                          <Text c="dimmed" size="0.68rem" mt={2}>{f.spec}</Text>
+                          {isSelected && <CheckIcon size={16} style={{ marginTop: 8 }} />}
+                        </Paper>
                       );
                     })}
-                  </div>
+                  </SimpleGrid>
                 </div>
               ))}
-            </div>
+            </Stack>
           </div>
         )}
 
         {/* Step 3: Produtos */}
         {step === 3 && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-foreground" style={{ fontWeight: 600 }}>Selecionar produtos</h3>
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>Escolha até 3 produtos para a campanha</p>
-              </div>
-              <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{selectedProducts.size}/3 selecionados</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <StepHeader
+              title="Selecionar produtos"
+              subtitle="Escolha até 3 produtos para a campanha"
+              right={<Text c="dimmed" size="0.78rem">{selectedProducts.size}/3 selecionados</Text>}
+            />
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
               {sortedProducts.map(p => {
                 const isSelected = selectedProducts.has(p.id);
                 const meta = productMeta[p.id];
                 return (
-                  <button
+                  <Paper
                     key={p.id}
+                    component="button"
+                    type="button"
+                    withBorder
+                    radius="lg"
+                    p="sm"
                     onClick={() => toggleProduct(p.id)}
-                    className={`rounded-xl border p-3 text-left transition-all ${isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-border/60 bg-secondary/20'}`}
+                    className={`${optionClass} ${classes.optionTinted}`}
+                    data-selected={isSelected || undefined}
+                    bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
                   >
-                    <div className="relative h-24 rounded-lg overflow-hidden bg-secondary mb-2">
-                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    <Box pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden' }}>
+                      <img src={p.image} alt={p.name} className={classes.imgCover} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       {isSelected && (
-                        <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                          <CheckIcon className="w-6 h-6 text-white" />
-                        </div>
+                        <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
+                          <CheckIcon size={24} color="#fff" />
+                        </Center>
                       )}
-                    </div>
+                    </Box>
                     {meta && (
-                      <span className={`inline-block px-1.5 py-0.5 rounded-full mb-1 capitalize ${tagColors[meta.tag]}`} style={{ fontSize: '0.62rem', fontWeight: 600 }}>
+                      <Badge
+                        variant="light"
+                        color={tagColors[meta.tag]}
+                        size="xs"
+                        mb={4}
+                        styles={{ label: { textTransform: 'capitalize', fontSize: '0.62rem', fontWeight: 600 } }}
+                      >
                         {meta.tag}
-                      </span>
+                      </Badge>
                     )}
-                    <p className="text-foreground truncate" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.name}</p>
-                    <p className="text-primary mono" style={{ fontSize: '0.72rem', fontWeight: 600 }}>{formatCurrency(p.price)}</p>
-                    {meta && <p className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Estoque: {meta.stock} pares</p>}
-                  </button>
+                    <Text size="0.75rem" fw={500} truncate>{p.name}</Text>
+                    <Text size="0.72rem" fw={600} className="mono">{formatCurrency(p.price)}</Text>
+                    {meta && <Text c="dimmed" size="0.68rem">Estoque: {meta.stock} pares</Text>}
+                  </Paper>
                 );
               })}
-            </div>
+            </SimpleGrid>
           </div>
         )}
 
         {/* Step 4: Tema (cenário fotográfico da campanha escolhida na Etapa 1) */}
         {step === 4 && (
           <div>
-            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Tema visual</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>
-              Escolha um cenário fotográfico de {selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}
-            </p>
+            <StepHeader
+              title="Tema visual"
+              subtitle={`Escolha um cenário fotográfico de ${selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}`}
+            />
             {selectedCampaign && selectedCampaign.photos.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {selectedCampaign.photos.map((photo, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setScenarioIndex(idx)}
-                    className={`rounded-xl border overflow-hidden transition-all ${scenarioIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-border/60'}`}
-                  >
-                    <div className="aspect-[4/5] bg-secondary/40">
-                      <img src={photo} alt={`Cenário ${idx + 1}`} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="p-3 bg-secondary/20 flex items-center justify-between">
-                      <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 500 }}>Cenário {idx + 1}</span>
-                      {scenarioIndex === idx && <CheckIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
+                {selectedCampaign.photos.map((photo, idx) => {
+                  const isSelected = scenarioIndex === idx;
+                  return (
+                    <Paper
+                      key={idx}
+                      component="button"
+                      type="button"
+                      withBorder
+                      radius="lg"
+                      onClick={() => setScenarioIndex(idx)}
+                      className={optionClass}
+                      data-selected={isSelected || undefined}
+                    >
+                      <AspectRatio ratio={4 / 5}>
+                        <Box bg="var(--mantine-color-default-hover)">
+                          <img src={photo} alt={`Cenário ${idx + 1}`} className={classes.imgCover} />
+                        </Box>
+                      </AspectRatio>
+                      <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
+                        <Text size="0.8rem" fw={500}>Cenário {idx + 1}</Text>
+                        {isSelected && <CheckIcon size={14} style={{ flexShrink: 0 }} />}
+                      </Group>
+                    </Paper>
+                  );
+                })}
+              </SimpleGrid>
             ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <ImageIcon className="w-8 h-8 text-muted-foreground/30 mb-2" />
-                <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>Nenhum cenário disponível para esta campanha</p>
-                <p className="text-muted-foreground mt-1" style={{ fontSize: '0.72rem' }}>Adicione cenários em Gerenciar campanhas</p>
-              </div>
+              <EmptyState title="Nenhum cenário disponível para esta campanha" subtitle="Adicione cenários em Gerenciar campanhas" />
             )}
           </div>
         )}
@@ -683,93 +820,95 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         {/* Step 5: Texto */}
         {step === 5 && (
           <div>
-            <h3 className="text-foreground mb-1" style={{ fontWeight: 600 }}>Texto assistido por IA</h3>
-            <p className="text-muted-foreground mb-4" style={{ fontSize: '0.78rem' }}>Descreva o tom da campanha ou use uma sugestão</p>
-            <textarea
+            <StepHeader title="Texto assistido por IA" subtitle="Descreva o tom da campanha ou use uma sugestão" />
+            <Textarea
               value={prompt}
-              onChange={e => setPrompt(e.target.value)}
+              onChange={e => setPrompt(e.currentTarget.value)}
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 resize-none mb-3"
-              style={{ fontSize: '0.88rem', lineHeight: 1.6 }}
+              radius="md"
+              mb="sm"
+              styles={{ input: { fontSize: '0.88rem', lineHeight: 1.6, padding: '12px 16px' } }}
             />
-            <div className="mb-4">
-              <p className="text-muted-foreground mb-2" style={{ fontSize: '0.75rem', fontWeight: 500 }}>Sugestões da IA:</p>
-              <div className="space-y-2">
+            <Box mb="md">
+              <Text c="dimmed" size="0.75rem" fw={500} mb={8}>Sugestões da IA:</Text>
+              <Stack gap={8}>
                 {AI_PROMPTS.map((sugg, i) => (
-                  <button
+                  <Paper
                     key={i}
+                    component="button"
+                    type="button"
+                    withBorder
+                    radius="md"
+                    p="sm"
                     onClick={() => setPrompt(sugg)}
-                    className={`w-full text-left rounded-lg border p-3 transition-colors ${prompt === sugg ? 'border-purple-400/50 bg-purple-400/5 text-foreground' : 'border-border text-muted-foreground hover:text-foreground hover:border-border/60'}`}
+                    className={`${interactive.cardButton} ${classes.suggestion}`}
+                    data-selected={prompt === sugg || undefined}
                     style={{ fontSize: '0.78rem', lineHeight: 1.5 }}
                   >
                     {sugg}
-                  </button>
+                  </Paper>
                 ))}
-              </div>
-            </div>
-            <div className="rounded-lg bg-secondary/40 p-3 text-muted-foreground" style={{ fontSize: '0.75rem' }}>
-              <MagicWandIcon className="inline w-3.5 h-3.5 mr-1.5 text-purple-400" />
-              A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
-            </div>
+              </Stack>
+            </Box>
+            <Box p="sm" bg="var(--mantine-color-default-hover)" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+              <Text c="dimmed" size="0.75rem">
+                <MagicWandIcon size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6, color: 'var(--mantine-color-violet-5)' }} />
+                A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
+              </Text>
+            </Box>
           </div>
         )}
 
         {/* Step 6: Resultado — cards like Histórico, one per selected format */}
         {step === 6 && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-foreground" style={{ fontWeight: 600 }}>Resultado da campanha</h3>
-                <p className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>
-                  {selectedFormatList.length} {selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'}
-                </p>
-              </div>
-              <button
-                onClick={() => setStep(5)}
-                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                style={{ fontSize: '0.78rem' }}
-              >
-                <ArrowsClockwiseIcon className="w-3.5 h-3.5" /> Regenerar
-              </button>
-            </div>
+            <StepHeader
+              title="Resultado da campanha"
+              subtitle={`${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'}`}
+              right={
+                <Button
+                  onClick={() => setStep(5)}
+                  variant="subtle"
+                  color="gray"
+                  size="compact-sm"
+                  leftSection={<ArrowsClockwiseIcon size={14} />}
+                  styles={{ label: { fontSize: '0.78rem', fontWeight: 400 } }}
+                >
+                  Regenerar
+                </Button>
+              }
+            />
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
               {selectedFormatList.map(f => (
-                <div key={f.id} className="bg-card border border-border rounded-xl overflow-hidden">
-                  <div className="aspect-square bg-secondary/40">
-                    <img src={campaignPreviewMock} alt={f.label} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-3">
-                    <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{f.label}</p>
-                    <p className="text-muted-foreground mb-2" style={{ fontSize: '0.72rem', ...clampStyle }}>{prompt}</p>
-                    <button
-                      onClick={() => toast.success('Arquivo baixado')}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                      style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                    >
-                      <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar
-                    </button>
-                  </div>
-                </div>
+                <Paper key={f.id} withBorder radius="lg" style={{ overflow: 'hidden' }}>
+                  <AspectRatio ratio={1}>
+                    <Box bg="var(--mantine-color-default-hover)">
+                      <img src={campaignPreviewMock} alt={f.label} className={classes.imgCover} />
+                    </Box>
+                  </AspectRatio>
+                  <PieceInfo label={f.label} copy={prompt} />
+                </Paper>
               ))}
-            </div>
+            </SimpleGrid>
           </div>
         )}
-      </div>
+      </Paper>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <button
+      <Group justify="space-between">
+        <Button
           onClick={() => setStep(s => Math.max(1, s - 1))}
           disabled={step === 1}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-40"
-          style={{ fontSize: '0.85rem', fontWeight: 500 }}
+          variant="default"
+          leftSection={<CaretLeftIcon size={16} />}
+          styles={{ label: { fontSize: '0.85rem', fontWeight: 500 } }}
         >
-          <CaretLeftIcon className="w-4 h-4" /> Voltar
-        </button>
+          Voltar
+        </Button>
 
         {step < 5 ? (
-          <button
+          <Button
             onClick={() => setStep(s => s + 1)}
             disabled={
               (step === 1 && !campaignId) ||
@@ -777,40 +916,41 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               (step === 3 && selectedProducts.size === 0) ||
               (step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0))
             }
-            className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
-            style={{ fontSize: '0.85rem', fontWeight: 600 }}
+            px="lg"
+            rightSection={<CaretRightIcon size={16} />}
+            styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
           >
-            Continuar <CaretRightIcon className="w-4 h-4" />
-          </button>
+            Continuar
+          </Button>
         ) : step === 5 ? (
-          <button
+          <Button
             onClick={handleGenerate}
             disabled={generating || !prompt}
-            className="flex items-center gap-1.5 px-6 py-2 rounded-lg text-white hover:opacity-90 transition-all disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, oklch(0.55 0.22 285), oklch(0.6 0.22 262))', fontWeight: 700, fontSize: '0.9rem' }}
+            px="xl"
+            leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
+            styles={{
+              root: {
+                background: 'linear-gradient(135deg, oklch(0.55 0.22 285), oklch(0.6 0.22 262))',
+                color: '#fff',
+                opacity: generating || !prompt ? 0.6 : 1,
+              },
+              label: { fontSize: '0.9rem', fontWeight: 700 },
+            }}
           >
-            {generating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Gerando...
-              </>
-            ) : (
-              <>
-                <SparkleIcon className="w-4 h-4" /> Gerar com IA
-              </>
-            )}
-          </button>
+            {generating ? 'Gerando...' : 'Gerar com IA'}
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={handleFinish}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            style={{ fontSize: '0.85rem', fontWeight: 600 }}
+            px="lg"
+            leftSection={<CheckIcon size={16} />}
+            styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
           >
-            <CheckIcon className="w-4 h-4" /> Concluir
-          </button>
+            Concluir
+          </Button>
         )}
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }
 
