@@ -271,10 +271,10 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
         size="sm"
         centered
         title={
-          <div>
+          <Box>
             <Text fw={600} size="0.95rem">Novo carrinho</Text>
             <Text c="dimmed" size="0.78rem">Criar carrinho para {cartContext?.clientName}</Text>
-          </div>
+          </Box>
         }
       >
         <TextInput
@@ -394,18 +394,18 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     />
                   </Group>
                   <SimpleGrid cols={3} spacing="sm">
-                    <div>
+                    <Box>
                       <Text c="dimmed" size="0.7rem">Desconto da tabela</Text>
                       <Text className="mono" size="0.9rem" fw={600} mt={2}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
-                    </div>
-                    <div>
+                    </Box>
+                    <Box>
                       <Text c="dimmed" size="0.7rem">Pagamento padrão</Text>
                       <Text size="0.85rem" fw={600} mt={2}>{policyDetails.paymentCondition}</Text>
-                    </div>
-                    <div>
+                    </Box>
+                    <Box>
                       <Text c="dimmed" size="0.7rem">Pedido mínimo</Text>
                       <Text className="mono" size="0.85rem" fw={600} mt={2}>{formatCurrency(policyDetails.minOrderValue)}</Text>
-                    </div>
+                    </Box>
                   </SimpleGrid>
                 </Paper>
 

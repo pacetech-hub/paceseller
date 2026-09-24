@@ -129,7 +129,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
   return (
     <Box p="lg" maw={1400} mx="auto" w="100%">
       <Group justify="space-between" align="flex-start" gap="sm" mb="lg">
-        <div>
+        <Box>
           <Title order={2} fw={700} style={{ fontSize: '1.15rem' }}>
             {lockClient ? 'Meus carrinhos' : selectedClient && !showAll ? `Carrinhos de ${selectedClient.name}` : 'Carrinhos em construção'}
           </Title>
@@ -140,7 +140,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
               ? 'Carrinhos vinculados ao cliente atual. Você pode manter mais de um.'
               : 'Cada carrinho está vinculado a um cliente. Abrir um carrinho de outro cliente troca o cliente ativo.'}
           </Text>
-        </div>
+        </Box>
         {!newOpen && (
           <Button
             onClick={() => canCreate && setNewOpen(true)}
@@ -160,10 +160,10 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             <ThemeIcon variant="light" color="neutral" size={32} radius="md">
               <UsersIcon size={16} />
             </ThemeIcon>
-            <div>
+            <Box>
               <Text fw={600} size="0.85rem">Selecione um cliente para criar um carrinho</Text>
               <Text c="dimmed" size="0.75rem">Busque pelo nome ou abra sua carteira de clientes.</Text>
-            </div>
+            </Box>
           </Group>
           <Group gap={8} align="stretch" wrap="wrap">
             <Popover opened={!!clientQuery} width="target" position="bottom-start" offset={4} shadow="md">

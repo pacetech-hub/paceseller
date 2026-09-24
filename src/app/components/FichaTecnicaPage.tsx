@@ -280,10 +280,10 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
 
   return (
     <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
-      <div>
+      <Box>
         <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Ficha Técnica</Title>
         <Text c="dimmed" size="0.8rem">Consulte informações completas, imagens e medidas de cada produto</Text>
-      </div>
+      </Box>
 
       <Group gap="sm" wrap="wrap">
         <TextInput
@@ -397,9 +397,9 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           {gallery.map((img, idx) => (
             <Box key={idx} onClick={() => openZoom(idx)} className={classes.tile} style={bentoSpan(idx)}>
               <Image src={img} alt={`${product.name} — foto ${idx + 1}`} fit="cover" pos="absolute" inset={0} w="100%" h="100%" />
-              <div className={classes.overlay}>
+              <Box className={classes.overlay}>
                 <MagnifyingGlassPlusIcon size={20} className={classes.zoomIcon} />
-              </div>
+              </Box>
               <ActionIcon
                 onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
                 aria-label="Baixar imagem"
@@ -421,19 +421,19 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       {/* Informações do produto */}
       <Paper withBorder radius="lg" p="lg">
         <Stack gap="md">
-          <div>
+          <Box>
             <Text c="dimmed" size="0.72rem" tt="uppercase" mb={2}>Ref. {product.reference}</Text>
             <Title order={2} fw={700} mb={6} style={{ fontSize: '1.15rem' }}>{product.name}</Title>
             <AvailabilityBadges product={product} size="sm" />
-          </div>
+          </Box>
 
-          <div>
+          <Box>
             <SectionLabel>Descrição</SectionLabel>
             <Text size="0.85rem" lh={1.6}>{product.description}</Text>
-          </div>
+          </Box>
 
           {highlights && (
-            <div>
+            <Box>
               <SectionLabel mb={8}>Destaques do produto</SectionLabel>
               <List
                 spacing={10}
@@ -454,7 +454,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
               <Text c="dimmed" size="0.8rem" fs="italic" lh={1.5} mt="sm">
                 {highlights.tagline}
               </Text>
-            </div>
+            </Box>
           )}
         </Stack>
       </Paper>
@@ -511,14 +511,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
 
       {/* Produtos relacionados */}
       {related.length > 0 && (
-        <div>
+        <Box>
           <SectionLabel mb={12}>Produtos relacionados</SectionLabel>
           <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
             {related.map(p => (
               <ProductCard key={p.id} product={p} onOpen={() => onOpenRelated(p)} compact />
             ))}
           </SimpleGrid>
-        </div>
+        </Box>
       )}
 
       {/* Zoom */}

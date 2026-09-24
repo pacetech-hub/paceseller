@@ -117,7 +117,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
             <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
           </Group>
           <Text size="0.85rem" fw={600} truncate>
-            <span className="mono">{order.id}</span> — {productName}
+            <Text span inherit className="mono">{order.id}</Text> — {productName}
           </Text>
         </Box>
 
@@ -223,7 +223,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
             {profile !== 'rep' && <Box miw={0}>Representante</Box>}
             <Box miw={0}>Quantidade</Box>
             <Box miw={0} ta="right">Total</Box>
-            <div />
+            <Box />
           </Paper>
         )}
 

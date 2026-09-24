@@ -1,7 +1,7 @@
 import { useState, useEffect, type CSSProperties } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge,
-  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center,
+  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import {
@@ -199,10 +199,10 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             <ThemeIcon variant="light" color="neutral" size={40} radius="md">
               <SparkleIcon size={20} />
             </ThemeIcon>
-            <div>
+            <Box>
               <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Estúdio de Marketing com IA</Title>
               <Text c="dimmed" size="0.8rem">Crie campanhas profissionais em menos de 2 minutos</Text>
-            </div>
+            </Box>
           </Group>
           <Group gap={8} wrap="nowrap" style={{ flexShrink: 0 }}>
             <Button
@@ -225,7 +225,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
       </Paper>
 
       {/* Histórico */}
-      <div>
+      <Box>
         <Text c="dimmed" size="0.7rem" fw={600} mb="sm" style={sectionLabelStyle}>
           Histórico
         </Text>
@@ -235,7 +235,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               <Paper key={item.id} withBorder radius="lg" style={{ overflow: 'hidden' }}>
                 <AspectRatio ratio={1}>
                   <Box pos="relative" bg="var(--mantine-color-default-hover)">
-                    <img src={item.image} alt={item.formatLabel} className={classes.imgCover} />
+                    <Image src={item.image} alt={item.formatLabel} h="100%" />
                     <ActionIcon
                       onClick={() => onDelete(item.id)}
                       aria-label="Excluir"
@@ -258,7 +258,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
         ) : (
           <EmptyState withCard strongTitle iconSize={40} py={64} title="Nenhuma campanha criada ainda" subtitle={'Clique em "Criar campanha" para começar'} />
         )}
-      </div>
+      </Box>
     </Stack>
   );
 }
@@ -303,10 +303,10 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
     <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       <BackLink onClick={onBack} />
 
-      <div>
+      <Box>
         <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Gerenciar campanhas</Title>
         <Text c="dimmed" size="0.8rem">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
-      </div>
+      </Box>
 
       <Group align="flex-start" gap="lg" wrap="nowrap">
         {/* Left panel: campaign list */}
@@ -396,7 +396,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                           bg="var(--mantine-color-default-hover)"
                           style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', border: '1px solid var(--mantine-color-default-border)' }}
                         >
-                          <img src={photo} alt={`${selected.name} — cenário ${idx + 1}`} className={classes.imgCover} />
+                          <Image src={photo} alt={`${selected.name} — cenário ${idx + 1}`} h="100%" />
                           <ActionIcon
                             onClick={() => onDeletePhoto(selected.id, idx)}
                             aria-label="Excluir cenário"
@@ -432,10 +432,10 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         size="sm"
         centered
         title={
-          <div>
+          <Box>
             <Text fw={600} size="0.95rem">Nova campanha</Text>
             <Text c="dimmed" size="0.78rem">Defina o nome e a descrição deste objetivo de campanha</Text>
-          </div>
+          </Box>
         }
       >
         <Stack gap="sm" py={4}>
@@ -509,10 +509,10 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
 function StepHeader({ title, subtitle, right, mb = 'md' }: { title: string; subtitle?: string; right?: React.ReactNode; mb?: string }) {
   return (
     <Group justify="space-between" align={right ? 'center' : 'flex-start'} wrap="wrap" gap={8} mb={mb}>
-      <div>
+      <Box>
         <Title order={3} fw={600} style={{ fontSize: '1rem' }}>{title}</Title>
         {subtitle && <Text c="dimmed" size="0.78rem" mt={4}>{subtitle}</Text>}
-      </div>
+      </Box>
       {right}
     </Group>
   );
@@ -632,7 +632,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
       <Paper withBorder radius="lg" p="lg">
         {/* Step 1: Campanha */}
         {step === 1 && (
-          <div>
+          <Box>
             <StepHeader title="Campanha" subtitle="Para qual campanha esta peça será criada?" />
             {campaigns.length > 0 ? (
               <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
@@ -652,7 +652,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       <AspectRatio ratio={4 / 5}>
                         <Center bg="var(--mantine-color-default-hover)">
                           {c.photos.length > 0 ? (
-                            <img src={c.photos[0]} alt={c.name} className={classes.imgCover} />
+                            <Image src={c.photos[0]} alt={c.name} h="100%" />
                           ) : (
                             <ImageIcon size={32} style={faintIcon} />
                           )}
@@ -672,12 +672,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             ) : (
               <EmptyState title="Nenhuma campanha cadastrada" subtitle="Crie uma em Gerenciar campanhas" />
             )}
-          </div>
+          </Box>
         )}
 
         {/* Step 2: Formato (multi-select) */}
         {step === 2 && (
-          <div>
+          <Box>
             <Group justify="space-between" wrap="wrap" gap={8} mb={4}>
               <Title order={3} fw={600} style={{ fontSize: '1rem' }}>Formato da peça</Title>
               <Text c="dimmed" size="0.78rem">{selectedFormats.size} selecionado(s)</Text>
@@ -685,7 +685,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             <Text c="dimmed" size="0.78rem" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
             <Stack gap="lg">
               {FORMAT_GROUPS.map(group => (
-                <div key={group}>
+                <Box key={group}>
                   <Text c="dimmed" size="0.7rem" fw={600} mb={8} style={sectionLabelStyle}>
                     {group}
                   </Text>
@@ -716,15 +716,15 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       );
                     })}
                   </SimpleGrid>
-                </div>
+                </Box>
               ))}
             </Stack>
-          </div>
+          </Box>
         )}
 
         {/* Step 3: Produtos */}
         {step === 3 && (
-          <div>
+          <Box>
             <StepHeader
               title="Selecionar produtos"
               subtitle="Escolha até 3 produtos para a campanha"
@@ -748,7 +748,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
                   >
                     <Box pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden' }}>
-                      <img src={p.image} alt={p.name} className={classes.imgCover} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <Image src={p.image} alt={p.name} h="100%" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       {isSelected && (
                         <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
                           <CheckIcon size={24} color="#fff" />
@@ -773,12 +773,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 );
               })}
             </SimpleGrid>
-          </div>
+          </Box>
         )}
 
         {/* Step 4: Tema (cenário fotográfico da campanha escolhida na Etapa 1) */}
         {step === 4 && (
-          <div>
+          <Box>
             <StepHeader
               title="Tema visual"
               subtitle={`Escolha um cenário fotográfico de ${selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}`}
@@ -800,7 +800,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     >
                       <AspectRatio ratio={4 / 5}>
                         <Box bg="var(--mantine-color-default-hover)">
-                          <img src={photo} alt={`Cenário ${idx + 1}`} className={classes.imgCover} />
+                          <Image src={photo} alt={`Cenário ${idx + 1}`} h="100%" />
                         </Box>
                       </AspectRatio>
                       <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
@@ -814,12 +814,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             ) : (
               <EmptyState title="Nenhum cenário disponível para esta campanha" subtitle="Adicione cenários em Gerenciar campanhas" />
             )}
-          </div>
+          </Box>
         )}
 
         {/* Step 5: Texto */}
         {step === 5 && (
-          <div>
+          <Box>
             <StepHeader title="Texto assistido por IA" subtitle="Descreva o tom da campanha ou use uma sugestão" />
             <Textarea
               value={prompt}
@@ -856,12 +856,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
               </Text>
             </Box>
-          </div>
+          </Box>
         )}
 
         {/* Step 6: Resultado — cards like Histórico, one per selected format */}
         {step === 6 && (
-          <div>
+          <Box>
             <StepHeader
               title="Resultado da campanha"
               subtitle={`${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'}`}
@@ -884,14 +884,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 <Paper key={f.id} withBorder radius="lg" style={{ overflow: 'hidden' }}>
                   <AspectRatio ratio={1}>
                     <Box bg="var(--mantine-color-default-hover)">
-                      <img src={campaignPreviewMock} alt={f.label} className={classes.imgCover} />
+                      <Image src={campaignPreviewMock} alt={f.label} h="100%" />
                     </Box>
                   </AspectRatio>
                   <PieceInfo label={f.label} copy={prompt} />
                 </Paper>
               ))}
             </SimpleGrid>
-          </div>
+          </Box>
         )}
       </Paper>
 

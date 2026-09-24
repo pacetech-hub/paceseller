@@ -90,10 +90,10 @@ export function SelloutDashboard() {
         <Grid.Col span={{ base: 12, lg: 8 }}>
           <Paper withBorder radius="lg" p="lg" h="100%">
             <Group justify="space-between" mb="lg">
-              <div>
+              <Box>
                 <ChartTitle>Evolução Sell-in × Sell-out</ChartTitle>
                 <Text c="dimmed" size="0.75rem">Jan–Jun 2026 · em R$</Text>
-              </div>
+              </Box>
               <Button variant="subtle" color="gray" size="compact-xs" leftSection={<DownloadSimpleIcon size={14} />}>
                 Exportar
               </Button>
@@ -163,7 +163,7 @@ export function SelloutDashboard() {
           <Box mb="md"><ChartTitle>Performance por Linha</ChartTitle></Box>
           <Stack gap="md">
             {stockByLine.map(line => (
-              <div key={line.name}>
+              <Box key={line.name}>
                 <Group justify="space-between" mb={6} wrap="nowrap">
                   <Text size="0.85rem" fw={500}>{line.name}</Text>
                   <Group gap="sm" wrap="nowrap">
@@ -176,7 +176,7 @@ export function SelloutDashboard() {
                   <Text c="dimmed" size="0.68rem">Sell-out: {formatCurrency(line.sellOut)}</Text>
                   <Text c="dimmed" size="0.68rem">Meta: {formatCurrency(line.sellIn)}</Text>
                 </Group>
-              </div>
+              </Box>
             ))}
           </Stack>
         </Paper>

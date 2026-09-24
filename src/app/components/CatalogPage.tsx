@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "../lib/toast";
 import {
   ActionIcon, Badge, Box, Button, Chip, Group, Modal, NumberInput, Paper, Select, SimpleGrid,
-  Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
@@ -267,7 +267,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         <Group p="md" gap="md" wrap="nowrap">
           <UnstyledButton onClick={onOpenDetail} w={80} h={80} bg="#fff" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', flexShrink: 0 }}>
             {!imgError ? (
-              <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={() => setImgError(true)} />
+              <Image src={product.image} alt={product.name} h="100%" onError={() => setImgError(true)} />
             ) : (
               <Group w="100%" h="100%" justify="center">
                 <PackageIcon size={24} style={{ color: 'var(--mantine-color-dimmed)', opacity: 0.4 }} />
@@ -329,10 +329,16 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
     <Paper withBorder radius="lg" className={classes.card} style={{ overflow: 'hidden' }}>
       <UnstyledButton onClick={onOpenDetail} className={classes.imageButton}>
         {!imgError ? (
-          <img
+          <Image
             src={product.image}
             alt={product.name}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom', padding: '8px 8px 0' }}
+            fit="contain"
+            pos="absolute"
+            inset={0}
+            h="100%"
+            pt={8}
+            px={8}
+            style={{ objectPosition: 'bottom' }}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -438,12 +444,12 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
           <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
             <Box pos="relative" w="100%" pt="90%" bg="#fff" style={{ borderRadius: 'var(--mantine-radius-lg)', overflow: 'hidden' }}>
-              <img src={images[activeImg]} alt={product.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', padding: 16 }} />
+              <Image src={images[activeImg]} alt={product.name} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
             </Box>
             <Group gap={8}>
               {images.map((img, i) => (
                 <UnstyledButton key={i} onClick={() => setActiveImg(i)} className={classes.thumb} data-active={activeImg === i || undefined}>
-                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <Image src={img} alt="" h="100%" />
                 </UnstyledButton>
               ))}
             </Group>
@@ -673,11 +679,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
     <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* Promo Banner */}
       <Paper withBorder radius="xl" shadow="xs" style={{ overflow: 'hidden' }}>
-        <img
-          src={bannerLimitedAsset}
-          alt="Edição Limitada"
-          style={{ width: '100%', height: 'auto', objectFit: 'cover', display: 'block' }}
-        />
+        <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
       </Paper>
 
       {/* Header + Controls */}

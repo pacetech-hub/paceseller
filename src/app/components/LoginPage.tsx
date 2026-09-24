@@ -51,7 +51,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className={classes.wrapper}>
+    <Box className={classes.wrapper}>
       <Paper className={classes.form} radius={0} px={30} pb={30} pt={{ base: 48, sm: 80 }}>
         <Box mb={50}>
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
@@ -64,7 +64,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           Catálogo digital, pedidos por grade, marketing com IA e sell-out em uma única plataforma.
         </Text>
 
-        <form onSubmit={handleLogin}>
+        <Box component="form" onSubmit={handleLogin}>
           <Autocomplete
             label="E-mail"
             type="email"
@@ -112,7 +112,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           >
             Entrar
           </Button>
-        </form>
+        </Box>
 
         <Box mt="auto" pt="xl">
           <Text ta="center" c="dimmed" size="xs">
@@ -120,6 +120,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </Text>
         </Box>
       </Paper>
-    </div>
+    </Box>
   );
 }

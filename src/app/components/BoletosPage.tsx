@@ -206,12 +206,12 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
 
 function CodeBlock({ label, code, size }: { label: string; code: string; size: string }) {
   return (
-    <div>
+    <Box>
       <Text c="dimmed" size="0.7rem" mb={4}>{label}</Text>
       <Code block className="mono" style={{ fontSize: size, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
         {code}
       </Code>
-    </div>
+    </Box>
   );
 }
 

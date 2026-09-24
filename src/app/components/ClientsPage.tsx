@@ -138,7 +138,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             </Popover.Target>
             <Popover.Dropdown w={320}>
               <Stack gap="md">
-                <div>
+                <Box>
                   <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Região</Text>
                   <Group gap={6}>
                     {REGIONS.map(r => (
@@ -147,9 +147,9 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                       </Chip>
                     ))}
                   </Group>
-                </div>
+                </Box>
 
-                <div>
+                <Box>
                   <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Status</Text>
                   <Group gap={6}>
                     {STATUS_OPTIONS.map(s => (
@@ -158,7 +158,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                       </Chip>
                     ))}
                   </Group>
-                </div>
+                </Box>
 
                 {activeFilterCount > 0 && (
                   <Button variant="subtle" color="neutral" size="xs" px={0} onClick={clearFilters}>

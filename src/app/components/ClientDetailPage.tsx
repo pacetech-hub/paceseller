@@ -203,10 +203,10 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               { label: 'CNPJ', value: client.cnpj },
               { label: 'Representante', value: client.rep },
             ].map(info => (
-              <div key={info.label}>
+              <Box key={info.label}>
                 <Text c="dimmed" size="0.68rem" fw={600}>{info.label}</Text>
                 <Text size="0.82rem" fw={600}>{info.value}</Text>
-              </div>
+              </Box>
             ))}
           </SimpleGrid>
         </Collapse>
@@ -279,10 +279,10 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             <ThemeIcon variant="light" color="gray" size={32} radius="md">
               <ListMagnifyingGlassIcon size={16} />
             </ThemeIcon>
-            <div>
+            <Box>
               <Title order={4} fw={600} style={{ fontSize: '0.85rem' }}>Produtos parados no estoque</Title>
               <Text c="dimmed" size="0.72rem">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
-            </div>
+            </Box>
           </Group>
           <Stack gap={8}>
             {stuckProducts.map(p => (
@@ -362,13 +362,13 @@ function RankCard({ title, items, renderLabel }: { title: string; items: RankIte
       <Title order={4} fw={600} mb="sm" style={{ fontSize: '0.85rem' }}>{title}</Title>
       <Stack gap="sm">
         {items.map(item => (
-          <div key={item.key}>
+          <Box key={item.key}>
             <Group justify="space-between" mb={4} wrap="nowrap">
               <Text size="0.8rem" fw={600} component="div">{renderLabel ? renderLabel(item) : item.label}</Text>
               <Text c="dimmed" size="0.7rem" className="mono">{item.pct}%</Text>
             </Group>
             <Progress value={item.pct} size={6} radius="xl" color="neutral" />
-          </div>
+          </Box>
         ))}
       </Stack>
     </Paper>
