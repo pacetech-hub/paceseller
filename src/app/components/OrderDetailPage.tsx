@@ -1,7 +1,9 @@
+import { Stack, Group, Box, Paper, Text, Button, Badge, Image, ThemeIcon, Grid, Anchor } from "@mantine/core";
 import { toast } from "../lib/toast";
+import classes from "./OrderDetailPage.module.css";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
 import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
-import { statusColors, statusIcon, statusSupportText, orderProductNames } from "./OrderHistory";
+import { OrderStatusBadge, statusSupportText, orderProductNames } from "./OrderHistory";
 
 type View = 'history' | 'boletos';
 
@@ -14,9 +16,19 @@ interface OrderDetailPageProps {
 }
 
 const clientStatusColors: Record<string, string> = {
-  'ativo': 'text-emerald-400 bg-emerald-400/10',
-  'inativo': 'text-red-400 bg-red-400/10',
+  'ativo': 'teal',
+  'inativo': 'red',
 };
+
+const badgeStyles = { label: { textTransform: 'none' as const } };
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb="sm" style={{ letterSpacing: '0.04em' }}>
+      {children}
+    </Text>
+  );
+}
 
 // deterministic line-item breakdown per order — quantities sum to order.items
 const orderLineItems: Record<string, Array<{ productId: string; quantity: number }>> = {
@@ -44,151 +56,154 @@ function getOrderLineItems(order: Order): Array<{ product: Product; quantity: nu
 export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageProps) {
   if (!order) {
     return (
-      <div className="p-6 max-w-[1000px] mx-auto w-full">
-        <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-          <PackageIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
-          <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido selecionado</p>
-          <button
-            onClick={() => onNavigate('history')}
-            className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-            style={{ fontSize: '0.78rem', fontWeight: 500 }}
-          >
-            <CaretLeftIcon className="w-3.5 h-3.5" /> Voltar para Pedidos
-          </button>
-        </div>
-      </div>
+      <Box p="lg" maw={1000} mx="auto" w="100%">
+        <Paper withBorder radius="lg" py={64}>
+          <Stack align="center" gap={4}>
+            <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+              <PackageIcon size={24} />
+            </ThemeIcon>
+            <Text fw={600}>Nenhum pedido selecionado</Text>
+            <Button
+              onClick={() => onNavigate('history')}
+              variant="default"
+              size="xs"
+              mt="sm"
+              leftSection={<CaretLeftIcon size={14} />}
+            >
+              Voltar para Pedidos
+            </Button>
+          </Stack>
+        </Paper>
+      </Box>
     );
   }
 
-  const StatusIcon = statusIcon[order.status];
   const support = statusSupportText(order);
   const productName = orderProductNames[order.id] ?? order.collection;
   const lineItems = getOrderLineItems(order);
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <div className="p-6 max-w-[1000px] mx-auto w-full space-y-5">
-      <button
-        onClick={() => onNavigate('history')}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        style={{ fontSize: '0.82rem', fontWeight: 500 }}
-      >
-        <CaretLeftIcon className="w-4 h-4" /> Voltar para Pedidos
-      </button>
+    <Stack gap="lg" p="lg" maw={1000} mx="auto" w="100%">
+      <Box>
+        <Button
+          onClick={() => onNavigate('history')}
+          variant="subtle"
+          color="gray"
+          size="compact-sm"
+          px={4}
+          leftSection={<CaretLeftIcon size={16} />}
+        >
+          Voltar para Pedidos
+        </Button>
+      </Box>
 
       {/* Cliente — admin/rep only */}
       {profile !== 'lojista' && client && (
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-muted-foreground mb-3" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Cliente
-          </p>
-          <div className="flex items-center gap-2 flex-wrap mb-1.5">
-            <p className="text-foreground" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{client.name}</p>
-            <span className={`px-2 py-0.5 rounded-full ${clientStatusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+        <Paper withBorder radius="lg" p="md">
+          <SectionTitle>Cliente</SectionTitle>
+          <Group gap={8} mb={6}>
+            <Text size="0.95rem" fw={700}>{client.name}</Text>
+            <Badge size="sm" variant="light" color={clientStatusColors[client.status]} styles={badgeStyles}>
               {client.status}
-            </span>
+            </Badge>
             {client.inadimplente && (
-              <span className="px-2 py-0.5 rounded-full text-amber-400 bg-amber-400/10" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                inadimplente
-              </span>
+              <Badge size="sm" variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
             )}
-          </div>
-          <p className="text-muted-foreground mb-0.5" style={{ fontSize: '0.8rem' }}>{client.cnpj}</p>
-          <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>{client.city} / {client.state}</p>
-        </div>
+          </Group>
+          <Text c="dimmed" size="0.8rem" mb={2}>{client.cnpj}</Text>
+          <Text c="dimmed" size="0.8rem">{client.city} / {client.state}</Text>
+        </Paper>
       )}
 
       {/* Produtos */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <p className="text-muted-foreground mb-3" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Produtos
-        </p>
-        <div className="space-y-3">
+      <Paper withBorder radius="lg" p="md">
+        <SectionTitle>Produtos</SectionTitle>
+        <Stack gap="sm">
           {lineItems.length > 0 ? (
             lineItems.map(({ product, quantity }) => (
-              <div key={product.id} className="flex items-center gap-3">
-                <img
+              <Group key={product.id} gap="sm" wrap="nowrap">
+                <Image
                   src={product.image}
                   alt={product.name}
-                  className="w-12 h-12 rounded-lg object-cover border border-border flex-shrink-0"
+                  w={48}
+                  h={48}
+                  radius="md"
+                  fit="cover"
+                  style={{ border: '1px solid var(--mantine-color-default-border)', flexShrink: 0 }}
                 />
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{product.name}</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Ref. {product.reference}</p>
-                </div>
-                <p className="text-foreground flex-shrink-0" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{quantity} pares</p>
-              </div>
+                <Box miw={0} style={{ flex: 1 }}>
+                  <Text size="0.85rem" fw={600} truncate>{product.name}</Text>
+                  <Text c="dimmed" size="0.72rem">Ref. {product.reference}</Text>
+                </Box>
+                <Text size="0.85rem" fw={600} style={{ flexShrink: 0 }}>{quantity} pares</Text>
+              </Group>
             ))
           ) : (
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-secondary/60 border border-border flex items-center justify-center flex-shrink-0">
-                <PackageIcon className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{productName}</p>
-                <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{order.collection}</p>
-              </div>
-              <p className="text-foreground flex-shrink-0" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{order.items} pares</p>
-            </div>
+            <Group gap="sm" wrap="nowrap">
+              <ThemeIcon variant="default" size={48} radius="md">
+                <PackageIcon size={20} style={{ color: 'var(--mantine-color-dimmed)' }} />
+              </ThemeIcon>
+              <Box miw={0} style={{ flex: 1 }}>
+                <Text size="0.85rem" fw={600} truncate>{productName}</Text>
+                <Text c="dimmed" size="0.72rem">{order.collection}</Text>
+              </Box>
+              <Text size="0.85rem" fw={600} style={{ flexShrink: 0 }}>{order.items} pares</Text>
+            </Group>
           )}
-        </div>
-      </div>
+        </Stack>
+      </Paper>
 
       {/* Detalhes do pedido */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <p className="text-muted-foreground mb-3" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Detalhes do pedido
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr] gap-4 sm:gap-8">
+      <Paper withBorder radius="lg" p="md">
+        <SectionTitle>Detalhes do pedido</SectionTitle>
+        {/* colunas na proporção 1.6 / 1 / 1 (8/5/5 de 18) */}
+        <Grid columns={18} gutter={{ base: 'md', sm: 'xl' }}>
           {/* column 1: status + order id/name */}
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[order.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                <StatusIcon className="w-3 h-3" />
-                {order.status}
-              </span>
-              <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
-            </div>
-            <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+          <Grid.Col span={{ base: 18, sm: 8 }} miw={0}>
+            <Group gap={8} mb={4}>
+              <OrderStatusBadge status={order.status} />
+              <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
+            </Group>
+            <Text size="0.85rem" fw={600}>
               <span className="mono">{order.id}</span> — {productName}
-            </p>
-            <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>Representante: {order.rep}</p>
-          </div>
+            </Text>
+            <Text c="dimmed" size="0.72rem" mt={2}>Representante: {order.rep}</Text>
+          </Grid.Col>
 
           {/* column 2: value + payment + link to Pagamentos e Boletos */}
-          <div className="min-w-0 sm:border-l sm:border-border sm:pl-8">
-            <p className="text-foreground mono" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
-            <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.8rem' }}>{order.paymentCondition}</p>
+          <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
+            <Text className="mono" size="1.05rem" fw={700}>{formatCurrency(order.total)}</Text>
+            <Text c="dimmed" size="0.8rem" mb={6}>{order.paymentCondition}</Text>
             {profile !== 'rep' && (
-              <button
-                onClick={() => onNavigate('boletos')}
-                className="flex items-center gap-1 text-primary hover:underline"
-                style={{ fontSize: '0.78rem', fontWeight: 600 }}
-              >
-                Ver em Pagamentos e Boletos <ArrowRightIcon className="w-3.5 h-3.5" />
-              </button>
+              <Anchor component="button" onClick={() => onNavigate('boletos')} c="neutral" size="0.78rem" fw={600}>
+                <Group gap={4} component="span">
+                  Ver em Pagamentos e Boletos <ArrowRightIcon size={14} />
+                </Group>
+              </Anchor>
             )}
-          </div>
+          </Grid.Col>
 
           {/* column 3: NF de compra */}
-          <div className="min-w-0 sm:border-l sm:border-border sm:pl-8">
-            <p className="text-muted-foreground mb-1.5" style={{ fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
+            <Text c="dimmed" size="0.68rem" fw={600} tt="uppercase" mb={6} style={{ letterSpacing: '0.04em' }}>
               NF de compra
-            </p>
+            </Text>
             {order.status === 'faturado' || order.status === 'entregue' ? (
-              <button
+              <Button
                 onClick={() => toast.success('Nota fiscal baixada')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                style={{ fontSize: '0.78rem', fontWeight: 500 }}
+                variant="default"
+                size="xs"
+                leftSection={<DownloadSimpleIcon size={14} />}
               >
-                <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar NF
-              </button>
+                Baixar NF
+              </Button>
             ) : (
-              <p className="text-muted-foreground" style={{ fontSize: '0.8rem' }}>NF indisponível</p>
+              <Text c="dimmed" size="0.8rem">NF indisponível</Text>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Grid.Col>
+        </Grid>
+      </Paper>
+    </Stack>
   );
 }

@@ -1,0 +1,9 @@
+/* Hover para cartões clicáveis (Paper/UnstyledButton) */
+.hoverable {
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.hoverable:hover {
+  background-color: var(--mantine-color-default-hover);
+}

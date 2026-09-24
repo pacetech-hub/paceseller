@@ -1,5 +1,10 @@
 import { useState } from "react";
+import {
+  Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code,
+  SimpleGrid, ThemeIcon, UnstyledButton, Collapse, List,
+} from "@mantine/core";
 import { toast } from "../lib/toast";
+import classes from "./interactive.module.css";
 import {
   MagnifyingGlassIcon,
   DownloadSimpleIcon,
@@ -11,6 +16,7 @@ import {
   CaretDownIcon,
   BarcodeIcon,
   QrCodeIcon,
+  type Icon,
 } from "@phosphor-icons/react";
 import { formatCurrency, formatDate } from "../data/mockData";
 
@@ -134,13 +140,14 @@ const boletosLojista: Payment[] = [
   makePayment({ id: 'BOL-2026-9103', orderId: 'PED-2026-0501', client: 'Bella Moda', rep: 'Marina Costa', product: 'Sandálias Femininas — Coleção Verão 26', orderTotal: 5120.00, amount: 1706.66, installment: '3/3', dueDate: '2026-10-25', status: 'pendente' }),
 ];
 
+// cor Mantine do badge de cada status
 const statusColors: Record<PaymentStatus, string> = {
-  pago: 'text-emerald-400 bg-emerald-400/10',
-  pendente: 'text-amber-400 bg-amber-400/10',
-  atrasado: 'text-red-400 bg-red-400/10',
+  pago: 'teal',
+  pendente: 'yellow',
+  atrasado: 'red',
 };
 
-const statusIcon: Record<PaymentStatus, React.ComponentType<{ className?: string }>> = {
+const statusIcon: Record<PaymentStatus, Icon> = {
   pago: CheckCircleIcon,
   pendente: ClockIcon,
   atrasado: WarningIcon,
@@ -197,12 +204,16 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   );
 }
 
-const methodToggleClass = (selected: boolean) =>
-  `flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
-    selected
-      ? 'bg-primary text-primary-foreground border-primary'
-      : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60'
-  }`;
+function CodeBlock({ label, code, size }: { label: string; code: string; size: string }) {
+  return (
+    <div>
+      <Text c="dimmed" size="0.7rem" mb={4}>{label}</Text>
+      <Code block className="mono" style={{ fontSize: size, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+        {code}
+      </Code>
+    </div>
+  );
+}
 
 function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile }) {
   const [expanded, setExpanded] = useState(false);
@@ -220,133 +231,141 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
     ...(profile === 'admin' ? [payment.rep] : []),
   ];
 
-  return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div
-        onClick={!isPago ? () => setExpanded(e => !e) : undefined}
-        className={`p-4 flex items-center gap-4 flex-wrap ${!isPago ? 'cursor-pointer hover:bg-secondary/30 transition-colors' : ''}`}
-      >
-        <div className="min-w-0 flex-1">
-          {/* line 1: status + due/payment date */}
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[payment.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-              <StatusIcon className="w-3 h-3" />
-              {statusLabel[payment.status]}
-            </span>
-            <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>
-              {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
-            </span>
-          </div>
-          {/* line 2: order title */}
-          <p className="text-foreground truncate mb-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{payment.product}</p>
-          {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
-          <p className="text-muted-foreground truncate" style={{ fontSize: '0.72rem' }}>{metaParts.join(' · ')}</p>
-        </div>
+  const summary = (
+    <Group gap="md" wrap="wrap" p="md">
+      <Box miw={0} style={{ flex: 1 }}>
+        {/* line 1: status + due/payment date */}
+        <Group gap={8} mb={4}>
+          <Badge
+            size="sm"
+            variant="light"
+            color={statusColors[payment.status]}
+            leftSection={<StatusIcon size={12} />}
+            styles={{ root: { flexShrink: 0 }, label: { textTransform: 'none' } }}
+          >
+            {statusLabel[payment.status]}
+          </Badge>
+          <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>
+            {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
+          </Text>
+        </Group>
+        {/* line 2: order title */}
+        <Text size="0.85rem" fw={600} truncate mb={2}>{payment.product}</Text>
+        {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
+        <Text c="dimmed" size="0.72rem" truncate>{metaParts.join(' · ')}</Text>
+      </Box>
 
-        <div className="text-right flex-shrink-0">
-          <p className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(payment.amount)}</p>
-        </div>
+      <Text className="mono" size="0.95rem" fw={700} ta="right" style={{ flexShrink: 0 }}>
+        {formatCurrency(payment.amount)}
+      </Text>
 
-        {!isPago && (
-          <CaretDownIcon className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-        )}
-      </div>
-
-      {expanded && !isPago && (
-        <div className="border-t border-border bg-secondary/20 p-4">
-          <div className="flex items-center gap-1.5 mb-3" role="tablist" aria-label="Forma de pagamento">
-            <button
-              onClick={() => setMethod('boleto')}
-              aria-pressed={method === 'boleto'}
-              className={methodToggleClass(method === 'boleto')}
-              style={{ fontSize: '0.78rem', fontWeight: 600 }}
-            >
-              <BarcodeIcon className="w-3.5 h-3.5" /> Boleto
-            </button>
-            <button
-              onClick={() => setMethod('pix')}
-              aria-pressed={method === 'pix'}
-              className={methodToggleClass(method === 'pix')}
-              style={{ fontSize: '0.78rem', fontWeight: 600 }}
-            >
-              <QrCodeIcon className="w-3.5 h-3.5" /> Pix
-            </button>
-          </div>
-
-          {method === 'boleto' ? (
-            <div className="space-y-3">
-              <div>
-                <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Linha digitável</p>
-                <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.78rem' }}>
-                  {payment.boletoLine}
-                </code>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
-                >
-                  <CopyIcon className="w-3.5 h-3.5" /> Copiar código de barras
-                </button>
-                <button
-                  onClick={() => toast.success('Fatura baixada')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                >
-                  <DownloadSimpleIcon className="w-3.5 h-3.5" /> Baixar fatura
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div>
-                <p className="text-muted-foreground mb-1" style={{ fontSize: '0.7rem' }}>Pix Copia e Cola</p>
-                <code className="block px-3 py-2 rounded-lg bg-card border border-border text-foreground mono break-all" style={{ fontSize: '0.72rem' }}>
-                  {payment.pixCode}
-                </code>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 600 }}
-                >
-                  <CopyIcon className="w-3.5 h-3.5" /> Copiar código Pix
-                </button>
-                <button
-                  onClick={() => setShowQr(v => !v)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors"
-                  style={{ fontSize: '0.78rem', fontWeight: 500 }}
-                >
-                  <QrCodeIcon className="w-3.5 h-3.5" /> {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
-                </button>
-              </div>
-
-              {showQr && (
-                <div className="flex items-start gap-4 flex-wrap pt-1">
-                  <div className="inline-block bg-white p-3 rounded-lg border border-border flex-shrink-0">
-                    <PixQrCode data={payment.pixCode} />
-                  </div>
-                  <div className="flex-1 min-w-[220px]">
-                    <p className="text-foreground mb-1" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Como pagar</p>
-                    <ol className="text-muted-foreground space-y-1 list-decimal list-inside" style={{ fontSize: '0.75rem' }}>
-                      <li>Abra o app do seu banco</li>
-                      <li>Escolha pagar via Pix com QR Code ou Copia e Cola</li>
-                      <li>Escaneie o código ao lado ou cole o código copiado</li>
-                      <li>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</li>
-                    </ol>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+      {!isPago && (
+        <CaretDownIcon
+          size={16}
+          style={{
+            flexShrink: 0,
+            color: 'var(--mantine-color-dimmed)',
+            transition: 'transform 150ms ease',
+            transform: expanded ? 'rotate(180deg)' : undefined,
+          }}
+        />
       )}
-    </div>
+    </Group>
+  );
+
+  return (
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+      {isPago ? summary : (
+        <UnstyledButton onClick={() => setExpanded(e => !e)} className={classes.hoverable} w="100%" aria-expanded={expanded}>
+          {summary}
+        </UnstyledButton>
+      )}
+
+      {!isPago && (
+        <Collapse in={expanded}>
+          <Box p="md" bg="var(--mantine-color-default-hover)" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+            <SegmentedControl
+              value={method}
+              onChange={v => setMethod(v as PaymentMethod)}
+              size="xs"
+              mb="sm"
+              aria-label="Forma de pagamento"
+              data={[
+                { value: 'boleto', label: <Group gap={6} wrap="nowrap"><BarcodeIcon size={14} /> Boleto</Group> },
+                { value: 'pix', label: <Group gap={6} wrap="nowrap"><QrCodeIcon size={14} /> Pix</Group> },
+              ]}
+            />
+
+            {method === 'boleto' ? (
+              <Stack gap="sm">
+                <CodeBlock label="Linha digitável" code={payment.boletoLine} size="0.78rem" />
+                <Group gap={8}>
+                  <Button
+                    onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
+                    variant="light"
+                    color="neutral"
+                    size="xs"
+                    leftSection={<CopyIcon size={14} />}
+                  >
+                    Copiar código de barras
+                  </Button>
+                  <Button
+                    onClick={() => toast.success('Fatura baixada')}
+                    variant="default"
+                    size="xs"
+                    leftSection={<DownloadSimpleIcon size={14} />}
+                  >
+                    Baixar fatura
+                  </Button>
+                </Group>
+              </Stack>
+            ) : (
+              <Stack gap="sm">
+                <CodeBlock label="Pix Copia e Cola" code={payment.pixCode} size="0.72rem" />
+                <Group gap={8}>
+                  <Button
+                    onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
+                    variant="light"
+                    color="neutral"
+                    size="xs"
+                    leftSection={<CopyIcon size={14} />}
+                  >
+                    Copiar código Pix
+                  </Button>
+                  <Button
+                    onClick={() => setShowQr(v => !v)}
+                    variant="default"
+                    size="xs"
+                    leftSection={<QrCodeIcon size={14} />}
+                  >
+                    {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
+                  </Button>
+                </Group>
+
+                {showQr && (
+                  <Group gap="md" align="flex-start" pt={4}>
+                    <Paper withBorder radius="md" p="sm" bg="white" style={{ flexShrink: 0 }}>
+                      <PixQrCode data={payment.pixCode} />
+                    </Paper>
+                    <Box style={{ flex: 1, minWidth: 220 }}>
+                      <Text size="0.8rem" fw={600} mb={4}>Como pagar</Text>
+                      <List type="ordered" withPadding listStyleType="decimal" size="xs" c="dimmed" spacing={4} style={{ fontSize: "0.75rem" }}>
+                        <List.Item>Abra o app do seu banco</List.Item>
+                        <List.Item>Escolha pagar via Pix com QR Code ou Copia e Cola</List.Item>
+                        <List.Item>Escaneie o código ao lado ou cole o código copiado</List.Item>
+                        <List.Item>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</List.Item>
+                      </List>
+                    </Box>
+                  </Group>
+                )}
+              </Stack>
+            )}
+          </Box>
+        </Collapse>
+      )}
+    </Paper>
   );
 }
-
 export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'todos' | PaymentStatus>('todos');
@@ -393,59 +412,70 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   ];
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* Financial summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
         {stats.map(stat => (
-          <div key={stat.label} className={`bg-card border rounded-xl p-4 ${stat.tone === 'danger' ? 'border-red-500/30' : 'border-border'}`}>
-            <p className="text-muted-foreground mb-1" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{stat.label}</p>
-            <p className={`mono ${stat.caption ? 'mb-1' : ''} ${stat.tone === 'danger' ? 'text-red-400' : 'text-foreground'}`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>{stat.value}</p>
-            {stat.caption && <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>{stat.caption}</p>}
-          </div>
+          <Paper
+            key={stat.label}
+            withBorder
+            radius="lg"
+            p="md"
+            style={stat.tone === 'danger' ? { borderColor: 'var(--mantine-color-red-3)' } : undefined}
+          >
+            <Text c="dimmed" size="0.75rem" fw={500} mb={4}>{stat.label}</Text>
+            <Text
+              className="mono"
+              c={stat.tone === 'danger' ? 'red.6' : undefined}
+              fw={700}
+              mb={stat.caption ? 4 : 0}
+              style={{ fontSize: '1.4rem', letterSpacing: '-0.01em' }}
+            >
+              {stat.value}
+            </Text>
+            {stat.caption && <Text c="dimmed" size="0.7rem">{stat.caption}</Text>}
+          </Paper>
         ))}
-      </div>
+      </SimpleGrid>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[160px]">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.82rem' }}
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {statuses.map(s => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-full transition-colors capitalize ${statusFilter === s ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.75rem', fontWeight: 500 }}
-            >
-              {s === 'todos' ? 'Todos' : statusLabel[s]}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Group gap="sm" wrap="wrap">
+        <TextInput
+          placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
+          leftSection={<MagnifyingGlassIcon size={14} />}
+          value={search}
+          onChange={e => setSearch(e.currentTarget.value)}
+          style={{ flex: 1, minWidth: 160 }}
+        />
+        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
+          <Group gap={6}>
+            {statuses.map(s => (
+              <Chip key={s} value={s} variant="filled" color="neutral" size="sm">
+                {s === 'todos' ? 'Todos' : statusLabel[s]}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </Group>
 
       {/* Payment cards */}
-      <div className="space-y-3">
+      <Stack gap="sm">
         {filtered.map(payment => (
           <PaymentCard key={payment.id} payment={payment} profile={profile} />
         ))}
 
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-            <ReceiptIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum boleto encontrado</p>
-            <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
-          </div>
+          <Paper withBorder radius="lg" py={64}>
+            <Stack align="center" gap={4}>
+              <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+                <ReceiptIcon size={24} />
+              </ThemeIcon>
+              <Text fw={600}>Nenhum boleto encontrado</Text>
+              <Text c="dimmed" size="0.85rem">Tente ajustar os filtros de busca</Text>
+            </Stack>
+          </Paper>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
