@@ -56,7 +56,7 @@ function getOrderLineItems(order: Order): Array<{ product: Product; quantity: nu
 export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageProps) {
   if (!order) {
     return (
-      <Box p="lg" maw={1000} mx="auto" w="100%">
+      <Box p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
         <Paper withBorder radius="lg" py={64}>
           <Stack align="center" gap={4}>
             <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
@@ -84,7 +84,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <Stack gap="lg" p="lg" maw={1000} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
       <Box>
         <Button
           onClick={() => onNavigate('history')}
@@ -164,7 +164,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           <Grid.Col span={{ base: 18, sm: 8 }} miw={0}>
             <Group gap={8} mb={4}>
               <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="0.72rem" flex="none">{support}</Text>
+              <Text c="dimmed" size="0.72rem">{support}</Text>
             </Group>
             <Text size="0.85rem" fw={600}>
               <Text span inherit className="mono">{order.id}</Text> — {productName}

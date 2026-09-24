@@ -34,7 +34,7 @@ interface ProfilePageProps {
 // ---------- helpers ----------
 function Section({ icon: Icon, title, description, children }: { icon: PhosphorIcon; title: string; description?: string; children: React.ReactNode }) {
   return (
-    <Paper component="section" withBorder radius="md" p="lg">
+    <Paper component="section" withBorder radius="md" p={{ base: 'md', sm: 'lg' }}>
       <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
         <ThemeIcon size={36} radius="md" variant="light" color="neutral" flex="none">
           <Icon size={16} />
@@ -52,10 +52,11 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
 function Field({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <Grid gutter="sm" align="flex-start" py={6} className={interactive.rowDivider}>
-      <Grid.Col span={4}>
+      {/* Rótulo acima do valor no celular; lado a lado a partir de xs */}
+      <Grid.Col span={{ base: 12, xs: 4 }}>
         <Text c="dimmed" size="0.75rem">{label}</Text>
       </Grid.Col>
-      <Grid.Col span={8}>
+      <Grid.Col span={{ base: 12, xs: 8 }}>
         <Text fw={500} size="0.82rem" ff={mono ? 'monospace' : undefined}>{value}</Text>
       </Grid.Col>
     </Grid>
@@ -284,7 +285,7 @@ function AdminProfile() {
 
 export function ProfilePage({ profile }: ProfilePageProps) {
   return (
-    <Box maw={1400} mx="auto" p="lg">
+    <Box maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       {profile === 'lojista' && <LojistaProfile />}
       {profile === 'rep' && <RepProfile />}
       {profile === 'admin' && <AdminProfile />}

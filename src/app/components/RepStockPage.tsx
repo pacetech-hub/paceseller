@@ -17,10 +17,11 @@ export function RepStockPage() {
   const myClients = clients.filter(c => c.rep === 'Marcos Andrade');
 
   return (
-    <Container size={1400} p="lg" w="100%">
+    <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="lg">
         <Group justify="space-between" gap="sm" wrap="wrap">
           <SegmentedControl
+            w={{ base: '100%', sm: 'auto' }}
             value={activeTab}
             onChange={v => setActiveTab(v as TabId)}
             data={tabs.map(tab => {

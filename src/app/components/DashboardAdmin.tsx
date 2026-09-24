@@ -14,7 +14,7 @@ const TICKET = 4030;
 
 export function DashboardAdmin({ onNavigate, onSelectClient, onOpenOrderStatus }: DashboardAdminProps) {
   return (
-    <Container size={1400} p="lg" w="100%">
+    <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       {/* VENDAS */}
       <SalesIndicatorsSection
         scope="network"

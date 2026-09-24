@@ -1,6 +1,6 @@
-/* Divisória vertical entre as colunas de "Detalhes do pedido", só a partir do breakpoint sm (48em) */
-@media (min-width: 48em) {
-  .divided {
+/* Divisória vertical entre as colunas de "Detalhes do pedido", só a partir do breakpoint sm */
+.divided {
+  @mixin larger-than $mantine-breakpoint-sm {
     border-left: 1px solid var(--mantine-color-default-border);
   }
 }

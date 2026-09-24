@@ -179,7 +179,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
   if (completed) {
     return (
-      <Stack align="center" justify="center" p="lg" mih="60vh">
+      <Stack align="center" justify="center" p={{ base: 'md', sm: 'lg' }} mih="60vh">
         <Stack align="center" gap={0} maw={384} ta="center">
           <ThemeIcon variant="light" color="teal" size={64} radius="xl" mb="lg">
             <CheckIcon size={32} />
@@ -207,14 +207,14 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
   const firstStep = selectedClient ? 2 : 1;
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Client chip — shown when client was pre-selected */}
       {selectedClient && (
         <Paper withBorder radius="lg" px="md" py="sm">
           <Group gap={10} wrap="nowrap">
-            <StorefrontIcon size={16} />
-            <Text c="dimmed" size="0.82rem">Pedindo para</Text>
-            <Text size="0.85rem" fw={700}>{selectedClient.name}</Text>
+            <StorefrontIcon size={16} style={{ flexShrink: 0 }} />
+            <Text c="dimmed" size="0.82rem" flex="none">Pedindo para</Text>
+            <Text size="0.85rem" fw={700} truncate>{selectedClient.name}</Text>
           </Group>
         </Paper>
       )}
@@ -240,7 +240,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
       </Paper>
 
       {/* Step Content */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         {/* Step 1: Cliente */}
         {step === 1 && (
           <Stack gap="md">
@@ -272,7 +272,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   {clientPolicy.name}
                 </Badge>
               </Group>
-              <SimpleGrid cols={3} spacing={8}>
+              <SimpleGrid cols={{ base: 1, xs: 3 }} spacing={8}>
                 <Box>
                   <Text c="dimmed" size="0.68rem">Desconto</Text>
                   <Text size="0.82rem" fw={600} c={clientPolicy.discount > 0 ? 'teal.6' : undefined}>
@@ -304,7 +304,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
         {step === 3 && selectedProduct && (
           <Stack gap="lg">
             <Group justify="space-between" align="flex-start" gap="sm" wrap="nowrap">
-              <Box>
+              <Box miw={0}>
                 <Title order={3} fw={600} size="1rem">{selectedProduct.name}</Title>
                 <Text c="dimmed" size="0.78rem">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </Box>
@@ -397,7 +397,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
             {/* Subtotal */}
             <Paper withBorder radius="md" px="md" py="sm" bg={highlightBg}>
-              <Group justify="space-between" wrap="nowrap">
+              <Group justify="space-between" gap="xs">
                 <Box>
                   <Text c="dimmed" size="0.75rem">Subtotal deste produto</Text>
                   <Text size="0.82rem">{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
@@ -430,7 +430,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           <Stack gap="lg">
             <Title order={3} fw={600} size="1rem">Revisão do pedido</Title>
 
-            <SimpleGrid cols={2} spacing="sm">
+            <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
               <InfoTile label="Cliente" value={selectedClientObj.name} />
               <InfoTile label="Pagamento" value={paymentCond} />
             </SimpleGrid>
@@ -444,7 +444,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 {allGrades.map(({ product, sizes, pairs, value }) => (
                   <Paper key={product.id} withBorder radius="md" p="md">
                     <Group justify="space-between" mb="sm" wrap="nowrap">
-                      <Box>
+                      <Box miw={0}>
                         <Text size="0.85rem" fw={600}>{product.name}</Text>
                         <Text c="dimmed" size="0.72rem">{product.reference}</Text>
                       </Box>
@@ -484,7 +484,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             )}
 
             {/* Breakdown de valor */}
-            <Paper withBorder radius="lg" px="lg" py="md" bg={highlightBg}>
+            <Paper withBorder radius="lg" px={{ base: 'md', sm: 'lg' }} py="md" bg={highlightBg}>
               <Stack gap={8}>
                 <Group justify="space-between">
                   <Text c="dimmed" size="0.78rem">Subtotal</Text>
@@ -497,12 +497,12 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   </Group>
                 )}
                 <Divider />
-                <Group justify="space-between" wrap="nowrap">
+                <Group justify="space-between" gap="xs">
                   <Box>
                     <Text c="dimmed" size="0.78rem">Total do pedido</Text>
                     <Text size="0.82rem">{grandPairs} pares · {allGrades.length} produto(s)</Text>
                   </Box>
-                  <Text className="mono" fw={700} fz="1.5rem">{formatCurrency(finalTotal)}</Text>
+                  <Text className="mono" fw={700} fz={{ base: '1.25rem', sm: '1.5rem' }}>{formatCurrency(finalTotal)}</Text>
                 </Group>
               </Stack>
             </Paper>
@@ -523,7 +523,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
         <Group gap="sm">
           {allGrades.length > 0 && step < 4 && (
-            <Text c="dimmed" size="0.78rem">
+            <Text c="dimmed" size="0.78rem" visibleFrom="xs">
               <Text span fw={600} c="var(--mantine-color-text)" inherit>{grandPairs}</Text> pares · {formatCurrency(grandTotal)}
             </Text>
           )}

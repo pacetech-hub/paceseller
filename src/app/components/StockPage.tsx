@@ -62,16 +62,16 @@ export function StockPage() {
   };
 
   return (
-    <Container size={1400} p="lg" w="100%">
+    <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="lg">
         {/* Header / mode toggle */}
-        <Paper withBorder radius="lg" p="lg">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Group justify="space-between" gap="sm" wrap="wrap">
-            <Group gap="sm" wrap="nowrap">
-              <ThemeIcon size={40} radius="md" variant="light">
+            <Group gap="sm" wrap="nowrap" flex="1 1 280px" align="flex-start">
+              <ThemeIcon size={40} radius="md" variant="light" flex="none">
                 <WarehouseIcon size={20} />
               </ThemeIcon>
-              <Box>
+              <Box flex={1} miw={0}>
                 <Title order={2} size="1.05rem" fw={700} lts="-0.01em">Meu Estoque · Tesla Footwear</Title>
                 <Text c="dimmed" size="0.78rem">
                   Mantenha seu estoque atualizado para que o catálogo mostre alertas de ruptura corretamente para seus clientes finais.
@@ -80,6 +80,7 @@ export function StockPage() {
             </Group>
             <SegmentedControl
               size="xs"
+              w={{ base: '100%', sm: 'auto' }}
               value={mode}
               onChange={v => setMode(v as Mode)}
               data={MODE_OPTIONS.map(o => {
@@ -102,12 +103,12 @@ export function StockPage() {
 
         {/* Integration panel */}
         {mode === 'integration' && (
-          <Paper withBorder radius="lg" p="lg">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
               <ThemeIcon size={36} radius="md" variant="light" flex="none">
                 <PlugIcon size={16} />
               </ThemeIcon>
-              <Box flex={1}>
+              <Box flex={1} miw={0}>
                 <Title order={3} size="0.9rem" fw={600}>Integração com seu sistema de estoque</Title>
                 <Text c="dimmed" size="0.78rem" mt={2}>
                   Sincronize automaticamente seu ERP / sistema de gestão. Os dados são lidos a cada hora.

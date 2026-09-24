@@ -174,7 +174,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
   if (step === 'done') {
     return (
-      <Stack align="center" justify="center" p="lg" mih="60vh">
+      <Stack align="center" justify="center" p={{ base: 'md', sm: 'lg' }} mih="60vh">
         <Stack align="center" gap={0} maw={384} ta="center">
           <ThemeIcon variant="light" color="teal" size={64} radius="xl" mb="lg">
             <CheckIcon size={32} />
@@ -197,7 +197,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
   }
 
   return (
-    <Box p="lg" maw={1400} mx="auto" w="100%">
+    <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {cartContext && (
         <Group justify="space-between" gap="sm" mb="md">
           <Group gap="sm" wrap="nowrap" miw={0}>
@@ -239,7 +239,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             </Box>
           </Group>
           {multiCart && (
-            <Group gap={8}>
+            <Group gap={8} w={{ base: '100%', xs: 'auto' }} grow>
               <Button
                 onClick={() => onNavigate('carts')}
                 variant="default"
@@ -301,7 +301,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
       </Modal>
 
       {/* Step indicator */}
-      <Group gap="sm" mb="lg">
+      <Group gap="xs" mb="lg" wrap="nowrap">
         <Button
           onClick={() => setStep('cart')}
           variant={step === 'cart' ? 'filled' : 'subtle'}
@@ -339,7 +339,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 {cart.map(item => {
                   const { pairs, value } = getItemTotal(item);
                   return (
-                    <Paper key={item.product.id} withBorder radius="lg" p="md">
+                    <Paper key={item.product.id} withBorder radius="lg" p={{ base: 'sm', sm: 'md' }}>
                       <Group align="flex-start" gap="sm" mb="sm" wrap="nowrap">
                         <Card w={64} h={64} radius="md" padding={0} flex="none" bg="var(--mantine-color-default-hover)">
                           <Image src={item.product.image} alt={item.product.name} w="100%" h="100%" fit="cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -378,7 +378,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               /* Checkout — Tabela, Condição, Campanhas */
               <Stack gap="md">
                 {/* Tabela de preço aplicada */}
-                <Paper withBorder radius="lg" p="lg">
+                <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
                   <Group justify="space-between" mb="sm" gap="sm">
                     <Group gap={8}>
                       <TagIcon size={16} />
@@ -390,11 +390,11 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                       data={priceTables.map(pt => ({ value: pt.id, label: `${pt.label} — ${pt.desc}` }))}
                       allowDeselect={false}
                       size="xs"
-                      w={260}
+                      w={{ base: '100%', xs: 260 }}
                       aria-label="Tabela de preço"
                     />
                   </Group>
-                  <SimpleGrid cols={3} spacing="sm">
+                  <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="sm">
                     <Box>
                       <Text c="dimmed" size="0.7rem">Desconto da tabela</Text>
                       <Text className="mono" size="0.9rem" fw={600} mt={2}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
@@ -411,7 +411,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 </Paper>
 
                 {/* Condições de pagamento disponíveis */}
-                <Paper withBorder radius="lg" p="lg">
+                <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
                   <Group gap={8} mb="sm">
                     <CreditCardIcon size={16} />
                     <Title order={3} fw={600} size="1rem">Condições de pagamento disponíveis</Title>
@@ -425,8 +425,8 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                         <Radio.Card key={opt.id} value={opt.id} radius="md" p="sm" className={classes.choiceCard}>
                           <Group align="flex-start" gap="sm" wrap="nowrap">
                             <Radio.Indicator color="neutral" mt={2} />
-                            <Box flex={1}>
-                              <Group justify="space-between">
+                            <Box flex={1} miw={0}>
+                              <Group justify="space-between" gap="xs">
                                 <Text size="0.85rem" fw={600}>{opt.label}</Text>
                                 {opt.surcharge !== 0 && (
                                   <Text className="mono" size="0.75rem" fw={600} c={adjColor(opt.surcharge)}>
@@ -445,7 +445,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
                 {/* Campanhas disponíveis */}
                 {campaigns.length > 0 && (
-                  <Paper withBorder radius="lg" p="lg">
+                  <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
                     <Group gap={8} mb="sm">
                       <SparkleIcon size={16} />
                       <Title order={3} fw={600} size="1rem">Campanhas disponíveis</Title>
@@ -481,7 +481,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 )}
 
                 {/* Observações */}
-                <Paper withBorder radius="lg" p="lg">
+                <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
                   <Textarea
                     label="Observações"
                     value={obs}
@@ -509,7 +509,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           {/* Summary */}
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack gap="md">
-              <Paper withBorder radius="lg" p="lg">
+              <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
                 <Title order={3} fw={600} mb="md" fz="0.9rem">Resumo do pedido</Title>
                 <Stack gap={8}>
                   <Group justify="space-between" wrap="nowrap">

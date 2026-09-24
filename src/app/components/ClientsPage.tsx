@@ -96,19 +96,19 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
   };
 
   return (
-    <Container size="xl" px="lg" py="lg" fluid>
+    <Container size="xl" px={{ base: 'md', sm: 'lg' }} py={{ base: 'md', sm: 'lg' }} fluid>
       <Stack gap="lg" maw={1400} mx="auto">
         {/* Stats */}
-        <SimpleGrid cols={3} spacing="md">
+        <SimpleGrid cols={3} spacing={{ base: 'xs', sm: 'md' }}>
           {[
             { count: filtered.length, suffix: 'clientes no total' },
             { count: activeCount, suffix: 'ativos' },
             { count: inactiveCount, suffix: 'inativos' },
           ].map(stat => (
-            <Paper key={stat.suffix} withBorder radius="md" p="md">
-              <Group gap={8} align="baseline">
-                <Text fw={700} fz="1.75rem" lh={1} className="mono">{stat.count}</Text>
-                <Text c="dimmed" size="sm" fw={500}>{stat.suffix}</Text>
+            <Paper key={stat.suffix} withBorder radius="md" p={{ base: 'sm', sm: 'md' }}>
+              <Group gap={6} align="baseline">
+                <Text fw={700} fz={{ base: '1.35rem', sm: '1.75rem' }} lh={1} className="mono">{stat.count}</Text>
+                <Text c="dimmed" fz={{ base: 'xs', sm: 'sm' }} fw={500}>{stat.suffix}</Text>
               </Group>
             </Paper>
           ))}
@@ -121,8 +121,8 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             leftSection={<MagnifyingGlassIcon size={14} />}
             value={search}
             onChange={e => setSearch(e.currentTarget.value)}
-            flex={1}
-            miw={200}
+            flex={{ base: '1 1 100%', sm: 1 }}
+            miw={{ sm: 200 }}
           />
 
           <Popover position="bottom-end" withArrow shadow="md">
@@ -138,7 +138,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 Filtros
               </Button>
             </Popover.Target>
-            <Popover.Dropdown w={320}>
+            <Popover.Dropdown w={320} maw="calc(100vw - 32px)">
               <Stack gap="md">
                 <Box>
                   <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Região</Text>
@@ -182,7 +182,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 Ordenar
               </Button>
             </Popover.Target>
-            <Popover.Dropdown w={280}>
+            <Popover.Dropdown w={280} maw="calc(100vw - 32px)">
               <Stack gap={4}>
                 <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={4}>Ordenar por</Text>
                 {SORT_OPTIONS.map(opt => (
@@ -212,9 +212,9 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
           <Table highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th w="50%">Cliente</Table.Th>
-                <Table.Th>Cidade/Estado</Table.Th>
-                <Table.Th>Representante</Table.Th>
+                <Table.Th w={{ sm: '50%' }}>Cliente</Table.Th>
+                <Table.Th visibleFrom="sm">Cidade/Estado</Table.Th>
+                <Table.Th visibleFrom="sm">Representante</Table.Th>
                 <Table.Th w={40} />
               </Table.Tr>
             </Table.Thead>
@@ -239,16 +239,20 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                           </Group>
                           <Text fw={600} size="sm" truncate>{client.name}</Text>
                           <Text c="dimmed" size="xs">Último pedido em {formatOrderDate(client.lastOrder)}</Text>
+                          {/* Colunas de cidade e representante resumidas abaixo do breakpoint sm */}
+                          <Text c="dimmed" size="xs" hiddenFrom="sm" truncate>
+                            {client.city}/{client.state} · {client.rep}
+                          </Text>
                         </Box>
                       </Group>
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td visibleFrom="sm">
                       <Group gap={4} wrap="nowrap">
                         <MapPinIcon size={12} color="var(--mantine-color-dimmed)" />
                         <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
                       </Group>
                     </Table.Td>
-                    <Table.Td><Text size="sm" c="dimmed">{client.rep}</Text></Table.Td>
+                    <Table.Td visibleFrom="sm"><Text size="sm" c="dimmed">{client.rep}</Text></Table.Td>
                     <Table.Td ta="right">
                       <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
                     </Table.Td>

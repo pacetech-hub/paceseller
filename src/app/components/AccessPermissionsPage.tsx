@@ -113,7 +113,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   const visaoInfo = visoes.find(v => v.id === scope.visao)!;
 
   return (
-    <Stack gap="lg" maw={1400} mx="auto" p="lg">
+    <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       <Group gap="sm" wrap="nowrap">
         <ThemeIcon size={40} radius="md" variant="light" color="neutral">
           <Icon size={20} />
@@ -130,7 +130,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
 
       {/* Usuários vinculados */}
       <Card withBorder radius="md" padding={0}>
-        <Group justify="space-between" p="lg" wrap="wrap">
+        <Group justify="space-between" p={{ base: 'md', sm: 'lg' }} wrap="wrap">
           <Box>
             <Text fw={600} size="0.9rem">Usuários vinculados</Text>
             <Text c="dimmed" size="0.75rem" mt={2}>{scope.usersHint}</Text>
@@ -148,7 +148,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
 
         {showInvite && (
           <>
-          <Stack gap="sm" p="lg" bg="var(--mantine-color-default-hover)">
+          <Stack gap="sm" p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
               <TextInput
                 label="Nome completo"
@@ -175,6 +175,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
           </>
         )}
 
+        <Table.ScrollContainer minWidth={640}>
         <Table verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
@@ -233,6 +234,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             )}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
       </Card>
 
       {/* O que cada perfil pode acessar */}

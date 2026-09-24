@@ -35,6 +35,13 @@
   opacity: 1;
 }
 
+/* Em telas de toque não há hover: o botão de excluir fica sempre visível */
+@media (hover: none) {
+  .rowDelete {
+    opacity: 1;
+  }
+}
+
 /* Cartão selecionável do assistente */
 .option {
   transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;

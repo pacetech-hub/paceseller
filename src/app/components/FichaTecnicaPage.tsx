@@ -3,6 +3,7 @@ import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
   ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, type BoxProps,
 } from "@mantine/core";
+import { useSmallerThan } from "../lib/responsive";
 import { toast } from "../lib/toast";
 import classes from "./FichaTecnicaPage.module.css";
 import interactive from "./interactive.module.css";
@@ -276,7 +277,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   });
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <Box>
         <Title order={2} fw={700} fz="1rem">Ficha Técnica</Title>
         <Text c="dimmed" size="0.8rem">Consulte informações completas, imagens e medidas de cada produto</Text>
@@ -288,16 +289,19 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          flex={1}
-          miw={200}
+          flex={{ base: '1 1 100%', md: 1 }}
+          miw={{ md: 200 }}
         />
+        {/* Abaixo de md os três selects dividem a linha de baixo */}
         <Select
           value={line}
           onChange={v => v && setLine(v)}
           data={lineOptions}
           allowDeselect={false}
           aria-label="Linha"
-          w={180}
+          flex={{ base: 1, md: 'none' }}
+          miw={0}
+          w={{ md: 180 }}
         />
         <Select
           value={category}
@@ -305,7 +309,9 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           data={categoryOptions}
           allowDeselect={false}
           aria-label="Categoria"
-          w={180}
+          flex={{ base: 1, md: 'none' }}
+          miw={0}
+          w={{ md: 180 }}
         />
         <Select
           value={sortBy}
@@ -317,7 +323,9 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           ]}
           allowDeselect={false}
           aria-label="Ordenar"
-          w={160}
+          flex={{ base: 1, md: 'none' }}
+          miw={0}
+          w={{ md: 160 }}
         />
       </Group>
 
@@ -343,6 +351,8 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
 }
 
 function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product: Product; profile: Profile; onBack: () => void; onOpenRelated: (p: Product) => void }) {
+  // Abaixo do breakpoint sm o zoom da imagem ocupa a tela inteira
+  const zoomFullScreen = useSmallerThan('sm');
   const gallery = getGallery(product);
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -383,7 +393,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
   };
 
   return (
-    <Stack gap="lg" p="lg" maw={1200} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1200} mx="auto" w="100%">
       <Box>
         <Button
           onClick={onBack}
@@ -425,7 +435,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       </AspectRatio>
 
       {/* Informações do produto */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <Stack gap="md">
           <Box>
             <Text c="dimmed" size="0.72rem" tt="uppercase" mb={2}>Ref. {product.reference}</Text>
@@ -466,7 +476,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       </Paper>
 
       {/* Estoque */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <SectionLabel mb={8}>
           {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
         </SectionLabel>
@@ -533,6 +543,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         opened={zoomOpen}
         onClose={() => setZoomOpen(false)}
         size={672}
+        fullScreen={zoomFullScreen}
         centered
         title={<Text fw={600} size="sm">{product.name}</Text>}
       >

@@ -14,7 +14,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
 
   return (
     <Card withBorder radius="md" padding={0}>
-      <Stack gap={8} p="lg">
+      <Stack gap={8} p={{ base: 'md', sm: 'lg' }}>
         <Group gap="sm">
           {perfis.map(perfil => (
             <Badge key={perfil} color="neutral" variant="light">{perfil}</Badge>
@@ -30,6 +30,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
       </Stack>
       <Divider color="var(--mantine-color-default-border)" />
 
+      <Table.ScrollContainer minWidth={120 + perfis.length * 110}>
       <Table verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
@@ -61,9 +62,10 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
           ))}
         </Table.Tbody>
       </Table>
+      </Table.ScrollContainer>
 
       <Divider color="var(--mantine-color-default-border)" />
-      <Group justify="space-between" p="lg">
+      <Group justify="space-between" gap="xs" p={{ base: 'md', sm: 'lg' }}>
         <Text c="dimmed" size="0.72rem">Clique em qualquer célula para alternar a permissão</Text>
         <Text
           component="button"
