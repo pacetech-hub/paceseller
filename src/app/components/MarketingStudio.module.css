@@ -7,7 +7,7 @@
 }
 
 .overlayDelete.overlayDelete:hover {
-  background: rgba(239, 68, 68, 0.8);
+  background: var(--mantine-color-red-7);
   color: #fff;
 }
 
@@ -58,8 +58,8 @@
 
 .suggestion[data-selected] {
   color: var(--mantine-color-text);
-  border-color: var(--mantine-color-violet-3);
-  background-color: var(--mantine-color-violet-0);
+  border-color: var(--mantine-color-neutral-9);
+  background-color: var(--mantine-color-neutral-0);
 }
 
 /* Etapa atual do assistente: anel ao redor do número */

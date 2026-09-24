@@ -175,7 +175,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
         fullWidth
         leftSection={<DownloadSimpleIcon size={16} />}
       >
-        Baixar peça
+        Baixar Peça
       </Button>
     </Box>
   );
@@ -196,19 +196,19 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               <Text c="dimmed" size="sm">Crie campanhas profissionais em menos de 2 minutos</Text>
             </Box>
           </Group>
-          <Group gap={8} wrap="wrap">
+          <Group gap="sm" wrap="wrap">
             <Button
               onClick={onManageCampaigns}
               variant="subtle"
               leftSection={<PencilSimpleIcon size={16} />}
             >
-              Gerenciar campanhas
+              Gerenciar Campanhas
             </Button>
             <Button
               onClick={onCreate}
               leftSection={<SparkleIcon size={16} />}
             >
-              Criar campanha
+              Criar Campanha
             </Button>
           </Group>
         </Group>
@@ -226,11 +226,11 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                     <Image src={item.image} alt={item.formatLabel} h="100%" />
                     <Button
                       onClick={() => onDelete(item.id)}
-                      aria-label={`Excluir peça ${item.formatLabel} do histórico`}
+                      aria-label={`Excluir Peça ${item.formatLabel} do Histórico`}
                       variant="transparent"
                       pos="absolute"
-                      top={8}
-                      right={8}
+                      top={12}
+                      right={12}
                       leftSection={<TrashIcon size={16} />}
                       className={classes.overlayDelete}
                     >
@@ -252,7 +252,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             subtitle="As peças que você salvar ao final do assistente aparecem aqui"
             action={
               <Button onClick={onCreate} variant="default" leftSection={<SparkleIcon size={16} />}>
-                Criar campanha
+                Criar Campanha
               </Button>
             }
           />
@@ -309,7 +309,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
     <FileButton onChange={handleFiles} accept="image/*" multiple>
       {props => (
         <Button {...props} variant="default" leftSection={<UploadSimpleIcon size={16} />}>
-          Enviar cenário
+          Enviar Cenário
         </Button>
       )}
     </FileButton>
@@ -357,7 +357,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             px="sm"
             leftSection={<PlusIcon size={16} />}
           >
-            Nova campanha
+            Nova Campanha
           </Button>
         </Paper>
 
@@ -379,13 +379,13 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                     c="red"
                     leftSection={<TrashIcon size={16} />}
                   >
-                    Excluir campanha
+                    Excluir Campanha
                   </Button>
                 </Group>
               </Paper>
 
               <Paper withBorder p="md">
-                <Group justify="space-between" wrap="wrap" gap={8} mb="sm">
+                <Group justify="space-between" wrap="wrap" gap="sm" mb="sm">
                   <Text fw={600}>
                     {selected.photos.length} {selected.photos.length === 1 ? 'cenário fotográfico' : 'cenários fotográficos'}
                   </Text>
@@ -401,11 +401,11 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                           <Image src={photo} alt={`${selected.name} — cenário ${idx + 1}`} h="100%" />
                           <Button
                             onClick={() => onDeletePhoto(selected.id, idx)}
-                            aria-label={`Excluir cenário ${idx + 1}`}
+                            aria-label={`Excluir Cenário ${idx + 1}`}
                             variant="transparent"
                             pos="absolute"
-                            top={8}
-                            right={8}
+                            top={12}
+                            right={12}
                             leftSection={<TrashIcon size={16} />}
                             className={classes.overlayDelete}
                           >
@@ -434,7 +434,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
               subtitle="Selecione uma campanha na lista ou crie uma nova para enviar cenários"
               action={
                 <Button onClick={() => setCreating(true)} variant="default" leftSection={<PlusIcon size={16} />}>
-                  Nova campanha
+                  Nova Campanha
                 </Button>
               }
             />
@@ -461,7 +461,8 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             label="Nome"
             value={newName}
             onChange={e => { setNewName(e.currentTarget.value); setNameError(null); }}
-            placeholder="Ex.: Dia dos Pais"
+            placeholder="ex.: Dia dos Pais"
+            maxLength={60}
             error={nameError}
           />
           <Textarea
@@ -469,15 +470,17 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             value={newDescription}
             onChange={e => setNewDescription(e.currentTarget.value)}
             rows={3}
-            placeholder="Descreva o objetivo desta campanha"
+            maxLength={200}
+            description="Até 200 caracteres"
+            placeholder="ex.: Peças para divulgar a coleção nova na vitrine e no WhatsApp"
           />
         </Stack>
-        <Group justify="flex-end" gap={8} mt="lg">
+        <Group justify="flex-end" gap="sm" mt="lg">
           <Button onClick={closeCreate} variant="default">
             Cancelar
           </Button>
           <Button onClick={handleCreate}>
-            Criar campanha
+            Criar Campanha
           </Button>
         </Group>
       </Modal>
@@ -494,7 +497,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         <Text c="dimmed" mt={6}>
           Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
         </Text>
-        <Group justify="flex-end" gap={8} mt="lg">
+        <Group justify="flex-end" gap="sm" mt="lg">
           <Button onClick={() => setDeleteTarget(null)} variant="default">
             Cancelar
           </Button>
@@ -505,7 +508,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             }}
             color="red"
           >
-            Excluir campanha
+            Excluir Campanha
           </Button>
         </Group>
       </Modal>
@@ -515,7 +518,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
 
 function StepHeader({ title, subtitle, right, mb = 'md' }: { title: string; subtitle?: string; right?: React.ReactNode; mb?: string }) {
   return (
-    <Group justify="space-between" align={right ? 'center' : 'flex-start'} wrap="wrap" gap={8} mb={mb}>
+    <Group justify="space-between" align={right ? 'center' : 'flex-start'} wrap="wrap" gap="sm" mb={mb}>
       <Box>
         <Title order={2}>{title}</Title>
         {subtitle && <Text c="dimmed" size="sm" mt={4}>{subtitle}</Text>}
@@ -585,7 +588,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
 
   // Motivo pelo qual o botão principal está desativado, mostrado ao lado da navegação
   const blockedReason =
-    step === 1 && !campaignId ? 'Crie uma campanha em Gerenciar campanhas para continuar' :
+    step === 1 && !campaignId ? 'Crie uma campanha em "Gerenciar Campanhas" para continuar' :
     step === 2 && selectedFormats.size === 0 ? 'Selecione ao menos um formato para continuar' :
     step === 3 && selectedProducts.size === 0 ? 'Selecione ao menos um produto para continuar' :
     step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0) ? 'Adicione um cenário à campanha para continuar' :
@@ -594,7 +597,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
 
   const manageCampaignsButton = (
     <Button onClick={onManageCampaigns} variant="default" leftSection={<PencilSimpleIcon size={16} />}>
-      Gerenciar campanhas
+      Gerenciar Campanhas
     </Button>
   );
 
@@ -837,7 +840,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
             ) : (
               <EmptyState
                 title="Esta campanha ainda não tem cenários"
-                subtitle="Envie ao menos um cenário fotográfico em Gerenciar campanhas para usar como fundo da peça"
+                subtitle="Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" para usar como fundo da peça"
                 action={manageCampaignsButton}
               />
             )}
@@ -853,11 +856,14 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               onChange={e => setPrompt(e.currentTarget.value)}
               rows={4}
               mb="sm"
+              maxLength={300}
+              description="Até 300 caracteres"
+              placeholder="ex.: Coleção Inverno com conforto e estilo para a sua vitrine"
               aria-label="Texto da campanha"
             />
             <Box mb="md">
               <Text c="dimmed" size="sm" fw={600} mb={8}>Sugestões da IA:</Text>
-              <Stack gap={8}>
+              <Stack gap="sm">
                 {AI_PROMPTS.map((sugg, i) => (
                   <Paper
                     key={i}
@@ -877,7 +883,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
             </Box>
             <Paper p="sm" bg="var(--mantine-color-default-hover)">
               <Text c="dimmed" size="sm">
-                <MagicWandIcon size={16} color="var(--mantine-color-violet-5)" className={classes.inlineIcon} />
+                <MagicWandIcon size={16} className={classes.inlineIcon} />
                 A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
               </Text>
             </Paper>
@@ -897,7 +903,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
                   color="gray"
                   leftSection={<ArrowsClockwiseIcon size={16} />}
                 >
-                  Regenerar peças
+                  Regenerar Peças
                 </Button>
               }
             />
@@ -949,19 +955,12 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               onClick={handleGenerate}
               disabled={generating || blockedReason !== null}
               leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
-              styles={{
-                root: {
-                  background: 'linear-gradient(135deg, oklch(0.55 0.22 285), oklch(0.6 0.22 262))',
-                  color: '#fff',
-                  opacity: generating || blockedReason !== null ? 0.6 : 1,
-                },
-              }}
             >
-              {generating ? 'Gerando peças...' : 'Gerar peças'}
+              {generating ? 'Gerando Peças...' : 'Gerar Peças'}
             </Button>
           ) : (
             <Button onClick={handleFinish} leftSection={<CheckIcon size={16} />}>
-              Salvar no histórico
+              Salvar no Histórico
             </Button>
           )}
         </Flex>
@@ -983,7 +982,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       const fallback = campaigns[idx + 1] ?? campaigns[idx - 1] ?? null;
       setSelectedCampaignId(fallback ? fallback.id : null);
     }
-    toast.success('Campanha excluída', 'Para criar outra, use "Nova campanha"');
+    toast.success('Campanha excluída', 'Para criar outra, use "Nova Campanha"');
   };
 
   if (mode === 'campaigns') {
@@ -997,7 +996,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
           const id = `camp-${Date.now()}`;
           setCampaigns(prev => [{ id, name, description, photos: [] }, ...prev]);
           setSelectedCampaignId(id);
-          toast.success('Campanha criada', 'Agora envie os cenários fotográficos dela em "Enviar cenário"');
+          toast.success('Campanha criada', 'Agora envie os cenários fotográficos dela em "Enviar Cenário"');
         }}
         onAddPhotos={(campaignId, photos) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: [...photos, ...c.photos] } : c));
@@ -1005,7 +1004,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
         }}
         onDeletePhoto={(campaignId, photoIndex) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: c.photos.filter((_, i) => i !== photoIndex) } : c));
-          toast.success('Cenário removido', 'Envie outro em "Enviar cenário" quando quiser');
+          toast.success('Cenário removido', 'Envie outro em "Enviar Cenário" quando quiser');
         }}
         onDeleteCampaign={handleDeleteCampaign}
       />
@@ -1031,7 +1030,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       onManageCampaigns={() => setMode('campaigns')}
       onDelete={id => {
         setHistory(prev => prev.filter(item => item.id !== id));
-        toast.success('Peça excluída do histórico', 'Para criar uma nova peça, use "Criar campanha"');
+        toast.success('Peça excluída do histórico', 'Para criar uma nova peça, use "Criar Campanha"');
       }}
     />
   );
