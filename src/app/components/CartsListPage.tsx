@@ -279,27 +279,26 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           const ctx: CartContext = { id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy };
           return (
             <Card key={c.id} withBorder radius="lg" padding={0}>
-              {isOther && (
-                <Badge
-                  size="xs"
-                  radius="sm"
-                  variant="light"
-                  color="yellow"
-                  leftSection={<ArrowsLeftRightIcon size={10} />}
-                  styles={badgeStyles}
-                  pos="absolute"
-                  top={12}
-                  right={12}
-                >
-                  troca cliente
-                </Badge>
-              )}
               <UnstyledButton onClick={() => onOpenCart(ctx)} className={classes.hoverable} p="md" pb={0} flex={1}>
-                <Group justify="space-between" align="flex-start" mb="sm">
+                <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
                   <ThemeIcon variant="light" color="neutral" size={40} radius="md">
                     <ShoppingCartIcon size={16} />
                   </ThemeIcon>
-                  <Text className="mono" size="0.95rem" fw={700}>{formatCurrency(c.total)}</Text>
+                  <Group gap={8} wrap="nowrap">
+                    {isOther && (
+                      <Badge
+                        size="xs"
+                        radius="sm"
+                        variant="light"
+                        color="yellow"
+                        leftSection={<ArrowsLeftRightIcon size={10} />}
+                        styles={badgeStyles}
+                      >
+                        troca cliente
+                      </Badge>
+                    )}
+                    <Text className="mono" size="0.95rem" fw={700}>{formatCurrency(c.total)}</Text>
+                  </Group>
                 </Group>
                 <Text fw={600} size="0.92rem" truncate>{c.cartName}</Text>
                 <Group gap={6} mt={4} c="dimmed" wrap="nowrap">
