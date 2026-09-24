@@ -8,13 +8,15 @@
   transform: translateY(-2px);
 }
 
-/* Ações que aparecem sobre a imagem no hover do card */
+/* Ações que aparecem sobre a imagem no hover do card: mesmo recuo de 8px do favoritar
+   e 12px entre as duas ações, para nenhuma encostar na borda do card ou na outra */
 .overlay {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
   display: flex;
+  gap: var(--mantine-spacing-sm);
   opacity: 0;
   transition: opacity 150ms ease;
 }
@@ -39,11 +41,19 @@
   justify-content: center;
   gap: 6px;
   padding: 10px 8px;
+  border-radius: var(--mantine-radius-md);
   cursor: pointer;
   font-size: var(--mantine-font-size-md);
   font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
   transition: background-color 150ms ease;
+
+  /* Card estreito do celular: menos respiro interno para "Compra Rápida" caber com o recuo */
+  @mixin smaller-than $mantine-breakpoint-sm {
+    gap: 4px;
+    padding-inline: 4px;
+  }
 }
 
 .overlayDetails {
@@ -102,13 +112,14 @@
 }
 
 .favToggle:hover {
-  color: var(--mantine-color-red-7);
+  color: var(--mantine-color-neutral-9);
 }
 
+/* Favoritado: neutro (o coração preenchido já indica o estado; vermelho fica para erro/esgotado) */
 .favToggle[data-active] {
-  background-color: var(--mantine-color-red-0);
-  border-color: var(--mantine-color-red-2);
-  color: var(--mantine-color-red-7);
+  background-color: var(--mantine-color-neutral-0);
+  border-color: var(--mantine-color-neutral-3);
+  color: var(--mantine-color-neutral-9);
 }
 
 /* Miniaturas no modal de detalhes: imagem + rótulo visível da vista (Lateral, Frontal, ...) */

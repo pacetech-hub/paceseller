@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, ThemeIcon, SimpleGrid,
   ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, type BoxProps,
 } from "@mantine/core";
 import { useSmallerThan } from "../lib/responsive";
@@ -285,9 +285,9 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
         <Text c="dimmed">Consulte informações completas, imagens e medidas de cada produto</Text>
       </Box>
 
-      <Group gap="sm" wrap="wrap">
+      <Group gap="sm" wrap="wrap" align="flex-end">
         <TextInput
-          placeholder="Buscar por nome ou referência..."
+          placeholder="Buscar por nome ou referência"
           leftSection={<MagnifyingGlassIcon size={18} />}
           aria-label="Buscar por nome ou referência"
           value={search}
@@ -295,13 +295,13 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           flex={{ base: '1 1 100%', md: 1 }}
           miw={{ md: 200 }}
         />
-        {/* Abaixo de md os três selects dividem a linha de baixo */}
+        {/* Linha e categoria vêm dos produtos (listas dinâmicas) → Select; abaixo de md dividem a linha de baixo */}
         <Select
           value={line}
           onChange={v => v && setLine(v)}
           data={lineOptions}
           allowDeselect={false}
-          aria-label="Linha"
+          label="Linha"
           flex={{ base: 1, md: 'none' }}
           miw={0}
           w={{ md: 180 }}
@@ -311,25 +311,25 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           onChange={v => v && setCategory(v)}
           data={categoryOptions}
           allowDeselect={false}
-          aria-label="Categoria"
+          label="Categoria"
           flex={{ base: 1, md: 'none' }}
           miw={0}
           w={{ md: 180 }}
         />
-        <Select
-          value={sortBy}
-          onChange={v => v && setSortBy(v as typeof sortBy)}
-          data={[
-            { value: 'relevância', label: 'Relevância' },
-            { value: 'nome', label: 'Nome (A-Z)' },
-            { value: 'referência', label: 'Referência' },
-          ]}
-          allowDeselect={false}
-          aria-label="Ordenar"
-          flex={{ base: 1, md: 'none' }}
-          miw={0}
-          w={{ md: 160 }}
-        />
+        {/* Ordenação com 3 opções fixas: controle segmentado, na linha inteira abaixo de md */}
+        <Input.Wrapper label="Ordenar por" labelElement="div" id="ficha-sort" flex={{ base: '1 1 100%', md: 'none' }}>
+          <SegmentedControl
+            fullWidth
+            value={sortBy}
+            onChange={v => setSortBy(v as typeof sortBy)}
+            aria-labelledby="ficha-sort-label"
+            data={[
+              { value: 'relevância', label: 'Relevância' },
+              { value: 'nome', label: 'Nome (A-Z)' },
+              { value: 'referência', label: 'Referência' },
+            ]}
+          />
+        </Input.Wrapper>
       </Group>
 
       {sorted.length > 0 ? (
@@ -352,7 +352,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
               leftSection={<XIcon size={16} />}
               onClick={() => { setSearch(''); setLine('Todos'); setCategory('Todos'); }}
             >
-              Limpar busca e filtros
+              Limpar Busca e Filtros
             </Button>
           </Stack>
         </Paper>
@@ -448,9 +448,9 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </Button>
       </Box>
 
-      <Group justify="flex-end" gap={8}>
+      <Group justify="flex-end" gap="sm">
         <Button onClick={downloadAllImages} variant="default" leftSection={<DownloadSimpleIcon size={18} />}>
-          Baixar imagens (ZIP)
+          Baixar Imagens (ZIP)
         </Button>
         <Button onClick={downloadPdf} leftSection={<FileTextIcon size={18} />}>
           Baixar PDF
@@ -542,7 +542,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                     </Table.Td>
                     {profile === 'lojista' && (
                       <Table.Td>
-                        <Group gap={8} justify="flex-end" wrap="nowrap">
+                        <Group gap="sm" justify="flex-end" wrap="nowrap">
                           <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
                           {storeLow && (
                             <Button
@@ -555,7 +555,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                               leftSection={<ArrowsClockwiseIcon size={16} />}
                               flex="none"
                             >
-                              Solicitar reposição
+                              Solicitar Reposição
                             </Button>
                           )}
                         </Group>
