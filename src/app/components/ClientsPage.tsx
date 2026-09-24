@@ -108,7 +108,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Paper key={stat.suffix} withBorder radius="md" p={{ base: 'sm', sm: 'md' }}>
               <Group gap={6} align="baseline">
                 <Text fw={700} fz={{ base: '1.35rem', sm: '1.75rem' }} lh={1} className="mono">{stat.count}</Text>
-                <Text c="dimmed" fz={{ base: 'xs', sm: 'sm' }} fw={500}>{stat.suffix}</Text>
+                <Text c="dimmed" fz={{ base: 'xs', sm: 'sm' }}>{stat.suffix}</Text>
               </Group>
             </Paper>
           ))}
@@ -163,7 +163,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 </Box>
 
                 {activeFilterCount > 0 && (
-                  <Button variant="subtle" color="neutral" size="xs" px={0} onClick={clearFilters}>
+                  <Button variant="subtle" color="neutral" size="xs" onClick={clearFilters}>
                     Limpar filtros
                   </Button>
                 )}
@@ -198,7 +198,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   </Button>
                 ))}
                 {sortActive && (
-                  <Button variant="subtle" color="neutral" size="xs" px={0} mt={4} onClick={() => setSortOrder(DEFAULT_SORT)}>
+                  <Button variant="subtle" color="neutral" size="xs" mt={4} onClick={() => setSortOrder(DEFAULT_SORT)}>
                     Restaurar ordenação padrão
                   </Button>
                 )}

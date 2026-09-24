@@ -139,7 +139,7 @@ export function StockPage() {
                     <ArrowsClockwiseIcon size={14} color="var(--mantine-color-dimmed)" />
                     <Text c="dimmed" size="0.75rem">Última sincronização: hoje, 14:02 · próxima em 38min</Text>
                   </Group>
-                  <Button variant="light" size="xs">Sincronizar agora</Button>
+                  <Button variant="default" size="xs">Sincronizar agora</Button>
                 </Group>
               </Paper>
             )}

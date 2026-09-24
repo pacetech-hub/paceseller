@@ -133,7 +133,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         variant="subtle"
         color="gray"
         size="compact-sm"
-        px={4}
+        ml={-12}
         leftSection={<CaretLeftIcon size={16} />}
       >
         Voltar para Clientes
@@ -183,17 +183,16 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
         <Button
           onClick={() => setExpanded(v => !v)}
-          variant="transparent"
+          variant="subtle"
           color="neutral"
-          size="compact-xs"
-          px={0}
+          size="compact-sm"
+          ml={-12}
           mt="sm"
           rightSection={
             <CaretDownIcon size={14} className={detail.caret} data-expanded={expanded || undefined} />
           }
-          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
         >
-          {expanded ? 'Ver menos informações' : 'Ver mais informações'}
+          {expanded ? 'Ocultar dados cadastrais' : 'Mostrar dados cadastrais'}
         </Button>
 
         <Collapse in={expanded}>
@@ -317,10 +316,10 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         <Group gap={6} mb="md">
           <Button
             onClick={() => setStockFilter('todos')}
-            size="compact-xs"
+            size="compact-sm"
             radius="xl"
-            variant={stockFilter === 'todos' ? 'filled' : 'light'}
-            color={stockFilter === 'todos' ? 'neutral' : 'gray'}
+            variant={stockFilter === 'todos' ? 'filled' : 'default'}
+            color="neutral"
           >
             Todos
           </Button>
@@ -330,10 +329,10 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               <Button
                 key={key}
                 onClick={() => setStockFilter(key)}
-                size="compact-xs"
+                size="compact-sm"
                 radius="xl"
-                variant={active ? 'filled' : 'light'}
-                color={active ? 'neutral' : STOCK_STATUS_CONFIG[key].color}
+                variant={active ? 'filled' : 'default'}
+                color="neutral"
               >
                 {STOCK_STATUS_CONFIG[key].label}
               </Button>
@@ -425,7 +424,7 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
         <Divider mt={8} color="var(--mantine-color-default-border)" />
         <Group justify="space-between" pt={8}>
           <Text className="mono" size="0.85rem" fw={700}>{formatCurrency(product.price)}</Text>
-          <Button onClick={onBuy} size="compact-xs" fz="0.72rem">Comprar</Button>
+          <Button onClick={onBuy} size="compact-sm">Montar pedido</Button>
         </Group>
       </Stack>
     </Card>
