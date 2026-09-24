@@ -12,7 +12,7 @@ import {
   ShoppingBagIcon,
   TrophyIcon,
   CalendarBlankIcon,
-  DownloadSimpleIcon,
+  ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { selloutData, formatCurrency } from "../data/mockData";
 
@@ -116,9 +116,9 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
               variant="default"
               size="sm"
               onClick={() => onNavigate('history')}
-              leftSection={<DownloadSimpleIcon size={14} />}
+              leftSection={<ClockCounterClockwiseIcon size={16} />}
             >
-              Exportar
+              Ver histórico de pedidos
             </Button>
           </Group>
         </Group>
@@ -139,7 +139,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                     <Text size="0.72rem" fw={700} c="inherit">{k.trend}</Text>
                   </Group>
                 </Group>
-                <Text c="dimmed" size="0.72rem" fw={500}>{k.label}</Text>
+                <Text c="dimmed" size="0.72rem" fw={400}>{k.label}</Text>
                 <Text size="1.15rem" fw={700} className="mono" lts="-0.01em">{k.value}</Text>
                 <Text c="dimmed" size="0.7rem">{k.sub}</Text>
               </Paper>

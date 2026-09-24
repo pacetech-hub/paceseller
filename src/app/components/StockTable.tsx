@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   SimpleGrid, Paper, Group, Text, ThemeIcon, TextInput, SegmentedControl, Button,
-  Table, Badge, NumberInput, ActionIcon, Avatar, Box, Stack, Card,
+  Table, Badge, NumberInput, ActionIcon, Avatar, Box, Stack, Card, Tooltip,
 } from "@mantine/core";
 import {
   WarehouseIcon,
@@ -63,7 +63,7 @@ export function StockKpis({ items }: { items: StockItem[] }) {
         return (
           <Paper key={k.label} withBorder radius="lg" p="md">
             <Group justify="space-between" mb="xs" wrap="nowrap">
-              <Text c="dimmed" size="0.75rem" fw={500}>{k.label}</Text>
+              <Text c="dimmed" size="0.75rem" fw={600}>{k.label}</Text>
               <ThemeIcon size={28} radius="md" variant="light" color={k.color}>
                 <Icon size={14} />
               </ThemeIcon>
@@ -99,7 +99,7 @@ export function StockProductCell({ item }: { item: StockItem }) {
         <PackageIcon size={16} />
       </Avatar>
       <Box miw={0}>
-        <Text size="0.82rem" fw={500} truncate>{item.name}</Text>
+        <Text size="0.82rem" fw={600} truncate>{item.name}</Text>
         <Text c="dimmed" size="0.7rem">{item.category} · {formatCurrency(item.price)}</Text>
       </Box>
     </Group>
@@ -162,10 +162,10 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
         />
         {showBulkActions && (
           <>
-            <Button variant="default" size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<UploadSimpleIcon size={14} />}>
+            <Button variant="default" size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<UploadSimpleIcon size={16} />}>
               Importar planilha
             </Button>
-            <Button size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<PlusIcon size={14} />}>
+            <Button size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<PlusIcon size={16} />}>
               Adicionar SKU
             </Button>
           </>
@@ -178,10 +178,12 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
 export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
   return (
     <Group gap={4} wrap="nowrap">
-      <ActionIcon variant="light" onClick={onSave} aria-label="Salvar">
-        <FloppyDiskIcon size={14} />
-      </ActionIcon>
-      <ActionIcon variant="subtle" color="gray" onClick={onCancel} aria-label="Cancelar">
+      <Tooltip label="Salvar estoque" withArrow>
+        <ActionIcon variant="filled" onClick={onSave} aria-label="Salvar estoque">
+          <FloppyDiskIcon size={14} />
+        </ActionIcon>
+      </Tooltip>
+      <ActionIcon variant="subtle" color="gray" onClick={onCancel} aria-label="Cancelar edição">
         <XIcon size={14} />
       </ActionIcon>
     </Group>
@@ -190,9 +192,11 @@ export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel
 
 export function EditButton({ onClick }: { onClick: () => void }) {
   return (
-    <ActionIcon variant="subtle" color="gray" onClick={onClick} aria-label="Editar">
-      <PencilSimpleIcon size={14} />
-    </ActionIcon>
+    <Tooltip label="Editar estoque" withArrow>
+      <ActionIcon variant="subtle" color="gray" onClick={onClick} aria-label="Editar estoque">
+        <PencilSimpleIcon size={14} />
+      </ActionIcon>
+    </Tooltip>
   );
 }
 

@@ -78,7 +78,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             }}
             error={emailError}
             size="md"
-            radius="md"
           />
           <PasswordInput
             label="Senha"
@@ -87,7 +86,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             onChange={(e) => setPassword(e.currentTarget.value)}
             mt="md"
             size="md"
-            radius="md"
           />
 
           <Group justify="space-between" mt="xl" gap="sm">
@@ -97,7 +95,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               onChange={(e) => setKeepLoggedIn(e.currentTarget.checked)}
               size="md"
             />
-            <Anchor component="button" type="button" size="sm" fw={500}>
+            <Anchor component="button" type="button" size="sm" fw={600}>
               Esqueceu a senha?
             </Anchor>
           </Group>

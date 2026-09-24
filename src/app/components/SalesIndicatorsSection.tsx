@@ -252,14 +252,14 @@ export function SalesIndicatorsSection({
       <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
           <CardTitle title="Vendas por representante" />
-          <SeeMoreButton onClick={onOpenSalesTeam} />
+          <SeeMoreButton onClick={onOpenSalesTeam} label="Ver todos os vendedores" />
         </Group>
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
               <Text c="dimmed" size="0.75rem" fw={600} w={20} ta="right" flex="none">{i + 1}</Text>
               <Box miw={0} flex={1}>
-                <Text size="0.82rem" fw={500} truncate>{e.name}</Text>
+                <Text size="0.82rem" fw={600} truncate>{e.name}</Text>
                 <Text c="dimmed" size="0.68rem" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>
@@ -277,7 +277,7 @@ export function SalesIndicatorsSection({
       <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="xs" wrap="nowrap">
           <CardTitle title="Prioridade de contato" />
-          <SeeMoreButton onClick={onNavigateClients} />
+          <SeeMoreButton onClick={onNavigateClients} label="Ver todos os clientes" />
         </Group>
         <Stack gap={2}>
           {priorityClients.map(c => (
@@ -319,10 +319,10 @@ function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   );
 }
 
-function SeeMoreButton({ onClick }: { onClick: () => void }) {
+function SeeMoreButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <Button variant="subtle" size="compact-sm" onClick={onClick} rightSection={<CaretRightIcon size={12} />}>
-      Ver mais
+    <Button variant="subtle" size="xs" onClick={onClick} rightSection={<CaretRightIcon size={14} />}>
+      {label}
     </Button>
   );
 }

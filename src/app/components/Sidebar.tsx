@@ -126,17 +126,19 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       >
         <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
         {!isCollapsed && (
-          <ActionIcon
-            onClick={() => setCollapsed(true)}
-            variant="subtle"
-            color="gray"
-            size="sm"
-            ml="auto"
-            visibleFrom="lg"
-            title="Recolher menu"
-          >
-            <CaretLeftIcon size={16} />
-          </ActionIcon>
+          <Tooltip label="Recolher menu" withArrow>
+            <ActionIcon
+              onClick={() => setCollapsed(true)}
+              variant="subtle"
+              color="gray"
+              size="sm"
+              ml="auto"
+              visibleFrom="lg"
+              aria-label="Recolher menu"
+            >
+              <CaretLeftIcon size={16} />
+            </ActionIcon>
+          </Tooltip>
         )}
       </Group>
       <Divider color={BORDER_COLOR} />
@@ -146,7 +148,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         <Paper withBorder radius="md" mx="sm" mt="sm" px="sm" py={8} bg="var(--mantine-color-default-hover)">
           <Group gap={8} wrap="nowrap">
             <ProfileIcon size={14} color={profileInfo.color} />
-            <Text size="0.78rem" fw={500} truncate>{profileInfo.label}</Text>
+            <Text size="0.78rem" fw={600} truncate>{profileInfo.label}</Text>
           </Group>
         </Paper>
       )}
@@ -154,7 +156,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       {/* Selected client chip — rep only */}
       {!isCollapsed && profile === 'rep' && selectedClient && (
         <Paper withBorder radius="md" mx="sm" mt={8} px="sm" py={8}>
-          <Text c="dimmed" size="0.62rem" fw={500} tt="uppercase" lts="0.06em">Pedindo para</Text>
+          <Text c="dimmed" size="0.62rem" fw={600} tt="uppercase" lts="0.06em">Pedindo para</Text>
           <Text size="0.82rem" fw={600} truncate mt={2}>{selectedClient.name}</Text>
         </Paper>
       )}
@@ -221,9 +223,11 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       <Box p={8} flex="none">
         {isCollapsed ? (
           <Group justify="center">
-            <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} title="Expandir menu">
-              <CaretRightIcon size={16} />
-            </ActionIcon>
+            <Tooltip label="Expandir menu" position="right" withArrow>
+              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} aria-label="Expandir menu">
+                <CaretRightIcon size={16} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
         ) : (
           <Group gap={8} px="sm" py={8} wrap="nowrap">
@@ -231,12 +235,14 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
               TF
             </Avatar>
             <Box flex={1} miw={0}>
-              <Text size="0.78rem" fw={500} truncate>Tesla Footwear</Text>
+              <Text size="0.78rem" fw={600} truncate>Tesla Footwear</Text>
               <Text size="0.7rem" c="dimmed" truncate>admin@tesla.com.br</Text>
             </Box>
-            <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" title="Sair">
-              <SignOutIcon size={14} />
-            </ActionIcon>
+            <Tooltip label="Sair da conta" withArrow>
+              <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" aria-label="Sair da conta">
+                <SignOutIcon size={14} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
         )}
       </Box>
@@ -383,16 +389,17 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             />
           )}
           {onOpenFilters && (
-            <ActionIcon
-              onClick={onOpenFilters}
-              hiddenFrom="lg"
-              variant="default"
-              size="lg"
-              aria-label="Abrir filtros"
-              title="Filtros"
-            >
-              <FunnelIcon size={16} />
-            </ActionIcon>
+            <Tooltip label="Abrir filtros" withArrow>
+              <ActionIcon
+                onClick={onOpenFilters}
+                hiddenFrom="lg"
+                variant="default"
+                size="lg"
+                aria-label="Abrir filtros"
+              >
+                <FunnelIcon size={16} />
+              </ActionIcon>
+            </Tooltip>
           )}
           {currentView !== 'catalog' && (
             <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
@@ -414,7 +421,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                     size="sm"
                     leftSection={<Icon size={14} />}
                     title={item.label}
-                    styles={{ label: { fontWeight: active ? 600 : 500 } }}
+                    styles={{ label: { fontWeight: active ? 600 : 400 } }}
                   >
                     <Text span visibleFrom="md" inherit>{item.label}</Text>
                   </Button>
@@ -434,16 +441,20 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
 
           {/* Cart(s) — todos os perfis usam multi-carrinhos */}
           <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
-            <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" title="Carrinhos">
-              <BasketIcon size={16} />
-            </ActionIcon>
+            <Tooltip label="Ver carrinhos" withArrow>
+              <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" aria-label="Ver carrinhos">
+                <BasketIcon size={16} />
+              </ActionIcon>
+            </Tooltip>
           </Indicator>
 
           {/* Notifications */}
           <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
-            <ActionIcon variant="subtle" color="neutral" size="lg" title="Notificações">
-              <BellIcon size={16} />
-            </ActionIcon>
+            <Tooltip label="Ver notificações" withArrow>
+              <ActionIcon variant="subtle" color="neutral" size="lg" aria-label="Ver notificações">
+                <BellIcon size={16} />
+              </ActionIcon>
+            </Tooltip>
           </Indicator>
 
           {/* Client chip — before avatar */}
@@ -462,17 +473,18 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               >
                 {selectedClient.name}
               </Button>
-              <ActionIcon
-                onClick={() => onNavigate('history')}
-                hiddenFrom="sm"
-                variant="default"
-                color="neutral"
-                size="lg"
-                aria-label={`Ver histórico de pedidos de ${selectedClient.name}`}
-                title={selectedClient.name}
-              >
-                <StorefrontIcon size={16} />
-              </ActionIcon>
+              <Tooltip label="Ver histórico de pedidos" withArrow>
+                <ActionIcon
+                  onClick={() => onNavigate('history')}
+                  hiddenFrom="sm"
+                  variant="default"
+                  color="neutral"
+                  size="lg"
+                  aria-label={`Ver histórico de pedidos de ${selectedClient.name}`}
+                >
+                  <StorefrontIcon size={16} />
+                </ActionIcon>
+              </Tooltip>
             </>
           )}
 
@@ -485,6 +497,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 radius="xl"
                 size={32}
                 ml={4}
+                aria-label="Abrir menu da conta"
                 className={classes.avatarButton}
               >
                 <ProfileIcon size={14} color={profileInfo.color} />

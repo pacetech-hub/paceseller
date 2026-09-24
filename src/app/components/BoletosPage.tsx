@@ -301,8 +301,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                 <Group gap={8}>
                   <Button
                     onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
-                    variant="light"
-                    color="neutral"
+                    variant="filled"
                     size="xs"
                     leftSection={<CopyIcon size={14} />}
                   >
@@ -324,8 +323,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                 <Group gap={8}>
                   <Button
                     onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
-                    variant="light"
-                    color="neutral"
+                    variant="filled"
                     size="xs"
                     leftSection={<CopyIcon size={14} />}
                   >
@@ -337,7 +335,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
                     size="xs"
                     leftSection={<QrCodeIcon size={14} />}
                   >
-                    {showQr ? 'Ocultar QR Code' : 'Ver QR Code Pix'}
+                    {showQr ? 'Ocultar QR Code' : 'Mostrar QR Code Pix'}
                   </Button>
                 </Group>
 
@@ -422,7 +420,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
             p="md"
             bd={stat.tone === 'danger' ? '1px solid var(--mantine-color-red-3)' : undefined}
           >
-            <Text c="dimmed" size="0.75rem" fw={500} mb={4}>{stat.label}</Text>
+            <Text c="dimmed" size="0.75rem" fw={600} mb={4}>{stat.label}</Text>
             <Text
               className="mono"
               c={stat.tone === 'danger' ? 'red.6' : undefined}

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, ThemeIcon,
-  SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider, Card,
+  SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider, Card, Tooltip,
 } from "@mantine/core";
 import {
   ShoppingCartIcon,
@@ -188,8 +188,8 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           </Text>
           <Text c="dimmed" size="sm" mt="sm">Você receberá uma confirmação por e-mail assim que aprovado.</Text>
           <Group gap="sm" mt="xl" justify="center">
-            <Button onClick={() => onNavigate('history')} variant="default">Ver histórico</Button>
-            <Button onClick={() => onNavigate('catalog')}>Continuar comprando</Button>
+            <Button onClick={() => onNavigate('history')} variant="default">Ver histórico de pedidos</Button>
+            <Button onClick={() => onNavigate('catalog')}>Voltar ao catálogo</Button>
           </Group>
         </Stack>
       </Stack>
@@ -205,12 +205,11 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               onClick={() => onNavigate('carts')}
               variant="subtle"
               color="gray"
-              size="compact-xs"
-              px={4}
+              size="xs"
+              ml={-12}
               leftSection={<CaretLeftIcon size={14} />}
-              styles={{ label: { fontWeight: 400, fontSize: '0.78rem' } }}
             >
-              Carrinhos
+              Voltar para carrinhos
             </Button>
             <Divider orientation="vertical" h={20} my="auto" />
             <Box miw={0}>
@@ -258,7 +257,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 leftSection={<FolderPlusIcon size={14} />}
                 title="Criar outro carrinho para este cliente"
               >
-                Novo carrinho
+                Criar carrinho
               </Button>
             </Group>
           )}
@@ -286,7 +285,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           placeholder="Ex.: Reposição Inverno 26"
           styles={{ label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
         />
-        <Group justify="flex-end" gap={8} mt="lg">
+        <Group justify="flex-end" gap={8} mt="lg" grow>
           <Button onClick={() => setShowNewCartDialog(false)} variant="default">Cancelar</Button>
           <Button
             onClick={() => {
@@ -295,7 +294,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               setNewCartName('');
             }}
           >
-            Criar
+            Criar carrinho
           </Button>
         </Group>
       </Modal>
@@ -349,9 +348,11 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                           <Text c="dimmed" size="0.72rem">{item.product.reference} · {formatCurrency(item.product.price)}/par</Text>
                           <Text className="mono" size="0.85rem" fw={700} mt={2}>{formatCurrency(value)}</Text>
                         </Box>
-                        <ActionIcon onClick={() => removeItem(item.product.id)} variant="subtle" color="red" aria-label="Remover item">
-                          <TrashIcon size={16} />
-                        </ActionIcon>
+                        <Tooltip label="Remover produto do carrinho">
+                          <ActionIcon onClick={() => removeItem(item.product.id)} variant="subtle" color="red" aria-label="Remover produto do carrinho">
+                            <TrashIcon size={16} />
+                          </ActionIcon>
+                        </Tooltip>
                       </Group>
                       <Group gap={8}>
                         {Object.entries(item.sizes).map(([size, qty]) => (
@@ -537,8 +538,8 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     </Group>
                   )}
                   <Group justify="space-between" wrap="nowrap">
-                    <Text size="0.82rem" fw={500}>IVA ({(IVA_RATE * 100).toFixed(0)}%)</Text>
-                    <Text className="mono" size="0.82rem" fw={500}>+{formatCurrency(finalTotal * IVA_RATE)}</Text>
+                    <Text size="0.82rem">IVA ({(IVA_RATE * 100).toFixed(0)}%)</Text>
+                    <Text className="mono" size="0.82rem">+{formatCurrency(finalTotal * IVA_RATE)}</Text>
                   </Group>
                   <Divider my={4} />
                   <Group justify="space-between" wrap="nowrap">
@@ -564,12 +565,12 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 </Button>
               ) : (
                 <Button onClick={() => setStep('done')} size="md" radius="lg" fullWidth leftSection={<CheckIcon size={16} />}>
-                  Confirmar pedido
+                  Enviar para aprovação
                 </Button>
               )}
 
-              <Button onClick={() => onNavigate('catalog')} variant="default" radius="lg" fullWidth fw={400}>
-                Continuar comprando
+              <Button onClick={() => onNavigate('catalog')} variant="default" radius="lg" fullWidth>
+                Voltar ao catálogo
               </Button>
             </Stack>
           </Grid.Col>

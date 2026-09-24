@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  Tabs, Table, ActionIcon, Avatar, Collapse, Alert, Divider,
+  Tabs, Table, ActionIcon, Avatar, Collapse, Alert, Divider, Tooltip,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -75,7 +75,7 @@ function CriteriaChips({ items }: { items: string[] }) {
     <Group gap={6}>
       {items.length === 0 && <Text c="dimmed" size="0.75rem">Nenhum item nesta condição</Text>}
       {items.map(v => (
-        <Badge key={v} size="md" variant="light" color="neutral" radius="xl" fw={500} styles={badgeStyles}>{v}</Badge>
+        <Badge key={v} size="md" variant="light" color="neutral" radius="xl" fw={600} styles={badgeStyles}>{v}</Badge>
       ))}
     </Group>
   );
@@ -87,7 +87,7 @@ function UserCell({ name }: { name: string }) {
       <Avatar size={28} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '0.62rem', fontWeight: 700 } }}>
         {initials(name)}
       </Avatar>
-      <Text size="0.82rem" fw={500}>{name}</Text>
+      <Text size="0.82rem" fw={600}>{name}</Text>
     </Group>
   );
 }
@@ -104,7 +104,7 @@ function SettingRow({ label, desc, children }: { label: string; desc: string; ch
         gap={{ base: 'xs', xs: 'md' }}
       >
         <Box>
-          <Text size="0.85rem" fw={500}>{label}</Text>
+          <Text size="0.85rem" fw={600}>{label}</Text>
           <Text c="dimmed" size="0.75rem">{desc}</Text>
         </Box>
         {children}
@@ -253,7 +253,7 @@ export function AdminPage() {
                   ].map(detail => (
                     <Box key={detail.label}>
                       <Text c="dimmed" size="0.7rem">{detail.label}</Text>
-                      <Text className={detail.mono ? 'mono' : undefined} size="0.85rem" fw={detail.highlight ? 700 : 500}>
+                      <Text className={detail.mono ? 'mono' : undefined} size="0.85rem" fw={detail.highlight ? 700 : 600}>
                         {detail.value}
                       </Text>
                     </Box>
@@ -280,8 +280,8 @@ export function AdminPage() {
                 onClick={() => setSelectedPolicyId(null)}
                 variant="subtle"
                 color="gray"
-                size="compact-xs"
-                px={4}
+                size="xs"
+                ml={-12}
                 leftSection={<ArrowLeftIcon size={14} />}
                 styles={{ label: { fontWeight: 400, fontSize: '0.78rem' } }}
               >
@@ -361,14 +361,14 @@ export function AdminPage() {
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Lojista', 'Cidade/UF', 'Representante'].map(c => (
-                      <Table.Th key={c} c="dimmed" tt="uppercase" fz="0.7rem" fw={500} lts="0.05em">{c}</Table.Th>
+                      <Table.Th key={c} c="dimmed" tt="uppercase" fz="0.7rem" fw={600} lts="0.05em">{c}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {covered.map(c => (
                     <Table.Tr key={c.name}>
-                      <Table.Td fw={500} fz="0.82rem">{c.name}</Table.Td>
+                      <Table.Td fw={600} fz="0.82rem">{c.name}</Table.Td>
                       <Table.Td c="dimmed" fz="0.78rem">{c.city}</Table.Td>
                       <Table.Td c="dimmed" fz="0.78rem">{c.rep}</Table.Td>
                     </Table.Tr>
@@ -405,7 +405,7 @@ export function AdminPage() {
             <Text c="dimmed" size="0.78rem" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
             <SettingRow label="Clientes inadimplentes" desc="Condição de pagamento aplicada automaticamente a clientes com débitos em aberto">
               <Paper withBorder radius="md" px="sm" py={8} flex="none">
-                <Text size="0.82rem" fw={500}>Apenas pagamento à vista</Text>
+                <Text size="0.82rem" fw={600}>Apenas pagamento à vista</Text>
               </Paper>
             </SettingRow>
           </Paper>
@@ -428,14 +428,15 @@ export function AdminPage() {
                   size="xs"
                 />
                 <Button onClick={() => setShowAddUser(!showAddUser)} size="xs" leftSection={<PlusIcon size={14} />}>
-                  Novo usuário
+                  Adicionar usuário
                 </Button>
               </Group>
             </Group>
             <Collapse in={showAddUser}>
               <Paper withBorder radius="lg" p="md" mb="md" bg="var(--mantine-color-default-hover)">
                 <Title order={4} fw={600} mb="sm" fz="0.88rem">Adicionar usuário</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                {/* Formulário em coluna única */}
+                <Stack gap="md">
                   <TextInput label="Nome completo" placeholder="Nome do usuário" size="xs" />
                   <TextInput label="E-mail" placeholder="email@tesla.com.br" size="xs" />
                   <Select
@@ -452,8 +453,8 @@ export function AdminPage() {
                     allowDeselect={false}
                     size="xs"
                   />
-                </SimpleGrid>
-                <Group justify="flex-end" gap={8} mt="sm">
+                </Stack>
+                <Group justify="flex-end" gap={8} mt="md">
                   <Button onClick={() => setShowAddUser(false)} variant="default" size="xs">Cancelar</Button>
                   <Button onClick={() => setShowAddUser(false)} size="xs">Criar usuário</Button>
                 </Group>
@@ -464,7 +465,7 @@ export function AdminPage() {
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Nome', 'E-mail', 'Perfil', 'Região', 'Status', 'Último acesso', ''].map(col => (
-                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={500}>{col}</Table.Th>
+                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={600}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -483,8 +484,12 @@ export function AdminPage() {
                       <Table.Td c="dimmed" className="mono" fz="0.75rem">{formatDate(user.lastLogin)}</Table.Td>
                       <Table.Td>
                         <Group gap={4} wrap="nowrap">
-                          <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Editar usuário"><PencilSimpleLineIcon size={14} /></ActionIcon>
-                          <ActionIcon variant="subtle" color="red" size="sm" aria-label="Excluir usuário"><TrashIcon size={14} /></ActionIcon>
+                          <Tooltip label="Editar usuário" withArrow>
+                            <ActionIcon variant="subtle" color="gray" size="sm" aria-label={`Editar usuário ${user.name}`}><PencilSimpleLineIcon size={14} /></ActionIcon>
+                          </Tooltip>
+                          <Tooltip label="Excluir usuário" withArrow>
+                            <ActionIcon variant="subtle" color="red" size="sm" aria-label={`Excluir usuário ${user.name}`}><TrashIcon size={14} /></ActionIcon>
+                          </Tooltip>
                         </Group>
                       </Table.Td>
                     </Table.Tr>
@@ -505,7 +510,7 @@ export function AdminPage() {
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Usuário', 'E-mail', 'Perfil', 'Vinculado a', 'Status', 'Último acesso'].map(col => (
-                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={500}>{col}</Table.Th>
+                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={600}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -535,7 +540,8 @@ export function AdminPage() {
 
           <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} fw={600} size="1rem" mb="md">Informações da empresa</Title>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+            {/* Formulário em coluna única */}
+            <Stack gap="md">
               {[
                 { label: 'Nome da empresa', value: 'Tesla Footwear Indústria LTDA' },
                 { label: 'CNPJ', value: '12.345.678/0001-90' },
@@ -549,8 +555,8 @@ export function AdminPage() {
                   styles={{ label: { fontSize: '0.75rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
                 />
               ))}
-            </SimpleGrid>
-            <Button mt="md">Salvar alterações</Button>
+            </Stack>
+            <Button mt="lg" fullWidth>Salvar dados da empresa</Button>
           </Paper>
         </Stack>
       )}

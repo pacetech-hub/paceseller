@@ -19,8 +19,8 @@
   createRoot(document.getElementById("root")!).render(
     <MantineProvider theme={mantineTheme}>
       <DatesProvider settings={{ locale: "pt-br" }}>
-        {/* Tamanho padrão 24px, igual ao lucide-react, para ícones sem classe de tamanho */}
-        <IconContext.Provider value={{ size: 24 }}>
+        {/* Ícones Phosphor no estilo regular em todo o app; tamanho padrão 24px */}
+        <IconContext.Provider value={{ size: 24, weight: "regular" }}>
           <Notifications position="top-center" autoClose={4000} />
           <App />
         </IconContext.Provider>

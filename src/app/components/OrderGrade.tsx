@@ -90,7 +90,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <Box miw={0} flex={1}>
-                    <Text size="0.82rem" fw={500} truncate>{p.name}</Text>
+                    <Text size="0.82rem" fw={600} truncate>{p.name}</Text>
                     <Text c="dimmed" size="0.7rem">{p.reference} · {formatCurrency(p.price)}</Text>
                   </Box>
                   {isSelected && <CheckIcon size={16} />}
@@ -193,10 +193,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           </Text>
           <Group gap="sm" mt="xl" justify="center">
             <Button onClick={() => { setCompleted(false); setStep(1); setGrades({}); }} variant="default">
-              Novo pedido
+              Criar novo pedido
             </Button>
             <Button onClick={() => onNavigate('history')}>
-              Ver histórico
+              Ver histórico de pedidos
             </Button>
           </Group>
         </Stack>
@@ -205,6 +205,8 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
   }
 
   const firstStep = selectedClient ? 2 : 1;
+  const stepLabel = (n: number) => steps.find(st => st.n === n)?.label ?? '';
+  const currentStepLabel = stepLabel(step);
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
@@ -237,6 +239,11 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             />
           ))}
         </Stepper>
+        {/* No mobile os rótulos do stepper ficam ocultos: mostra a etapa atual por extenso */}
+        <Text hiddenFrom="sm" size="0.82rem" ta="center" mt="sm" aria-live="polite">
+          <Text span c="dimmed" inherit>Etapa {step} de {steps.length} · </Text>
+          <Text span fw={600} inherit>{currentStepLabel}</Text>
+        </Text>
       </Paper>
 
       {/* Step Content */}
@@ -266,7 +273,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               <Group justify="space-between" mb={8}>
                 <Group gap={6}>
                   <TagIcon size={14} />
-                  <Text c="dimmed" size="0.75rem" fw={500}>Política comercial aplicada</Text>
+                  <Text c="dimmed" size="0.75rem" fw={600}>Política comercial aplicada</Text>
                 </Group>
                 <Badge size="sm" variant="light" color="neutral" styles={{ label: { textTransform: 'none' } }}>
                   {clientPolicy.name}
@@ -308,8 +315,8 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 <Title order={3} fw={600} size="1rem">{selectedProduct.name}</Title>
                 <Text c="dimmed" size="0.78rem">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </Box>
-              <Button onClick={handleAutoFill} variant="light" color="yellow" size="xs" leftSection={<LightningIcon size={14} />} flex="none">
-                Sugestão IA
+              <Button onClick={handleAutoFill} variant="default" size="xs" leftSection={<LightningIcon size={14} />} flex="none">
+                Sugerir quantidades
               </Button>
             </Group>
 
@@ -324,11 +331,11 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               <Table withRowBorders horizontalSpacing={4}>
                 <Table.Thead>
                   <Table.Tr bd="none">
-                    <Table.Th c="dimmed" fw={500} fz="0.72rem">Numeração</Table.Th>
+                    <Table.Th c="dimmed" fw={600} fz="0.72rem">Numeração</Table.Th>
                     {SIZES.map(sz => (
-                      <Table.Th key={sz} c="dimmed" fw={500} ta="center" fz="0.72rem">Nº {sz}</Table.Th>
+                      <Table.Th key={sz} c="dimmed" fw={600} ta="center" fz="0.72rem">Nº {sz}</Table.Th>
                     ))}
-                    <Table.Th c="dimmed" fw={500} ta="right" fz="0.72rem">Total</Table.Th>
+                    <Table.Th c="dimmed" fw={600} ta="right" fz="0.72rem">Total</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -345,7 +352,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                     <Table.Td />
                   </Table.Tr>
                   <Table.Tr>
-                    <Table.Td fw={500} fz="0.82rem">Quantidade</Table.Td>
+                    <Table.Td fw={600} fz="0.82rem">Quantidade</Table.Td>
                     {SIZES.map(sz => {
                       const qty = currentGrades[sz] || 0;
                       const stock = selectedProduct.grades[sz] || 0;
@@ -413,13 +420,13 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   setSelectedProduct(null);
                   setStep(2);
                 }}
-                variant="transparent"
+                variant="subtle"
                 color="neutral"
-                size="compact-sm"
-                px={0}
-                fw={500}
+                size="sm"
+                ml={-12}
+                leftSection={<PlusIcon size={16} />}
               >
-                + Adicionar outro produto
+                Adicionar outro produto
               </Button>
             </Box>
           </Stack>
@@ -518,7 +525,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           variant="default"
           leftSection={<CaretLeftIcon size={16} />}
         >
-          Voltar
+          {step > firstStep ? `Voltar para ${stepLabel(step - 1).toLowerCase()}` : 'Voltar'}
         </Button>
 
         <Group gap="sm">
@@ -533,7 +540,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               disabled={step === 3 && totalPairs === 0}
               rightSection={<CaretRightIcon size={16} />}
             >
-              {step === 3 ? 'Revisar pedido' : 'Continuar'}
+              {step === 3 ? 'Revisar pedido' : `Ir para ${stepLabel(step + 1).toLowerCase()}`}
             </Button>
           ) : (
             <Button
@@ -541,7 +548,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               disabled={allGrades.length === 0}
               leftSection={<ShoppingCartIcon size={16} />}
             >
-              Confirmar pedido
+              Enviar pedido
             </Button>
           )}
         </Group>

@@ -3,7 +3,7 @@ import {
   ColorSwatch, SimpleGrid, Table, Box, Button,
 } from "@mantine/core";
 import { LineChart } from "@mantine/charts";
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
 
@@ -34,16 +34,16 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
   const color = tone === 'amber' || tone === 'neg' ? WARN : tone === 'pos' ? POS : undefined;
   return (
     <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
-      <Text c="dimmed" size="0.72rem" fw={500}>{lab}</Text>
+      <Text c="dimmed" size="0.72rem" fw={400}>{lab}</Text>
       <Text c={color} size="1.1rem" fw={700} lts="-0.02em">{val}</Text>
       {sub && <Text c="dimmed" size="0.68rem" mt={2}>{sub}</Text>}
     </Paper>
   );
 }
 
-function Badge({ children, tone = 'ok' }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'risk' }) {
+function Badge({ children, tone = 'ok', icon }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'risk'; icon?: React.ReactNode }) {
   return (
-    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : 'yellow'} size="sm" tt="none">
+    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : 'yellow'} size="sm" tt="none" leftSection={icon}>
       {children}
     </MantineBadge>
   );
@@ -59,7 +59,7 @@ function ListItem({ title, meta, right }: { title: string; meta: string; right?:
       <Group align="flex-start" gap="xs" wrap="nowrap">
         <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} mt={6} withShadow={false} />
         <Box flex={1}>
-          <Text size="0.8rem" fw={500}>{title}</Text>
+          <Text size="0.8rem" fw={600}>{title}</Text>
           <Text c="dimmed" size="0.72rem">{meta}</Text>
         </Box>
         {right}
@@ -115,7 +115,7 @@ function SimpleTable({ head, children }: { head: string[]; children: React.React
       <Table fz="0.78rem" verticalSpacing={8} horizontalSpacing={8}>
         <Table.Thead>
           <Table.Tr>
-            {head.map(h => <Table.Th key={h} fw={500} c="dimmed">{h}</Table.Th>)}
+            {head.map(h => <Table.Th key={h} fw={600} c="dimmed">{h}</Table.Th>)}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{children}</Table.Tbody>
@@ -140,7 +140,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Box>
           <Group gap="xs">
             {['Período: Últimos 90 dias', 'Coleção: Todas', 'Status: Todos'].map(c => (
-              <MantineBadge key={c} variant="light" color="gray" size="lg" tt="none" fw={500} c="var(--mantine-color-text)">{c}</MantineBadge>
+              <MantineBadge key={c} variant="light" color="gray" size="lg" tt="none" fw={600} c="var(--mantine-color-text)">{c}</MantineBadge>
             ))}
           </Group>
         </Group>
@@ -185,12 +185,18 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               valueFormatter={v => `R$ ${v} mil`}
               yAxisProps={{ tickFormatter: (v: number) => `${v}k` }}
             />
-            <Text c={POS} size="0.75rem" fw={600} mt="xs">▲ 8% jul vs jun · ▲ 44% vs fev</Text>
+            <Group gap={4} c={POS} mt="xs" wrap="nowrap">
+              <TrendUpIcon size={14} />
+              <Text c="inherit" size="0.75rem" fw={600}>+8% jul vs jun · +44% vs fev</Text>
+            </Group>
           </Card>
 
           <Card title="Pedidos repetidos" hint="Contados pelo botão “repetir pedido” do histórico" span={5}>
             <Text size="1.8rem" fw={700}>4</Text>
-            <Text c={POS} size="0.75rem" fw={600}>▲ 2 vs período anterior</Text>
+            <Group gap={4} c={POS} wrap="nowrap">
+              <TrendUpIcon size={14} />
+              <Text c="inherit" size="0.75rem" fw={600}>+2 vs período anterior</Text>
+            </Group>
             <Stack gap="xs" mt="sm">
               {[
                 { t: 'Pedido #2314 → repetido 2x', m: 'Tênis Runner X · grade completa' },
@@ -234,7 +240,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
         <Grid gutter="md">
           <Card title="Sell-out" hint="Envio do dado de venda na ponta" span={3}>
             <Stack gap="sm" align="stretch">
-              <Box><Badge tone="ok">✓ Loja participante</Badge></Box>
+              <Box><Badge tone="ok" icon={<CheckIcon size={12} />}>Loja participante</Badge></Box>
               <Tile lab="Giro médio do estoque" val="20 dias" sub="alerta se > 30d" />
               <Tile lab="Valor em estoque" val={brl(9435)} />
               <Tile lab="SKUs em ruptura" val="1" tone="neg" />
@@ -277,12 +283,12 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </Stack>
             <Button
               variant="subtle"
-              size="compact-sm"
+              size="xs"
               mt="sm"
               onClick={() => onNavigate('catalog')}
               rightSection={<CaretRightIcon size={14} />}
             >
-              Ver no catálogo
+              Ir para o catálogo
             </Button>
           </Card>
 

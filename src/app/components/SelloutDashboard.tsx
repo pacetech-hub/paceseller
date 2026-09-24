@@ -71,7 +71,7 @@ export function SelloutDashboard() {
           const TrendIcon = kpi.trend === 'up' ? TrendUpIcon : TrendDownIcon;
           return (
             <Paper key={kpi.label} withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-              <Text c="dimmed" size="0.78rem" fw={500} mb={8}>{kpi.label}</Text>
+              <Text c="dimmed" size="0.78rem" fw={400} mb={8}>{kpi.label}</Text>
               <Text className="mono" fw={700} fz="1.4rem" lts="-0.02em">{kpi.value}</Text>
               <Group gap={6} mt={6} wrap="nowrap">
                 <Group gap={2} c={kpi.color} wrap="nowrap" flex="none">
@@ -95,8 +95,8 @@ export function SelloutDashboard() {
                 <ChartTitle>Evolução Sell-in × Sell-out</ChartTitle>
                 <Text c="dimmed" size="0.75rem">Jan–Jun 2026 · em R$</Text>
               </Box>
-              <Button variant="subtle" color="gray" size="compact-xs" leftSection={<DownloadSimpleIcon size={14} />}>
-                Exportar
+              <Button variant="subtle" color="gray" size="xs" leftSection={<DownloadSimpleIcon size={14} />}>
+                Exportar gráfico
               </Button>
             </Group>
             <BarChart
@@ -166,7 +166,7 @@ export function SelloutDashboard() {
             {stockByLine.map(line => (
               <Box key={line.name}>
                 <Group justify="space-between" mb={6} wrap="nowrap">
-                  <Text size="0.85rem" fw={500}>{line.name}</Text>
+                  <Text size="0.85rem" fw={600}>{line.name}</Text>
                   <Group gap="sm" wrap="nowrap">
                     <Text c="dimmed" className="mono" size="0.72rem">{formatCurrency(line.sellOut)}</Text>
                     <Text size="0.75rem" fw={700} c={line.giro >= 90 ? 'teal.6' : 'yellow.7'}>{line.giro}%</Text>
@@ -212,8 +212,8 @@ export function SelloutDashboard() {
               {encalheAlerts.length} alertas
             </Badge>
           </Group>
-          <Button variant="subtle" color="gray" size="compact-xs" leftSection={<ArrowsClockwiseIcon size={14} />}>
-            Atualizar
+          <Button variant="subtle" color="gray" size="xs" leftSection={<ArrowsClockwiseIcon size={14} />}>
+            Atualizar alertas
           </Button>
         </Group>
         <Table.ScrollContainer minWidth={720}>
@@ -221,14 +221,14 @@ export function SelloutDashboard() {
             <Table.Thead>
               <Table.Tr>
                 {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ação sugerida'].map(col => (
-                  <Table.Th key={col} c="dimmed" fw={500} pr="md" fz="0.72rem">{col}</Table.Th>
+                  <Table.Th key={col} c="dimmed" fw={600} pr="md" fz="0.72rem">{col}</Table.Th>
                 ))}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {encalheAlerts.map((alert, i) => (
                 <Table.Tr key={i}>
-                  <Table.Td pr="md"><Text size="0.82rem" fw={500}>{alert.product}</Text></Table.Td>
+                  <Table.Td pr="md"><Text size="0.82rem" fw={600}>{alert.product}</Text></Table.Td>
                   <Table.Td pr="md"><Text c="dimmed" className="mono" size="0.75rem">{alert.sku}</Text></Table.Td>
                   <Table.Td pr="md"><Text className="mono" size="0.82rem" fw={600}>{alert.stock}</Text></Table.Td>
                   <Table.Td pr="md">
@@ -236,7 +236,7 @@ export function SelloutDashboard() {
                   </Table.Td>
                   <Table.Td pr="md"><Text c="dimmed" size="0.78rem">{alert.region}</Text></Table.Td>
                   <Table.Td>
-                    <Button variant="light" color="yellow" size="compact-xs" radius="xl" leftSection={<LightningIcon size={12} />}>
+                    <Button variant="default" size="xs" leftSection={<LightningIcon size={14} />}>
                       {alert.action}
                     </Button>
                   </Table.Td>

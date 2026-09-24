@@ -52,6 +52,24 @@
   backdrop-filter: blur(4px);
 }
 
+/* Legenda da foto no canto inferior esquerdo do tile */
+.tileLabel {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: var(--mantine-radius-sm);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: var(--mantine-color-white);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Abas do zoom: quebram linha em telas estreitas em vez de estourar a largura */
+.zoomTabs {
+  flex-wrap: wrap;
+}
+
 .nowrap {
   white-space: nowrap;
 }

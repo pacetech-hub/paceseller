@@ -31,3 +31,32 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.4 0.02 265);
 }
+
+/*
+ * Botões: respiro interno de "x" em cima e embaixo e "2x" nas laterais.
+ * Como o rótulo tem altura igual ao tamanho da fonte, x = (altura - fonte) / 2
+ * e o padding lateral fica 2x = altura - fonte.
+ */
+:root {
+  --button-padding-x-xs: calc(1.125rem * var(--mantine-scale));
+  --button-padding-x-sm: calc(1.375rem * var(--mantine-scale));
+  --button-padding-x-md: calc(1.625rem * var(--mantine-scale));
+  --button-padding-x-lg: calc(2rem * var(--mantine-scale));
+  --button-padding-x-xl: calc(2.5rem * var(--mantine-scale));
+  --button-padding-x-compact-xs: calc(0.625rem * var(--mantine-scale));
+  --button-padding-x-compact-sm: calc(0.75rem * var(--mantine-scale));
+  --button-padding-x-compact-md: calc(0.875rem * var(--mantine-scale));
+  --button-padding-x-compact-lg: calc(1rem * var(--mantine-scale));
+  --button-padding-x-compact-xl: calc(1.25rem * var(--mantine-scale));
+}
+
+/* Campos: borda sempre visível (o Mantine usa a mesma cor do fundo em alguns tons) */
+.mantine-Input-input {
+  border-color: var(--mantine-color-gray-4);
+}
+
+/* Pesos 500 restantes do Mantine (cabeçalho de tabela vertical, calendário) → semibold */
+.mantine-Table-th,
+.mantine-CalendarHeader-calendarHeaderLevel {
+  font-weight: 600;
+}

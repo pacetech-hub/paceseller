@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, Paper, ThemeIcon, Text, Alert, Button, TextInput,
-  Table, Avatar, Badge, Select, ActionIcon, SimpleGrid, Card, Divider,
+  Table, Avatar, Badge, Select, ActionIcon, Card, Divider, Tooltip,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -148,8 +148,8 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
 
         {showInvite && (
           <>
-          <Stack gap="sm" p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+          {/* Formulário de convite em coluna única */}
+          <Stack gap="md" p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
               <TextInput
                 label="Nome completo"
                 value={inviteName}
@@ -162,13 +162,12 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 onChange={e => setInviteEmail(e.currentTarget.value)}
                 placeholder="email@exemplo.com.br"
               />
-            </SimpleGrid>
             <Text c="dimmed" size="0.72rem">
-              Será convidado com o perfil <Text component="span" fw={500} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
+              Será convidado com o perfil <Text component="span" fw={600} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
             </Text>
             <Group justify="flex-end" gap="sm">
               <Button onClick={() => setShowInvite(false)} variant="default" color="neutral" size="sm">Cancelar</Button>
-              <Button onClick={inviteUser} color="neutral" size="sm">Convidar</Button>
+              <Button onClick={inviteUser} color="neutral" size="sm">Enviar convite</Button>
             </Group>
           </Stack>
           <Divider color="var(--mantine-color-default-border)" />
@@ -193,7 +192,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   <Group gap="sm" wrap="nowrap">
                     <Avatar radius="xl" size={28} color="neutral">{initials(u.name)}</Avatar>
                     <Box miw={0}>
-                      <Text fw={500} size="0.82rem" truncate>{u.name}</Text>
+                      <Text fw={600} size="0.82rem" truncate>{u.name}</Text>
                       <Text c="dimmed" size="0.72rem" truncate>{u.email}</Text>
                     </Box>
                   </Group>
@@ -217,9 +216,11 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <ActionIcon onClick={() => removeUser(u.id)} variant="subtle" color="red" title="Remover vínculo">
-                    <TrashIcon size={14} />
-                  </ActionIcon>
+                  <Tooltip label="Remover vínculo" withArrow>
+                    <ActionIcon onClick={() => removeUser(u.id)} variant="subtle" color="red" aria-label={`Remover vínculo de ${u.name}`}>
+                      <TrashIcon size={14} />
+                    </ActionIcon>
+                  </Tooltip>
                 </Table.Td>
               </Table.Tr>
             ))}
