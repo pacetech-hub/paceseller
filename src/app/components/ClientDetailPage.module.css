@@ -1,0 +1,8 @@
+/* Seta de "Ver mais informações" gira quando o bloco está aberto */
+.caret {
+  transition: transform 150ms ease;
+}
+
+.caret[data-expanded] {
+  transform: rotate(180deg);
+}

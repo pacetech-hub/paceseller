@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, Badge, ThemeIcon, SimpleGrid, Avatar, Collapse,
-  Divider, Progress, AspectRatio, Image, Center, ColorSwatch,
+  Divider, Progress, AspectRatio, Image, Center, ColorSwatch, Card,
 } from "@mantine/core";
 import {
   CaretLeftIcon,
@@ -19,6 +19,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
+import detail from "./ClientDetailPage.module.css";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
 
@@ -172,7 +173,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                 <Badge size="sm" variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
               )}
             </Group>
-            <Title order={2} fw={700} mb={4} style={{ fontSize: '1.1rem' }}>{client.name}</Title>
+            <Title order={2} fw={700} mb={4} fz="1.1rem">{client.name}</Title>
             <Group gap={4} c="dimmed">
               <MapPinIcon size={14} />
               <Text size="0.8rem" c="dimmed">{client.city}/{client.state}</Text>
@@ -188,7 +189,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           px={0}
           mt="sm"
           rightSection={
-            <CaretDownIcon size={14} style={{ transition: 'transform 150ms ease', transform: expanded ? 'rotate(180deg)' : undefined }} />
+            <CaretDownIcon size={14} className={detail.caret} data-expanded={expanded || undefined} />
           }
           styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
         >
@@ -257,7 +258,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
       {/* Desempenho de vendas e estoque */}
       <Stack gap="md">
-        <Title order={3} fw={600} style={{ fontSize: '0.95rem' }}>Desempenho de vendas e estoque</Title>
+        <Title order={3} fw={600} fz="0.95rem">Desempenho de vendas e estoque</Title>
 
         <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
           <RankCard title="Números com mais vendas" items={sizeRanks} />
@@ -266,7 +267,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             items={colorRanks}
             renderLabel={c => (
               <Group gap={6} wrap="nowrap">
-                <ColorSwatch color={COLOR_SWATCH[c.key] ?? '#999'} size={10} withShadow={false} style={{ border: '1px solid var(--mantine-color-default-border)' }} />
+                <ColorSwatch color={COLOR_SWATCH[c.key] ?? '#999'} size={10} withShadow={false} bd="1px solid var(--mantine-color-default-border)" />
                 {c.label}
               </Group>
             )}
@@ -280,7 +281,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               <ListMagnifyingGlassIcon size={16} />
             </ThemeIcon>
             <Box>
-              <Title order={4} fw={600} style={{ fontSize: '0.85rem' }}>Produtos parados no estoque</Title>
+              <Title order={4} fw={600} fz="0.85rem">Produtos parados no estoque</Title>
               <Text c="dimmed" size="0.72rem">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
             </Box>
           </Group>
@@ -289,11 +290,11 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               <Paper key={p.id} withBorder radius="md" p={10}>
                 <Group gap="sm" wrap="nowrap">
                   <ProductThumb src={p.image} alt={p.name} size={40} />
-                  <Box miw={0} style={{ flex: 1 }}>
+                  <Box miw={0} flex={1}>
                     <Text size="0.82rem" fw={600} truncate>{p.name}</Text>
                     <Text c="dimmed" size="0.7rem" truncate>{p.line} · {p.reference}</Text>
                   </Box>
-                  <Box ta="right" style={{ flexShrink: 0 }}>
+                  <Box ta="right" flex="none">
                     <Text className="mono" size="0.78rem" fw={700}>{p.soldUnits} un.</Text>
                     <Text c="dimmed" size="0.65rem">vendidas · giro baixo</Text>
                   </Box>
@@ -311,7 +312,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
       {/* Sugestões de venda */}
       <Paper withBorder radius="lg" p="lg">
-        <Title order={3} fw={600} mb="sm" style={{ fontSize: '0.95rem' }}>Sugestões de venda</Title>
+        <Title order={3} fw={600} mb="sm" fz="0.95rem">Sugestões de venda</Title>
 
         <Group gap={6} mb="md">
           <Button
@@ -359,7 +360,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 function RankCard({ title, items, renderLabel }: { title: string; items: RankItem[]; renderLabel?: (item: RankItem) => React.ReactNode }) {
   return (
     <Paper withBorder radius="lg" p="lg">
-      <Title order={4} fw={600} mb="sm" style={{ fontSize: '0.85rem' }}>{title}</Title>
+      <Title order={4} fw={600} mb="sm" fz="0.85rem">{title}</Title>
       <Stack gap="sm">
         {items.map(item => (
           <Box key={item.key}>
@@ -378,20 +379,20 @@ function RankCard({ title, items, renderLabel }: { title: string; items: RankIte
 function ProductThumb({ src, alt, size }: { src: string; alt: string; size?: number }) {
   const [imgError, setImgError] = useState(false);
   // com size: miniatura quadrada com borda; sem size: preenche o container (cartão)
-  const boxProps = size
-    ? { w: size, h: size, style: { borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-default-border)', flexShrink: 0, overflow: 'hidden' } }
-    : { w: '100%', h: '100%', style: { overflow: 'hidden' } };
+  const cardProps = size
+    ? { w: size, h: size, radius: 'md', bd: '1px solid var(--mantine-color-default-border)', flex: 'none' }
+    : { w: '100%', h: '100%', radius: 0 };
 
   return (
-    <Box bg="white" {...boxProps}>
+    <Card padding={0} bg="white" {...cardProps}>
       {!imgError ? (
         <Image src={src} alt={alt} w="100%" h="100%" fit="cover" onError={() => setImgError(true)} />
       ) : (
         <Center h="100%">
-          <PackageIcon size={size ? 16 : 32} style={{ opacity: 0.3, color: 'var(--mantine-color-dimmed)' }} />
+          <PackageIcon size={size ? 16 : 32} color="var(--mantine-color-dimmed)" opacity={0.3} />
         </Center>
       )}
-    </Box>
+    </Card>
   );
 }
 
@@ -400,7 +401,7 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
   const StatusIcon = cfg.icon;
 
   return (
-    <Paper withBorder radius="lg" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <Card withBorder radius="lg" padding={0}>
       <AspectRatio ratio={1}>
         <Box pos="relative">
           <ProductThumb src={product.image} alt={product.name} />
@@ -418,14 +419,15 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
           </Badge>
         </Box>
       </AspectRatio>
-      <Stack gap={0} p="sm" style={{ flex: 1 }}>
+      <Stack gap={0} p="sm" flex={1}>
         <Text size="0.82rem" fw={600} truncate>{product.name}</Text>
         <Text c="dimmed" size="0.7rem" truncate>{product.line} · {product.reference}</Text>
-        <Group justify="space-between" mt="auto" pt={8} style={{ borderTop: '1px solid var(--mantine-color-default-border)', marginTop: 8 }}>
+        <Divider mt={8} color="var(--mantine-color-default-border)" />
+        <Group justify="space-between" pt={8}>
           <Text className="mono" size="0.85rem" fw={700}>{formatCurrency(product.price)}</Text>
-          <Button onClick={onBuy} size="compact-xs" style={{ fontSize: '0.72rem' }}>Comprar</Button>
+          <Button onClick={onBuy} size="compact-xs" fz="0.72rem">Comprar</Button>
         </Group>
       </Stack>
-    </Paper>
+    </Card>
   );
 }
