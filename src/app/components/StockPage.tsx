@@ -154,7 +154,7 @@ export function StockPage() {
                     leftSection={<ArrowsClockwiseIcon size={16} />}
                     onClick={() => toast.success('Sincronização iniciada', 'Os saldos da tabela abaixo são atualizados em alguns minutos')}
                   >
-                    Sincronizar agora
+                    Sincronizar Agora
                   </Button>
                 </Group>
               </Paper>
@@ -184,14 +184,14 @@ export function StockPage() {
                       <Table.Td><Text>{it.line}</Text></Table.Td>
                       <Table.Td>
                         {isEditing ? (
-                          <NumberInput w={110} aria-label="Estoque atual" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
+                          <NumberInput w={110} aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
                         ) : (
                           <Text fw={600} className="mono">{it.stock}</Text>
                         )}
                       </Table.Td>
                       <Table.Td>
                         {isEditing ? (
-                          <NumberInput w={110} aria-label="Limiar mínimo" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
+                          <NumberInput w={110} aria-label="Limiar mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
                         ) : (
                           <Text c="dimmed" className="mono">{it.min}</Text>
                         )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
-  Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box, Card,
+  Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box, Card, Radio,
 } from "@mantine/core";
 import interactive from "./interactive.module.css";
 import {
@@ -23,7 +23,7 @@ interface ClientsPageProps {
 }
 
 const statusColor: Record<string, string> = {
-  'ativo': 'green',
+  'ativo': 'teal',
   'inativo': 'red',
 };
 
@@ -45,7 +45,7 @@ const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
   { value: 'az', label: 'A a Z' },
   { value: 'za', label: 'Z a A' },
   { value: 'ultimo-pedido', label: 'Pedido mais antigo para mais recente' },
-  { value: 'ultimo-pedido-desc', label: 'Pedido mais recentes para mais antigos' },
+  { value: 'ultimo-pedido-desc', label: 'Pedido mais recente para mais antigo' },
 ];
 
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
@@ -117,7 +117,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         {/* Filters */}
         <Group gap="sm" wrap="wrap">
           <TextInput
-            placeholder="Buscar cliente, cidade, rep..."
+            placeholder="Buscar por nome, cidade ou representante"
             leftSection={<MagnifyingGlassIcon size={14} />}
             value={search}
             onChange={e => setSearch(e.currentTarget.value)}
@@ -142,7 +142,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               <Stack gap="md">
                 <Box>
                   <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={6}>Região</Text>
-                  <Group gap={6}>
+                  <Group gap="sm">
                     {REGIONS.map(r => (
                       <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="neutral">
                         {r}
@@ -153,7 +153,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
                 <Box>
                   <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={6}>Status</Text>
-                  <Group gap={6}>
+                  <Group gap="sm">
                     {STATUS_OPTIONS.map(s => (
                       <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="neutral">
                         {s.label}
@@ -164,7 +164,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
                 {activeFilterCount > 0 && (
                   <Button variant="subtle" color="neutral" onClick={clearFilters}>
-                    Limpar filtros
+                    Limpar Filtros
                   </Button>
                 )}
               </Stack>
@@ -183,23 +183,22 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               </Button>
             </Popover.Target>
             <Popover.Dropdown w={280} maw="calc(100vw - 32px)">
-              <Stack gap={4}>
-                <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={4}>Ordenar por</Text>
-                {SORT_OPTIONS.map(opt => (
-                  <Button
-                    key={opt.value}
-                    variant={sortOrder === opt.value ? 'light' : 'subtle'}
-                    color="neutral"
-                    justify="flex-start"
-                    fullWidth
-                    onClick={() => setSortOrder(opt.value)}
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
+              <Stack gap="md">
+                {/* 4 opções fixas: lista de rádios em vez de botões que imitam um select */}
+                <Radio.Group
+                  label="Ordenar por"
+                  value={sortOrder}
+                  onChange={v => setSortOrder(v as SortOrder)}
+                >
+                  <Stack gap="sm" mt={6}>
+                    {SORT_OPTIONS.map(opt => (
+                      <Radio key={opt.value} value={opt.value} label={opt.label} color="neutral" />
+                    ))}
+                  </Stack>
+                </Radio.Group>
                 {sortActive && (
-                  <Button variant="subtle" color="neutral" mt={4} onClick={() => setSortOrder(DEFAULT_SORT)}>
-                    Restaurar ordenação padrão
+                  <Button variant="subtle" color="neutral" onClick={() => setSortOrder(DEFAULT_SORT)}>
+                    Restaurar Ordenação Padrão
                   </Button>
                 )}
               </Stack>
@@ -272,7 +271,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 Nenhum cliente corresponde à busca ou aos filtros aplicados. Limpe-os para ver a carteira completa.
               </Text>
               <Button variant="default" mt="sm" onClick={() => { setSearch(''); clearFilters(); }}>
-                Limpar busca e filtros
+                Limpar Busca e Filtros
               </Button>
             </Stack>
           )}

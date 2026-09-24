@@ -46,7 +46,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
         data={options}
         filter={filterByNameOrId}
         limit={8}
-        placeholder="Buscar cliente por nome ou código..."
+        placeholder="Buscar por nome ou código do cliente"
         nothingFoundMessage="Nenhum cliente encontrado. Confira o nome ou busque pelo código do cliente."
         leftSection={<MagnifyingGlassIcon size={14} />}
         renderOption={({ option }) => (

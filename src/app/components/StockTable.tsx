@@ -129,7 +129,7 @@ export function StockEmptyRow({ colSpan, onClear }: { colSpan: number; onClear?:
           <FunnelIcon size={24} color="var(--mantine-color-dimmed)" opacity={0.6} />
           <Text c="dimmed" ta="center">Nenhum SKU corresponde à busca ou ao filtro de status aplicado.</Text>
           {onClear && (
-            <Button variant="default" onClick={onClear}>Limpar busca e filtro</Button>
+            <Button variant="default" onClick={onClear}>Limpar Busca e Filtro</Button>
           )}
         </Stack>
       </Table.Td>
@@ -148,11 +148,11 @@ interface StockToolbarProps {
 export function StockToolbar({ query, onQueryChange, filter, onFilterChange, showBulkActions }: StockToolbarProps) {
   return (
     <Paper withBorder p="sm">
-      <Group gap="xs" wrap="wrap">
+      <Group gap="sm" wrap="wrap">
         <TextInput
           value={query}
           onChange={e => onQueryChange(e.currentTarget.value)}
-          placeholder="Buscar por SKU ou nome..."
+          placeholder="Buscar por nome ou SKU"
           leftSection={<MagnifyingGlassIcon size={16} />}
           flex={{ base: '1 1 100%', sm: 1 }}
           miw={{ sm: 200 }}
@@ -166,7 +166,7 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
         {showBulkActions && (
           <>
             <Button variant="default" flex={{ base: 1, sm: 'none' }} leftSection={<UploadSimpleIcon size={16} />}>
-              Importar planilha
+              Importar Planilha
             </Button>
             <Button flex={{ base: 1, sm: 'none' }} leftSection={<PlusIcon size={16} />}>
               Adicionar SKU
@@ -181,11 +181,11 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
 // Linha de tabela densa: botões size="sm" (36px) com ícone + texto; cancelar à esquerda, salvar (principal) à direita
 export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
   return (
-    <Group gap="xs" wrap="nowrap">
-      <Button variant="default" size="sm" onClick={onCancel} leftSection={<XIcon size={16} />} aria-label="Cancelar edição">
+    <Group gap="sm" wrap="nowrap">
+      <Button variant="default" size="sm" onClick={onCancel} leftSection={<XIcon size={16} />} aria-label="Cancelar Edição">
         Cancelar
       </Button>
-      <Button variant="filled" size="sm" onClick={onSave} leftSection={<FloppyDiskIcon size={16} />} aria-label="Salvar estoque">
+      <Button variant="filled" size="sm" onClick={onSave} leftSection={<FloppyDiskIcon size={16} />} aria-label="Salvar Estoque">
         Salvar
       </Button>
     </Group>
@@ -194,7 +194,7 @@ export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel
 
 export function EditButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button variant="default" size="sm" onClick={onClick} leftSection={<PencilSimpleIcon size={16} />} aria-label="Editar estoque">
+    <Button variant="default" size="sm" onClick={onClick} leftSection={<PencilSimpleIcon size={16} />} aria-label="Editar Estoque">
       Editar
     </Button>
   );
@@ -204,7 +204,7 @@ interface StockTableProps {
   items: StockItem[];
   onUpdateStock?: (sku: string, stock: number) => void;
   readOnly?: boolean;
-  /** Botões de "Importar planilha" / "Adicionar SKU" — só fazem sentido no estoque industrial completo. */
+  /** Botões de "Importar Planilha" / "Adicionar SKU" — só fazem sentido no estoque industrial completo. */
   showBulkActions?: boolean;
 }
 
@@ -262,6 +262,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
                         <NumberInput
                           w={110}
                           aria-label="Estoque atual"
+                          placeholder="0"
                           min={0}
                           value={draft}
                           onChange={v => setDraft(Number(v) || 0)}
