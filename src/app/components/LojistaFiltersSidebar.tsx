@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  Accordion, ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Drawer, Group, Image, ScrollArea,
-  Select, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
+  Accordion, ActionIcon, Affix, Badge, Box, Button, Chip, ColorSwatch, Divider, Drawer, Group, Image,
+  ScrollArea, Select, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -24,6 +24,7 @@ import {
 import type { Client } from "../data/mockData";
 import { products, formatCurrency } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
+import classes from "./LojistaFiltersSidebar.module.css";
 
 export type CatalogFilters = {
   search: string;
@@ -68,8 +69,7 @@ export const defaultFilters: CatalogFilters = {
   priceTable: 'padrao',
 };
 
-const SIDEBAR_BORDER = '1px solid var(--mantine-color-default-border)';
-const SECTION_LABEL_STYLE = { letterSpacing: '0.06em' } as const;
+const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
 interface Props {
   filters: CatalogFilters;
@@ -123,14 +123,14 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
   const renderContent = (isCollapsed: boolean) => (
     <Stack gap={0} h="100%">
-      {/* Logo */}
+      {/* Logo — 55px + divisória de 1px = 56px, alinhado ao cabeçalho */}
       <Group
-        h={56}
+        h={55}
         px={isCollapsed ? 12 : 'md'}
         gap="sm"
         wrap="nowrap"
         justify={isCollapsed ? 'center' : 'flex-start'}
-        style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}
+        flex="none"
       >
         <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
         {!isCollapsed && (
@@ -147,9 +147,10 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           </ActionIcon>
         )}
       </Group>
+      <Divider color={BORDER_COLOR} />
 
       {isCollapsed ? (
-        <Stack align="center" pt="md" gap="sm" style={{ flex: 1 }}>
+        <Stack align="center" pt="md" gap="sm" flex={1}>
           <Tooltip label="Filtros" position="right" withArrow>
             <ActionIcon onClick={() => setCollapsed(false)} variant="light" color="neutral" size={32} aria-label="Filtros">
               <FunnelIcon size={16} />
@@ -164,10 +165,10 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
       ) : (
         <>
           {/* Tabela de Preço */}
-          <Box px="sm" py="sm" style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}>
+          <Box px="sm" py="sm" flex="none">
             <Group gap={6} mb={6} wrap="nowrap">
               <CurrencyDollarIcon size={12} />
-              <Text lh={1.5} c="dimmed" size="0.66rem" fw={600} tt="uppercase" style={SECTION_LABEL_STYLE}>
+              <Text lh={1.5} c="dimmed" size="0.66rem" fw={600} tt="uppercase" lts="0.06em">
                 Tabela de preço
               </Text>
             </Group>
@@ -181,8 +182,9 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               styles={{ input: { fontSize: '0.78rem', fontWeight: 500 } }}
             />
           </Box>
+          <Divider color={BORDER_COLOR} />
 
-          <Group px="md" pt="md" pb={8} justify="space-between" wrap="nowrap" style={{ flexShrink: 0 }}>
+          <Group px="md" pt="md" pb={8} justify="space-between" wrap="nowrap" flex="none">
             <Group gap={8} wrap="nowrap">
               <FunnelIcon size={14} />
               <Text lh={1.5} size="0.82rem" fw={600}>Filtros</Text>
@@ -207,7 +209,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           </Group>
 
           {/* Search */}
-          <Box px="sm" pb="sm" style={{ flexShrink: 0 }}>
+          <Box px="sm" pb="sm" flex="none">
             <TextInput
               size="xs"
               value={filters.search}
@@ -218,7 +220,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             />
           </Box>
 
-          <ScrollArea style={{ flex: 1 }} px="sm" pb="sm">
+          <ScrollArea flex={1} px="sm" pb="sm">
             <Accordion
               multiple
               value={Array.from(openSections)}
@@ -244,7 +246,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
                 </FilterSection>
 
                 <FilterSection value="Cores" icon={PaletteIcon} label="Cores">
-                  <SimpleGrid cols={6} spacing={6} verticalSpacing={6} style={{ justifyItems: 'start' }}>
+                  <SimpleGrid cols={6} spacing={6} verticalSpacing={6} className={classes.swatchGrid}>
                     {allColors.map(c => {
                       const active = filters.colors.includes(c);
                       const bg = colorSwatch[c] || '#94a3b8';
@@ -258,15 +260,10 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
                           color={bg}
                           size={20}
                           withShadow={false}
-                          style={{
-                            cursor: 'pointer',
-                            border: active
-                              ? '2px solid var(--mantine-color-neutral-9)'
-                              : '2px solid var(--mantine-color-default-border)',
-                            transform: active ? 'scale(1.1)' : undefined,
-                            transition: 'transform 150ms ease, border-color 150ms ease',
-                            color: bg === '#fff' ? '#111' : '#fff',
-                          }}
+                          bd={`2px solid ${active ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR}`}
+                          c={bg === '#fff' ? '#111' : '#fff'}
+                          className={classes.swatch}
+                          data-active={active || undefined}
                         >
                           {active && <CheckIcon size={9} weight="bold" />}
                         </ColorSwatch>
@@ -304,7 +301,8 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
       )}
 
       {/* Bottom */}
-      <Box p={8} style={{ borderTop: SIDEBAR_BORDER, flexShrink: 0 }}>
+      <Divider color={BORDER_COLOR} />
+      <Box p={8} flex="none">
         {!isCollapsed ? (
           <Group gap={8} px="sm" py={8} wrap="nowrap">
             <ThemeIcon
@@ -315,7 +313,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             >
               {profile === 'rep' ? <UsersIcon size={14} /> : <StorefrontIcon size={14} />}
             </ThemeIcon>
-            <Box style={{ flex: 1, minWidth: 0 }}>
+            <Box flex={1} miw={0}>
               <Text lh={1.5} size="0.78rem" fw={500} truncate>
                 {profile === 'rep' ? 'Representante' : 'Lojista'}
               </Text>
@@ -340,19 +338,16 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
   return (
     <>
-      <ActionIcon
-        onClick={() => setMobileOpen(true)}
-        hiddenFrom="lg"
-        variant="default"
-        size="lg"
-        pos="fixed"
-        top={16}
-        left={16}
-        style={{ zIndex: 50 }}
-        aria-label="Abrir filtros"
-      >
-        <ListIcon size={16} />
-      </ActionIcon>
+      <Affix position={{ top: 16, left: 16 }} zIndex={50} hiddenFrom="lg">
+        <ActionIcon
+          onClick={() => setMobileOpen(true)}
+          variant="default"
+          size="lg"
+          aria-label="Abrir filtros"
+        >
+          <ListIcon size={16} />
+        </ActionIcon>
+      </Affix>
 
       <Drawer
         opened={mobileOpen}
@@ -363,6 +358,8 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         withCloseButton={false}
         styles={{ body: { height: '100%' } }}
       >
+        {renderContent(false)}
+        {/* Depois do conteúdo no DOM, para ficar por cima dele sem z-index */}
         <ActionIcon
           onClick={() => setMobileOpen(false)}
           variant="subtle"
@@ -371,12 +368,10 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           pos="absolute"
           top={12}
           right={12}
-          style={{ zIndex: 1 }}
           aria-label="Fechar"
         >
           <XIcon size={16} />
         </ActionIcon>
-        {renderContent(false)}
       </Drawer>
 
       <Box
@@ -385,7 +380,8 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         h="100%"
         w={collapsed ? 52 : 280}
         bg="var(--mantine-color-body)"
-        style={{ borderRight: SIDEBAR_BORDER, flexShrink: 0, transition: 'width 200ms ease' }}
+        flex="none"
+        className={classes.aside}
       >
         {renderContent(collapsed)}
       </Box>
@@ -408,8 +404,8 @@ function FilterSection({
     <Accordion.Item value={value}>
       <Accordion.Control>
         <Group gap={6} wrap="nowrap">
-          <SectionIcon size={12} style={{ color: 'var(--mantine-color-dimmed)' }} />
-          <Text lh={1.5} c="dimmed" size="0.68rem" fw={600} tt="uppercase" style={SECTION_LABEL_STYLE}>{label}</Text>
+          <SectionIcon size={12} color="var(--mantine-color-dimmed)" />
+          <Text lh={1.5} c="dimmed" size="0.68rem" fw={600} tt="uppercase" lts="0.06em">{label}</Text>
         </Group>
       </Accordion.Control>
       <Accordion.Panel>{children}</Accordion.Panel>
