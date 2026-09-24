@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, Button, NavLink, ColorSwatch, Box,
+  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, Button, NavLink, ColorSwatch, Box, Anchor,
 } from "@mantine/core";
 import { CompositeChart } from "@mantine/charts";
 import { CaretRightIcon } from "@phosphor-icons/react";
@@ -89,12 +89,12 @@ function buildSeries(monthlyBase: number, period: Period) {
   });
 }
 
-// `color` é uma cor do tema Mantine (nome.tom)
+// `color` é uma cor do tema Mantine (nome.tom) — só neutro + cores de status da paleta
 const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
   { key: 'analise', label: 'Em análise', color: 'yellow.6', ratio: 0.10, orderStatus: 'em análise' },
   { key: 'aprovado', label: 'Aprovado', color: 'neutral.9', ratio: 0.40, orderStatus: 'aprovado' },
-  { key: 'faturado', label: 'Faturado', color: 'blue.5', ratio: 0.27, orderStatus: 'faturado' },
-  { key: 'entregue', label: 'Entregue', color: 'violet.5', ratio: 0.18, orderStatus: 'entregue' },
+  { key: 'faturado', label: 'Faturado', color: 'neutral.5', ratio: 0.27, orderStatus: 'faturado' },
+  { key: 'entregue', label: 'Entregue', color: 'teal.6', ratio: 0.18, orderStatus: 'entregue' },
   { key: 'cancelado', label: 'Cancelado', color: 'red.5', ratio: 0.05, orderStatus: 'cancelado' },
 ];
 
@@ -250,7 +250,7 @@ export function SalesIndicatorsSection({
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
           <CardTitle title="Vendas por representante" />
-          <SeeMoreButton onClick={onOpenSalesTeam} label="Ver todos os vendedores" />
+          <SeeMoreLink onClick={onOpenSalesTeam} label="Ver todos os vendedores" />
         </Group>
         <Stack gap="xs">
           {ranked.map((e, i) => (
@@ -269,7 +269,7 @@ export function SalesIndicatorsSection({
             <Stack align="center" gap="xs" py="lg">
               <Text c="dimmed" ta="center">Nenhum vendedor registrou vendas neste período.</Text>
               {period !== 'mes' && (
-                <Button variant="default" onClick={() => setPeriod('mes')}>Ver vendas do mês</Button>
+                <Button variant="default" onClick={() => setPeriod('mes')}>Ver Vendas do Mês</Button>
               )}
             </Stack>
           )}
@@ -280,7 +280,7 @@ export function SalesIndicatorsSection({
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="xs" wrap="nowrap">
           <CardTitle title="Prioridade de contato" />
-          <SeeMoreButton onClick={onNavigateClients} label="Ver todos os clientes" />
+          <SeeMoreLink onClick={onNavigateClients} label="Ver todos os clientes" />
         </Group>
         <Stack gap={2}>
           {priorityClients.map(c => (
@@ -297,7 +297,7 @@ export function SalesIndicatorsSection({
           {priorityClients.length === 0 && (
             <Stack align="center" gap="xs" py="lg">
               <Text c="dimmed" ta="center">Nenhum cliente precisa de contato agora — a carteira ainda não tem clientes vinculados.</Text>
-              <Button variant="default" onClick={onNavigateClients}>Abrir clientes</Button>
+              <Button variant="default" onClick={onNavigateClients}>Abrir Clientes</Button>
             </Stack>
           )}
         </Stack>
@@ -325,10 +325,11 @@ function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   );
 }
 
-function SeeMoreButton({ onClick, label }: { onClick: () => void; label: string }) {
+// navegação para a lista completa: é um link (texto azul sublinhado), não uma ação
+function SeeMoreLink({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <Button variant="subtle" onClick={onClick} rightSection={<CaretRightIcon size={14} />}>
+    <Anchor component="button" type="button" onClick={onClick} flex="none">
       {label}
-    </Button>
+    </Anchor>
   );
 }

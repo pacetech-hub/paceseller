@@ -104,7 +104,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             <Title order={2}>Histórico de Compras</Title>
             <Text c="dimmed">Visão de sell-in × sell-out e linhas em destaque</Text>
           </Box>
-          <Group gap="xs">
+          <Group gap="sm">
             <CalendarBlankIcon size={16} color="var(--mantine-color-dimmed)" />
             <SegmentedControl
               value={period}
@@ -116,7 +116,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
               onClick={() => onNavigate('history')}
               leftSection={<ClockCounterClockwiseIcon size={16} />}
             >
-              Ver histórico de pedidos
+              Ver Histórico de Pedidos
             </Button>
           </Group>
         </Group>
@@ -156,8 +156,8 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             data={chartData}
             dataKey="month"
             series={[
-              { name: 'Sell-in', color: 'blue.6' },
-              { name: 'Sell-out', color: 'teal.5' },
+              { name: 'Sell-in', color: 'neutral.9' },
+              { name: 'Sell-out', color: 'teal.6' },
             ]}
             curveType="monotone"
             gridAxis="y"
@@ -175,7 +175,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="md">
                 <Group gap="xs">
-                  <TrophyIcon size={20} color="var(--mantine-color-yellow-6)" />
+                  <TrophyIcon size={20} color="var(--mantine-color-dimmed)" />
                   <Title order={3}>Linhas mais vendidas</Title>
                 </Group>
                 <Text c="dimmed" size="sm">{periods.find(p => p.id === period)?.label}</Text>
@@ -185,8 +185,8 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                 data={lines}
                 dataKey="name"
                 orientation="vertical"
-                series={[{ name: 'revenue', label: 'Receita', color: 'blue.6' }]}
-                getBarColor={v => (v === maxRev ? 'yellow.6' : 'blue.6')}
+                series={[{ name: 'revenue', label: 'Receita', color: 'neutral.4' }]}
+                getBarColor={v => (v === maxRev ? 'neutral.9' : 'neutral.4')}
                 gridAxis="x"
                 tickLine="none"
                 valueFormatter={formatCurrency}
@@ -211,15 +211,15 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                       key={l.name}
                       withBorder
                       p="sm"
-                      bg={top ? 'var(--mantine-color-yellow-0)' : 'var(--mantine-color-gray-0)'}
-                      bd={top ? '1px solid var(--mantine-color-yellow-4)' : undefined}
+                      bg={top ? undefined : 'var(--mantine-color-gray-0)'}
+                      bd={top ? '1px solid var(--mantine-color-neutral-9)' : undefined}
                     >
                       <Group justify="space-between" mb={6} wrap="nowrap">
                         <Group gap="xs" wrap="nowrap" miw={0}>
                           <Center
                             w={24}
                             h={24}
-                            bg={top ? 'yellow.5' : 'gray.2'}
+                            bg={top ? 'neutral.9' : 'gray.2'}
                             c={top ? 'white' : 'dimmed'}
                             flex="none"
                             className={classes.rank}
@@ -236,7 +236,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                         <Text c="dimmed" size="sm">{l.units} pares</Text>
                         <Text size="sm" fw={600} className="mono">{formatCurrency(l.revenue)}</Text>
                       </Group>
-                      <Progress value={(l.revenue / maxRev) * 100} size={4} mt={6} color={top ? 'yellow.5' : undefined} />
+                      <Progress value={(l.revenue / maxRev) * 100} size={4} mt={6} />
                     </Paper>
                   );
                 })}

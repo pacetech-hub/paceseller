@@ -1,9 +1,9 @@
 import {
   Container, Stack, Group, Grid, Paper, Title, Text, Badge as MantineBadge, Progress, Tooltip,
-  ColorSwatch, SimpleGrid, Table, Box, Button,
+  ColorSwatch, SimpleGrid, Table, Box, Anchor,
 } from "@mantine/core";
 import { LineChart } from "@mantine/charts";
-import { CaretRightIcon, CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
+import { CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
 
@@ -17,6 +17,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR');
 // cores de destaque (tema Mantine)
 const WARN = 'yellow.8';
 const POS = 'teal.7';
+const NEG = 'red.7';
 
 function Card({ title, hint, span = 12, children }: { title: string; hint?: string; span?: number; children: React.ReactNode }) {
   return (
@@ -31,7 +32,7 @@ function Card({ title, hint, span = 12, children }: { title: string; hint?: stri
 }
 
 function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string; tone?: 'amber' | 'neg' | 'pos' | 'muted' }) {
-  const color = tone === 'amber' || tone === 'neg' ? WARN : tone === 'pos' ? POS : undefined;
+  const color = tone === 'amber' ? WARN : tone === 'neg' ? NEG : tone === 'pos' ? POS : undefined;
   return (
     <Paper withBorder p="sm" bg="var(--mantine-color-gray-0)">
       <Text c="dimmed" size="sm">{lab}</Text>
@@ -43,7 +44,7 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
 
 function Badge({ children, tone = 'ok', icon }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'risk'; icon?: React.ReactNode }) {
   return (
-    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : 'yellow'} leftSection={icon}>
+    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : tone === 'risk' ? 'red' : 'yellow'} leftSection={icon}>
       {children}
     </MantineBadge>
   );
@@ -162,8 +163,8 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           <Card title="Carteira de pedidos por status" hint="Situação dos 7 pedidos do período · barra 100% empilhada" span={8}>
             <StatusStack segs={[
               { n: 'Aprovado', q: 3, color: 'neutral.9' },
-              { n: 'Faturado', q: 2, color: 'blue.5' },
-              { n: 'Em transporte', q: 1, color: 'violet.5' },
+              { n: 'Faturado', q: 2, color: 'neutral.6' },
+              { n: 'Em transporte', q: 1, color: 'teal.6' },
               { n: 'Aguardando aprovação', q: 1, color: 'yellow.6', action: true },
             ]} />
             <SimpleGrid cols={3} spacing="xs" mt="md">
@@ -281,14 +282,11 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               />
               <ListItem title="Bota Chelsea Couro" meta="Top produto da sua região (Serra Gaúcha) nesta coleção" />
             </Stack>
-            <Button
-              variant="subtle"
-              mt="sm"
-              onClick={() => onNavigate('catalog')}
-              rightSection={<CaretRightIcon size={14} />}
-            >
-              Ir para o catálogo
-            </Button>
+            <Box mt="sm">
+              <Anchor component="button" type="button" onClick={() => onNavigate('catalog')}>
+                Ir para o catálogo
+              </Anchor>
+            </Box>
           </Card>
 
           <Card title="Lojas de perfil semelhante estão comprando" hint="Recomendação por perfil/região similar" span={6}>

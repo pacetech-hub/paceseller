@@ -17,9 +17,9 @@ import { toast } from "../lib/toast";
 import { selloutData, regionData, formatCurrency } from "../data/mockData";
 
 const encalheAlerts = [
-  { product: 'Mocassim Couro Trançado', sku: 'TCF-2026-003', stock: 240, diasEstoque: 62, region: 'Sul', action: 'Sugerir desconto' },
-  { product: 'Derby Casual Urban', sku: 'TCF-2026-002', stock: 180, diasEstoque: 54, region: 'Nordeste', action: 'Redistribuir estoque' },
-  { product: 'Sandália Slide Premium', sku: 'TCF-2026-006', stock: 420, diasEstoque: 78, region: 'Centro-Oeste', action: 'Campanha urgente' },
+  { product: 'Mocassim Couro Trançado', sku: 'TCF-2026-003', stock: 240, diasEstoque: 62, region: 'Sul', action: 'Sugerir Desconto' },
+  { product: 'Derby Casual Urban', sku: 'TCF-2026-002', stock: 180, diasEstoque: 54, region: 'Nordeste', action: 'Redistribuir Estoque' },
+  { product: 'Sandália Slide Premium', sku: 'TCF-2026-006', stock: 420, diasEstoque: 78, region: 'Centro-Oeste', action: 'Campanha Urgente' },
   { product: 'Tênis Vulcanizado', sku: 'TCF-2026-008', stock: 96, diasEstoque: 45, region: 'Norte', action: 'Reposicionamento' },
 ];
 
@@ -30,12 +30,12 @@ const stockByLine = [
 ];
 
 const pieData = [
-  { name: 'Vendido', value: 2860000, color: 'blue.6' },
+  { name: 'Vendido', value: 2860000, color: 'neutral.9' },
   { name: 'Estoque', value: 140000, color: 'gray.3' },
 ];
 
-const SELL_IN_COLOR = 'blue.6';
-const SELL_OUT_COLOR = 'orange.5';
+const SELL_IN_COLOR = 'neutral.9';
+const SELL_OUT_COLOR = 'teal.6';
 
 const formatK = (v: number) => `${(v / 1000).toFixed(0)}k`;
 
@@ -48,7 +48,7 @@ const giroBarColor = (giro: number) => (giro >= 95 ? 'teal.5' : giro >= 85 ? 'ne
 const kpis = [
   { label: 'Taxa de Sell-out', value: '95,3%', sub: 'Coleção Inverno 2026', trend: 'up', trendVal: '+2,1%', color: 'teal.6' },
   { label: 'Estoque Parado', value: formatCurrency(140000), sub: 'valor em encalhe', trend: 'down', trendVal: '-R$28k', color: 'red.6' },
-  { label: 'Giro Médio', value: '28 dias', sub: 'da produção à venda', trend: 'up', trendVal: '-3 dias', color: 'black' },
+  { label: 'Giro Médio', value: '28 dias', sub: 'da produção à venda', trend: 'up', trendVal: '-3 dias', color: 'neutral.9' },
   { label: 'Alertas Ativos', value: '6', sub: 'produtos em encalhe', trend: 'down', trendVal: '-2 esta semana', color: 'yellow.7' },
 ] as const;
 
@@ -135,7 +135,7 @@ export function SelloutDashboard() {
                 <Text c="dimmed" size="sm">Jan–Jun 2026 · em R$</Text>
               </Box>
               <Button variant="subtle" color="gray" leftSection={<DownloadSimpleIcon size={16} />} onClick={exportChartData}>
-                Exportar dados (CSV)
+                Exportar Dados (CSV)
               </Button>
             </Group>
             <BarChart
@@ -257,7 +257,7 @@ export function SelloutDashboard() {
             )}
           </Box>
           <Button variant="subtle" color="gray" leftSection={<ArrowsClockwiseIcon size={16} />} onClick={refreshAlerts}>
-            Atualizar alertas
+            Atualizar Alertas
           </Button>
         </Group>
         <Table.ScrollContainer minWidth={720}>
