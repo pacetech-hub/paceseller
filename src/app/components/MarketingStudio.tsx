@@ -652,7 +652,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       <AspectRatio ratio={4 / 5}>
                         <Center bg="var(--mantine-color-default-hover)">
                           {c.photos.length > 0 ? (
-                            <Image src={c.photos[0]} alt={c.name} h="100%" />
+                            <Image src={c.photos[0]} alt={c.name} h="100%" flex={1} />
                           ) : (
                             <ImageIcon size={32} style={faintIcon} />
                           )}
