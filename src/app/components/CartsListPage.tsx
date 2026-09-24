@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Badge, ThemeIcon, SimpleGrid,
-  SegmentedControl, Popover, UnstyledButton, Divider,
+  SegmentedControl, Popover, UnstyledButton, Divider, Card,
 } from "@mantine/core";
 import {
   ShoppingCartIcon,
@@ -130,7 +130,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
     <Box p="lg" maw={1400} mx="auto" w="100%">
       <Group justify="space-between" align="flex-start" gap="sm" mb="lg">
         <Box>
-          <Title order={2} fw={700} style={{ fontSize: '1.15rem' }}>
+          <Title order={2} fw={700} fz="1.15rem">
             {lockClient ? 'Meus carrinhos' : selectedClient && !showAll ? `Carrinhos de ${selectedClient.name}` : 'Carrinhos em construção'}
           </Title>
           <Text c="dimmed" size="0.82rem">
@@ -173,31 +173,34 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   onChange={e => setClientQuery(e.currentTarget.value)}
                   placeholder="Buscar cliente por nome ou código..."
                   leftSection={<MagnifyingGlassIcon size={14} />}
-                  style={{ flex: 1, minWidth: 220 }}
+                  flex={1}
+                  miw={220}
                 />
               </Popover.Target>
               <Popover.Dropdown p={4}>
                 {clientMatches.length > 0 ? (
                   clientMatches.map(c => (
-                    <UnstyledButton
+                    <Paper
                       key={c.id}
+                      component="button"
+                      type="button"
                       onClick={() => {
                         onSelectClient?.(c);
                         setClientQuery('');
                         setNewOpen(true);
                       }}
-                      className={classes.hoverable}
-                      w="100%"
+                      className={`${classes.cardButton} ${classes.hoverable}`}
+                      radius="sm"
+                      bd="none"
                       px="sm"
                       py={8}
-                      style={{ borderRadius: 'var(--mantine-radius-sm)' }}
                     >
                       <Group gap={8} wrap="nowrap">
-                        <StorefrontIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                        <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
                         <Text size="0.82rem">{c.name}</Text>
                         <Text c="dimmed" size="0.7rem" ml="auto" className="mono">{c.id}</Text>
                       </Group>
-                    </UnstyledButton>
+                    </Paper>
                   ))
                 ) : (
                   <Text c="dimmed" size="0.78rem" p="sm">Nenhum cliente encontrado.</Text>
@@ -275,7 +278,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           const isOther = selectedClient && c.clientId !== selectedClient.id;
           const ctx: CartContext = { id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy };
           return (
-            <Paper key={c.id} withBorder radius="lg" pos="relative" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Card key={c.id} withBorder radius="lg" padding={0}>
               {isOther && (
                 <Badge
                   size="xs"
@@ -287,12 +290,11 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   pos="absolute"
                   top={12}
                   right={12}
-                  style={{ zIndex: 1 }}
                 >
                   troca cliente
                 </Badge>
               )}
-              <UnstyledButton onClick={() => onOpenCart(ctx)} className={classes.hoverable} p="md" pb={0} style={{ flex: 1 }}>
+              <UnstyledButton onClick={() => onOpenCart(ctx)} className={classes.hoverable} p="md" pb={0} flex={1}>
                 <Group justify="space-between" align="flex-start" mb="sm">
                   <ThemeIcon variant="light" color="neutral" size={40} radius="md">
                     <ShoppingCartIcon size={16} />
@@ -324,7 +326,8 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   <Text size="0.7rem" c="dimmed" truncate>Rep: {c.rep}</Text>
                 </Group>
               </UnstyledButton>
-              <Group gap={8} p="md" pt="sm" grow style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+              <Divider color="var(--mantine-color-default-border)" />
+              <Group gap={8} p="md" pt="sm" grow>
                 <Button onClick={() => onOpenCart(ctx)} variant="default" size="xs" leftSection={<EyeIcon size={14} />}>
                   Detalhes
                 </Button>
@@ -334,14 +337,14 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   </Button>
                 )}
               </Group>
-            </Paper>
+            </Card>
           );
         })}
       </SimpleGrid>
 
       {filtered.length === 0 && (
         <Stack align="center" gap={8} py={64}>
-          <ShoppingCartIcon size={40} style={{ opacity: 0.3, color: 'var(--mantine-color-dimmed)' }} />
+          <ShoppingCartIcon size={40} color="var(--mantine-color-dimmed)" opacity={0.3} />
           <Text c="dimmed" size="0.88rem" ta="center">
             {selectedClient && !showAll
               ? `Nenhum carrinho para ${selectedClient.name} ainda. Crie um novo ou veja carrinhos de outros clientes.`
