@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { toast } from "../lib/toast";
 import {
-  ActionIcon, Badge, Box, Button, Chip, Group, Modal, NumberInput, Paper, Select, SimpleGrid,
-  Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Group, Modal, NumberInput,
+  Paper, ScrollArea, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
@@ -27,8 +27,11 @@ import classes from "./CatalogPage.module.css";
 
 import type { CartContext, CartCreator } from "./CartsListPage";
 
-const BORDER = '1px solid var(--mantine-color-default-border)';
+const BORDER_COLOR = 'var(--mantine-color-default-border)';
+const BORDER = `1px solid ${BORDER_COLOR}`;
 const PRIMARY_TEXT = 'var(--mantine-primary-color-filled)';
+const DIMMED = 'var(--mantine-color-dimmed)';
+const DASHED_BORDER = `1px dashed ${BORDER_COLOR}`;
 
 function CartCreatorTag({ createdBy }: { createdBy?: CartCreator }) {
   if (!createdBy) return null;
@@ -84,10 +87,8 @@ function StarRating({ rating }: { rating: number }) {
           key={s}
           size={12}
           weight={s <= Math.round(rating) ? 'fill' : 'regular'}
-          style={{
-            color: s <= Math.round(rating) ? 'var(--mantine-color-yellow-5)' : 'var(--mantine-color-dimmed)',
-            opacity: s <= Math.round(rating) ? 1 : 0.3,
-          }}
+          color={s <= Math.round(rating) ? 'var(--mantine-color-yellow-5)' : DIMMED}
+          opacity={s <= Math.round(rating) ? 1 : 0.3}
         />
       ))}
       <Text lh={1.5} c="dimmed" ml={4} size="0.68rem">{rating}</Text>
@@ -98,7 +99,7 @@ function StarRating({ rating }: { rating: number }) {
 function QtyStepper({ value, onChange, buttonSize, inputWidth = 32 }: { value: number; onChange: (v: number) => void; buttonSize: number; inputWidth?: number }) {
   return (
     <Group gap={2} wrap="nowrap">
-      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value - 1)} style={{ fontSize: '0.7rem', lineHeight: 1 }}>−</ActionIcon>
+      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value - 1)} fz="0.7rem" lh={1}>−</ActionIcon>
       <NumberInput
         value={value}
         onChange={v => onChange(Number(v) || 0)}
@@ -108,7 +109,7 @@ function QtyStepper({ value, onChange, buttonSize, inputWidth = 32 }: { value: n
         size="xs"
         styles={{ input: { textAlign: 'center', fontSize: '0.72rem', fontWeight: 600, minHeight: 0, height: 22, padding: 0 } }}
       />
-      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value + 1)} style={{ fontSize: '0.7rem', lineHeight: 1 }}>+</ActionIcon>
+      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value + 1)} fz="0.7rem" lh={1}>+</ActionIcon>
     </Group>
   );
 }
@@ -116,7 +117,7 @@ function QtyStepper({ value, onChange, buttonSize, inputWidth = 32 }: { value: n
 function GradeHeader({ onClose }: { onClose?: () => void }) {
   return (
     <Group justify="space-between" mb={8} wrap="nowrap">
-      <Text lh={1.5} size="0.72rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.04em' }}>
+      <Text lh={1.5} size="0.72rem" fw={600} tt="uppercase" lts="0.04em">
         Compra rápida — Grade
       </Text>
       {onClose && (
@@ -140,35 +141,40 @@ function GradeCompact({ product, onAdd, onClose }: {
   const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
 
   return (
-    <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)" style={{ borderTop: BORDER }}>
-      <GradeHeader onClose={onClose} />
-      <Stack gap={4}>
-        {sizes.map(s => (
-          <Group key={s} justify="space-between" wrap="nowrap" px={8} py={4} bg="var(--mantine-color-body)" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
-            <Group gap={8} wrap="nowrap">
-              <Text lh={1.5} size="0.78rem" fw={600}>Nº {s}</Text>
-              <Text lh={1.5} c="teal.6" size="0.65rem">{product.grades[s]} disp.</Text>
-            </Group>
-            <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={20} />
-          </Group>
-        ))}
-      </Stack>
-      <Group justify="space-between" mt={8} mb={8}>
-        <Text lh={1.5} c="dimmed" size="0.7rem">
-          {total} {total === 1 ? 'par' : 'pares'}
-        </Text>
-        <Text lh={1.5} className="mono" size="0.85rem" fw={700}>{formatCurrency(subtotal)}</Text>
-      </Group>
-      <Button
-        fullWidth
-        onClick={() => onAdd(qtys)}
-        disabled={total === 0}
-        leftSection={<ShoppingCartIcon size={14} />}
-        styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
-      >
-        Adicionar
-      </Button>
-    </Box>
+    <>
+      <Divider color={BORDER_COLOR} />
+      <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
+        <GradeHeader onClose={onClose} />
+        <Stack gap={4}>
+          {sizes.map(s => (
+            <Paper key={s} radius="md" px={8} py={4}>
+              <Group justify="space-between" wrap="nowrap">
+                <Group gap={8} wrap="nowrap">
+                  <Text lh={1.5} size="0.78rem" fw={600}>Nº {s}</Text>
+                  <Text lh={1.5} c="teal.6" size="0.65rem">{product.grades[s]} disp.</Text>
+                </Group>
+                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={20} />
+              </Group>
+            </Paper>
+          ))}
+        </Stack>
+        <Group justify="space-between" mt={8} mb={8}>
+          <Text lh={1.5} c="dimmed" size="0.7rem">
+            {total} {total === 1 ? 'par' : 'pares'}
+          </Text>
+          <Text lh={1.5} className="mono" size="0.85rem" fw={700}>{formatCurrency(subtotal)}</Text>
+        </Group>
+        <Button
+          fullWidth
+          onClick={() => onAdd(qtys)}
+          disabled={total === 0}
+          leftSection={<ShoppingCartIcon size={14} />}
+          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+        >
+          Adicionar
+        </Button>
+      </Box>
+    </>
   );
 }
 
@@ -185,57 +191,62 @@ function GradeInline({ product, onAdd, onClose }: {
 
   // colunas: rótulo (90px) · uma por numeração, de largura igual · total (60px)
   const rowLabel = (text: string) => (
-    <Text lh={1.5} w={90} flex="none" px={8} py={6} c="dimmed" size="0.62rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{text}</Text>
+    <Text lh={1.5} w={90} flex="none" px={8} py={6} c="dimmed" size="0.62rem" fw={600} tt="uppercase" lts="0.05em">{text}</Text>
   );
 
   return (
-    <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)" style={{ borderTop: BORDER }}>
-      <GradeHeader onClose={onClose} />
+    <>
+      <Divider color={BORDER_COLOR} />
+      <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
+        <GradeHeader onClose={onClose} />
 
-      <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
-        <Group gap={0} wrap="nowrap" bg="var(--mantine-color-default-hover)" style={{ borderBottom: BORDER }}>
-          {rowLabel('Numeração')}
-          {sizes.map(s => (
-            <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" size="0.72rem" fw={600}>Nº {s}</Text>
-          ))}
-          <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.62rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>Total</Text>
-        </Group>
+        <Card withBorder radius="md" padding={0}>
+          <Group gap={0} wrap="nowrap" bg="var(--mantine-color-default-hover)">
+            {rowLabel('Numeração')}
+            {sizes.map(s => (
+              <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" size="0.72rem" fw={600}>Nº {s}</Text>
+            ))}
+            <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.62rem" fw={600} tt="uppercase" lts="0.05em">Total</Text>
+          </Group>
+          <Divider color={BORDER_COLOR} />
 
-        <Group gap={0} wrap="nowrap" style={{ borderBottom: BORDER }}>
-          {rowLabel('Estoque')}
-          {sizes.map(s => (
-            <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" c="teal.6" size="0.72rem" fw={600}>{product.grades[s]}</Text>
-          ))}
-          <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.7rem">
-            {Object.values(product.grades).reduce((a, b) => a + b, 0)}
+          <Group gap={0} wrap="nowrap">
+            {rowLabel('Estoque')}
+            {sizes.map(s => (
+              <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" c="teal.6" size="0.72rem" fw={600}>{product.grades[s]}</Text>
+            ))}
+            <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.7rem">
+              {Object.values(product.grades).reduce((a, b) => a + b, 0)}
+            </Text>
+          </Group>
+          <Divider color={BORDER_COLOR} />
+
+          <Group gap={0} wrap="nowrap">
+            {rowLabel('Quantidade')}
+            {sizes.map(s => (
+              <Group key={s} flex={1} miw={0} px={4} py={6} gap={2} justify="center" wrap="nowrap">
+                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={16} inputWidth={26} />
+              </Group>
+            ))}
+            <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" className="mono" size="0.78rem" fw={700}>{total}</Text>
+          </Group>
+        </Card>
+
+        <Group justify="flex-end" gap="sm" mt={8} mb={4} wrap="nowrap">
+          <Text lh={1.5} c="dimmed" size="0.7rem">
+            {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" size="0.85rem" fw={700}>{formatCurrency(subtotal)}</Text>
           </Text>
+          <Button
+            onClick={() => onAdd(qtys)}
+            disabled={total === 0}
+            leftSection={<ShoppingCartIcon size={14} />}
+            styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+          >
+            Adicionar
+          </Button>
         </Group>
-
-        <Group gap={0} wrap="nowrap">
-          {rowLabel('Quantidade')}
-          {sizes.map(s => (
-            <Group key={s} flex={1} miw={0} px={4} py={6} gap={2} justify="center" wrap="nowrap">
-              <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={16} inputWidth={26} />
-            </Group>
-          ))}
-          <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" className="mono" size="0.78rem" fw={700}>{total}</Text>
-        </Group>
-      </Paper>
-
-      <Group justify="flex-end" gap="sm" mt={8} mb={4} wrap="nowrap">
-        <Text lh={1.5} c="dimmed" size="0.7rem">
-          {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" size="0.85rem" fw={700}>{formatCurrency(subtotal)}</Text>
-        </Text>
-        <Button
-          onClick={() => onAdd(qtys)}
-          disabled={total === 0}
-          leftSection={<ShoppingCartIcon size={14} />}
-          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
-        >
-          Adicionar
-        </Button>
-      </Group>
-    </Box>
+      </Box>
+    </>
   );
 }
 
@@ -261,20 +272,22 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
 
   if (viewMode === 'list') {
     return (
-      <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+      <Card withBorder radius="lg" padding={0}>
         <Group p="md" gap="md" wrap="nowrap">
-          <UnstyledButton onClick={onOpenDetail} w={80} h={80} bg="#fff" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', flexShrink: 0 }}>
-            {!imgError ? (
-              <Image src={product.image} alt={product.name} h="100%" onError={() => setImgError(true)} />
-            ) : (
-              <Group w="100%" h="100%" justify="center">
-                <PackageIcon size={24} style={{ color: 'var(--mantine-color-dimmed)', opacity: 0.4 }} />
-              </Group>
-            )}
+          <UnstyledButton onClick={onOpenDetail} w={80} h={80} flex="none">
+            <Paper radius="md" bg="#fff" h="100%">
+              {!imgError ? (
+                <Image src={product.image} alt={product.name} h="100%" radius="md" onError={() => setImgError(true)} />
+              ) : (
+                <Group w="100%" h="100%" justify="center">
+                  <PackageIcon size={24} color={DIMMED} opacity={0.4} />
+                </Group>
+              )}
+            </Paper>
           </UnstyledButton>
-          <Box style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={onOpenDetail}>
+          <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
             <Group gap={8} align="flex-start" wrap="nowrap">
-              <Box style={{ flex: 1, minWidth: 0 }}>
+              <Box flex={1} miw={0}>
                 <Text lh={1.5} c="dimmed" size="0.7rem" fw={500}>{product.reference}</Text>
                 <Text lh={1.5} size="0.9rem" fw={600}>{product.name}</Text>
                 <Text lh={1.5} c="dimmed" size="0.75rem">{product.line} · {product.category} · {product.collection}</Text>
@@ -286,10 +299,10 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
               <Text lh={1.5} c="dimmed" size="0.72rem">{product.material}</Text>
               <Text lh={1.5} c="dimmed" size="0.72rem">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
             </Group>
-          </Box>
-          <Stack gap={8} align="flex-end" style={{ flexShrink: 0 }}>
+          </UnstyledButton>
+          <Stack gap={8} align="flex-end" flex="none">
             <Box ta="right">
-              <Text lh={1.5} className="mono" size="1.1rem" fw={700} style={{ letterSpacing: '-0.01em' }}>{formatCurrency(product.price)}</Text>
+              <Text lh={1.5} className="mono" size="1.1rem" fw={700} lts="-0.01em">{formatCurrency(product.price)}</Text>
               <Text lh={1.5} c="dimmed" td="line-through" size="0.75rem">{formatCurrency(product.priceRetail)}</Text>
               <Text lh={1.5} c={PRIMARY_TEXT} size="0.65rem" fw={600}>+ IVA</Text>
             </Box>
@@ -319,13 +332,13 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         {gradeOpen && (
           <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
         )}
-      </Paper>
+      </Card>
     );
   }
 
   return (
-    <Paper withBorder radius="lg" className={classes.card} style={{ overflow: 'hidden' }}>
-      <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" mb={-12} bg="white" style={{ overflow: 'hidden' }}>
+    <Card withBorder radius="lg" padding={0} className={classes.card}>
+      <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" mb={-12} bg="white">
         {!imgError ? (
           <Image
             src={product.image}
@@ -336,12 +349,12 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             h="100%"
             pt={8}
             px={8}
-            style={{ objectPosition: 'bottom' }}
+            className={classes.cardImage}
             onError={() => setImgError(true)}
           />
         ) : (
           <Group pos="absolute" inset={0} justify="center">
-            <PackageIcon size={40} style={{ color: 'var(--mantine-color-dimmed)', opacity: 0.3 }} />
+            <PackageIcon size={40} color={DIMMED} opacity={0.3} />
           </Group>
         )}
         <Box
@@ -371,11 +384,11 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         </Box>
       </UnstyledButton>
 
-      <Box p="sm" style={{ cursor: 'pointer' }} onClick={onOpenDetail}>
+      <UnstyledButton onClick={onOpenDetail} display="block" w="100%" p="sm">
         <Badge variant="light" color={availBadgeColor} size="sm" mb={8} styles={{ label: { textTransform: 'none', fontSize: '0.62rem', fontWeight: 600 } }}>
           {product.availability}
         </Badge>
-        <Text lh={1.5} c="dimmed" size="0.68rem" fw={500} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{product.line} · {product.reference}</Text>
+        <Text lh={1.5} c="dimmed" size="0.68rem" fw={500} tt="uppercase" lts="0.05em">{product.line} · {product.reference}</Text>
         <Text lh={1.5} mt={2} truncate size="0.95rem" fw={600}>{product.name}</Text>
         <Text lh={1.5} c="dimmed" size="0.75rem">{product.material}</Text>
 
@@ -384,7 +397,8 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
           <Text lh={1.5} c="dimmed" size="0.68rem">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
         </Group>
 
-        <Group justify="space-between" mt="sm" pt="sm" wrap="nowrap" style={{ borderTop: BORDER }}>
+        <Divider mt="sm" color={BORDER_COLOR} />
+        <Group justify="space-between" pt="sm" wrap="nowrap">
           <Box>
             <Text lh={1.5} className="mono" size="1rem" fw={700}>{formatCurrency(product.price)}</Text>
             <Text lh={1.5} c="dimmed" td="line-through" size="0.72rem">{formatCurrency(product.priceRetail)}</Text>
@@ -401,12 +415,12 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             )}
           </Group>
         </Group>
-      </Box>
+      </UnstyledButton>
 
       {gradeOpen && (
         <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
       )}
-    </Paper>
+    </Card>
   );
 }
 
@@ -417,7 +431,6 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
 }) {
   const [activeImg, setActiveImg] = useState(0);
   const images = [product.image, product.image, product.image];
-  const labelStyle = { letterSpacing: '0.05em' } as const;
   return (
     <Modal
       opened
@@ -428,7 +441,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
       padding={0}
       overlayProps={{ backgroundOpacity: 0.7 }}
       title={
-        <Text lh={1.5} component="span" c="dimmed" size="0.72rem" fw={500} tt="uppercase" style={{ letterSpacing: '0.06em' }}>
+        <Text lh={1.5} component="span" c="dimmed" size="0.72rem" fw={500} tt="uppercase" lts="0.06em">
           {product.line} · {product.reference}
         </Text>
       }
@@ -438,12 +451,12 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
         body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0 },
       }}
     >
-      <Box style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <Box className={classes.detailBody}>
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
           <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
-            <Box pos="relative" w="100%" pt="90%" bg="#fff" style={{ borderRadius: 'var(--mantine-radius-lg)', overflow: 'hidden' }}>
+            <Paper pos="relative" w="100%" pt="90%" radius="lg" bg="#fff">
               <Image src={images[activeImg]} alt={product.name} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
-            </Box>
+            </Paper>
             <Group gap={8}>
               {images.map((img, i) => (
                 <UnstyledButton key={i} onClick={() => setActiveImg(i)} className={classes.thumb} data-active={activeImg === i || undefined}>
@@ -455,13 +468,13 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
           <Stack gap="md" p="lg">
             <Box>
               <Group justify="space-between" align="flex-start" gap={8} wrap="nowrap">
-                <Title order={2} size="1.4rem" fw={700} style={{ letterSpacing: '-0.01em' }}>{product.name}</Title>
+                <Title order={2} size="1.4rem" fw={700} lts="-0.01em">{product.name}</Title>
                 <ActionIcon
                   onClick={onToggleFav}
                   size={36}
                   variant={isFavorite ? 'light' : 'default'}
                   color={isFavorite ? 'red' : 'gray'}
-                  style={{ flexShrink: 0 }}
+                  flex="none"
                   aria-label="Favoritar"
                 >
                   <HeartIcon size={16} weight={isFavorite ? 'fill' : 'regular'} />
@@ -473,23 +486,23 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
               </Group>
             </Box>
             <Group gap="sm" align="baseline">
-              <Text lh={1.5} className="mono" size="1.8rem" fw={700} style={{ letterSpacing: '-0.02em' }}>{formatCurrency(product.price)}</Text>
+              <Text lh={1.5} className="mono" size="1.8rem" fw={700} lts="-0.02em">{formatCurrency(product.price)}</Text>
               <Text lh={1.5} c="dimmed" td="line-through" size="0.9rem">{formatCurrency(product.priceRetail)}</Text>
               <Text lh={1.5} c={PRIMARY_TEXT} size="0.72rem" fw={600}>+ IVA</Text>
             </Group>
             <Text size="0.85rem" lh={1.6}>{product.description}</Text>
             <SimpleGrid cols={2} spacing="sm">
               <Box>
-                <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" style={labelStyle}>Material</Text>
+                <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" lts="0.05em">Material</Text>
                 <Text lh={1.5} mt={2} size="0.85rem" fw={500}>{product.material}</Text>
               </Box>
               <Box>
-                <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" style={labelStyle}>Coleção</Text>
+                <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" lts="0.05em">Coleção</Text>
                 <Text lh={1.5} mt={2} size="0.85rem" fw={500}>{product.collection}</Text>
               </Box>
             </SimpleGrid>
             <Box>
-              <Text lh={1.5} c="dimmed" mb={6} size="0.7rem" tt="uppercase" style={labelStyle}>Cores</Text>
+              <Text lh={1.5} c="dimmed" mb={6} size="0.7rem" tt="uppercase" lts="0.05em">Cores</Text>
               <Group gap={6}>
                 {product.colors.map(c => (
                   <Badge key={c} variant="light" color="gray" size="lg" styles={{ label: { textTransform: 'none', fontSize: '0.75rem', fontWeight: 500, color: 'var(--mantine-color-text)' } }}>{c}</Badge>
@@ -499,7 +512,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
           </Stack>
         </SimpleGrid>
       </Box>
-      <Box style={{ flexShrink: 0 }}>
+      <Box flex="none">
         <GradeInline product={product} onAdd={onAddGrade} />
       </Box>
     </Modal>
@@ -522,16 +535,16 @@ function CartOption({ cart, selected, onClick }: { cart: CartContext; selected: 
         <ThemeIcon size={32} radius="md" variant="light" color="neutral">
           <ShoppingCartIcon size={14} />
         </ThemeIcon>
-        <Box style={{ flex: 1, minWidth: 0 }}>
+        <Box flex={1} miw={0}>
           <Text lh={1.5} truncate size="0.85rem" fw={600}>{cart.cartName}</Text>
           <Group gap={4} wrap="nowrap">
-            <StorefrontIcon size={10} style={{ color: 'var(--mantine-color-dimmed)' }} />
+            <StorefrontIcon size={10} color={DIMMED} />
             <Text lh={1.5} c="dimmed" size="0.7rem">{cart.clientName}</Text>
           </Group>
           <CartCreatorTag createdBy={cart.createdBy} />
         </Box>
         {selected && (
-          <Text lh={1.5} c={PRIMARY_TEXT} size="0.65rem" fw={700} tt="uppercase" style={{ letterSpacing: '0.05em' }}>Atual</Text>
+          <Text lh={1.5} c={PRIMARY_TEXT} size="0.65rem" fw={700} tt="uppercase" lts="0.05em">Atual</Text>
         )}
       </Group>
     </Paper>
@@ -676,14 +689,15 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   return (
     <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* Promo Banner */}
-      <Paper withBorder radius="xl" shadow="xs" style={{ overflow: 'hidden' }}>
+      <Card withBorder radius="xl" shadow="xs" padding={0}>
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
-      </Paper>
+      </Card>
 
       {/* Header + Controls */}
       <Group gap="sm" wrap="wrap">
         <TextInput
-          style={{ flex: 1, minWidth: 200 }}
+          flex={1}
+          miw={200}
           placeholder="Buscar produto, referência, linha..."
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
@@ -703,7 +717,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             color="neutral"
             leftSection={<FunnelIcon size={16} />}
             rightSection={hasActiveFilters ? (
-              <Box w={6} h={6} bg="var(--mantine-color-neutral-9)" style={{ borderRadius: '50%' }} />
+              <ColorSwatch color="var(--mantine-color-neutral-9)" size={6} withShadow={false} />
             ) : undefined}
             styles={{ label: { fontSize: '0.83rem', fontWeight: 500 } }}
           >
@@ -771,7 +785,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             <Badge
               variant="light"
               color="neutral"
-              rightSection={<XIcon size={10} style={{ cursor: 'pointer' }} onClick={() => setSelectedLine('Todos')} />}
+              rightSection={<CloseButton size={14} iconSize={10} variant="transparent" onClick={() => setSelectedLine('Todos')} aria-label="Remover filtro de linha" />}
               styles={{ label: { textTransform: 'none', fontSize: '0.72rem', fontWeight: 400 } }}
             >
               {selectedLine}
@@ -781,7 +795,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             <Badge
               variant="light"
               color="neutral"
-              rightSection={<XIcon size={10} style={{ cursor: 'pointer' }} onClick={() => setSelectedCategory('Todos')} />}
+              rightSection={<CloseButton size={14} iconSize={10} variant="transparent" onClick={() => setSelectedCategory('Todos')} aria-label="Remover filtro de categoria" />}
               styles={{ label: { textTransform: 'none', fontSize: '0.72rem', fontWeight: 400 } }}
             >
               {selectedCategory}
@@ -793,12 +807,14 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
       {/* Products Grid/List */}
       {sorted.length === 0 ? (
         <Stack align="center" justify="center" gap={0} py={80} ta="center">
-          <PackageIcon size={48} style={{ color: 'var(--mantine-color-dimmed)', opacity: 0.3, marginBottom: 16 }} />
+          <Box mb={16} lh={0}>
+            <PackageIcon size={48} color={DIMMED} opacity={0.3} />
+          </Box>
           <Text lh={1.5} fw={600}>Nenhum produto encontrado</Text>
           <Text lh={1.5} c="dimmed" mt={4} size="0.85rem">Tente ajustar os filtros ou a busca</Text>
         </Stack>
       ) : viewMode === 'grid' ? (
-        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" style={{ alignItems: 'start' }}>
+        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" className={classes.grid}>
           {sorted.map(product => renderProductCard(product, 'grid'))}
         </SimpleGrid>
       ) : (
@@ -830,26 +846,30 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
       >
         {confirmAdd && (
           <>
-            <Box px="lg" py="md" style={{ borderBottom: BORDER }}>
+            <Box px="lg" py="md">
               <Text lh={1.5} fw={700} size="0.95rem">Adicionar ao carrinho</Text>
               <Text lh={1.5} c="dimmed" mt={4} size="0.78rem">
                 {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={500} inherit>{confirmAdd.product.name}</Text>
               </Text>
             </Box>
-            <Stack gap={8} px="lg" py="md" mah="40vh" style={{ overflowY: 'auto' }}>
-              {(clientCarts ?? []).map(c => (
-                <CartOption
-                  key={c.id}
-                  cart={c}
-                  selected={confirmAdd.selectedCartId === c.id}
-                  onClick={() => setConfirmAdd(prev => prev ? { ...prev, selectedCartId: c.id } : prev)}
-                />
-              ))}
-              {(clientCarts ?? []).length === 0 && (
-                <Text lh={1.5} c="dimmed" ta="center" py="sm" size="0.8rem">Nenhum carrinho disponível.</Text>
-              )}
-            </Stack>
-            <Group px="lg" py="md" gap={8} grow style={{ borderTop: BORDER }}>
+            <Divider color={BORDER_COLOR} />
+            <ScrollArea.Autosize mah="40vh" type="auto">
+              <Stack gap={8} px="lg" py="md">
+                {(clientCarts ?? []).map(c => (
+                  <CartOption
+                    key={c.id}
+                    cart={c}
+                    selected={confirmAdd.selectedCartId === c.id}
+                    onClick={() => setConfirmAdd(prev => prev ? { ...prev, selectedCartId: c.id } : prev)}
+                  />
+                ))}
+                {(clientCarts ?? []).length === 0 && (
+                  <Text lh={1.5} c="dimmed" ta="center" py="sm" size="0.8rem">Nenhum carrinho disponível.</Text>
+                )}
+              </Stack>
+            </ScrollArea.Autosize>
+            <Divider color={BORDER_COLOR} />
+            <Group px="lg" py="md" gap={8} grow>
               <Button
                 onClick={() => {
                   setConfirmAdd(null);
@@ -858,7 +878,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   setCreatingNewName('');
                 }}
                 variant="default"
-                style={{ borderStyle: 'dashed' }}
+                bd={DASHED_BORDER}
                 px={12}
                 leftSection={<PlusIcon size={14} />}
                 styles={{ label: { fontSize: '0.82rem', fontWeight: 500 }, section: { marginInlineEnd: 6 } }}
@@ -895,8 +915,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
       >
         {pendingAdd && (
           <>
-            <Group justify="space-between" px="lg" py="sm" wrap="nowrap" style={{ borderBottom: BORDER }}>
-              <Box style={{ minWidth: 0 }}>
+            <Group justify="space-between" px="lg" py="sm" wrap="nowrap">
+              <Box miw={0}>
                 <Text lh={1.5} fw={700} size="0.95rem">Adicionar a qual carrinho?</Text>
                 <Text lh={1.5} c="dimmed" truncate size="0.75rem">
                   {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
@@ -906,82 +926,85 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 <XIcon size={16} />
               </ActionIcon>
             </Group>
-            <Stack gap={8} p="md" mah="50vh" style={{ overflowY: 'auto' }}>
-              {(clientCarts ?? []).map(c => (
-                <CartOption
-                  key={c.id}
-                  cart={c}
-                  selected={activeCartId === c.id}
-                  onClick={() => {
-                    onPickCart?.(c);
-                    commitAdd(pendingAdd.product, pendingAdd.qtys, c.cartName);
-                    setPendingAdd(null);
-                  }}
-                />
-              ))}
-              {(clientCarts ?? []).length === 0 && !creatingMode && (
-                <Text lh={1.5} c="dimmed" ta="center" py="sm" size="0.8rem">
-                  Nenhum carrinho ainda para este cliente.
-                </Text>
-              )}
-              {creatingMode ? (
-                <Paper
-                  radius="md"
-                  p="sm"
-                  bg="var(--mantine-color-neutral-0)"
-                  style={{ border: '1px solid var(--mantine-color-neutral-3)' }}
-                >
-                  <Stack gap={8}>
-                    <TextInput
-                      autoFocus
-                      label="Nome do novo carrinho"
-                      value={creatingNewName}
-                      onChange={e => setCreatingNewName(e.currentTarget.value)}
-                      placeholder="Ex.: Reposição Inverno 26"
-                      styles={{
-                        label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)', marginBottom: 8 },
-                        input: { fontSize: '0.82rem' },
-                      }}
-                    />
-                    <Group justify="flex-end" gap={8}>
-                      <Button
-                        onClick={() => { setCreatingMode(false); setCreatingNewName(''); }}
-                        variant="default"
-                        size="xs"
-                        styles={{ label: { fontSize: '0.78rem', fontWeight: 400 } }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const ctx = onCreateCart?.(creatingNewName || 'Novo carrinho');
-                          if (ctx) {
-                            commitAdd(pendingAdd.product, pendingAdd.qtys, ctx.cartName);
-                            setPendingAdd(null);
-                          }
+            <Divider color={BORDER_COLOR} />
+            <ScrollArea.Autosize mah="50vh" type="auto">
+              <Stack gap={8} p="md">
+                {(clientCarts ?? []).map(c => (
+                  <CartOption
+                    key={c.id}
+                    cart={c}
+                    selected={activeCartId === c.id}
+                    onClick={() => {
+                      onPickCart?.(c);
+                      commitAdd(pendingAdd.product, pendingAdd.qtys, c.cartName);
+                      setPendingAdd(null);
+                    }}
+                  />
+                ))}
+                {(clientCarts ?? []).length === 0 && !creatingMode && (
+                  <Text lh={1.5} c="dimmed" ta="center" py="sm" size="0.8rem">
+                    Nenhum carrinho ainda para este cliente.
+                  </Text>
+                )}
+                {creatingMode ? (
+                  <Paper
+                    radius="md"
+                    p="sm"
+                    bg="var(--mantine-color-neutral-0)"
+                    bd="1px solid var(--mantine-color-neutral-3)"
+                  >
+                    <Stack gap={8}>
+                      <TextInput
+                        autoFocus
+                        label="Nome do novo carrinho"
+                        value={creatingNewName}
+                        onChange={e => setCreatingNewName(e.currentTarget.value)}
+                        placeholder="Ex.: Reposição Inverno 26"
+                        styles={{
+                          label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)', marginBottom: 8 },
+                          input: { fontSize: '0.82rem' },
                         }}
-                        size="xs"
-                        styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
-                      >
-                        Criar e adicionar
-                      </Button>
-                    </Group>
-                  </Stack>
-                </Paper>
-              ) : (
-                <Button
-                  onClick={() => setCreatingMode(true)}
-                  variant="default"
-                  style={{ borderStyle: 'dashed' }}
-                  fullWidth
-                  h={44}
-                  leftSection={<PlusIcon size={14} />}
-                  styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
-                >
-                  Criar novo carrinho
-                </Button>
-              )}
-            </Stack>
+                      />
+                      <Group justify="flex-end" gap={8}>
+                        <Button
+                          onClick={() => { setCreatingMode(false); setCreatingNewName(''); }}
+                          variant="default"
+                          size="xs"
+                          styles={{ label: { fontSize: '0.78rem', fontWeight: 400 } }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const ctx = onCreateCart?.(creatingNewName || 'Novo carrinho');
+                            if (ctx) {
+                              commitAdd(pendingAdd.product, pendingAdd.qtys, ctx.cartName);
+                              setPendingAdd(null);
+                            }
+                          }}
+                          size="xs"
+                          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+                        >
+                          Criar e adicionar
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Paper>
+                ) : (
+                  <Button
+                    onClick={() => setCreatingMode(true)}
+                    variant="default"
+                    bd={DASHED_BORDER}
+                    fullWidth
+                    h={44}
+                    leftSection={<PlusIcon size={14} />}
+                    styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+                  >
+                    Criar novo carrinho
+                  </Button>
+                )}
+              </Stack>
+            </ScrollArea.Autosize>
           </>
         )}
       </Modal>
