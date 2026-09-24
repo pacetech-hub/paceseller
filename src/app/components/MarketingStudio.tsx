@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
-  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image,
+  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image, Tooltip,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import {
@@ -155,9 +155,9 @@ function BackLink({ onClick }: { onClick: () => void }) {
         variant="subtle"
         color="gray"
         size="compact-sm"
-        px={4}
+        ml={-8}
         leftSection={<CaretLeftIcon size={16} />}
-        styles={{ label: { fontSize: '0.82rem', fontWeight: 500 } }}
+        styles={{ label: { fontSize: '0.82rem' } }}
       >
         Voltar para Marketing IA
       </Button>
@@ -176,9 +176,9 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
         size="xs"
         fullWidth
         leftSection={<DownloadSimpleIcon size={14} />}
-        styles={{ label: { fontSize: '0.78rem', fontWeight: 500 } }}
+        styles={{ label: { fontSize: '0.78rem' } }}
       >
-        Baixar
+        Baixar peça
       </Button>
     </Box>
   );
@@ -204,14 +204,14 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               onClick={onManageCampaigns}
               variant="subtle"
               leftSection={<PencilSimpleIcon size={16} />}
-              styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+              styles={{ label: { fontSize: '0.82rem' } }}
             >
               Gerenciar campanhas
             </Button>
             <Button
               onClick={onCreate}
               leftSection={<SparkleIcon size={16} />}
-              styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
+              styles={{ label: { fontSize: '0.85rem' } }}
             >
               Criar campanha
             </Button>
@@ -231,19 +231,21 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                 <AspectRatio ratio={1}>
                   <Box pos="relative" bg="var(--mantine-color-default-hover)">
                     <Image src={item.image} alt={item.formatLabel} h="100%" />
-                    <ActionIcon
-                      onClick={() => onDelete(item.id)}
-                      aria-label="Excluir"
-                      size={28}
-                      radius="md"
-                      variant="transparent"
-                      pos="absolute"
-                      top={8}
-                      right={8}
-                      className={classes.overlayDelete}
-                    >
-                      <TrashIcon size={14} />
-                    </ActionIcon>
+                    <Tooltip label="Excluir peça do histórico" withArrow>
+                      <ActionIcon
+                        onClick={() => onDelete(item.id)}
+                        aria-label="Excluir peça do histórico"
+                        size={28}
+                        radius="md"
+                        variant="transparent"
+                        pos="absolute"
+                        top={8}
+                        right={8}
+                        className={classes.overlayDelete}
+                      >
+                        <TrashIcon size={14} />
+                      </ActionIcon>
+                    </Tooltip>
                   </Box>
                 </AspectRatio>
                 <PieceInfo label={item.formatLabel} copy={item.copy} />
@@ -290,7 +292,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
   };
 
   const inputStyles = {
-    label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)', marginBottom: 4 },
+    label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' },
     input: { fontSize: '0.82rem' },
   };
 
@@ -319,21 +321,23 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                   data-active={active || undefined}
                 >
                   <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py={10} flex={1} miw={0}>
-                    <Text size="0.85rem" fw={active ? 600 : 500} truncate>
+                    <Text size="0.85rem" fw={active ? 600 : 400} truncate>
                       {c.name}
                     </Text>
                   </UnstyledButton>
-                  <ActionIcon
-                    onClick={() => setDeleteTarget(c)}
-                    aria-label={`Excluir ${c.name}`}
-                    variant="subtle"
-                    color="red"
-                    size={26}
-                    mr={6}
-                    className={classes.rowDelete}
-                  >
-                    <TrashIcon size={14} />
-                  </ActionIcon>
+                  <Tooltip label="Excluir campanha" withArrow>
+                    <ActionIcon
+                      onClick={() => setDeleteTarget(c)}
+                      aria-label={`Excluir campanha ${c.name}`}
+                      variant="subtle"
+                      color="red"
+                      size={26}
+                      mr={6}
+                      className={classes.rowDelete}
+                    >
+                      <TrashIcon size={14} />
+                    </ActionIcon>
+                  </Tooltip>
                 </Group>
               );
             })}
@@ -346,7 +350,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             mt={4}
             px="sm"
             leftSection={<PlusIcon size={16} />}
-            styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
+            styles={{ label: { fontSize: '0.85rem' } }}
           >
             Nova campanha
           </Button>
@@ -375,7 +379,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                         variant="default"
                         size="xs"
                         leftSection={<UploadSimpleIcon size={14} />}
-                        styles={{ label: { fontSize: '0.78rem', fontWeight: 500 } }}
+                        styles={{ label: { fontSize: '0.78rem' } }}
                       >
                         Enviar cenário
                       </Button>
@@ -389,19 +393,21 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                       <AspectRatio key={idx} ratio={1}>
                         <Card bd={`1px solid ${BORDER_COLOR}`} radius="md" padding={0} pos="relative" bg="var(--mantine-color-default-hover)">
                           <Image src={photo} alt={`${selected.name} — cenário ${idx + 1}`} h="100%" />
-                          <ActionIcon
-                            onClick={() => onDeletePhoto(selected.id, idx)}
-                            aria-label="Excluir cenário"
-                            size={24}
-                            radius="sm"
-                            variant="transparent"
-                            pos="absolute"
-                            top={6}
-                            right={6}
-                            className={classes.overlayDelete}
-                          >
-                            <TrashIcon size={12} />
-                          </ActionIcon>
+                          <Tooltip label="Excluir cenário" withArrow>
+                            <ActionIcon
+                              onClick={() => onDeletePhoto(selected.id, idx)}
+                              aria-label={`Excluir cenário ${idx + 1}`}
+                              size={24}
+                              radius="sm"
+                              variant="transparent"
+                              pos="absolute"
+                              top={6}
+                              right={6}
+                              className={classes.overlayDelete}
+                            >
+                              <TrashIcon size={12} />
+                            </ActionIcon>
+                          </Tooltip>
                         </Card>
                       </AspectRatio>
                     ))}
@@ -430,7 +436,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
           </Box>
         }
       >
-        <Stack gap="sm" py={4}>
+        <Stack gap="md" py={4}>
           <TextInput
             data-autofocus
             label="Nome"
@@ -440,7 +446,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             styles={inputStyles}
           />
           <Textarea
-            label="Descrição"
+            label="Descrição (opcional)"
             value={newDescription}
             onChange={e => setNewDescription(e.currentTarget.value)}
             rows={3}
@@ -452,12 +458,12 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
           <Button
             onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}
             variant="default"
-            styles={{ label: { fontSize: '0.82rem', fontWeight: 500 } }}
+            styles={{ label: { fontSize: '0.82rem' } }}
           >
             Cancelar
           </Button>
-          <Button onClick={handleCreate} styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}>
-            Salvar
+          <Button onClick={handleCreate} disabled={!newName.trim()} styles={{ label: { fontSize: '0.82rem' } }}>
+            Criar campanha
           </Button>
         </Group>
       </Modal>
@@ -478,7 +484,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
           <Button
             onClick={() => setDeleteTarget(null)}
             variant="default"
-            styles={{ label: { fontSize: '0.82rem', fontWeight: 500 } }}
+            styles={{ label: { fontSize: '0.82rem' } }}
           >
             Cancelar
           </Button>
@@ -488,9 +494,9 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
               setDeleteTarget(null);
             }}
             color="red"
-            styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+            styles={{ label: { fontSize: '0.82rem' } }}
           >
-            Excluir
+            Excluir campanha
           </Button>
         </Group>
       </Modal>
@@ -587,7 +593,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     radius="xl"
                     variant={done || current ? 'filled' : 'light'}
                     color={done || current ? 'neutral' : 'gray'}
-                    aria-label={s.label}
+                    aria-label={`Etapa ${s.n}: ${s.label}`}
                     flex="none"
                     fz="0.72rem"
                     fw={700}
@@ -613,6 +619,10 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             );
           })}
         </Group>
+        {/* No celular os rótulos das etapas ficam ocultos: mostra a etapa atual por extenso */}
+        <Text hiddenFrom="sm" size="0.8rem" fw={600} mt="sm" aria-live="polite">
+          Etapa {step} de {WIZARD_STEPS.length} · {WIZARD_STEPS[step - 1].label}
+        </Text>
       </Paper>
 
       {/* Step Content */}
@@ -753,7 +763,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                         {meta.tag}
                       </Badge>
                     )}
-                    <Text size="0.75rem" fw={500} truncate>{p.name}</Text>
+                    <Text size="0.75rem" fw={600} truncate>{p.name}</Text>
                     <Text size="0.72rem" fw={600} className="mono">{formatCurrency(p.price)}</Text>
                     {meta && <Text c="dimmed" size="0.68rem">Estoque: {meta.stock} pares</Text>}
                   </Paper>
@@ -791,7 +801,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                         </Box>
                       </AspectRatio>
                       <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
-                        <Text size="0.8rem" fw={500}>Cenário {idx + 1}</Text>
+                        <Text size="0.8rem" fw={600}>Cenário {idx + 1}</Text>
                         {isSelected && <CheckIcon size={14} />}
                       </Group>
                     </Paper>
@@ -812,12 +822,11 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               value={prompt}
               onChange={e => setPrompt(e.currentTarget.value)}
               rows={4}
-              radius="md"
               mb="sm"
               styles={{ input: { fontSize: '0.88rem', lineHeight: 1.6, padding: '12px 16px' } }}
             />
             <Box mb="md">
-              <Text c="dimmed" size="0.75rem" fw={500} mb={8}>Sugestões da IA:</Text>
+              <Text c="dimmed" size="0.75rem" fw={600} mb={8}>Sugestões da IA:</Text>
               <Stack gap={8}>
                 {AI_PROMPTS.map((sugg, i) => (
                   <Paper
@@ -860,9 +869,9 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                   color="gray"
                   size="compact-sm"
                   leftSection={<ArrowsClockwiseIcon size={14} />}
-                  styles={{ label: { fontSize: '0.78rem', fontWeight: 400 } }}
+                  styles={{ label: { fontSize: '0.78rem' } }}
                 >
-                  Regenerar
+                  Regenerar peças
                 </Button>
               }
             />
@@ -884,15 +893,15 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
       </Paper>
 
       {/* Navigation */}
-      <Group justify="space-between">
+      <Group justify="space-between" gap="sm">
         <Button
           onClick={() => setStep(s => Math.max(1, s - 1))}
           disabled={step === 1}
           variant="default"
           leftSection={<CaretLeftIcon size={16} />}
-          styles={{ label: { fontSize: '0.85rem', fontWeight: 500 } }}
+          styles={{ label: { fontSize: '0.85rem' } }}
         >
-          Voltar
+          {step > 1 ? `Voltar para ${WIZARD_STEPS[step - 2].label}` : 'Voltar'}
         </Button>
 
         {step < 5 ? (
@@ -904,17 +913,15 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               (step === 3 && selectedProducts.size === 0) ||
               (step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0))
             }
-            px="lg"
             rightSection={<CaretRightIcon size={16} />}
-            styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
+            styles={{ label: { fontSize: '0.85rem' } }}
           >
-            Continuar
+            Avançar para {WIZARD_STEPS[step].label}
           </Button>
         ) : step === 5 ? (
           <Button
             onClick={handleGenerate}
             disabled={generating || !prompt}
-            px="xl"
             leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
             styles={{
               root: {
@@ -925,16 +932,15 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               label: { fontSize: '0.9rem', fontWeight: 700 },
             }}
           >
-            {generating ? 'Gerando...' : 'Gerar com IA'}
+            {generating ? 'Gerando peças...' : 'Gerar peças'}
           </Button>
         ) : (
           <Button
             onClick={handleFinish}
-            px="lg"
             leftSection={<CheckIcon size={16} />}
-            styles={{ label: { fontSize: '0.85rem', fontWeight: 600 } }}
+            styles={{ label: { fontSize: '0.85rem' } }}
           >
-            Concluir
+            Salvar no histórico
           </Button>
         )}
       </Group>

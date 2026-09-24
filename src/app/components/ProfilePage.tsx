@@ -57,7 +57,7 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
         <Text c="dimmed" size="0.75rem">{label}</Text>
       </Grid.Col>
       <Grid.Col span={{ base: 12, xs: 8 }}>
-        <Text fw={500} size="0.82rem" ff={mono ? 'monospace' : undefined}>{value}</Text>
+        <Text size="0.82rem" ff={mono ? 'monospace' : undefined}>{value}</Text>
       </Grid.Col>
     </Grid>
   );
@@ -71,7 +71,7 @@ function ToggleRow({ label, description, defaultChecked = false }: { label: stri
       defaultChecked={defaultChecked}
       py="xs"
       styles={{ body: { justifyContent: 'space-between', alignItems: 'flex-start' }, labelWrapper: { flex: 1 } }}
-      label={<Text size="0.82rem" fw={500}>{label}</Text>}
+      label={<Text size="0.82rem" fw={600}>{label}</Text>}
       description={description && <Text size="0.72rem" c="dimmed">{description}</Text>}
     />
   );
@@ -117,7 +117,7 @@ function LojistaProfile() {
       <Section icon={CreditCardIcon} title="Situação financeira" description="Sincronizado com o ERP">
         <Field label="Limite de crédito" value="R$ 25.000,00" />
         <Field label="Utilizado" value="R$ 8.420,00" />
-        <Field label="Disponível" value={<Text c="teal" span fw={500} size="0.82rem">R$ 16.580,00</Text>} />
+        <Field label="Disponível" value={<Text c="teal" span fw={600} size="0.82rem">R$ 16.580,00</Text>} />
         <Field label="Status" value={<StatusPill ok label="Adimplente" />} />
       </Section>
 
@@ -160,7 +160,7 @@ function RepProfile() {
 
       <Section icon={TargetIcon} title="Metas do período" description="Ciclo Verão 26 · jan–abr">
         <Field label="Meta sell-in" value="R$ 480.000,00" />
-        <Field label="Realizado" value={<Text c="teal" span fw={500} size="0.82rem">R$ 312.450,00 (65%)</Text>} />
+        <Field label="Realizado" value={<Text c="teal" span fw={600} size="0.82rem">R$ 312.450,00 (65%)</Text>} />
         <Field label="Faltam" value="R$ 167.550,00" />
         <Progress value={65} color="teal" size="sm" radius="xl" mt="sm" />
       </Section>
@@ -261,7 +261,7 @@ function AdminProfile() {
           ].map((l, i) => (
             <Group key={i} justify="space-between" gap="sm" py={6} className={interactive.rowDivider} wrap="nowrap">
               <Box miw={0}>
-                <Text component="span" fw={500} size="0.8rem">{l.who}</Text>
+                <Text component="span" fw={600} size="0.8rem">{l.who}</Text>
                 <Text component="span" c="dimmed" size="0.78rem" ml={8}>{l.what}</Text>
               </Box>
               <Text c="dimmed" size="0.72rem" flex="none">{l.when}</Text>
