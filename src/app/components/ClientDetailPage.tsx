@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
 import {
+  Stack, Group, Box, Paper, Text, Title, Button, Badge, ThemeIcon, SimpleGrid, Avatar, Collapse,
+  Divider, Progress, AspectRatio, Image, Center, ColorSwatch,
+} from "@mantine/core";
+import {
   CaretLeftIcon,
   CaretDownIcon,
   MapPinIcon,
@@ -12,7 +16,9 @@ import {
   HourglassLowIcon,
   ListMagnifyingGlassIcon,
   PackageIcon,
+  type Icon,
 } from "@phosphor-icons/react";
+import classes from "./interactive.module.css";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
 
@@ -23,9 +29,11 @@ interface ClientDetailPageProps {
 }
 
 const statusColors: Record<Client['status'], string> = {
-  'ativo': 'text-emerald-400 bg-emerald-400/10',
-  'inativo': 'text-red-400 bg-red-400/10',
+  'ativo': 'teal',
+  'inativo': 'red',
 };
+
+const badgeStyles = { label: { textTransform: 'none' as const } };
 
 const formatOrderDate = (dateStr: string) =>
   new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -39,11 +47,11 @@ function seededOrderCount(clientId: string): number {
 
 type StockStatusKey = 'zerado' | 'alto-giro' | 'chegando-ao-fim' | 'parado';
 
-const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; cls: string; icon: any }> = {
-  'zerado': { label: 'Estoque zerado', cls: 'text-red-400 bg-red-400/10', icon: EmptyIcon },
-  'alto-giro': { label: 'Alto giro', cls: 'text-emerald-400 bg-emerald-400/10', icon: TrendUpIcon },
-  'chegando-ao-fim': { label: 'Estoque chegando ao fim', cls: 'text-amber-400 bg-amber-400/10', icon: HourglassLowIcon },
-  'parado': { label: 'Parado no estoque', cls: 'text-muted-foreground bg-secondary', icon: ListMagnifyingGlassIcon },
+const STOCK_STATUS_CONFIG: Record<StockStatusKey, { label: string; color: string; icon: Icon }> = {
+  'zerado': { label: 'Estoque zerado', color: 'red', icon: EmptyIcon },
+  'alto-giro': { label: 'Alto giro', color: 'teal', icon: TrendUpIcon },
+  'chegando-ao-fim': { label: 'Estoque chegando ao fim', color: 'yellow', icon: HourglassLowIcon },
+  'parado': { label: 'Parado no estoque', color: 'gray', icon: ListMagnifyingGlassIcon },
 };
 
 // mock: classificação determinística do status de estoque por produto
@@ -117,18 +125,27 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   );
   const filteredBuyProducts = stockFilter === 'todos' ? buyProducts : buyProducts.filter(p => p.stockStatus === stockFilter);
 
+  const backButton = (
+    <Box>
+      <Button
+        onClick={() => onNavigate('clients')}
+        variant="subtle"
+        color="gray"
+        size="compact-sm"
+        px={4}
+        leftSection={<CaretLeftIcon size={16} />}
+      >
+        Voltar para Clientes
+      </Button>
+    </Box>
+  );
+
   if (!client) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto space-y-4">
-        <button
-          onClick={() => onNavigate('clients')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          style={{ fontSize: '0.82rem', fontWeight: 500 }}
-        >
-          <CaretLeftIcon className="w-4 h-4" /> Voltar para Clientes
-        </button>
-        <p className="text-muted-foreground">Nenhum cliente selecionado.</p>
-      </div>
+      <Stack gap="md" p="lg" maw={1400} mx="auto">
+        {backButton}
+        <Text c="dimmed">Nenhum cliente selecionado.</Text>
+      </Stack>
     );
   }
 
@@ -139,294 +156,276 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   const stuckProducts = products.filter(p => stockStatusOf(p) === 'parado');
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
-      <button
-        onClick={() => onNavigate('clients')}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        style={{ fontSize: '0.82rem', fontWeight: 500 }}
-      >
-        <CaretLeftIcon className="w-4 h-4" /> Voltar para Clientes
-      </button>
+    <Stack gap="lg" p="lg" maw={1400} mx="auto">
+      {backButton}
 
       {/* Header */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary" style={{ fontSize: '1rem', fontWeight: 700 }}>{client.avatar}</span>
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className={`px-2 py-0.5 rounded-full ${statusColors[client.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                {client.status}
-              </span>
+      <Paper withBorder radius="lg" p="lg">
+        <Group gap="md" wrap="nowrap" miw={0}>
+          <Avatar size={56} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '1rem', fontWeight: 700 } }}>
+            {client.avatar}
+          </Avatar>
+          <Box miw={0}>
+            <Group gap={8} mb={4}>
+              <Badge size="sm" variant="light" color={statusColors[client.status]} styles={badgeStyles}>{client.status}</Badge>
               {client.inadimplente && (
-                <span className="px-2 py-0.5 rounded-full text-amber-400 bg-amber-400/10" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                  inadimplente
-                </span>
+                <Badge size="sm" variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
               )}
-            </div>
-            <h2 className="text-foreground mb-1" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{client.name}</h2>
-            <p className="text-muted-foreground flex items-center gap-1" style={{ fontSize: '0.8rem' }}>
-              <MapPinIcon className="w-3.5 h-3.5" /> {client.city}/{client.state}
-            </p>
-          </div>
-        </div>
+            </Group>
+            <Title order={2} fw={700} mb={4} style={{ fontSize: '1.1rem' }}>{client.name}</Title>
+            <Group gap={4} c="dimmed">
+              <MapPinIcon size={14} />
+              <Text size="0.8rem" c="dimmed">{client.city}/{client.state}</Text>
+            </Group>
+          </Box>
+        </Group>
 
-        <button
+        <Button
           onClick={() => setExpanded(v => !v)}
-          className="flex items-center gap-1 text-primary mt-3"
-          style={{ fontSize: '0.78rem', fontWeight: 600 }}
+          variant="transparent"
+          color="neutral"
+          size="compact-xs"
+          px={0}
+          mt="sm"
+          rightSection={
+            <CaretDownIcon size={14} style={{ transition: 'transform 150ms ease', transform: expanded ? 'rotate(180deg)' : undefined }} />
+          }
+          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
         >
           {expanded ? 'Ver menos informações' : 'Ver mais informações'}
-          <CaretDownIcon className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-        </button>
+        </Button>
 
-        {expanded && (
-          <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Endereço</p>
-              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.address}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>CNPJ</p>
-              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.cnpj}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground" style={{ fontSize: '0.68rem', fontWeight: 600 }}>Representante</p>
-              <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{client.rep}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Último pedido e ticket médio */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <ClockIcon className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Último pedido</p>
-          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatOrderDate(client.lastOrder)}</p>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <ChartBarIcon className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ticket médio por pedido</p>
-          <p className="text-foreground mono mt-0.5" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{formatCurrency(avgTicket)}</p>
-        </div>
-      </div>
-
-      {/* Ações de carrinho */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <button
-          onClick={() => onNavigate('carts')}
-          className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
-        >
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <PlusIcon className="w-4 h-4 text-primary" />
-          </div>
-          <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Novo carrinho</p>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Criar um novo carrinho para este cliente</p>
-        </button>
-
-        <button
-          onClick={() => onNavigate('carts')}
-          className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors group"
-        >
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-            <ShoppingCartIcon className="w-4 h-4 text-primary" />
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Carrinhos</p>
-            <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary" style={{ fontSize: '0.68rem', fontWeight: 700 }}>{cartCount}</span>
-          </div>
-          <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>
-            {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
-          </p>
-        </button>
-      </div>
-
-      {/* Desempenho de vendas e estoque */}
-      <div className="space-y-4">
-        <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Desempenho de vendas e estoque</h3>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Números com mais vendas</h4>
-            <div className="space-y-3">
-              {sizeRanks.map(s => (
-                <div key={s.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{s.label}</span>
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{s.pct}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${s.pct}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Cores com mais vendas</h4>
-            <div className="space-y-3">
-              {colorRanks.map(c => (
-                <div key={c.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                      <span className="w-2.5 h-2.5 rounded-full border border-border/60 flex-shrink-0" style={{ background: COLOR_SWATCH[c.key] ?? '#999' }} />
-                      {c.label}
-                    </span>
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{c.pct}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${c.pct}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h4 className="text-foreground mb-3" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Tipo com mais vendas</h4>
-            <div className="space-y-3">
-              {typeRanks.map(t => (
-                <div key={t.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-foreground" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{t.label}</span>
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.7rem' }}>{t.pct}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${t.pct}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-              <ListMagnifyingGlassIcon className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div>
-              <h4 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Produtos parados no estoque</h4>
-              <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Baixo giro nos últimos meses — considere oferecer com condição especial</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {stuckProducts.map(p => (
-              <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/60">
-                <ProductThumb src={p.image} alt={p.name} className="w-10 h-10 rounded-lg flex-shrink-0" iconClassName="w-4 h-4" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{p.name}</p>
-                  <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{p.line} · {p.reference}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 700 }}>{p.soldUnits} un.</p>
-                  <p className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>vendidas · giro baixo</p>
-                </div>
+        <Collapse in={expanded}>
+          <Divider mt="sm" />
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" pt="sm">
+            {[
+              { label: 'Endereço', value: client.address },
+              { label: 'CNPJ', value: client.cnpj },
+              { label: 'Representante', value: client.rep },
+            ].map(info => (
+              <div key={info.label}>
+                <Text c="dimmed" size="0.68rem" fw={600}>{info.label}</Text>
+                <Text size="0.82rem" fw={600}>{info.value}</Text>
               </div>
             ))}
-            {stuckProducts.length === 0 && (
-              <p className="text-muted-foreground text-center py-4" style={{ fontSize: '0.8rem' }}>
-                Nenhum produto parado no estoque no momento.
-              </p>
+          </SimpleGrid>
+        </Collapse>
+      </Paper>
+
+      {/* Último pedido e ticket médio */}
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <Paper withBorder radius="lg" p="md">
+          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+            <ClockIcon size={16} />
+          </ThemeIcon>
+          <Text size="0.85rem" fw={600}>Último pedido</Text>
+          <Text className="mono" size="1.05rem" fw={700} mt={2}>{formatOrderDate(client.lastOrder)}</Text>
+        </Paper>
+
+        <Paper withBorder radius="lg" p="md">
+          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+            <ChartBarIcon size={16} />
+          </ThemeIcon>
+          <Text size="0.85rem" fw={600}>Ticket médio por pedido</Text>
+          <Text className="mono" size="1.05rem" fw={700} mt={2}>{formatCurrency(avgTicket)}</Text>
+        </Paper>
+      </SimpleGrid>
+
+      {/* Ações de carrinho */}
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <Paper withBorder radius="lg" p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
+          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+            <PlusIcon size={16} />
+          </ThemeIcon>
+          <Text size="0.85rem" fw={600}>Novo carrinho</Text>
+          <Text c="dimmed" size="0.75rem" mt={2}>Criar um novo carrinho para este cliente</Text>
+        </Paper>
+
+        <Paper withBorder radius="lg" p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
+          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+            <ShoppingCartIcon size={16} />
+          </ThemeIcon>
+          <Group gap={8}>
+            <Text size="0.85rem" fw={600}>Carrinhos</Text>
+            <Badge size="sm" variant="light" color="neutral" circle>{cartCount}</Badge>
+          </Group>
+          <Text c="dimmed" size="0.75rem" mt={2}>
+            {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
+          </Text>
+        </Paper>
+      </SimpleGrid>
+
+      {/* Desempenho de vendas e estoque */}
+      <Stack gap="md">
+        <Title order={3} fw={600} style={{ fontSize: '0.95rem' }}>Desempenho de vendas e estoque</Title>
+
+        <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
+          <RankCard title="Números com mais vendas" items={sizeRanks} />
+          <RankCard
+            title="Cores com mais vendas"
+            items={colorRanks}
+            renderLabel={c => (
+              <Group gap={6} wrap="nowrap">
+                <ColorSwatch color={COLOR_SWATCH[c.key] ?? '#999'} size={10} withShadow={false} style={{ border: '1px solid var(--mantine-color-default-border)' }} />
+                {c.label}
+              </Group>
             )}
-          </div>
-        </div>
-      </div>
+          />
+          <RankCard title="Tipo com mais vendas" items={typeRanks} />
+        </SimpleGrid>
+
+        <Paper withBorder radius="lg" p="lg">
+          <Group gap="sm" mb="sm" wrap="nowrap">
+            <ThemeIcon variant="light" color="gray" size={32} radius="md">
+              <ListMagnifyingGlassIcon size={16} />
+            </ThemeIcon>
+            <div>
+              <Title order={4} fw={600} style={{ fontSize: '0.85rem' }}>Produtos parados no estoque</Title>
+              <Text c="dimmed" size="0.72rem">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
+            </div>
+          </Group>
+          <Stack gap={8}>
+            {stuckProducts.map(p => (
+              <Paper key={p.id} withBorder radius="md" p={10}>
+                <Group gap="sm" wrap="nowrap">
+                  <ProductThumb src={p.image} alt={p.name} size={40} />
+                  <Box miw={0} style={{ flex: 1 }}>
+                    <Text size="0.82rem" fw={600} truncate>{p.name}</Text>
+                    <Text c="dimmed" size="0.7rem" truncate>{p.line} · {p.reference}</Text>
+                  </Box>
+                  <Box ta="right" style={{ flexShrink: 0 }}>
+                    <Text className="mono" size="0.78rem" fw={700}>{p.soldUnits} un.</Text>
+                    <Text c="dimmed" size="0.65rem">vendidas · giro baixo</Text>
+                  </Box>
+                </Group>
+              </Paper>
+            ))}
+            {stuckProducts.length === 0 && (
+              <Text c="dimmed" size="0.8rem" ta="center" py="md">
+                Nenhum produto parado no estoque no momento.
+              </Text>
+            )}
+          </Stack>
+        </Paper>
+      </Stack>
 
       {/* Sugestões de venda */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-          <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Sugestões de venda</h3>
-        </div>
+      <Paper withBorder radius="lg" p="lg">
+        <Title order={3} fw={600} mb="sm" style={{ fontSize: '0.95rem' }}>Sugestões de venda</Title>
 
-        <div className="flex items-center gap-1.5 flex-wrap mb-4">
-          <button
+        <Group gap={6} mb="md">
+          <Button
             onClick={() => setStockFilter('todos')}
-            className={`px-2.5 py-1 rounded-full transition-colors ${stockFilter === 'todos' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-            style={{ fontSize: '0.72rem', fontWeight: 600 }}
+            size="compact-xs"
+            radius="xl"
+            variant={stockFilter === 'todos' ? 'filled' : 'light'}
+            color={stockFilter === 'todos' ? 'neutral' : 'gray'}
           >
             Todos
-          </button>
+          </Button>
           {(Object.keys(STOCK_STATUS_CONFIG) as StockStatusKey[]).map(key => {
-            const cfg = STOCK_STATUS_CONFIG[key];
+            const active = stockFilter === key;
             return (
-              <button
+              <Button
                 key={key}
                 onClick={() => setStockFilter(key)}
-                className={`px-2.5 py-1 rounded-full transition-colors ${stockFilter === key ? 'bg-primary text-primary-foreground' : `${cfg.cls} hover:opacity-80`}`}
-                style={{ fontSize: '0.72rem', fontWeight: 600 }}
+                size="compact-xs"
+                radius="xl"
+                variant={active ? 'filled' : 'light'}
+                color={active ? 'neutral' : STOCK_STATUS_CONFIG[key].color}
               >
-                {cfg.label}
-              </button>
+                {STOCK_STATUS_CONFIG[key].label}
+              </Button>
             );
           })}
-        </div>
+        </Group>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredBuyProducts.map(p => (
-            <BuyProductCard key={p.id} product={p} onBuy={() => onNavigate('order-grade')} />
-          ))}
-          {filteredBuyProducts.length === 0 && (
-            <p className="text-muted-foreground col-span-full text-center py-6" style={{ fontSize: '0.8rem' }}>
-              Nenhum produto encontrado para este filtro.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+        {filteredBuyProducts.length > 0 ? (
+          <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
+            {filteredBuyProducts.map(p => (
+              <BuyProductCard key={p.id} product={p} onBuy={() => onNavigate('order-grade')} />
+            ))}
+          </SimpleGrid>
+        ) : (
+          <Text c="dimmed" size="0.8rem" ta="center" py="lg">
+            Nenhum produto encontrado para este filtro.
+          </Text>
+        )}
+      </Paper>
+    </Stack>
   );
 }
 
-function ProductThumb({ src, alt, className, iconClassName, bordered = true }: { src: string; alt: string; className?: string; iconClassName?: string; bordered?: boolean }) {
+function RankCard({ title, items, renderLabel }: { title: string; items: RankItem[]; renderLabel?: (item: RankItem) => React.ReactNode }) {
+  return (
+    <Paper withBorder radius="lg" p="lg">
+      <Title order={4} fw={600} mb="sm" style={{ fontSize: '0.85rem' }}>{title}</Title>
+      <Stack gap="sm">
+        {items.map(item => (
+          <div key={item.key}>
+            <Group justify="space-between" mb={4} wrap="nowrap">
+              <Text size="0.8rem" fw={600} component="div">{renderLabel ? renderLabel(item) : item.label}</Text>
+              <Text c="dimmed" size="0.7rem" className="mono">{item.pct}%</Text>
+            </Group>
+            <Progress value={item.pct} size={6} radius="xl" color="neutral" />
+          </div>
+        ))}
+      </Stack>
+    </Paper>
+  );
+}
+
+function ProductThumb({ src, alt, size }: { src: string; alt: string; size?: number }) {
   const [imgError, setImgError] = useState(false);
+  // com size: miniatura quadrada com borda; sem size: preenche o container (cartão)
+  const boxProps = size
+    ? { w: size, h: size, style: { borderRadius: 'var(--mantine-radius-md)', border: '1px solid var(--mantine-color-default-border)', flexShrink: 0, overflow: 'hidden' } }
+    : { w: '100%', h: '100%', style: { overflow: 'hidden' } };
 
   return (
-    <div className={`bg-white overflow-hidden ${bordered ? 'border border-border/60' : ''} ${className ?? ''}`}>
+    <Box bg="white" {...boxProps}>
       {!imgError ? (
-        <img src={src} alt={alt} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+        <Image src={src} alt={alt} w="100%" h="100%" fit="cover" onError={() => setImgError(true)} />
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <PackageIcon className={`text-muted-foreground/30 ${iconClassName ?? 'w-8 h-8'}`} />
-        </div>
+        <Center h="100%">
+          <PackageIcon size={size ? 16 : 32} style={{ opacity: 0.3, color: 'var(--mantine-color-dimmed)' }} />
+        </Center>
       )}
-    </div>
+    </Box>
   );
 }
 
 function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: StockStatusKey }; onBuy: () => void }) {
   const cfg = STOCK_STATUS_CONFIG[product.stockStatus];
-  const Icon = cfg.icon;
+  const StatusIcon = cfg.icon;
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
-      <div className="aspect-square relative">
-        <ProductThumb src={product.image} alt={product.name} className="w-full h-full" iconClassName="w-8 h-8" bordered={false} />
-        <span className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full ${cfg.cls}`} style={{ fontSize: '0.62rem', fontWeight: 700 }}>
-          <Icon className="w-3 h-3" /> {cfg.label}
-        </span>
-      </div>
-      <div className="p-3 flex flex-col flex-1">
-        <p className="text-foreground truncate" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{product.name}</p>
-        <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{product.line} · {product.reference}</p>
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/60">
-          <span className="text-foreground mono" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(product.price)}</span>
-          <button
-            onClick={onBuy}
-            className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-            style={{ fontSize: '0.72rem', fontWeight: 600 }}
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <AspectRatio ratio={1}>
+        <Box pos="relative">
+          <ProductThumb src={product.image} alt={product.name} />
+          <Badge
+            size="xs"
+            variant="light"
+            color={cfg.color}
+            leftSection={<StatusIcon size={12} />}
+            styles={badgeStyles}
+            pos="absolute"
+            top={8}
+            left={8}
           >
-            Comprar
-          </button>
-        </div>
-      </div>
-    </div>
+            {cfg.label}
+          </Badge>
+        </Box>
+      </AspectRatio>
+      <Stack gap={0} p="sm" style={{ flex: 1 }}>
+        <Text size="0.82rem" fw={600} truncate>{product.name}</Text>
+        <Text c="dimmed" size="0.7rem" truncate>{product.line} · {product.reference}</Text>
+        <Group justify="space-between" mt="auto" pt={8} style={{ borderTop: '1px solid var(--mantine-color-default-border)', marginTop: 8 }}>
+          <Text className="mono" size="0.85rem" fw={700}>{formatCurrency(product.price)}</Text>
+          <Button onClick={onBuy} size="compact-xs" style={{ fontSize: '0.72rem' }}>Comprar</Button>
+        </Group>
+      </Stack>
+    </Paper>
   );
 }

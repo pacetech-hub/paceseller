@@ -1,0 +1,41 @@
+/* Bento grid de imagens: overlay escurece e mostra a lupa no hover */
+.tile {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color 150ms ease;
+}
+
+.zoomIcon {
+  color: var(--mantine-color-white);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.tile:hover .overlay {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.tile:hover .zoomIcon {
+  opacity: 1;
+}
+
+/* Cartões de produto: borda levemente mais escura no hover */
+.productCard {
+  transition: border-color 150ms ease;
+}
+
+.productCard:hover {
+  border-color: var(--mantine-color-gray-4);
+}

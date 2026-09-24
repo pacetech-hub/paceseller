@@ -7,3 +7,13 @@
 .hoverable:hover {
   background-color: var(--mantine-color-default-hover);
 }
+
+/* Reset para usar um Paper como <button> (cartão clicável) */
+.cardButton {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
