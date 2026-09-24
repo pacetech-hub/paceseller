@@ -92,7 +92,7 @@ export const mantineTheme = createTheme({
     },
     // Botões só com ícone: mesma altura dos campos (42px) e cantos iguais aos demais botões.
     ActionIcon: { defaultProps: { size: "input-md", radius: "md" } },
-    CloseButton: { defaultProps: { size: "input-md", radius: "md" } },
+    CloseButton: { defaultProps: { size: "xl", radius: "md" } },
     SegmentedControl: { defaultProps: { size: CONTROL_SIZE, radius: "md" }, styles: { label: { fontWeight: SEMIBOLD } } },
     Chip: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },
     Checkbox: { defaultProps: { size: CONTROL_SIZE, radius: "sm" } },

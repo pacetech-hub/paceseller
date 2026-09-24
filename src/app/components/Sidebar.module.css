@@ -30,3 +30,20 @@
 .navLabel.navLabel {
   font-size: var(--mantine-font-size-md);
 }
+
+/* Carrinhos/Notificações com texto só em telas largas (≥ 1600px); abaixo disso,
+   ao lado dos itens de navegação, não há espaço e ficam só com ícone + tooltip
+   (classes duplicadas para vencer o display do próprio Indicator) */
+.wideOnly.wideOnly {
+  display: none;
+}
+
+@media (min-width: 100em) {
+  .wideOnly.wideOnly {
+    display: block;
+  }
+
+  .narrowOnly.narrowOnly {
+    display: none;
+  }
+}

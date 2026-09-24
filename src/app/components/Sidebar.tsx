@@ -454,13 +454,13 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           {actions}
 
           {/* Cart(s) — todos os perfis usam multi-carrinhos.
-              Ícone + texto a partir de lg; abaixo disso a barra fica apertada e vira só ícone com tooltip */}
-          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} visibleFrom="lg">
+              Ícone + texto a partir de 1600px; abaixo disso a barra (com os itens de navegação) fica apertada e vira só ícone com tooltip */}
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.wideOnly}>
             <Button onClick={() => onNavigate('carts')} variant="subtle" color="neutral" px="sm" leftSection={<BasketIcon size={16} />}>
               Carrinhos
             </Button>
           </Indicator>
-          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} hiddenFrom="lg">
+          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.narrowOnly}>
             <Tooltip label="Ver carrinhos" withArrow>
               <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" aria-label="Ver carrinhos">
                 <BasketIcon size={16} />
@@ -469,12 +469,12 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           </Indicator>
 
           {/* Notifications — mesma regra do carrinho */}
-          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} visibleFrom="lg">
+          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} className={classes.wideOnly}>
             <Button variant="subtle" color="neutral" px="sm" leftSection={<BellIcon size={16} />}>
               Notificações
             </Button>
           </Indicator>
-          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} hiddenFrom="lg">
+          <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} className={classes.narrowOnly}>
             <Tooltip label="Ver notificações" withArrow>
               <ActionIcon variant="subtle" color="neutral" aria-label="Ver notificações">
                 <BellIcon size={16} />
