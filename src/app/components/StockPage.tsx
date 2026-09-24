@@ -17,6 +17,7 @@ import {
   EditActions, EditButton, filterStock, type StockFilter,
 } from "./StockTable";
 import interactive from "./interactive.module.css";
+import { toast } from "../lib/toast";
 
 type Mode = 'manual' | 'integration';
 
@@ -59,27 +60,36 @@ export function StockPage() {
   const saveEdit = (sku: string) => {
     setItems(prev => prev.map(it => it.sku === sku ? { ...it, stock: draft.stock, min: draft.min, updatedAt: new Date().toISOString().slice(0, 10) } : it));
     setEditing(null);
+    const name = items.find(it => it.sku === sku)?.name ?? sku;
+    toast.success(`Estoque de ${name} atualizado`, 'O novo status e a data de atualização já aparecem na tabela');
+  };
+  const clearFilters = () => {
+    setQuery('');
+    setFilter('todos');
+  };
+  const connect = (provider: string) => {
+    setIntegrationConnected(true);
+    toast.success(`${provider} conectado`, 'A primeira sincronização acontece em até 1 hora; acompanhe o horário abaixo');
   };
 
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="lg">
         {/* Header / mode toggle */}
-        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Group justify="space-between" gap="sm" wrap="wrap">
             <Group gap="sm" wrap="nowrap" flex="1 1 280px" align="flex-start">
-              <ThemeIcon size={40} radius="md" variant="light" flex="none">
+              <ThemeIcon size={40} variant="light" flex="none">
                 <WarehouseIcon size={20} />
               </ThemeIcon>
               <Box flex={1} miw={0}>
-                <Title order={2} size="1.05rem" fw={700} lts="-0.01em">Meu Estoque · Tesla Footwear</Title>
-                <Text c="dimmed" size="0.78rem">
+                <Title order={1} fw={700}>Meu Estoque · Tesla Footwear</Title>
+                <Text c="dimmed" size="sm">
                   Mantenha seu estoque atualizado para que o catálogo mostre alertas de ruptura corretamente para seus clientes finais.
                 </Text>
               </Box>
             </Group>
             <SegmentedControl
-              size="xs"
               w={{ base: '100%', sm: 'auto' }}
               value={mode}
               onChange={v => setMode(v as Mode)}
@@ -89,7 +99,7 @@ export function StockPage() {
                   value: o.value,
                   label: (
                     <Group gap={6} wrap="nowrap">
-                      <Icon size={14} />
+                      <Icon size={16} />
                       {o.label}
                     </Group>
                   ),
@@ -103,19 +113,19 @@ export function StockPage() {
 
         {/* Integration panel */}
         {mode === 'integration' && (
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
-              <ThemeIcon size={36} radius="md" variant="light" flex="none">
+              <ThemeIcon size={36} variant="light" flex="none">
                 <PlugIcon size={16} />
               </ThemeIcon>
               <Box flex={1} miw={0}>
-                <Title order={3} size="0.9rem" fw={600}>Integração com seu sistema de estoque</Title>
-                <Text c="dimmed" size="0.78rem" mt={2}>
+                <Title order={2} fw={600}>Integração com seu sistema de estoque</Title>
+                <Text c="dimmed" size="sm" mt={2}>
                   Sincronize automaticamente seu ERP / sistema de gestão. Os dados são lidos a cada hora.
                 </Text>
               </Box>
               {integrationConnected && (
-                <Badge variant="light" color="teal" leftSection={<CheckCircleIcon size={12} />}>
+                <Badge variant="light" color="teal" leftSection={<CheckCircleIcon size={14} />}>
                   Conectado
                 </Badge>
               )}
@@ -123,23 +133,29 @@ export function StockPage() {
 
             <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm" mb="md">
               {INTEGRATIONS.map(p => (
-                <UnstyledButton key={p} onClick={() => setIntegrationConnected(true)}>
-                  <Paper withBorder radius="md" p="sm" className={interactive.hoverable}>
-                    <Text size="0.82rem" fw={600}>{p}</Text>
-                    <Text c="dimmed" size="0.7rem" mt={2}>Conectar via OAuth</Text>
+                <UnstyledButton key={p} onClick={() => connect(p)}>
+                  <Paper withBorder p="sm" className={interactive.hoverable}>
+                    <Text fw={600}>{p}</Text>
+                    <Text c="dimmed" size="sm" mt={2}>Conectar via OAuth</Text>
                   </Paper>
                 </UnstyledButton>
               ))}
             </SimpleGrid>
 
             {integrationConnected && (
-              <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
+              <Paper withBorder p="sm" bg="var(--mantine-color-gray-0)">
                 <Group justify="space-between" gap="sm">
                   <Group gap="xs" wrap="nowrap">
-                    <ArrowsClockwiseIcon size={14} color="var(--mantine-color-dimmed)" />
-                    <Text c="dimmed" size="0.75rem">Última sincronização: hoje, 14:02 · próxima em 38min</Text>
+                    <ArrowsClockwiseIcon size={16} color="var(--mantine-color-dimmed)" />
+                    <Text c="dimmed" size="sm">Última sincronização: hoje, 14:02 · próxima em 38min</Text>
                   </Group>
-                  <Button variant="default" size="xs">Sincronizar agora</Button>
+                  <Button
+                    variant="default"
+                    leftSection={<ArrowsClockwiseIcon size={16} />}
+                    onClick={() => toast.success('Sincronização iniciada', 'Os saldos da tabela abaixo são atualizados em alguns minutos')}
+                  >
+                    Sincronizar agora
+                  </Button>
                 </Group>
               </Paper>
             )}
@@ -154,7 +170,7 @@ export function StockPage() {
           showBulkActions={mode === 'manual'}
         />
 
-        <Card withBorder radius="lg" padding={0}>
+        <Card withBorder padding={0}>
           <Table.ScrollContainer minWidth={900}>
             <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
               <StockTableHeader labels={HEADERS} />
@@ -164,37 +180,37 @@ export function StockPage() {
                   return (
                     <Table.Tr key={it.sku}>
                       <Table.Td><StockProductCell item={it} /></Table.Td>
-                      <Table.Td><Text c="dimmed" size="0.75rem" className="mono">{it.sku}</Text></Table.Td>
-                      <Table.Td><Text size="0.78rem">{it.line}</Text></Table.Td>
+                      <Table.Td><Text c="dimmed" size="sm" className="mono">{it.sku}</Text></Table.Td>
+                      <Table.Td><Text>{it.line}</Text></Table.Td>
                       <Table.Td>
                         {isEditing ? (
-                          <NumberInput size="xs" w={90} min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
+                          <NumberInput w={110} aria-label="Estoque atual" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
                         ) : (
-                          <Text size="0.82rem" fw={600} className="mono">{it.stock}</Text>
+                          <Text fw={600} className="mono">{it.stock}</Text>
                         )}
                       </Table.Td>
                       <Table.Td>
                         {isEditing ? (
-                          <NumberInput size="xs" w={90} min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
+                          <NumberInput w={110} aria-label="Limiar mínimo" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
                         ) : (
-                          <Text c="dimmed" size="0.78rem" className="mono">{it.min}</Text>
+                          <Text c="dimmed" className="mono">{it.min}</Text>
                         )}
                       </Table.Td>
                       <Table.Td><StockStatusBadge item={it} /></Table.Td>
-                      <Table.Td><Text c="dimmed" size="0.72rem">{it.updatedAt}</Text></Table.Td>
+                      <Table.Td><Text c="dimmed" size="sm">{it.updatedAt}</Text></Table.Td>
                       <Table.Td>
                         {mode === 'manual' ? (
                           isEditing
                             ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
                             : <EditButton onClick={() => startEdit(it)} />
                         ) : (
-                          <Text c="dimmed" size="0.7rem">via ERP</Text>
+                          <Text c="dimmed" size="sm">via ERP</Text>
                         )}
                       </Table.Td>
                     </Table.Tr>
                   );
                 })}
-                {filtered.length === 0 && <StockEmptyRow colSpan={HEADERS.length} />}
+                {filtered.length === 0 && <StockEmptyRow colSpan={HEADERS.length} onClear={clearFilters} />}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>

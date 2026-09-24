@@ -47,38 +47,38 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
         filter={filterByNameOrId}
         limit={8}
         placeholder="Buscar cliente por nome ou código..."
-        nothingFoundMessage="Nenhum cliente encontrado."
+        nothingFoundMessage="Nenhum cliente encontrado. Confira o nome ou busque pelo código do cliente."
         leftSection={<MagnifyingGlassIcon size={14} />}
         renderOption={({ option }) => (
           <Group gap="xs" wrap="nowrap" w="100%">
             <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
-            <Text size="0.82rem" truncate flex={1}>{option.label}</Text>
-            <Text c="dimmed" size="0.7rem" className="mono">{option.value}</Text>
+            <Text truncate flex={1}>{option.label}</Text>
+            <Text c="dimmed" size="sm" className="mono">{option.value}</Text>
           </Group>
         )}
       />
 
       {!selected && (
-        <Paper withBorder radius="lg" py={64}>
+        <Paper withBorder py={64}>
           <Stack align="center" gap="sm">
             <StorefrontIcon size={40} opacity={0.3} />
-            <Text c="dimmed" size="0.88rem">Busque um cliente acima para ver o estoque reportado por ele.</Text>
+            <Text c="dimmed" ta="center" px="md">Nenhum cliente selecionado. Busque um cliente acima pelo nome ou código para ver o estoque reportado por ele.</Text>
           </Stack>
         </Paper>
       )}
 
       {selected && (
         <>
-          <Paper withBorder radius="lg" p="md">
+          <Paper withBorder p="md">
             <Group gap="sm" wrap="nowrap">
-              <ThemeIcon size={40} radius="md" variant="light">
+              <ThemeIcon size={40} variant="light">
                 <StorefrontIcon size={16} />
               </ThemeIcon>
               <Box miw={0}>
-                <Text size="0.92rem" fw={700} truncate>{selected.name}</Text>
+                <Text fw={700} truncate>{selected.name}</Text>
                 <Group gap={6} c="dimmed" wrap="nowrap">
                   <MapPinIcon size={12} style={{ flexShrink: 0 }} />
-                  <Text size="0.75rem" c="dimmed" truncate>{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
+                  <Text size="sm" c="dimmed" truncate>{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
                 </Group>
               </Box>
             </Group>

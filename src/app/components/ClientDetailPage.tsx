@@ -34,8 +34,6 @@ const statusColors: Record<Client['status'], string> = {
   'inativo': 'red',
 };
 
-const badgeStyles = { label: { textTransform: 'none' as const } };
-
 const formatOrderDate = (dateStr: string) =>
   new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
@@ -132,7 +130,6 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         onClick={() => onNavigate('clients')}
         variant="subtle"
         color="gray"
-        size="compact-sm"
         ml={-12}
         leftSection={<CaretLeftIcon size={16} />}
       >
@@ -145,7 +142,13 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
     return (
       <Stack gap="md" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
         {backButton}
-        <Text c="dimmed">Nenhum cliente selecionado.</Text>
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+          <Stack align="flex-start" gap="sm">
+            <Text fw={600}>Nenhum cliente selecionado</Text>
+            <Text c="dimmed" size="sm">Escolha um cliente na lista para ver dados cadastrais, desempenho e sugestões de venda.</Text>
+            <Button variant="default" onClick={() => onNavigate('clients')}>Ver lista de clientes</Button>
+          </Stack>
+        </Paper>
       </Stack>
     );
   }
@@ -161,22 +164,22 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       {backButton}
 
       {/* Header */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group gap="md" wrap="nowrap" miw={0}>
-          <Avatar size={56} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '1rem', fontWeight: 700 } }}>
+          <Avatar size={56} color="neutral" variant="light" styles={{ placeholder: { fontWeight: 700 } }}>
             {client.avatar}
           </Avatar>
           <Box miw={0}>
             <Group gap={8} mb={4}>
-              <Badge size="sm" variant="light" color={statusColors[client.status]} styles={badgeStyles}>{client.status}</Badge>
+              <Badge variant="light" color={statusColors[client.status]}>{client.status}</Badge>
               {client.inadimplente && (
-                <Badge size="sm" variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
+                <Badge variant="light" color="yellow">inadimplente</Badge>
               )}
             </Group>
-            <Title order={2} fw={700} mb={4} fz="1.1rem">{client.name}</Title>
+            <Title order={1} fw={700} mb={4}>{client.name}</Title>
             <Group gap={4} c="dimmed">
               <MapPinIcon size={14} />
-              <Text size="0.8rem" c="dimmed">{client.city}/{client.state}</Text>
+              <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
             </Group>
           </Box>
         </Group>
@@ -185,7 +188,6 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           onClick={() => setExpanded(v => !v)}
           variant="subtle"
           color="neutral"
-          size="compact-sm"
           ml={-12}
           mt="sm"
           rightSection={
@@ -204,8 +206,8 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               { label: 'Representante', value: client.rep },
             ].map(info => (
               <Box key={info.label}>
-                <Text c="dimmed" size="0.68rem" fw={600}>{info.label}</Text>
-                <Text size="0.82rem" fw={600}>{info.value}</Text>
+                <Text c="dimmed" size="sm" fw={600}>{info.label}</Text>
+                <Text fw={600}>{info.value}</Text>
               </Box>
             ))}
           </SimpleGrid>
@@ -214,42 +216,42 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
       {/* Último pedido e ticket médio */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-        <Paper withBorder radius="lg" p="md">
-          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+        <Paper withBorder p="md">
+          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <ClockIcon size={16} />
           </ThemeIcon>
-          <Text size="0.85rem" fw={600}>Último pedido</Text>
-          <Text className="mono" size="1.05rem" fw={700} mt={2}>{formatOrderDate(client.lastOrder)}</Text>
+          <Text fw={600}>Último pedido</Text>
+          <Text className="mono" size="xl" fw={700} mt={2}>{formatOrderDate(client.lastOrder)}</Text>
         </Paper>
 
-        <Paper withBorder radius="lg" p="md">
-          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+        <Paper withBorder p="md">
+          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <ChartBarIcon size={16} />
           </ThemeIcon>
-          <Text size="0.85rem" fw={600}>Ticket médio por pedido</Text>
-          <Text className="mono" size="1.05rem" fw={700} mt={2}>{formatCurrency(avgTicket)}</Text>
+          <Text fw={600}>Ticket médio por pedido</Text>
+          <Text className="mono" size="xl" fw={700} mt={2}>{formatCurrency(avgTicket)}</Text>
         </Paper>
       </SimpleGrid>
 
       {/* Ações de carrinho */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-        <Paper withBorder radius="lg" p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
-          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+        <Paper withBorder p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
+          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <PlusIcon size={16} />
           </ThemeIcon>
-          <Text size="0.85rem" fw={600}>Novo carrinho</Text>
-          <Text c="dimmed" size="0.75rem" mt={2}>Criar um novo carrinho para este cliente</Text>
+          <Text fw={600}>Novo carrinho</Text>
+          <Text c="dimmed" size="sm" mt={2}>Criar um novo carrinho para este cliente</Text>
         </Paper>
 
-        <Paper withBorder radius="lg" p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
-          <ThemeIcon variant="light" color="neutral" size={36} radius="md" mb="sm">
+        <Paper withBorder p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
+          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <ShoppingCartIcon size={16} />
           </ThemeIcon>
           <Group gap={8}>
-            <Text size="0.85rem" fw={600}>Carrinhos</Text>
-            <Badge size="sm" variant="light" color="neutral" circle>{cartCount}</Badge>
+            <Text fw={600}>Carrinhos</Text>
+            <Badge variant="light" color="neutral" circle>{cartCount}</Badge>
           </Group>
-          <Text c="dimmed" size="0.75rem" mt={2}>
+          <Text c="dimmed" size="sm" mt={2}>
             {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
           </Text>
         </Paper>
@@ -257,7 +259,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
       {/* Desempenho de vendas e estoque */}
       <Stack gap="md">
-        <Title order={3} fw={600} fz="0.95rem">Desempenho de vendas e estoque</Title>
+        <Title order={2} fw={600}>Desempenho de vendas e estoque</Title>
 
         <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="md">
           <RankCard title="Números com mais vendas" items={sizeRanks} />
@@ -274,35 +276,35 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <RankCard title="Tipo com mais vendas" items={typeRanks} />
         </SimpleGrid>
 
-        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Group gap="sm" mb="sm" wrap="nowrap">
-            <ThemeIcon variant="light" color="gray" size={32} radius="md">
+            <ThemeIcon variant="light" color="gray" size={32}>
               <ListMagnifyingGlassIcon size={16} />
             </ThemeIcon>
             <Box>
-              <Title order={4} fw={600} fz="0.85rem">Produtos parados no estoque</Title>
-              <Text c="dimmed" size="0.72rem">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
+              <Title order={3} fw={600}>Produtos parados no estoque</Title>
+              <Text c="dimmed" size="sm">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
             </Box>
           </Group>
           <Stack gap={8}>
             {stuckProducts.map(p => (
-              <Paper key={p.id} withBorder radius="md" p={10}>
+              <Paper key={p.id} withBorder p="sm">
                 <Group gap="sm" wrap="nowrap">
                   <ProductThumb src={p.image} alt={p.name} size={40} />
                   <Box miw={0} flex={1}>
-                    <Text size="0.82rem" fw={600} truncate>{p.name}</Text>
-                    <Text c="dimmed" size="0.7rem" truncate>{p.line} · {p.reference}</Text>
+                    <Text fw={600} truncate>{p.name}</Text>
+                    <Text c="dimmed" size="sm" truncate>{p.line} · {p.reference}</Text>
                   </Box>
                   <Box ta="right" flex="none">
-                    <Text className="mono" size="0.78rem" fw={700}>{p.soldUnits} un.</Text>
-                    <Text c="dimmed" size="0.65rem">vendidas · giro baixo</Text>
+                    <Text className="mono" fw={700}>{p.soldUnits} un.</Text>
+                    <Text c="dimmed" size="sm">vendidas · giro baixo</Text>
                   </Box>
                 </Group>
               </Paper>
             ))}
             {stuckProducts.length === 0 && (
-              <Text c="dimmed" size="0.8rem" ta="center" py="md">
-                Nenhum produto parado no estoque no momento.
+              <Text c="dimmed" size="sm" ta="center" py="md">
+                Nenhum produto parado no estoque: todos estão girando bem. Veja as sugestões de venda abaixo.
               </Text>
             )}
           </Stack>
@@ -310,14 +312,12 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       </Stack>
 
       {/* Sugestões de venda */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-        <Title order={3} fw={600} mb="sm" fz="0.95rem">Sugestões de venda</Title>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+        <Title order={2} fw={600} mb="sm">Sugestões de venda</Title>
 
         <Group gap={6} mb="md">
           <Button
             onClick={() => setStockFilter('todos')}
-            size="compact-sm"
-            radius="xl"
             variant={stockFilter === 'todos' ? 'filled' : 'default'}
             color="neutral"
           >
@@ -329,8 +329,6 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               <Button
                 key={key}
                 onClick={() => setStockFilter(key)}
-                size="compact-sm"
-                radius="xl"
                 variant={active ? 'filled' : 'default'}
                 color="neutral"
               >
@@ -347,9 +345,12 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             ))}
           </SimpleGrid>
         ) : (
-          <Text c="dimmed" size="0.8rem" ta="center" py="lg">
-            Nenhum produto encontrado para este filtro.
-          </Text>
+          <Stack align="center" gap="sm" py="lg">
+            <Text c="dimmed" size="sm" ta="center">
+              Nenhum produto deste cliente está em “{stockFilter !== 'todos' ? STOCK_STATUS_CONFIG[stockFilter].label : 'Todos'}” agora.
+            </Text>
+            <Button variant="default" onClick={() => setStockFilter('todos')}>Ver todos os produtos</Button>
+          </Stack>
         )}
       </Paper>
     </Stack>
@@ -358,16 +359,16 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
 function RankCard({ title, items, renderLabel }: { title: string; items: RankItem[]; renderLabel?: (item: RankItem) => React.ReactNode }) {
   return (
-    <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-      <Title order={4} fw={600} mb="sm" fz="0.85rem">{title}</Title>
+    <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+      <Title order={3} fw={600} mb="sm">{title}</Title>
       <Stack gap="sm">
         {items.map(item => (
           <Box key={item.key}>
             <Group justify="space-between" mb={4} wrap="nowrap">
-              <Text size="0.8rem" fw={600} component="div">{renderLabel ? renderLabel(item) : item.label}</Text>
-              <Text c="dimmed" size="0.7rem" className="mono">{item.pct}%</Text>
+              <Text fw={600} component="div">{renderLabel ? renderLabel(item) : item.label}</Text>
+              <Text c="dimmed" size="sm" className="mono">{item.pct}%</Text>
             </Group>
-            <Progress value={item.pct} size={6} radius="xl" color="neutral" />
+            <Progress value={item.pct} size={6} color="neutral" />
           </Box>
         ))}
       </Stack>
@@ -379,7 +380,7 @@ function ProductThumb({ src, alt, size }: { src: string; alt: string; size?: num
   const [imgError, setImgError] = useState(false);
   // com size: miniatura quadrada com borda; sem size: preenche o container (cartão)
   const cardProps = size
-    ? { w: size, h: size, radius: 'md', bd: '1px solid var(--mantine-color-default-border)', flex: 'none' }
+    ? { w: size, h: size, bd: '1px solid var(--mantine-color-default-border)', flex: 'none' }
     : { w: '100%', h: '100%', radius: 0 };
 
   return (
@@ -400,16 +401,14 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
   const StatusIcon = cfg.icon;
 
   return (
-    <Card withBorder radius="lg" padding={0}>
+    <Card withBorder padding={0}>
       <AspectRatio ratio={1}>
         <Box pos="relative">
           <ProductThumb src={product.image} alt={product.name} />
           <Badge
-            size="xs"
             variant="light"
             color={cfg.color}
             leftSection={<StatusIcon size={12} />}
-            styles={badgeStyles}
             pos="absolute"
             top={8}
             left={8}
@@ -419,13 +418,12 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
         </Box>
       </AspectRatio>
       <Stack gap={0} p="sm" flex={1}>
-        <Text size="0.82rem" fw={600} truncate>{product.name}</Text>
-        <Text c="dimmed" size="0.7rem" truncate>{product.line} · {product.reference}</Text>
+        <Text fw={600} truncate>{product.name}</Text>
+        <Text c="dimmed" size="sm" truncate>{product.line} · {product.reference}</Text>
         <Divider mt={8} color="var(--mantine-color-default-border)" />
-        <Group justify="space-between" pt={8}>
-          <Text className="mono" size="0.85rem" fw={700}>{formatCurrency(product.price)}</Text>
-          <Button onClick={onBuy} size="compact-sm">Montar pedido</Button>
-        </Group>
+        {/* preço acima e ação principal no rodapé do cartão, em largura total (cabe nos cartões estreitos do mobile) */}
+        <Text className="mono" size="lg" fw={700} pt={8}>{formatCurrency(product.price)}</Text>
+        <Button onClick={onBuy} fullWidth mt="sm">Montar pedido</Button>
       </Stack>
     </Card>
   );
