@@ -98,10 +98,10 @@ function SettingRow({ label, desc, children }: { label: string; desc: string; ch
   return (
     <Paper withBorder radius="md" p="md" bg="var(--mantine-color-default-hover)">
       <Group justify="space-between" wrap="nowrap" gap="md">
-        <div>
+        <Box>
           <Text size="0.85rem" fw={500}>{label}</Text>
           <Text c="dimmed" size="0.75rem">{desc}</Text>
-        </div>
+        </Box>
         {children}
       </Group>
     </Paper>
@@ -246,12 +246,12 @@ export function AdminPage() {
                     { label: 'Pedido mín.', value: policy.minOrder, mono: true },
                     { label: 'Pagamento', value: policy.payment },
                   ].map(detail => (
-                    <div key={detail.label}>
+                    <Box key={detail.label}>
                       <Text c="dimmed" size="0.7rem">{detail.label}</Text>
                       <Text className={detail.mono ? 'mono' : undefined} size="0.85rem" fw={detail.highlight ? 700 : 500}>
                         {detail.value}
                       </Text>
-                    </div>
+                    </Box>
                   ))}
                 </SimpleGrid>
                 <Text c="dimmed" size="0.72rem">
@@ -316,7 +316,7 @@ export function AdminPage() {
             </Alert>
 
             {/* Critérios */}
-            <div>
+            <Box>
               <Title order={3} fw={600} mb="sm" style={{ fontSize: '0.95rem' }}>Critérios de aplicação</Title>
               <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
                 <PolicySection icon={UserCircleIcon} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
@@ -340,7 +340,7 @@ export function AdminPage() {
                   <CriteriaChips items={criteria.products} />
                 </PolicySection>
               </Box>
-            </div>
+            </Box>
 
             {/* Clientes cobertos */}
             <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
@@ -571,10 +571,10 @@ export function AdminPage() {
                     <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'neutral' : 'gray'} size={36} radius="md">
                       <VisaoIcon size={16} />
                     </ThemeIcon>
-                    <div>
+                    <Box>
                       <Text size="0.85rem" fw={600}>{v.label}</Text>
                       <Text c="dimmed" size="0.72rem">{v.desc}</Text>
-                    </div>
+                    </Box>
                   </Group>
                 </Paper>
               );

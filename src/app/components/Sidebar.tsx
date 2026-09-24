@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Group, Button, ActionIcon, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, ScrollArea, UnstyledButton,
+  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton,
 } from "@mantine/core";
 import {
   SquaresFourIcon,
@@ -120,11 +120,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         justify={isCollapsed ? 'center' : 'flex-start'}
         style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}
       >
-        <img
-          src={teslaLogo}
-          alt="Tesla Footwear"
-          style={{ height: isCollapsed ? 24 : 28, width: 'auto', objectFit: 'contain' }}
-        />
+        <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
         {!isCollapsed && (
           <ActionIcon
             onClick={() => setCollapsed(true)}
@@ -374,7 +370,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         <Group style={{ flex: 1, minWidth: 0 }} gap="sm" wrap="nowrap">
           {currentView !== 'catalog' && (
             <Box pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0, borderRight: '1px solid var(--mantine-color-default-border)' }}>
-              <img src={teslaLogo} alt="Tesla Footwear" style={{ height: 24, width: 'auto', objectFit: 'contain' }} />
+              <Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />
             </Box>
           )}
           {/* Nav items à esquerda quando existem, caso contrário título */}

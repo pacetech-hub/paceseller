@@ -166,7 +166,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
               <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
             </Group>
             <Text size="0.85rem" fw={600}>
-              <span className="mono">{order.id}</span> — {productName}
+              <Text span inherit className="mono">{order.id}</Text> — {productName}
             </Text>
             <Text c="dimmed" size="0.72rem" mt={2}>Representante: {order.rep}</Text>
           </Grid.Col>

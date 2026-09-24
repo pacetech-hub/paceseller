@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Accordion, ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Drawer, Group, ScrollArea,
+  Accordion, ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Drawer, Group, Image, ScrollArea,
   Select, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import {
@@ -132,11 +132,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         justify={isCollapsed ? 'center' : 'flex-start'}
         style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}
       >
-        <img
-          src={teslaLogo}
-          alt="Tesla Footwear"
-          style={{ height: isCollapsed ? 24 : 28, width: 'auto', objectFit: 'contain' }}
-        />
+        <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
         {!isCollapsed && (
           <ActionIcon
             onClick={() => setCollapsed(true)}

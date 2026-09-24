@@ -54,7 +54,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
   );
 
   return (
-    <div>
+    <Box>
       <TextInput
         placeholder="Buscar produto ou referência..."
         value={search}
@@ -100,7 +100,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
           })}
         </Stack>
       </ScrollArea.Autosize>
-    </div>
+    </Box>
   );
 }
 
@@ -273,20 +273,20 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 </Badge>
               </Group>
               <SimpleGrid cols={3} spacing={8}>
-                <div>
+                <Box>
                   <Text c="dimmed" size="0.68rem">Desconto</Text>
                   <Text size="0.82rem" fw={600} c={clientPolicy.discount > 0 ? 'teal.6' : undefined}>
                     {clientPolicy.discount > 0 ? `${clientPolicy.discount}%` : 'sem desconto'}
                   </Text>
-                </div>
-                <div>
+                </Box>
+                <Box>
                   <Text c="dimmed" size="0.68rem">Pagamento padrão</Text>
                   <Text size="0.82rem" fw={600}>{clientPolicy.paymentCondition}</Text>
-                </div>
-                <div>
+                </Box>
+                <Box>
                   <Text c="dimmed" size="0.68rem">Pedido mínimo</Text>
                   <Text size="0.82rem" fw={600}>{formatCurrency(clientPolicy.minOrderValue)}</Text>
-                </div>
+                </Box>
               </SimpleGrid>
             </Paper>
           </Stack>
@@ -304,10 +304,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
         {step === 3 && selectedProduct && (
           <Stack gap="lg">
             <Group justify="space-between" align="flex-start" gap="sm" wrap="nowrap">
-              <div>
+              <Box>
                 <Title order={3} fw={600} size="1rem">{selectedProduct.name}</Title>
                 <Text c="dimmed" size="0.78rem">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
-              </div>
+              </Box>
               <Button onClick={handleAutoFill} variant="light" color="yellow" size="xs" leftSection={<LightningIcon size={14} />} style={{ flexShrink: 0 }}>
                 Sugestão IA
               </Button>
@@ -398,10 +398,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             {/* Subtotal */}
             <Paper withBorder radius="md" px="md" py="sm" bg={highlightBg}>
               <Group justify="space-between" wrap="nowrap">
-                <div>
+                <Box>
                   <Text c="dimmed" size="0.75rem">Subtotal deste produto</Text>
                   <Text size="0.82rem">{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
-                </div>
+                </Box>
                 <Text className="mono" fw={700} style={{ fontSize: '1.2rem' }}>{formatCurrency(totalValue)}</Text>
               </Group>
             </Paper>
@@ -444,10 +444,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 {allGrades.map(({ product, sizes, pairs, value }) => (
                   <Paper key={product.id} withBorder radius="md" p="md">
                     <Group justify="space-between" mb="sm" wrap="nowrap">
-                      <div>
+                      <Box>
                         <Text size="0.85rem" fw={600}>{product.name}</Text>
                         <Text c="dimmed" size="0.72rem">{product.reference}</Text>
-                      </div>
+                      </Box>
                       <Box ta="right">
                         <Text className="mono" fw={700}>{formatCurrency(value)}</Text>
                         <Text c="dimmed" size="0.72rem">{pairs} pares</Text>
@@ -498,10 +498,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 )}
                 <Divider />
                 <Group justify="space-between" wrap="nowrap">
-                  <div>
+                  <Box>
                     <Text c="dimmed" size="0.78rem">Total do pedido</Text>
                     <Text size="0.82rem">{grandPairs} pares · {allGrades.length} produto(s)</Text>
-                  </div>
+                  </Box>
                   <Text className="mono" fw={700} style={{ fontSize: '1.5rem' }}>{formatCurrency(finalTotal)}</Text>
                 </Group>
               </Stack>
