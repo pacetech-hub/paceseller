@@ -1,17 +1,16 @@
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend,
-} from "recharts";
+  Stack, Group, Box, Paper, Text, Title, Button, Badge, SimpleGrid, Grid, Table, Progress, Center,
+} from "@mantine/core";
+import { BarChart, DonutChart } from "@mantine/charts";
 import {
   WarningIcon,
   TrendDownIcon,
   TrendUpIcon,
   LightningIcon,
   ArrowsClockwiseIcon,
-  ChartBarIcon,
   DownloadSimpleIcon,
 } from "@phosphor-icons/react";
-import { selloutData, regionData, topProducts, formatCurrency } from "../data/mockData";
+import { selloutData, regionData, formatCurrency } from "../data/mockData";
 
 const encalheAlerts = [
   { product: 'Mocassim Couro Trançado', sku: 'TCF-2026-003', stock: 240, diasEstoque: 62, region: 'Sul', action: 'Sugerir desconto' },
@@ -27,235 +26,225 @@ const stockByLine = [
 ];
 
 const pieData = [
-  { name: 'Vendido', value: 2860000, color: 'oklch(0.6 0.22 262)' },
-  { name: 'Estoque', value: 140000, color: '#d1d5db' },
+  { name: 'Vendido', value: 2860000, color: 'blue.6' },
+  { name: 'Estoque', value: 140000, color: 'gray.3' },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
+const SELL_IN_COLOR = 'blue.6';
+const SELL_OUT_COLOR = 'orange.5';
+
+const formatK = (v: number) => `${(v / 1000).toFixed(0)}k`;
+
+// dias parado: acima de 60 crítico, acima de 45 atenção
+const daysColor = (days: number) => (days > 60 ? 'red.6' : days > 45 ? 'yellow.7' : undefined);
+
+// barra de giro por linha: >= 95 ótimo, >= 85 ok, abaixo atenção
+const giroBarColor = (giro: number) => (giro >= 95 ? 'teal.5' : giro >= 85 ? 'neutral' : 'yellow.5');
+
+const kpis = [
+  { label: 'Taxa de Sell-out', value: '95.3%', sub: 'Coleção Inverno 2026', trend: 'up', trendVal: '+2,1%', color: 'teal.6' },
+  { label: 'Estoque Parado', value: formatCurrency(140000), sub: 'valor em encalhe', trend: 'down', trendVal: '-R$28k', color: 'red.6' },
+  { label: 'Giro Médio', value: '28 dias', sub: 'da produção à venda', trend: 'up', trendVal: '-3 dias', color: 'black' },
+  { label: 'Alertas Ativos', value: '6', sub: 'produtos em encalhe', trend: 'down', trendVal: '-2 esta semana', color: 'yellow.7' },
+] as const;
+
+function ChartTitle({ children }: { children: React.ReactNode }) {
+  return <Title order={3} fw={600} style={{ fontSize: '0.9rem' }}>{children}</Title>;
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
   return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>{label}</p>
-      {payload.map((entry: any, i: number) => (
-        <p key={i} style={{ color: entry.color, fontSize: '0.8rem', fontWeight: 600 }}>
-          {entry.name}: {entry.value > 1000 ? formatCurrency(entry.value) : `${entry.value}%`}
-        </p>
-      ))}
-    </div>
+    <Group gap={6} wrap="nowrap">
+      <Box w={12} h={12} bg={color} style={{ borderRadius: 3 }} />
+      <Text c="dimmed" size="0.72rem">{label}</Text>
+    </Group>
   );
-};
+}
 
 export function SelloutDashboard() {
-  const selloutRate = 95.3;
-  const overstockValue = 140000;
-  const avgDays = 28;
-
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto w-full">
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {
-            label: 'Taxa de Sell-out', value: `${selloutRate}%`, sub: 'Coleção Inverno 2026',
-            trend: 'up', trendVal: '+2,1%', color: 'text-emerald-400',
-          },
-          {
-            label: 'Estoque Parado', value: formatCurrency(overstockValue), sub: 'valor em encalhe',
-            trend: 'down', trendVal: '-R$28k', color: 'text-red-400',
-          },
-          {
-            label: 'Giro Médio', value: `${avgDays} dias`, sub: 'da produção à venda',
-            trend: 'up', trendVal: '-3 dias', color: 'text-black',
-          },
-          {
-            label: 'Alertas Ativos', value: '6', sub: 'produtos em encalhe',
-            trend: 'down', trendVal: '-2 esta semana', color: 'text-amber-400',
-          },
-        ].map(kpi => (
-          <div key={kpi.label} className="bg-card border border-border rounded-xl p-5">
-            <p className="text-muted-foreground mb-2" style={{ fontSize: '0.78rem', fontWeight: 500 }}>{kpi.label}</p>
-            <p className={`text-foreground mono`} style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{kpi.value}</p>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className={kpi.color} style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                {kpi.trend === 'up' ? <TrendUpIcon className="inline w-3 h-3 mr-0.5" /> : <TrendDownIcon className="inline w-3 h-3 mr-0.5" />}
-                {kpi.trendVal}
-              </span>
-              <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{kpi.sub}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
+        {kpis.map(kpi => {
+          const TrendIcon = kpi.trend === 'up' ? TrendUpIcon : TrendDownIcon;
+          return (
+            <Paper key={kpi.label} withBorder radius="lg" p="lg">
+              <Text c="dimmed" size="0.78rem" fw={500} mb={8}>{kpi.label}</Text>
+              <Text className="mono" fw={700} style={{ fontSize: '1.4rem', letterSpacing: '-0.02em' }}>{kpi.value}</Text>
+              <Group gap={6} mt={6} wrap="nowrap">
+                <Group gap={2} c={kpi.color} wrap="nowrap" style={{ flexShrink: 0 }}>
+                  <TrendIcon size={12} />
+                  <Text size="0.72rem" fw={600} c={kpi.color}>{kpi.trendVal}</Text>
+                </Group>
+                <Text c="dimmed" size="0.72rem" truncate>{kpi.sub}</Text>
+              </Group>
+            </Paper>
+          );
+        })}
+      </SimpleGrid>
 
       {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <Grid gutter="md">
         {/* Sell-in x Sell-out trend */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Evolução Sell-in × Sell-out</h3>
-              <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Jan–Jun 2026 · em R$</p>
-            </div>
-            <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.75rem' }}>
-              <DownloadSimpleIcon className="w-3.5 h-3.5" /> Exportar
-            </button>
-          </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={selloutData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} barGap={4}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="sellIn" name="Sell-in" fill="oklch(0.6 0.22 262)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="sellOut" name="Sell-out" fill="oklch(0.72 0.15 48)" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="flex items-center gap-4 mt-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm" style={{ background: 'oklch(0.6 0.22 262)' }} />
-              <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Sell-in (faturado)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm" style={{ background: 'oklch(0.72 0.15 48)' }} />
-              <span className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>Sell-out (vendido)</span>
-            </div>
-          </div>
-        </div>
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+          <Paper withBorder radius="lg" p="lg" h="100%">
+            <Group justify="space-between" mb="lg">
+              <div>
+                <ChartTitle>Evolução Sell-in × Sell-out</ChartTitle>
+                <Text c="dimmed" size="0.75rem">Jan–Jun 2026 · em R$</Text>
+              </div>
+              <Button variant="subtle" color="gray" size="compact-xs" leftSection={<DownloadSimpleIcon size={14} />}>
+                Exportar
+              </Button>
+            </Group>
+            <BarChart
+              h={200}
+              data={selloutData}
+              dataKey="month"
+              series={[
+                { name: 'sellIn', label: 'Sell-in', color: SELL_IN_COLOR },
+                { name: 'sellOut', label: 'Sell-out', color: SELL_OUT_COLOR },
+              ]}
+              gridAxis="y"
+              tickLine="none"
+              strokeDasharray="3 3"
+              valueFormatter={formatCurrency}
+              yAxisProps={{ tickFormatter: formatK, width: 44 }}
+              barProps={{ radius: [3, 3, 0, 0] }}
+              barChartProps={{ barGap: 4 }}
+            />
+            <Group gap="md" mt="sm">
+              <LegendDot color={SELL_IN_COLOR} label="Sell-in (faturado)" />
+              <LegendDot color={SELL_OUT_COLOR} label="Sell-out (vendido)" />
+            </Group>
+          </Paper>
+        </Grid.Col>
 
         {/* Donut giro */}
-        <div className="bg-card border border-border rounded-xl p-5 flex flex-col">
-          <h3 className="text-foreground mb-4" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Giro da Coleção</h3>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="relative w-40 h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} innerRadius="60%" outerRadius="90%" dataKey="value" strokeWidth={0} startAngle={90} endAngle={-270}>
-                    {pieData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-foreground" style={{ fontSize: '1.4rem', fontWeight: 700 }}>78%</span>
-                <span className="text-muted-foreground" style={{ fontSize: '0.65rem' }}>girado</span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {pieData.map(d => (
-              <div key={d.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />
-                  <span className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>{d.name}</span>
-                </div>
-                <span className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 600 }}>{formatCurrency(d.value)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Paper withBorder radius="lg" p="lg" h="100%" style={{ display: 'flex', flexDirection: 'column' }}>
+            <Box mb="md"><ChartTitle>Giro da Coleção</ChartTitle></Box>
+            <Center style={{ flex: 1 }}>
+              <Box pos="relative">
+                <DonutChart
+                  data={pieData}
+                  size={160}
+                  thickness={24}
+                  startAngle={90}
+                  endAngle={-270}
+                  strokeWidth={0}
+                  withTooltip={false}
+                />
+                <Center pos="absolute" inset={0} style={{ flexDirection: 'column', pointerEvents: 'none' }}>
+                  <Text fw={700} style={{ fontSize: '1.4rem', lineHeight: 1.1 }}>78%</Text>
+                  <Text c="dimmed" size="0.65rem">girado</Text>
+                </Center>
+              </Box>
+            </Center>
+            <Stack gap={8} mt="md">
+              {pieData.map(d => (
+                <Group key={d.name} justify="space-between" wrap="nowrap">
+                  <Group gap={8} wrap="nowrap">
+                    <Box w={10} h={10} bg={d.color} style={{ borderRadius: '50%' }} />
+                    <Text c="dimmed" size="0.75rem">{d.name}</Text>
+                  </Group>
+                  <Text className="mono" size="0.78rem" fw={600}>{formatCurrency(d.value)}</Text>
+                </Group>
+              ))}
+            </Stack>
+          </Paper>
+        </Grid.Col>
+      </Grid>
 
       {/* Performance por linha */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h3 className="text-foreground mb-4" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Performance por Linha</h3>
-          <div className="space-y-4">
+      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+        <Paper withBorder radius="lg" p="lg">
+          <Box mb="md"><ChartTitle>Performance por Linha</ChartTitle></Box>
+          <Stack gap="md">
             {stockByLine.map(line => (
               <div key={line.name}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{line.name}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.72rem' }}>{formatCurrency(line.sellOut)}</span>
-                    <span className={`${line.giro >= 90 ? 'text-emerald-400' : 'text-amber-400'}`} style={{ fontSize: '0.75rem', fontWeight: 700 }}>{line.giro}%</span>
-                  </div>
-                </div>
-                <div className="relative h-2 rounded-full bg-secondary">
-                  <div
-                    className={`absolute inset-y-0 left-0 rounded-full ${line.giro >= 95 ? 'bg-emerald-400' : line.giro >= 85 ? 'bg-primary' : 'bg-amber-400'}`}
-                    style={{ width: `${line.giro}%`, transition: 'width 0.8s ease' }}
-                  />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Sell-out: {formatCurrency(line.sellOut)}</span>
-                  <span className="text-muted-foreground" style={{ fontSize: '0.68rem' }}>Meta: {formatCurrency(line.sellIn)}</span>
-                </div>
+                <Group justify="space-between" mb={6} wrap="nowrap">
+                  <Text size="0.85rem" fw={500}>{line.name}</Text>
+                  <Group gap="sm" wrap="nowrap">
+                    <Text c="dimmed" className="mono" size="0.72rem">{formatCurrency(line.sellOut)}</Text>
+                    <Text size="0.75rem" fw={700} c={line.giro >= 90 ? 'teal.6' : 'yellow.7'}>{line.giro}%</Text>
+                  </Group>
+                </Group>
+                <Progress value={line.giro} size={8} radius="xl" color={giroBarColor(line.giro)} transitionDuration={800} />
+                <Group justify="space-between" mt={4}>
+                  <Text c="dimmed" size="0.68rem">Sell-out: {formatCurrency(line.sellOut)}</Text>
+                  <Text c="dimmed" size="0.68rem">Meta: {formatCurrency(line.sellIn)}</Text>
+                </Group>
               </div>
             ))}
-          </div>
-        </div>
+          </Stack>
+        </Paper>
 
         {/* Regional */}
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h3 className="text-foreground mb-4" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Sell-out por Região</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={regionData} layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
-              <XAxis type="number" tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="region" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="revenue" name="Receita" fill="oklch(0.6 0.22 262)" radius={[0, 3, 3, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+        <Paper withBorder radius="lg" p="lg">
+          <Box mb="md"><ChartTitle>Sell-out por Região</ChartTitle></Box>
+          <BarChart
+            h={200}
+            data={regionData}
+            dataKey="region"
+            orientation="vertical"
+            series={[{ name: 'revenue', label: 'Receita', color: SELL_IN_COLOR }]}
+            gridAxis="x"
+            tickLine="none"
+            strokeDasharray="3 3"
+            valueFormatter={formatCurrency}
+            xAxisProps={{ tickFormatter: formatK }}
+            yAxisProps={{ width: 90 }}
+            barProps={{ radius: [0, 3, 3, 0] }}
+          />
+        </Paper>
+      </SimpleGrid>
 
       {/* Encalhe Alerts */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <WarningIcon className="w-4 h-4 text-amber-400" />
-            <h3 className="text-foreground" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alertas de Encalhe</h3>
-            <span className="px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400" style={{ fontSize: '0.65rem', fontWeight: 700 }}>
+      <Paper withBorder radius="lg" p="lg">
+        <Group justify="space-between" mb="md">
+          <Group gap={8}>
+            <WarningIcon size={16} style={{ color: 'var(--mantine-color-yellow-6)' }} />
+            <ChartTitle>Alertas de Encalhe</ChartTitle>
+            <Badge size="sm" variant="light" color="yellow" styles={{ label: { textTransform: 'none' } }}>
               {encalheAlerts.length} alertas
-            </span>
-          </div>
-          <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors" style={{ fontSize: '0.78rem' }}>
-            <ArrowsClockwiseIcon className="w-3.5 h-3.5" /> Atualizar
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
+            </Badge>
+          </Group>
+          <Button variant="subtle" color="gray" size="compact-xs" leftSection={<ArrowsClockwiseIcon size={14} />}>
+            Atualizar
+          </Button>
+        </Group>
+        <Table.ScrollContainer minWidth={720}>
+          <Table highlightOnHover verticalSpacing="sm" horizontalSpacing={0}>
+            <Table.Thead>
+              <Table.Tr>
                 {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ação sugerida'].map(col => (
-                  <th key={col} className="text-left pb-3 text-muted-foreground pr-4" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{col}</th>
+                  <Table.Th key={col} c="dimmed" fw={500} pr="md" style={{ fontSize: '0.72rem' }}>{col}</Table.Th>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
               {encalheAlerts.map((alert, i) => (
-                <tr key={i} className="border-b border-border/40 hover:bg-secondary/20 transition-colors">
-                  <td className="py-3 pr-4">
-                    <p className="text-foreground" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{alert.product}</p>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-muted-foreground mono" style={{ fontSize: '0.75rem' }}>{alert.sku}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-foreground mono" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{alert.stock}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span
-                      className={`mono ${alert.diasEstoque > 60 ? 'text-red-400' : alert.diasEstoque > 45 ? 'text-amber-400' : 'text-foreground'}`}
-                      style={{ fontSize: '0.82rem', fontWeight: 600 }}
-                    >
-                      {alert.diasEstoque}d
-                    </span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-muted-foreground" style={{ fontSize: '0.78rem' }}>{alert.region}</span>
-                  </td>
-                  <td className="py-3">
-                    <button className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                      <LightningIcon className="w-3 h-3" /> {alert.action}
-                    </button>
-                  </td>
-                </tr>
+                <Table.Tr key={i}>
+                  <Table.Td pr="md"><Text size="0.82rem" fw={500}>{alert.product}</Text></Table.Td>
+                  <Table.Td pr="md"><Text c="dimmed" className="mono" size="0.75rem">{alert.sku}</Text></Table.Td>
+                  <Table.Td pr="md"><Text className="mono" size="0.82rem" fw={600}>{alert.stock}</Text></Table.Td>
+                  <Table.Td pr="md">
+                    <Text className="mono" size="0.82rem" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque}d</Text>
+                  </Table.Td>
+                  <Table.Td pr="md"><Text c="dimmed" size="0.78rem">{alert.region}</Text></Table.Td>
+                  <Table.Td>
+                    <Button variant="light" color="yellow" size="compact-xs" radius="xl" leftSection={<LightningIcon size={12} />}>
+                      {alert.action}
+                    </Button>
+                  </Table.Td>
+                </Table.Tr>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            </Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
+      </Paper>
+    </Stack>
   );
 }

@@ -17,3 +17,17 @@
   color: inherit;
   cursor: pointer;
 }
+
+/* Radio.Card / Checkbox.Card: destaca a opção marcada (cor via --choice-color) */
+.choiceCard {
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.choiceCard:hover {
+  background-color: var(--mantine-color-default-hover);
+}
+
+.choiceCard[data-checked] {
+  border-color: var(--choice-color, var(--mantine-color-neutral-9));
+  background-color: var(--choice-bg, var(--mantine-color-neutral-0));
+}

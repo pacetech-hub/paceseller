@@ -1,5 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import {
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, ThemeIcon,
+  SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider,
+} from "@mantine/core";
+import {
   ShoppingCartIcon,
   TrashIcon,
   PlusIcon,
@@ -20,7 +24,7 @@ import {
 import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./LojistaFiltersSidebar";
 import type { CartContext, CartCreator } from "./CartsListPage";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import classes from "./interactive.module.css";
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -157,422 +161,420 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
 
 
 
+  const badgeStyles = { label: { textTransform: 'none' as const } };
+  // desconto em verde, acréscimo em amarelo
+  const adjColor = (v: number) => (v < 0 ? 'teal.6' : 'yellow.7');
+
+  const handleTableChange = (id: string) => {
+    setTableId(id);
+    setPaymentId((paymentOptionsByTable[id] ?? [])[0]?.id ?? '');
+    setCampaignIds([]);
+  };
+
   if (step === 'done') {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-5">
-            <CheckIcon className="w-8 h-8 text-emerald-400" />
-          </div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.3rem' }}>Pedido enviado para aprovação!</h2>
-          <p className="text-muted-foreground mt-2" style={{ fontSize: '0.85rem' }}>
-            Pedido <span className="text-foreground font-semibold mono">PED-2026-0413</span>
-          </p>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.82rem' }}>
+      <Stack align="center" justify="center" p="lg" mih="60vh">
+        <Stack align="center" gap={0} maw={384} ta="center">
+          <ThemeIcon variant="light" color="teal" size={64} radius="xl" mb="lg">
+            <CheckIcon size={32} />
+          </ThemeIcon>
+          <Title order={2} fw={700} style={{ fontSize: '1.3rem' }}>Pedido enviado para aprovação!</Title>
+          <Text c="dimmed" size="0.85rem" mt={8}>
+            Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>PED-2026-0413</Text>
+          </Text>
+          <Text c="dimmed" size="0.82rem" mt={4}>
             {grandPairs} pares · {formatCurrency(finalTotal)}
-          </p>
-          <p className="text-muted-foreground mt-3 text-sm">Você receberá uma confirmação por e-mail assim que aprovado.</p>
-          <div className="flex gap-3 mt-6 justify-center">
-            <button onClick={() => onNavigate('history')} className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary/60 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>
-              Ver histórico
-            </button>
-            <button onClick={() => onNavigate('catalog')} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              Continuar comprando
-            </button>
-          </div>
-        </div>
-      </div>
+          </Text>
+          <Text c="dimmed" size="sm" mt="sm">Você receberá uma confirmação por e-mail assim que aprovado.</Text>
+          <Group gap="sm" mt="xl" justify="center">
+            <Button onClick={() => onNavigate('history')} variant="default">Ver histórico</Button>
+            <Button onClick={() => onNavigate('catalog')}>Continuar comprando</Button>
+          </Group>
+        </Stack>
+      </Stack>
     );
   }
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full">
+    <Box p="lg" maw={1400} mx="auto" w="100%">
       {cartContext && (
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
+        <Group justify="space-between" gap="sm" mb="md">
+          <Group gap="sm" wrap="nowrap" miw={0}>
+            <Button
               onClick={() => onNavigate('carts')}
-              className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-              style={{ fontSize: '0.78rem' }}
+              variant="subtle"
+              color="gray"
+              size="compact-xs"
+              px={4}
+              leftSection={<CaretLeftIcon size={14} />}
+              styles={{ label: { fontWeight: 400, fontSize: '0.78rem' } }}
             >
-              <CaretLeftIcon className="w-3.5 h-3.5" /> Carrinhos
-            </button>
-            <div className="w-px h-5 bg-border" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-foreground truncate" style={{ fontSize: '1rem', fontWeight: 700 }}>{cartContext.cartName}</p>
+              Carrinhos
+            </Button>
+            <Divider orientation="vertical" h={20} style={{ alignSelf: 'center' }} />
+            <Box miw={0}>
+              <Group gap={8}>
+                <Text size="1rem" fw={700} truncate>{cartContext.cartName}</Text>
                 {cartContext.createdBy && (
-                  <span
-                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${cartContext.createdBy === 'lojista' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'}`}
-                    style={{ fontSize: '0.65rem', fontWeight: 600 }}
+                  <Badge
+                    size="xs"
+                    radius="sm"
+                    variant="light"
+                    color={cartContext.createdBy === 'lojista' ? 'teal' : 'yellow'}
+                    leftSection={cartContext.createdBy === 'lojista' ? <StorefrontIcon size={10} /> : <UserCheckIcon size={10} />}
+                    styles={badgeStyles}
                     title={cartContext.createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante'}
                   >
-                    {cartContext.createdBy === 'lojista' ? <StorefrontIcon className="w-2.5 h-2.5" /> : <UserCheckIcon className="w-2.5 h-2.5" />}
                     {cartContext.createdBy === viewerRole ? 'Você' : cartContext.createdBy === 'lojista' ? 'Lojista' : 'Representante'}
-                  </span>
+                  </Badge>
                 )}
-              </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <StorefrontIcon className="w-3 h-3" />
-                <span className="truncate" style={{ fontSize: '0.75rem' }}>Cliente: <span className="text-foreground" style={{ fontWeight: 600 }}>{cartContext.clientName}</span></span>
-              </div>
-            </div>
-          </div>
+              </Group>
+              <Group gap={6} c="dimmed" wrap="nowrap">
+                <StorefrontIcon size={12} />
+                <Text size="0.75rem" c="dimmed" truncate>
+                  Cliente: <Text span fw={600} c="var(--mantine-color-text)" inherit>{cartContext.clientName}</Text>
+                </Text>
+              </Group>
+            </Box>
+          </Group>
           {multiCart && (
-            <div className="flex items-center gap-2">
-              <button
+            <Group gap={8}>
+              <Button
                 onClick={() => onNavigate('carts')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-                style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                variant="default"
+                size="xs"
+                leftSection={<ListBulletsIcon size={14} />}
                 title="Selecionar outro carrinho"
               >
-                <ListBulletsIcon className="w-3.5 h-3.5" /> Outros carrinhos
-              </button>
-              <button
+                Outros carrinhos
+              </Button>
+              <Button
                 onClick={() => {
                   setNewCartName('');
                   setShowNewCartDialog(true);
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                style={{ fontSize: '0.75rem', fontWeight: 600 }}
+                size="xs"
+                leftSection={<FolderPlusIcon size={14} />}
                 title="Criar outro carrinho para este cliente"
               >
-                <FolderPlusIcon className="w-3.5 h-3.5" /> Novo carrinho
-              </button>
-            </div>
+                Novo carrinho
+              </Button>
+            </Group>
           )}
-        </div>
+        </Group>
       )}
+
       {/* New cart dialog */}
-      <Dialog open={showNewCartDialog} onOpenChange={setShowNewCartDialog}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle style={{ fontSize: '0.95rem' }}>Novo carrinho</DialogTitle>
-            <DialogDescription style={{ fontSize: '0.78rem' }}>
-              Criar carrinho para {cartContext?.clientName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <label className="block text-muted-foreground" style={{ fontSize: '0.72rem' }}>Nome do carrinho</label>
-            <input
-              autoFocus
-              value={newCartName}
-              onChange={e => setNewCartName(e.target.value)}
-              placeholder="Ex.: Reposição Inverno 26"
-              className="w-full px-3 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-              style={{ fontSize: '0.82rem' }}
-            />
+      <Modal
+        opened={showNewCartDialog}
+        onClose={() => setShowNewCartDialog(false)}
+        size="sm"
+        centered
+        title={
+          <div>
+            <Text fw={600} size="0.95rem">Novo carrinho</Text>
+            <Text c="dimmed" size="0.78rem">Criar carrinho para {cartContext?.clientName}</Text>
           </div>
-          <DialogFooter>
-            <button
-              onClick={() => setShowNewCartDialog(false)}
-              className="px-3 py-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 500 }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={() => {
-                onCreateNewCart?.(newCartName.trim() || 'Novo carrinho');
-                setShowNewCartDialog(false);
-                setNewCartName('');
-              }}
-              className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ fontSize: '0.82rem', fontWeight: 600 }}
-            >
-              Criar
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <TextInput
+          data-autofocus
+          label="Nome do carrinho"
+          value={newCartName}
+          onChange={e => setNewCartName(e.currentTarget.value)}
+          placeholder="Ex.: Reposição Inverno 26"
+          styles={{ label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
+        />
+        <Group justify="flex-end" gap={8} mt="lg">
+          <Button onClick={() => setShowNewCartDialog(false)} variant="default">Cancelar</Button>
+          <Button
+            onClick={() => {
+              onCreateNewCart?.(newCartName.trim() || 'Novo carrinho');
+              setShowNewCartDialog(false);
+              setNewCartName('');
+            }}
+          >
+            Criar
+          </Button>
+        </Group>
+      </Modal>
+
       {/* Step indicator */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
+      <Group gap="sm" mb="lg">
+        <Button
           onClick={() => setStep('cart')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${step === 'cart' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          style={{ fontSize: '0.82rem', fontWeight: 600 }}
+          variant={step === 'cart' ? 'filled' : 'subtle'}
+          color={step === 'cart' ? 'neutral' : 'gray'}
+          radius="xl"
+          leftSection={<ShoppingCartIcon size={14} />}
         >
-          <ShoppingCartIcon className="w-3.5 h-3.5" /> Carrinho ({cart.length})
-        </button>
-        <CaretRightIcon className="w-4 h-4 text-muted-foreground" />
-        <button
+          Carrinho ({cart.length})
+        </Button>
+        <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+        <Button
           onClick={() => cart.length > 0 && setStep('checkout')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${step === 'checkout' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          style={{ fontSize: '0.82rem', fontWeight: 600 }}
+          variant={step === 'checkout' ? 'filled' : 'subtle'}
+          color={step === 'checkout' ? 'neutral' : 'gray'}
+          radius="xl"
+          leftSection={<CreditCardIcon size={14} />}
         >
-          <CreditCardIcon className="w-3.5 h-3.5" /> Checkout
-        </button>
-      </div>
+          Checkout
+        </Button>
+      </Group>
 
       {cart.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ShoppingCartIcon className="w-12 h-12 text-muted-foreground/30 mb-4" />
-          <p className="text-foreground" style={{ fontWeight: 600 }}>Carrinho vazio</p>
-          <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Adicione produtos do catálogo para criar um pedido.</p>
-          <button
-            onClick={() => onNavigate('catalog')}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            style={{ fontSize: '0.85rem', fontWeight: 600 }}
-          >
-            Ir ao catálogo
-          </button>
-        </div>
+        <Stack align="center" gap={4} py={80} ta="center">
+          <ShoppingCartIcon size={48} style={{ opacity: 0.3, color: 'var(--mantine-color-dimmed)' }} />
+          <Text fw={600} mt="sm">Carrinho vazio</Text>
+          <Text c="dimmed" size="0.85rem">Adicione produtos do catálogo para criar um pedido.</Text>
+          <Button onClick={() => onNavigate('catalog')} mt="md">Ir ao catálogo</Button>
+        </Stack>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <Grid gutter="lg">
           {/* Items */}
-          <div className="lg:col-span-2 space-y-3">
+          <Grid.Col span={{ base: 12, lg: 8 }}>
             {step === 'cart' ? (
-              cart.map(item => {
-                const { pairs, value } = getItemTotal(item);
-                return (
-                  <div key={item.product.id} className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                        <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-foreground" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{item.product.name}</p>
-                        <p className="text-muted-foreground" style={{ fontSize: '0.72rem' }}>{item.product.reference} · {formatCurrency(item.product.price)}/par</p>
-                        <p className="text-foreground mono mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 700 }}>{formatCurrency(value)}</p>
-                      </div>
-                      <button
-                        onClick={() => removeItem(item.product.id)}
-                        className="text-muted-foreground hover:text-red-400 transition-colors p-1"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(item.sizes).map(([size, qty]) => (
-                        <div key={size} className="flex items-center gap-1.5 rounded-lg border border-border px-2 py-1 bg-secondary/40">
-                          <span className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Nº {size}</span>
-                          <button onClick={() => updateQty(item.product.id, size, -1)} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                            <MinusIcon className="w-2.5 h-2.5" />
-                          </button>
-                          <span className="text-foreground mono" style={{ fontSize: '0.78rem', fontWeight: 600, minWidth: 16, textAlign: 'center' }}>{qty}</span>
-                          <button onClick={() => updateQty(item.product.id, size, 1)} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                            <PlusIcon className="w-2.5 h-2.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground mt-2" style={{ fontSize: '0.72rem' }}>{pairs} pares neste item</p>
-                  </div>
-                );
-              })
+              <Stack gap="sm">
+                {cart.map(item => {
+                  const { pairs, value } = getItemTotal(item);
+                  return (
+                    <Paper key={item.product.id} withBorder radius="lg" p="md">
+                      <Group align="flex-start" gap="sm" mb="sm" wrap="nowrap">
+                        <Box w={64} h={64} bg="var(--mantine-color-default-hover)" style={{ borderRadius: 'var(--mantine-radius-md)', overflow: 'hidden', flexShrink: 0 }}>
+                          <Image src={item.product.image} alt={item.product.name} w="100%" h="100%" fit="cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        </Box>
+                        <Box miw={0} style={{ flex: 1 }}>
+                          <Text size="0.88rem" fw={600}>{item.product.name}</Text>
+                          <Text c="dimmed" size="0.72rem">{item.product.reference} · {formatCurrency(item.product.price)}/par</Text>
+                          <Text className="mono" size="0.85rem" fw={700} mt={2}>{formatCurrency(value)}</Text>
+                        </Box>
+                        <ActionIcon onClick={() => removeItem(item.product.id)} variant="subtle" color="red" aria-label="Remover item">
+                          <TrashIcon size={16} />
+                        </ActionIcon>
+                      </Group>
+                      <Group gap={8}>
+                        {Object.entries(item.sizes).map(([size, qty]) => (
+                          <Paper key={size} withBorder radius="md" px={8} py={4} bg="var(--mantine-color-default-hover)">
+                            <Group gap={6} wrap="nowrap">
+                              <Text c="dimmed" size="0.7rem">Nº {size}</Text>
+                              <ActionIcon onClick={() => updateQty(item.product.id, size, -1)} variant="subtle" color="gray" size={20} aria-label={`Diminuir Nº ${size}`}>
+                                <MinusIcon size={10} />
+                              </ActionIcon>
+                              <Text className="mono" size="0.78rem" fw={600} miw={16} ta="center">{qty}</Text>
+                              <ActionIcon onClick={() => updateQty(item.product.id, size, 1)} variant="subtle" color="gray" size={20} aria-label={`Aumentar Nº ${size}`}>
+                                <PlusIcon size={10} />
+                              </ActionIcon>
+                            </Group>
+                          </Paper>
+                        ))}
+                      </Group>
+                      <Text c="dimmed" size="0.72rem" mt={8}>{pairs} pares neste item</Text>
+                    </Paper>
+                  );
+                })}
+              </Stack>
             ) : (
               /* Checkout — Tabela, Condição, Campanhas */
-              <div className="space-y-4">
+              <Stack gap="md">
                 {/* Tabela de preço aplicada */}
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-foreground flex items-center gap-2" style={{ fontWeight: 600 }}>
-                      <TagIcon className="w-4 h-4 text-primary" /> Política comercial aplicada
-                    </h3>
-                    <select
+                <Paper withBorder radius="lg" p="lg">
+                  <Group justify="space-between" mb="sm" gap="sm">
+                    <Group gap={8}>
+                      <TagIcon size={16} />
+                      <Title order={3} fw={600} size="1rem">Política comercial aplicada</Title>
+                    </Group>
+                    <Select
                       value={tableId}
-                      onChange={e => { setTableId(e.target.value); setPaymentId((paymentOptionsByTable[e.target.value] ?? [])[0]?.id ?? ''); setCampaignIds([]); }}
-                      className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-foreground outline-none focus:border-primary"
-                      style={{ fontSize: '0.78rem' }}
-                    >
-                      {priceTables.map(p => <option key={p.id} value={p.id}>{p.label} — {p.desc}</option>)}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
+                      onChange={v => v && handleTableChange(v)}
+                      data={priceTables.map(pt => ({ value: pt.id, label: `${pt.label} — ${pt.desc}` }))}
+                      allowDeselect={false}
+                      size="xs"
+                      w={260}
+                      aria-label="Tabela de preço"
+                    />
+                  </Group>
+                  <SimpleGrid cols={3} spacing="sm">
                     <div>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Desconto da tabela</p>
-                      <p className="text-foreground mono mt-0.5" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</p>
+                      <Text c="dimmed" size="0.7rem">Desconto da tabela</Text>
+                      <Text className="mono" size="0.9rem" fw={600} mt={2}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
                     </div>
                     <div>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Pagamento padrão</p>
-                      <p className="text-foreground mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{policyDetails.paymentCondition}</p>
+                      <Text c="dimmed" size="0.7rem">Pagamento padrão</Text>
+                      <Text size="0.85rem" fw={600} mt={2}>{policyDetails.paymentCondition}</Text>
                     </div>
                     <div>
-                      <p className="text-muted-foreground" style={{ fontSize: '0.7rem' }}>Pedido mínimo</p>
-                      <p className="text-foreground mono mt-0.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{formatCurrency(policyDetails.minOrderValue)}</p>
+                      <Text c="dimmed" size="0.7rem">Pedido mínimo</Text>
+                      <Text className="mono" size="0.85rem" fw={600} mt={2}>{formatCurrency(policyDetails.minOrderValue)}</Text>
                     </div>
-                  </div>
-                </div>
+                  </SimpleGrid>
+                </Paper>
 
                 {/* Condições de pagamento disponíveis */}
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <h3 className="text-foreground flex items-center gap-2 mb-3" style={{ fontWeight: 600 }}>
-                    <CreditCardIcon className="w-4 h-4 text-primary" /> Condições de pagamento disponíveis
-                  </h3>
-                  <p className="text-muted-foreground mb-3" style={{ fontSize: '0.75rem' }}>
-                    Opções habilitadas para a <span className="text-foreground" style={{ fontWeight: 600 }}>{policy.label}</span>.
-                  </p>
-                  <div className="space-y-2">
-                    {paymentOptions.map(opt => {
-                      const active = paymentId === opt.id;
-                      return (
-                        <label
-                          key={opt.id}
-                          className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${active ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary/40'}`}
-                        >
-                          <input type="radio" name="payment" checked={active} onChange={() => setPaymentId(opt.id)} className="mt-1 accent-primary" />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <p className="text-foreground" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{opt.label}</p>
-                              {opt.surcharge !== 0 && (
-                                <span className={`mono ${opt.surcharge < 0 ? 'text-emerald-400' : 'text-amber-400'}`} style={{ fontSize: '0.75rem', fontWeight: 600 }}>
-                                  {opt.surcharge < 0 ? `${opt.surcharge}%` : `+${opt.surcharge}%`}
-                                </span>
-                              )}
-                            </div>
-                            {opt.description && <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>{opt.description}</p>}
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
+                <Paper withBorder radius="lg" p="lg">
+                  <Group gap={8} mb="sm">
+                    <CreditCardIcon size={16} />
+                    <Title order={3} fw={600} size="1rem">Condições de pagamento disponíveis</Title>
+                  </Group>
+                  <Text c="dimmed" size="0.75rem" mb="sm">
+                    Opções habilitadas para a <Text span fw={600} c="var(--mantine-color-text)" inherit>{policy.label}</Text>.
+                  </Text>
+                  <Radio.Group value={paymentId} onChange={setPaymentId} name="payment">
+                    <Stack gap={8}>
+                      {paymentOptions.map(opt => (
+                        <Radio.Card key={opt.id} value={opt.id} radius="md" p="sm" className={classes.choiceCard}>
+                          <Group align="flex-start" gap="sm" wrap="nowrap">
+                            <Radio.Indicator color="neutral" mt={2} />
+                            <Box style={{ flex: 1 }}>
+                              <Group justify="space-between">
+                                <Text size="0.85rem" fw={600}>{opt.label}</Text>
+                                {opt.surcharge !== 0 && (
+                                  <Text className="mono" size="0.75rem" fw={600} c={adjColor(opt.surcharge)}>
+                                    {opt.surcharge < 0 ? `${opt.surcharge}%` : `+${opt.surcharge}%`}
+                                  </Text>
+                                )}
+                              </Group>
+                              {opt.description && <Text c="dimmed" size="0.72rem" mt={2}>{opt.description}</Text>}
+                            </Box>
+                          </Group>
+                        </Radio.Card>
+                      ))}
+                    </Stack>
+                  </Radio.Group>
+                </Paper>
 
                 {/* Campanhas disponíveis */}
                 {campaigns.length > 0 && (
-                  <div className="bg-card border border-border rounded-xl p-5">
-                    <h3 className="text-foreground flex items-center gap-2 mb-3" style={{ fontWeight: 600 }}>
-                      <SparkleIcon className="w-4 h-4 text-primary" /> Campanhas disponíveis
-                    </h3>
-                    <div className="space-y-2">
-                      {campaigns.map(c => {
-                        const active = campaignIds.includes(c.id);
-                        return (
-                          <label
+                  <Paper withBorder radius="lg" p="lg">
+                    <Group gap={8} mb="sm">
+                      <SparkleIcon size={16} />
+                      <Title order={3} fw={600} size="1rem">Campanhas disponíveis</Title>
+                    </Group>
+                    <Checkbox.Group value={campaignIds} onChange={setCampaignIds}>
+                      <Stack gap={8}>
+                        {campaigns.map(c => (
+                          <Checkbox.Card
                             key={c.id}
-                            className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${active ? 'border-emerald-400/60 bg-emerald-400/5' : 'border-border hover:bg-secondary/40'}`}
+                            value={c.id}
+                            radius="md"
+                            p="sm"
+                            className={classes.choiceCard}
+                            style={{ '--choice-color': 'var(--mantine-color-teal-4)', '--choice-bg': 'var(--mantine-color-teal-0)' } as React.CSSProperties}
                           >
-                            <input
-                              type="checkbox"
-                              checked={active}
-                              onChange={() => setCampaignIds(prev => prev.includes(c.id) ? prev.filter(x => x !== c.id) : [...prev, c.id])}
-                              className="mt-1 accent-emerald-400"
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <p className="text-foreground flex items-center gap-1.5" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                                  <PercentIcon className="w-3 h-3 text-emerald-400" /> {c.name}
-                                </p>
-                                <span className="text-emerald-400 mono" style={{ fontSize: '0.75rem', fontWeight: 600 }}>-{c.discount}%</span>
-                              </div>
-                              <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.72rem' }}>{c.description}</p>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
+                            <Group align="flex-start" gap="sm" wrap="nowrap">
+                              <Checkbox.Indicator color="teal" mt={2} />
+                              <Box style={{ flex: 1 }}>
+                                <Group justify="space-between">
+                                  <Group gap={6}>
+                                    <PercentIcon size={12} style={{ color: 'var(--mantine-color-teal-6)' }} />
+                                    <Text size="0.85rem" fw={600}>{c.name}</Text>
+                                  </Group>
+                                  <Text c="teal.6" className="mono" size="0.75rem" fw={600}>-{c.discount}%</Text>
+                                </Group>
+                                <Text c="dimmed" size="0.72rem" mt={2}>{c.description}</Text>
+                              </Box>
+                            </Group>
+                          </Checkbox.Card>
+                        ))}
+                      </Stack>
+                    </Checkbox.Group>
+                  </Paper>
                 )}
 
                 {/* Observações */}
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <label className="block text-muted-foreground mb-1.5" style={{ fontSize: '0.78rem' }}>Observações</label>
-                  <textarea
+                <Paper withBorder radius="lg" p="lg">
+                  <Textarea
+                    label="Observações"
                     value={obs}
-                    onChange={e => setObs(e.target.value)}
+                    onChange={e => setObs(e.currentTarget.value)}
                     rows={3}
                     placeholder="Informações adicionais..."
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary resize-none"
-                    style={{ fontSize: '0.85rem' }}
+                    styles={{ label: { fontSize: '0.78rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
                   />
-                </div>
+                </Paper>
 
                 {approvalRequired && (
-                  <div className="flex items-start gap-2 rounded-lg bg-amber-400/5 border border-amber-400/20 p-3">
-                    <FileTextIcon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-amber-400" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Aprovação necessária</p>
-                      <p className="text-muted-foreground mt-0.5" style={{ fontSize: '0.75rem' }}>Este pedido passará pela aprovação do representante antes de ser faturado.</p>
-                    </div>
-                  </div>
+                  <Alert
+                    variant="light"
+                    color="yellow"
+                    icon={<FileTextIcon size={16} />}
+                    title={<Text size="0.8rem" fw={600} c="yellow.8">Aprovação necessária</Text>}
+                  >
+                    <Text c="dimmed" size="0.75rem">Este pedido passará pela aprovação do representante antes de ser faturado.</Text>
+                  </Alert>
                 )}
-              </div>
+              </Stack>
             )}
-
-          </div>
+          </Grid.Col>
 
           {/* Summary */}
-          <div className="space-y-4">
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="text-foreground mb-4" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Resumo do pedido</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Valor bruto · {grandPairs} pares</span>
-                  <span className="text-foreground mono" style={{ fontSize: '0.82rem' }}>{formatCurrency(grandTotal)}</span>
-                </div>
-                {tableDiscount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-emerald-400" style={{ fontSize: '0.82rem' }}>Desconto {policy.label} ({policyDetails.discount}%)</span>
-                    <span className="text-emerald-400 mono" style={{ fontSize: '0.82rem' }}>-{formatCurrency(tableDiscount)}</span>
-                  </div>
-                )}
-                {campaignDiscount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-emerald-400" style={{ fontSize: '0.82rem' }}>Campanhas</span>
-                    <span className="text-emerald-400 mono" style={{ fontSize: '0.82rem' }}>-{formatCurrency(campaignDiscount)}</span>
-                  </div>
-                )}
-                {paymentAdj !== 0 && (
-                  <div className="flex justify-between">
-                    <span className={paymentAdj < 0 ? 'text-emerald-400' : 'text-amber-400'} style={{ fontSize: '0.82rem' }}>
-                      Ajuste pagamento
-                    </span>
-                    <span className={`mono ${paymentAdj < 0 ? 'text-emerald-400' : 'text-amber-400'}`} style={{ fontSize: '0.82rem' }}>
-                      {paymentAdj < 0 ? '-' : '+'}{formatCurrency(Math.abs(paymentAdj))}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-primary" style={{ fontSize: '0.82rem', fontWeight: 500 }}>IVA ({(IVA_RATE * 100).toFixed(0)}%)</span>
-                  <span className="text-primary mono" style={{ fontSize: '0.82rem', fontWeight: 500 }}>+{formatCurrency(finalTotal * IVA_RATE)}</span>
-                </div>
-                <div className="h-px bg-border my-2" />
-                <div className="flex justify-between">
-                  <span className="text-foreground" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Total c/ IVA</span>
-                  <span className="text-foreground mono" style={{ fontSize: '1rem', fontWeight: 700 }}>{formatCurrency(finalTotal * (1 + IVA_RATE))}</span>
-                </div>
-                {step === 'checkout' && selectedPayment && (
-                  <div className="text-muted-foreground text-center pt-1" style={{ fontSize: '0.72rem' }}>
-                    Condição: {selectedPayment.label}
-                  </div>
-                )}
-                {belowMin && step === 'checkout' && (
-                  <div className="mt-2 rounded-md bg-amber-400/10 border border-amber-400/30 px-2.5 py-2 text-amber-400" style={{ fontSize: '0.72rem' }}>
-                    Pedido mínimo da {policy.label}: {formatCurrency(policyDetails.minOrderValue)}
-                  </div>
-                )}
-              </div>
-            </div>
+          <Grid.Col span={{ base: 12, lg: 4 }}>
+            <Stack gap="md">
+              <Paper withBorder radius="lg" p="lg">
+                <Title order={3} fw={600} mb="md" style={{ fontSize: '0.9rem' }}>Resumo do pedido</Title>
+                <Stack gap={8}>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text c="dimmed" size="0.72rem" tt="uppercase" style={{ letterSpacing: '0.05em' }}>Valor bruto · {grandPairs} pares</Text>
+                    <Text className="mono" size="0.82rem">{formatCurrency(grandTotal)}</Text>
+                  </Group>
+                  {tableDiscount > 0 && (
+                    <Group justify="space-between" wrap="nowrap">
+                      <Text c="teal.6" size="0.82rem">Desconto {policy.label} ({policyDetails.discount}%)</Text>
+                      <Text c="teal.6" className="mono" size="0.82rem">-{formatCurrency(tableDiscount)}</Text>
+                    </Group>
+                  )}
+                  {campaignDiscount > 0 && (
+                    <Group justify="space-between" wrap="nowrap">
+                      <Text c="teal.6" size="0.82rem">Campanhas</Text>
+                      <Text c="teal.6" className="mono" size="0.82rem">-{formatCurrency(campaignDiscount)}</Text>
+                    </Group>
+                  )}
+                  {paymentAdj !== 0 && (
+                    <Group justify="space-between" wrap="nowrap">
+                      <Text c={adjColor(paymentAdj)} size="0.82rem">Ajuste pagamento</Text>
+                      <Text c={adjColor(paymentAdj)} className="mono" size="0.82rem">
+                        {paymentAdj < 0 ? '-' : '+'}{formatCurrency(Math.abs(paymentAdj))}
+                      </Text>
+                    </Group>
+                  )}
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="0.82rem" fw={500}>IVA ({(IVA_RATE * 100).toFixed(0)}%)</Text>
+                    <Text className="mono" size="0.82rem" fw={500}>+{formatCurrency(finalTotal * IVA_RATE)}</Text>
+                  </Group>
+                  <Divider my={4} />
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="0.9rem" fw={600}>Total c/ IVA</Text>
+                    <Text className="mono" size="1rem" fw={700}>{formatCurrency(finalTotal * (1 + IVA_RATE))}</Text>
+                  </Group>
+                  {step === 'checkout' && selectedPayment && (
+                    <Text c="dimmed" size="0.72rem" ta="center" pt={4}>
+                      Condição: {selectedPayment.label}
+                    </Text>
+                  )}
+                  {belowMin && step === 'checkout' && (
+                    <Alert variant="light" color="yellow" p={8} mt={8}>
+                      <Text c="yellow.8" size="0.72rem">Pedido mínimo da {policy.label}: {formatCurrency(policyDetails.minOrderValue)}</Text>
+                    </Alert>
+                  )}
+                </Stack>
+              </Paper>
 
+              {step === 'cart' ? (
+                <Button onClick={() => setStep('checkout')} size="md" radius="lg" fullWidth rightSection={<CaretRightIcon size={16} />}>
+                  Ir para checkout
+                </Button>
+              ) : (
+                <Button onClick={() => setStep('done')} size="md" radius="lg" fullWidth leftSection={<CheckIcon size={16} />}>
+                  Confirmar pedido
+                </Button>
+              )}
 
-            {step === 'cart' ? (
-              <button
-                onClick={() => setStep('checkout')}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-                style={{ fontWeight: 600, fontSize: '0.9rem' }}
-              >
-                Ir para checkout <CaretRightIcon className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={() => setStep('done')}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-                style={{ fontWeight: 600, fontSize: '0.9rem' }}
-              >
-                <CheckIcon className="w-4 h-4" /> Confirmar pedido
-              </button>
-            )}
-
-            <button
-              onClick={() => onNavigate('catalog')}
-              className="w-full py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-              style={{ fontSize: '0.85rem' }}
-            >
-              Continuar comprando
-            </button>
-          </div>
-        </div>
+              <Button onClick={() => onNavigate('catalog')} variant="default" radius="lg" fullWidth fw={400}>
+                Continuar comprando
+              </Button>
+            </Stack>
+          </Grid.Col>
+        </Grid>
       )}
-    </div>
+    </Box>
   );
 }
