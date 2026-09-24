@@ -70,7 +70,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
               mt="sm"
               leftSection={<CaretLeftIcon size={14} />}
             >
-              Voltar para Pedidos
+              Voltar para pedidos
             </Button>
           </Stack>
         </Paper>
@@ -90,11 +90,11 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           onClick={() => onNavigate('history')}
           variant="subtle"
           color="gray"
-          size="compact-sm"
-          px={4}
+          size="sm"
+          ml={-12}
           leftSection={<CaretLeftIcon size={16} />}
         >
-          Voltar para Pedidos
+          Voltar para pedidos
         </Button>
       </Box>
 
@@ -179,7 +179,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             {profile !== 'rep' && (
               <Anchor component="button" onClick={() => onNavigate('boletos')} c="neutral" size="0.78rem" fw={600}>
                 <Group gap={4} component="span">
-                  Ver em Pagamentos e Boletos <ArrowRightIcon size={14} />
+                  Abrir Pagamentos e Boletos <ArrowRightIcon size={14} />
                 </Group>
               </Anchor>
             )}
@@ -197,7 +197,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 size="xs"
                 leftSection={<DownloadSimpleIcon size={14} />}
               >
-                Baixar NF
+                Baixar nota fiscal
               </Button>
             ) : (
               <Text c="dimmed" size="0.8rem">NF indisponível</Text>

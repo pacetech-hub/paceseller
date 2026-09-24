@@ -135,7 +135,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           {/* column 2: cliente (admin/rep only) */}
           {profile !== 'lojista' && (
             <Box w={COL.client} flex="none" visibleFrom="md">
-              <Text size="0.8rem" fw={500} truncate>{client?.name ?? order.client}</Text>
+              <Text size="0.8rem" fw={600} truncate>{client?.name ?? order.client}</Text>
               <Text c="dimmed" size="0.7rem" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
             </Box>
           )}
@@ -143,13 +143,13 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           {/* column 3: representante (hidden for rep, viewing their own orders) */}
           {profile !== 'rep' && (
             <Box w={COL.rep} flex="none" visibleFrom="md">
-              <Text size="0.8rem" fw={500} truncate>{order.rep}</Text>
+              <Text size="0.8rem" truncate>{order.rep}</Text>
             </Box>
           )}
 
           {/* column 4: quantidade */}
           <Box w={COL.qty} flex="none" visibleFrom="md">
-            <Text size="0.8rem" fw={500} truncate>{order.items} pares</Text>
+            <Text size="0.8rem" truncate>{order.items} pares</Text>
           </Box>
 
           {/* column 5: total */}

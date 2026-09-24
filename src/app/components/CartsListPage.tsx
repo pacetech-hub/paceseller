@@ -149,7 +149,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             leftSection={<PlusIcon size={16} />}
             w={{ base: '100%', xs: 'auto' }}
           >
-            Novo carrinho
+            Criar carrinho
           </Button>
         )}
       </Group>
@@ -261,7 +261,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           />
           <Group justify="flex-end" gap={8} mt="sm">
             <Button onClick={() => setNewOpen(false)} variant="default" size="xs">Cancelar</Button>
-            <Button onClick={handleCreate} size="xs">Criar e abrir</Button>
+            <Button onClick={handleCreate} size="xs">Criar e abrir carrinho</Button>
           </Group>
         </Paper>
       )}
@@ -330,11 +330,11 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
               <Divider color="var(--mantine-color-default-border)" />
               <Group gap={8} p="md" pt="sm" grow>
                 <Button onClick={() => onOpenCart(ctx)} variant="default" size="xs" leftSection={<EyeIcon size={14} />}>
-                  Detalhes
+                  Abrir carrinho
                 </Button>
                 {onGoToCatalog && (
                   <Button onClick={() => onGoToCatalog(ctx)} size="xs" leftSection={<ShoppingBagIcon size={14} />}>
-                    Catálogo
+                    Adicionar produtos
                   </Button>
                 )}
               </Group>
