@@ -1,4 +1,4 @@
-import { Stack, Group, Box, Paper, Text, Button, Badge, Image, ThemeIcon, Grid, Anchor } from "@mantine/core";
+import { Stack, Group, Box, Paper, Text, Title, Button, Badge, Image, ThemeIcon, Grid } from "@mantine/core";
 import { toast } from "../lib/toast";
 import classes from "./OrderDetailPage.module.css";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
@@ -24,9 +24,9 @@ const badgeStyles = { label: { textTransform: 'none' as const } };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb="sm" lts="0.04em">
+    <Title order={2} mb="sm">
       {children}
-    </Text>
+    </Title>
   );
 }
 
@@ -57,18 +57,17 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
   if (!order) {
     return (
       <Box p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
-        <Paper withBorder radius="lg" py={64}>
+        <Paper withBorder py={64}>
           <Stack align="center" gap={4}>
-            <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+            <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
               <PackageIcon size={24} />
             </ThemeIcon>
             <Text fw={600}>Nenhum pedido selecionado</Text>
+            <Text c="dimmed" ta="center">Escolha um pedido no histórico para ver produtos, pagamento e nota fiscal.</Text>
             <Button
               onClick={() => onNavigate('history')}
-              variant="default"
-              size="xs"
-              mt="sm"
-              leftSection={<CaretLeftIcon size={14} />}
+              mt="md"
+              leftSection={<CaretLeftIcon size={16} />}
             >
               Voltar para pedidos
             </Button>
@@ -90,7 +89,6 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           onClick={() => onNavigate('history')}
           variant="subtle"
           color="gray"
-          size="sm"
           ml={-12}
           leftSection={<CaretLeftIcon size={16} />}
         >
@@ -100,24 +98,24 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
 
       {/* Cliente — admin/rep only */}
       {profile !== 'lojista' && client && (
-        <Paper withBorder radius="lg" p="md">
+        <Paper withBorder p="md">
           <SectionTitle>Cliente</SectionTitle>
           <Group gap={8} mb={6}>
-            <Text size="0.95rem" fw={700}>{client.name}</Text>
-            <Badge size="sm" variant="light" color={clientStatusColors[client.status]} styles={badgeStyles}>
+            <Text fw={700}>{client.name}</Text>
+            <Badge variant="light" color={clientStatusColors[client.status]} styles={badgeStyles}>
               {client.status}
             </Badge>
             {client.inadimplente && (
-              <Badge size="sm" variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
+              <Badge variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
             )}
           </Group>
-          <Text c="dimmed" size="0.8rem" mb={2}>{client.cnpj}</Text>
-          <Text c="dimmed" size="0.8rem">{client.city} / {client.state}</Text>
+          <Text c="dimmed" size="sm" mb={2}>{client.cnpj}</Text>
+          <Text c="dimmed" size="sm">{client.city} / {client.state}</Text>
         </Paper>
       )}
 
       {/* Produtos */}
-      <Paper withBorder radius="lg" p="md">
+      <Paper withBorder p="md">
         <SectionTitle>Produtos</SectionTitle>
         <Stack gap="sm">
           {lineItems.length > 0 ? (
@@ -128,35 +126,34 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                   alt={product.name}
                   w={48}
                   h={48}
-                  radius="md"
                   fit="cover"
                   bd="1px solid var(--mantine-color-default-border)"
                   flex="none"
                 />
                 <Box miw={0} flex={1}>
-                  <Text size="0.85rem" fw={600} truncate>{product.name}</Text>
-                  <Text c="dimmed" size="0.72rem">Ref. {product.reference}</Text>
+                  <Text fw={600} truncate>{product.name}</Text>
+                  <Text c="dimmed" size="sm">Ref. {product.reference}</Text>
                 </Box>
-                <Text size="0.85rem" fw={600} flex="none">{quantity} pares</Text>
+                <Text fw={600} flex="none">{quantity} pares</Text>
               </Group>
             ))
           ) : (
             <Group gap="sm" wrap="nowrap">
-              <ThemeIcon variant="default" size={48} radius="md">
+              <ThemeIcon variant="default" size={48}>
                 <PackageIcon size={20} color="var(--mantine-color-dimmed)" />
               </ThemeIcon>
               <Box miw={0} flex={1}>
-                <Text size="0.85rem" fw={600} truncate>{productName}</Text>
-                <Text c="dimmed" size="0.72rem">{order.collection}</Text>
+                <Text fw={600} truncate>{productName}</Text>
+                <Text c="dimmed" size="sm">{order.collection}</Text>
               </Box>
-              <Text size="0.85rem" fw={600} flex="none">{order.items} pares</Text>
+              <Text fw={600} flex="none">{order.items} pares</Text>
             </Group>
           )}
         </Stack>
       </Paper>
 
       {/* Detalhes do pedido */}
-      <Paper withBorder radius="lg" p="md">
+      <Paper withBorder p="md">
         <SectionTitle>Detalhes do pedido</SectionTitle>
         {/* colunas na proporção 1.6 / 1 / 1 (8/5/5 de 18) */}
         <Grid columns={18} gutter={{ base: 'md', sm: 'xl' }}>
@@ -164,43 +161,46 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           <Grid.Col span={{ base: 18, sm: 8 }} miw={0}>
             <Group gap={8} mb={4}>
               <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="0.72rem">{support}</Text>
+              <Text c="dimmed" size="sm">{support}</Text>
             </Group>
-            <Text size="0.85rem" fw={600}>
+            <Text fw={600}>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
             </Text>
-            <Text c="dimmed" size="0.72rem" mt={2}>Representante: {order.rep}</Text>
+            <Text c="dimmed" size="sm" mt={2}>Representante: {order.rep}</Text>
           </Grid.Col>
 
           {/* column 2: value + payment + link to Pagamentos e Boletos */}
           <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
-            <Text className="mono" size="1.05rem" fw={700}>{formatCurrency(order.total)}</Text>
-            <Text c="dimmed" size="0.8rem" mb={6}>{order.paymentCondition}</Text>
+            <Text className="mono" size="xl" fw={700}>{formatCurrency(order.total)}</Text>
+            <Text c="dimmed" size="sm" mb={6}>{order.paymentCondition}</Text>
             {profile !== 'rep' && (
-              <Anchor component="button" onClick={() => onNavigate('boletos')} c="neutral" size="0.78rem" fw={600}>
-                <Group gap={4} component="span">
-                  Abrir Pagamentos e Boletos <ArrowRightIcon size={14} />
-                </Group>
-              </Anchor>
+              <Button
+                onClick={() => onNavigate('boletos')}
+                variant="subtle"
+                color="neutral"
+                ml={-12}
+                rightSection={<ArrowRightIcon size={16} />}
+              >
+                Abrir Pagamentos e Boletos
+              </Button>
             )}
           </Grid.Col>
 
           {/* column 3: NF de compra */}
           <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
-            <Text c="dimmed" size="0.68rem" fw={600} tt="uppercase" mb={6} lts="0.04em">
+            <Text c="dimmed" size="sm" fw={600} mb={6}>
               NF de compra
             </Text>
             {order.status === 'faturado' || order.status === 'entregue' ? (
               <Button
-                onClick={() => toast.success('Nota fiscal baixada')}
+                onClick={() => toast.success('Download da nota fiscal iniciado', 'O PDF vai para a pasta de downloads do navegador')}
                 variant="default"
-                size="xs"
-                leftSection={<DownloadSimpleIcon size={14} />}
+                leftSection={<DownloadSimpleIcon size={16} />}
               >
                 Baixar nota fiscal
               </Button>
             ) : (
-              <Text c="dimmed" size="0.8rem">NF indisponível</Text>
+              <Text c="dimmed" size="sm">A nota fiscal fica disponível aqui quando o pedido for faturado.</Text>
             )}
           </Grid.Col>
         </Grid>

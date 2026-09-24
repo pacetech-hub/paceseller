@@ -64,7 +64,7 @@ function CreatorBadge({ createdBy, viewerRole }: { createdBy?: CartCreator; view
   const label = isViewer ? 'Você' : createdBy === 'lojista' ? 'Lojista' : 'Representante';
   const title = createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante';
   return (
-    <Badge size="xs" radius="sm" variant="light" color={color} leftSection={<CreatorIcon size={10} />} styles={badgeStyles} title={title}>
+    <Badge variant="light" color={color} leftSection={<CreatorIcon size={14} />} styles={badgeStyles} title={title}>
       {label}
     </Badge>
   );
@@ -130,10 +130,10 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
     <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <Group justify="space-between" align="flex-start" gap="sm" mb="lg">
         <Box flex="1 1 260px" miw={0}>
-          <Title order={2} fw={700} fz="1.15rem">
+          <Title order={1}>
             {lockClient ? 'Meus carrinhos' : selectedClient && !showAll ? `Carrinhos de ${selectedClient.name}` : 'Carrinhos em construção'}
           </Title>
-          <Text c="dimmed" size="0.82rem">
+          <Text c="dimmed">
             {lockClient
               ? 'Carrinhos da sua loja. Você pode manter mais de um, e ver os que o representante montou para você.'
               : selectedClient && !showAll
@@ -156,14 +156,14 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
 
       {/* Bloco sem cliente selecionado: busca rápida + atalho para carteira */}
       {!lockClient && !selectedClient && (
-        <Paper withBorder radius="lg" p="md" mb="lg" bg="var(--mantine-color-neutral-0)">
+        <Paper withBorder p="md" mb="lg" bg="var(--mantine-color-neutral-0)">
           <Group gap="sm" mb="sm" wrap="nowrap">
-            <ThemeIcon variant="light" color="neutral" size={32} radius="md">
+            <ThemeIcon variant="light" color="neutral" size={32}>
               <UsersIcon size={16} />
             </ThemeIcon>
             <Box miw={0}>
-              <Text fw={600} size="0.85rem">Selecione um cliente para criar um carrinho</Text>
-              <Text c="dimmed" size="0.75rem">Busque pelo nome ou abra sua carteira de clientes.</Text>
+              <Text fw={600}>Selecione um cliente para criar um carrinho</Text>
+              <Text c="dimmed" size="sm">Busque pelo nome ou abra sua carteira de clientes.</Text>
             </Box>
           </Group>
           <Group gap={8} align="stretch" wrap="wrap">
@@ -191,20 +191,19 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                         setNewOpen(true);
                       }}
                       className={`${classes.cardButton} ${classes.hoverable}`}
-                      radius="sm"
                       bd="none"
                       px="sm"
-                      py={8}
+                      py="sm"
                     >
                       <Group gap={8} wrap="nowrap">
                         <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
-                        <Text size="0.82rem">{c.name}</Text>
-                        <Text c="dimmed" size="0.7rem" ml="auto" className="mono">{c.id}</Text>
+                        <Text>{c.name}</Text>
+                        <Text c="dimmed" size="sm" ml="auto" className="mono">{c.id}</Text>
                       </Group>
                     </Paper>
                   ))
                 ) : (
-                  <Text c="dimmed" size="0.78rem" p="sm">Nenhum cliente encontrado.</Text>
+                  <Text c="dimmed" size="sm" p="sm">Nenhum cliente encontrado. Confira o nome ou busque na carteira de clientes.</Text>
                 )}
               </Popover.Dropdown>
             </Popover>
@@ -222,7 +221,6 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
         <SegmentedControl
           value={showAll ? 'all' : 'client'}
           onChange={v => setShowAll(v === 'all')}
-          size="sm"
           mb="md"
           w={{ base: '100%', xs: 'auto' }}
           data={[
@@ -234,7 +232,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   <ArrowsLeftRightIcon size={14} />
                   Todos os clientes
                   {otherCarts.length > 0 && (
-                    <Badge size="xs" variant="default" radius="sm">+{otherCarts.length}</Badge>
+                    <Badge variant="default">+{otherCarts.length}</Badge>
                   )}
                 </Group>
               ),
@@ -244,11 +242,11 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
       )}
 
       {newOpen && selectedClient && (
-        <Paper withBorder radius="lg" p="md" mb="lg">
-          <Text fw={600} size="0.9rem" mb={4}>Criar novo carrinho</Text>
+        <Paper withBorder p="md" mb="lg">
+          <Title order={2} mb={4}>Criar novo carrinho</Title>
           <Group gap={6} mb="sm" c="dimmed">
             <StorefrontIcon size={12} />
-            <Text size="0.78rem" c="dimmed">
+            <Text size="sm" c="dimmed">
               Cliente: <Text span fw={600} c="var(--mantine-color-text)" inherit>{selectedClient.name}</Text>
             </Text>
           </Group>
@@ -257,11 +255,10 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             value={newName}
             onChange={e => setNewName(e.currentTarget.value)}
             placeholder="Ex.: Reposição Inverno 26"
-            styles={{ label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
           />
           <Group justify="flex-end" gap={8} mt="sm">
-            <Button onClick={() => setNewOpen(false)} variant="default" size="xs">Cancelar</Button>
-            <Button onClick={handleCreate} size="xs">Criar e abrir carrinho</Button>
+            <Button onClick={() => setNewOpen(false)} variant="default">Cancelar</Button>
+            <Button onClick={handleCreate}>Criar e abrir carrinho</Button>
           </Group>
         </Paper>
       )}
@@ -280,32 +277,30 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           const isOther = selectedClient && c.clientId !== selectedClient.id;
           const ctx: CartContext = { id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy };
           return (
-            <Card key={c.id} withBorder radius="lg" padding={0}>
+            <Card key={c.id} withBorder padding={0}>
               <UnstyledButton onClick={() => onOpenCart(ctx)} className={classes.hoverable} p="md" pb={0} flex={1}>
                 <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
-                  <ThemeIcon variant="light" color="neutral" size={40} radius="md">
+                  <ThemeIcon variant="light" color="neutral" size={40}>
                     <ShoppingCartIcon size={16} />
                   </ThemeIcon>
                   <Group gap={8} wrap="nowrap">
                     {isOther && (
                       <Badge
-                        size="xs"
-                        radius="sm"
                         variant="light"
                         color="yellow"
-                        leftSection={<ArrowsLeftRightIcon size={10} />}
+                        leftSection={<ArrowsLeftRightIcon size={14} />}
                         styles={badgeStyles}
                       >
                         troca cliente
                       </Badge>
                     )}
-                    <Text className="mono" size="0.95rem" fw={700}>{formatCurrency(c.total)}</Text>
+                    <Text className="mono" fw={700}>{formatCurrency(c.total)}</Text>
                   </Group>
                 </Group>
-                <Text fw={600} size="0.92rem" truncate>{c.cartName}</Text>
+                <Text fw={600} truncate>{c.cartName}</Text>
                 <Group gap={6} mt={4} c="dimmed" wrap="nowrap">
                   <StorefrontIcon size={12} />
-                  <Text size="0.76rem" c="dimmed" truncate>{c.clientName}</Text>
+                  <Text size="sm" c="dimmed" truncate>{c.clientName}</Text>
                 </Group>
                 <Box mt={8}>
                   <CreatorBadge createdBy={c.createdBy} viewerRole={viewerRole} />
@@ -314,26 +309,26 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                 <SimpleGrid cols={3} spacing={8} pt="sm">
                   <Group gap={4} c="dimmed" wrap="nowrap" title="Itens">
                     <PackageIcon size={12} />
-                    <Text size="0.72rem" c="dimmed">{c.items} itens</Text>
+                    <Text size="sm" c="dimmed">{c.items} itens</Text>
                   </Group>
-                  <Text size="0.72rem" c="dimmed" className="mono" title="Pares">{c.pairs} pares</Text>
+                  <Text size="sm" c="dimmed" className="mono" title="Pares">{c.pairs} pares</Text>
                   <Group gap={4} c="dimmed" wrap="nowrap" justify="flex-end" title="Atualizado">
                     <CalendarBlankIcon size={12} />
-                    <Text size="0.72rem" c="dimmed">{new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
+                    <Text size="sm" c="dimmed">{new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
                   </Group>
                 </SimpleGrid>
                 <Group gap={4} mt={8} pb="md" c="dimmed" wrap="nowrap">
                   <UserIcon size={12} />
-                  <Text size="0.7rem" c="dimmed" truncate>Rep: {c.rep}</Text>
+                  <Text size="sm" c="dimmed" truncate>Rep: {c.rep}</Text>
                 </Group>
               </UnstyledButton>
               <Divider color="var(--mantine-color-default-border)" />
               <Group gap={8} p="md" pt="sm" grow>
-                <Button onClick={() => onOpenCart(ctx)} variant="default" size="xs" leftSection={<EyeIcon size={14} />}>
+                <Button onClick={() => onOpenCart(ctx)} variant="default" leftSection={<EyeIcon size={14} />}>
                   Abrir carrinho
                 </Button>
                 {onGoToCatalog && (
-                  <Button onClick={() => onGoToCatalog(ctx)} size="xs" leftSection={<ShoppingBagIcon size={14} />}>
+                  <Button onClick={() => onGoToCatalog(ctx)} leftSection={<ShoppingBagIcon size={14} />}>
                     Adicionar produtos
                   </Button>
                 )}
@@ -346,11 +341,34 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
       {filtered.length === 0 && (
         <Stack align="center" gap={8} py={64}>
           <ShoppingCartIcon size={40} color="var(--mantine-color-dimmed)" opacity={0.3} />
-          <Text c="dimmed" size="0.88rem" ta="center">
-            {selectedClient && !showAll
+          <Text c="dimmed" ta="center">
+            {q
+              ? `Nenhum carrinho corresponde a "${q}". Limpe a busca ou tente outro nome.`
+              : selectedClient && !showAll
               ? `Nenhum carrinho para ${selectedClient.name} ainda. Crie um novo ou veja carrinhos de outros clientes.`
-              : 'Nenhum carrinho encontrado.'}
+              : canCreate
+              ? 'Nenhum carrinho em construção. Crie um carrinho para começar um pedido.'
+              : 'Nenhum carrinho em construção. Selecione um cliente acima para criar um carrinho.'}
           </Text>
+          {/* Ações para sair do estado vazio: secundária à esquerda, principal à direita */}
+          <Group gap="sm" justify="center" mt="sm">
+            {q ? (
+              <Button onClick={() => setQ('')} variant="default">Limpar busca</Button>
+            ) : (
+              <>
+                {!lockClient && selectedClient && !showAll && (
+                  <Button onClick={() => setShowAll(true)} variant="default" leftSection={<ArrowsLeftRightIcon size={16} />}>
+                    Ver todos os clientes
+                  </Button>
+                )}
+                {canCreate && !newOpen && (
+                  <Button onClick={() => setNewOpen(true)} leftSection={<PlusIcon size={16} />}>
+                    Criar carrinho
+                  </Button>
+                )}
+              </>
+            )}
+          </Group>
         </Stack>
       )}
     </Box>

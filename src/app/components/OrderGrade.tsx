@@ -39,9 +39,9 @@ const highlightBg = 'var(--mantine-color-neutral-0)';
 
 function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <Paper radius="md" p="sm" bg="var(--mantine-color-default-hover)">
-      <Text c="dimmed" size="0.72rem">{label}</Text>
-      <Text size="0.85rem" fw={600}>{value}</Text>
+    <Paper p="sm" bg="var(--mantine-color-default-hover)">
+      <Text c="dimmed" size="sm">{label}</Text>
+      <Text fw={600}>{value}</Text>
     </Paper>
   );
 }
@@ -72,7 +72,6 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
                 type="button"
                 onClick={() => onSelect(p)}
                 className={isSelected ? classes.cardButton : `${classes.cardButton} ${classes.hoverable}`}
-                radius="md"
                 p={8}
                 bd={`1px solid ${isSelected ? 'var(--mantine-color-neutral-3)' : 'transparent'}`}
                 bg={isSelected ? highlightBg : undefined}
@@ -83,15 +82,14 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
                     alt={p.name}
                     w={40}
                     h={40}
-                    radius="sm"
                     fit="cover"
                     bg="var(--mantine-color-default-hover)"
                     flex="none"
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <Box miw={0} flex={1}>
-                    <Text size="0.82rem" fw={600} truncate>{p.name}</Text>
-                    <Text c="dimmed" size="0.7rem">{p.reference} · {formatCurrency(p.price)}</Text>
+                    <Text fw={600} truncate>{p.name}</Text>
+                    <Text c="dimmed" size="sm">{p.reference} · {formatCurrency(p.price)}</Text>
                   </Box>
                   {isSelected && <CheckIcon size={16} />}
                 </Group>
@@ -181,22 +179,29 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
     return (
       <Stack align="center" justify="center" p={{ base: 'md', sm: 'lg' }} mih="60vh">
         <Stack align="center" gap={0} maw={384} ta="center">
-          <ThemeIcon variant="light" color="teal" size={64} radius="xl" mb="lg">
+          <ThemeIcon variant="light" color="teal" size={64} mb="lg">
             <CheckIcon size={32} />
           </ThemeIcon>
-          <Title order={2} fw={700} fz="1.3rem">Pedido enviado!</Title>
-          <Text c="dimmed" size="0.85rem" mt={8} mb={4}>
-            Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>PED-2026-0413</Text> criado com sucesso.
+          <Title order={1}>Pedido enviado para aprovação</Title>
+          <Text c="dimmed" mt={8} mb={4}>
+            Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>PED-2026-0413</Text> para {selectedClientObj.name}
           </Text>
-          <Text c="dimmed" size="0.82rem">
+          <Text c="dimmed">
             {grandPairs} pares · {formatCurrency(finalTotal)}
+          </Text>
+          {/* Próximos passos: o que acontece agora e onde acompanhar */}
+          <Text mt="md">
+            O pedido fica "em análise" até a aprovação comercial. Depois de aprovado, segue para faturamento e o cliente recebe a confirmação por e-mail.
+          </Text>
+          <Text c="dimmed" size="sm" mt={4}>
+            Acompanhe o status em Histórico de pedidos.
           </Text>
           <Group gap="sm" mt="xl" justify="center">
             <Button onClick={() => { setCompleted(false); setStep(1); setGrades({}); }} variant="default">
               Criar novo pedido
             </Button>
             <Button onClick={() => onNavigate('history')}>
-              Ver histórico de pedidos
+              Acompanhar no histórico
             </Button>
           </Group>
         </Stack>
@@ -212,24 +217,23 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Client chip — shown when client was pre-selected */}
       {selectedClient && (
-        <Paper withBorder radius="lg" px="md" py="sm">
+        <Paper withBorder px="md" py="sm">
           <Group gap={10} wrap="nowrap">
             <StorefrontIcon size={16} style={{ flexShrink: 0 }} />
-            <Text c="dimmed" size="0.82rem" flex="none">Pedindo para</Text>
-            <Text size="0.85rem" fw={700} truncate>{selectedClient.name}</Text>
+            <Text c="dimmed" flex="none">Pedindo para</Text>
+            <Text fw={700} truncate>{selectedClient.name}</Text>
           </Group>
         </Paper>
       )}
 
       {/* Stepper */}
-      <Paper withBorder radius="lg" p="md">
+      <Paper withBorder p="md">
         <Stepper
           active={step - 1}
-          size="sm"
           color="neutral"
           allowNextStepsSelect={false}
+          radius="md"
           completedIcon={<CheckIcon size={14} />}
-          styles={{ stepLabel: { fontSize: '0.8rem' } }}
         >
           {steps.map(st => (
             <Stepper.Step
@@ -240,18 +244,18 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           ))}
         </Stepper>
         {/* No mobile os rótulos do stepper ficam ocultos: mostra a etapa atual por extenso */}
-        <Text hiddenFrom="sm" size="0.82rem" ta="center" mt="sm" aria-live="polite">
+        <Text hiddenFrom="sm" ta="center" mt="sm" aria-live="polite">
           <Text span c="dimmed" inherit>Etapa {step} de {steps.length} · </Text>
           <Text span fw={600} inherit>{currentStepLabel}</Text>
         </Text>
       </Paper>
 
       {/* Step Content */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         {/* Step 1: Cliente */}
         {step === 1 && (
           <Stack gap="md">
-            <Title order={3} fw={600} size="1rem">Selecionar cliente</Title>
+            <Title order={3} fw={600}>Selecionar cliente</Title>
             <Select
               label="Cliente"
               value={selectedClientId}
@@ -269,30 +273,30 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             />
 
             {/* Política comercial dinâmica */}
-            <Paper withBorder radius="md" p="sm" bg={highlightBg}>
+            <Paper withBorder p="sm" bg={highlightBg}>
               <Group justify="space-between" mb={8}>
                 <Group gap={6}>
                   <TagIcon size={14} />
-                  <Text c="dimmed" size="0.75rem" fw={600}>Política comercial aplicada</Text>
+                  <Text c="dimmed" size="sm" fw={600}>Política comercial aplicada</Text>
                 </Group>
-                <Badge size="sm" variant="light" color="neutral" styles={{ label: { textTransform: 'none' } }}>
+                <Badge variant="light" color="neutral">
                   {clientPolicy.name}
                 </Badge>
               </Group>
               <SimpleGrid cols={{ base: 1, xs: 3 }} spacing={8}>
                 <Box>
-                  <Text c="dimmed" size="0.68rem">Desconto</Text>
-                  <Text size="0.82rem" fw={600} c={clientPolicy.discount > 0 ? 'teal.6' : undefined}>
+                  <Text c="dimmed" size="sm">Desconto</Text>
+                  <Text fw={600} c={clientPolicy.discount > 0 ? 'teal.6' : undefined}>
                     {clientPolicy.discount > 0 ? `${clientPolicy.discount}%` : 'sem desconto'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text c="dimmed" size="0.68rem">Pagamento padrão</Text>
-                  <Text size="0.82rem" fw={600}>{clientPolicy.paymentCondition}</Text>
+                  <Text c="dimmed" size="sm">Pagamento padrão</Text>
+                  <Text fw={600}>{clientPolicy.paymentCondition}</Text>
                 </Box>
                 <Box>
-                  <Text c="dimmed" size="0.68rem">Pedido mínimo</Text>
-                  <Text size="0.82rem" fw={600}>{formatCurrency(clientPolicy.minOrderValue)}</Text>
+                  <Text c="dimmed" size="sm">Pedido mínimo</Text>
+                  <Text fw={600}>{formatCurrency(clientPolicy.minOrderValue)}</Text>
                 </Box>
               </SimpleGrid>
             </Paper>
@@ -302,7 +306,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
         {/* Step 2: Produtos */}
         {step === 2 && (
           <Stack gap="md">
-            <Title order={3} fw={600} size="1rem">Selecionar produto</Title>
+            <Title order={3} fw={600}>Selecionar produto</Title>
             <ProductSelector selected={selectedProduct} onSelect={setSelectedProduct} />
           </Stack>
         )}
@@ -312,47 +316,47 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           <Stack gap="lg">
             <Group justify="space-between" align="flex-start" gap="sm" wrap="nowrap">
               <Box miw={0}>
-                <Title order={3} fw={600} size="1rem">{selectedProduct.name}</Title>
-                <Text c="dimmed" size="0.78rem">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
+                <Title order={3} fw={600}>{selectedProduct.name}</Title>
+                <Text c="dimmed" size="sm">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </Box>
-              <Button onClick={handleAutoFill} variant="default" size="xs" leftSection={<LightningIcon size={14} />} flex="none">
+              <Button onClick={handleAutoFill} variant="default" leftSection={<LightningIcon size={14} />} flex="none">
                 Sugerir quantidades
               </Button>
             </Group>
 
             {autoFill && (
               <Alert variant="light" color="yellow" icon={<LightningIcon size={14} />} py={8}>
-                <Text size="0.78rem" c="yellow.8">Quantidades sugeridas com base no histórico de giro desta loja.</Text>
+                <Text c="yellow.8">Quantidades sugeridas com base no histórico de giro desta loja. Ajuste qualquer numeração antes de revisar.</Text>
               </Alert>
             )}
 
             {/* Grade Table */}
-            <Table.ScrollContainer minWidth={900}>
+            <Table.ScrollContainer minWidth={1600}>
               <Table withRowBorders horizontalSpacing={4}>
                 <Table.Thead>
                   <Table.Tr bd="none">
-                    <Table.Th c="dimmed" fw={600} fz="0.72rem">Numeração</Table.Th>
+                    <Table.Th c="dimmed" fw={600} fz="sm">Numeração</Table.Th>
                     {SIZES.map(sz => (
-                      <Table.Th key={sz} c="dimmed" fw={600} ta="center" fz="0.72rem">Nº {sz}</Table.Th>
+                      <Table.Th key={sz} c="dimmed" fw={600} ta="center" fz="sm">Nº {sz}</Table.Th>
                     ))}
-                    <Table.Th c="dimmed" fw={600} ta="right" fz="0.72rem">Total</Table.Th>
+                    <Table.Th c="dimmed" fw={600} ta="right" fz="sm">Total</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   <Table.Tr>
-                    <Table.Td c="dimmed" fz="0.78rem">Estoque</Table.Td>
+                    <Table.Td c="dimmed" fz="sm">Estoque</Table.Td>
                     {SIZES.map(sz => {
                       const stock = selectedProduct.grades[sz] || 0;
                       return (
                         <Table.Td key={sz} ta="center">
-                          <Text span className="mono" size="0.78rem" c={stockColor(stock)}>{stock}</Text>
+                          <Text span className="mono" size="sm" c={stockColor(stock)}>{stock}</Text>
                         </Table.Td>
                       );
                     })}
                     <Table.Td />
                   </Table.Tr>
                   <Table.Tr>
-                    <Table.Td fw={600} fz="0.82rem">Quantidade</Table.Td>
+                    <Table.Td fw={600}>Quantidade</Table.Td>
                     {SIZES.map(sz => {
                       const qty = currentGrades[sz] || 0;
                       const stock = selectedProduct.grades[sz] || 0;
@@ -360,8 +364,8 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                       return (
                         <Table.Td key={sz} ta="center" py="sm">
                           <Group gap={4} justify="center" wrap="nowrap">
-                            <ActionIcon onClick={() => setQty(sz, qty - 1)} disabled={qty === 0} variant="light" color="gray" size={24} aria-label={`Diminuir Nº ${sz}`}>
-                              <MinusIcon size={12} />
+                            <ActionIcon onClick={() => setQty(sz, qty - 1)} disabled={qty === 0} variant="light" color="gray" size="input-sm" aria-label={`Diminuir Nº ${sz}`}>
+                              <MinusIcon size={16} />
                             </ActionIcon>
                             <NumberInput
                               value={qty}
@@ -372,30 +376,28 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                               allowNegative={false}
                               allowDecimal={false}
                               hideControls
-                              size="xs"
-                              w={40}
+                              w={56}
                               error={over}
                               aria-label={`Quantidade Nº ${sz}`}
                               styles={{
                                 input: {
                                   textAlign: 'center',
-                                  paddingInline: 2,
+                                  paddingInline: 4,
                                   fontWeight: 600,
-                                  fontSize: '0.82rem',
                                   borderColor: over ? undefined : qty > 0 ? 'var(--mantine-color-neutral-5)' : undefined,
                                 },
                               }}
                             />
-                            <ActionIcon onClick={() => setQty(sz, qty + 1)} disabled={qty >= stock} variant="light" color="gray" size={24} aria-label={`Aumentar Nº ${sz}`}>
-                              <PlusIcon size={12} />
+                            <ActionIcon onClick={() => setQty(sz, qty + 1)} disabled={qty >= stock} variant="light" color="gray" size="input-sm" aria-label={`Aumentar Nº ${sz}`}>
+                              <PlusIcon size={16} />
                             </ActionIcon>
                           </Group>
-                          {over && <Text c="red.6" mt={2} fz="0.6rem">Sem estoque</Text>}
+                          {over && <Text c="red.6" mt={2} size="sm">Acima do estoque ({stock})</Text>}
                         </Table.Td>
                       );
                     })}
                     <Table.Td ta="right">
-                      <Text span className="mono" fw={700} size="0.9rem">{totalPairs}</Text>
+                      <Text span className="mono" fw={700}>{totalPairs}</Text>
                     </Table.Td>
                   </Table.Tr>
                 </Table.Tbody>
@@ -403,13 +405,13 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             </Table.ScrollContainer>
 
             {/* Subtotal */}
-            <Paper withBorder radius="md" px="md" py="sm" bg={highlightBg}>
+            <Paper withBorder px="md" py="sm" bg={highlightBg}>
               <Group justify="space-between" gap="xs">
                 <Box>
-                  <Text c="dimmed" size="0.75rem">Subtotal deste produto</Text>
-                  <Text size="0.82rem">{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
+                  <Text c="dimmed" size="sm">Subtotal deste produto</Text>
+                  <Text>{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
                 </Box>
-                <Text className="mono" fw={700} fz="1.2rem">{formatCurrency(totalValue)}</Text>
+                <Text className="mono" fw={700} size="xl">{formatCurrency(totalValue)}</Text>
               </Group>
             </Paper>
 
@@ -422,7 +424,6 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 }}
                 variant="subtle"
                 color="neutral"
-                size="sm"
                 ml={-12}
                 leftSection={<PlusIcon size={16} />}
               >
@@ -435,7 +436,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
         {/* Step 4: Revisão */}
         {step === 4 && (
           <Stack gap="lg">
-            <Title order={3} fw={600} size="1rem">Revisão do pedido</Title>
+            <Title order={3} fw={600}>Revisão do pedido</Title>
 
             <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
               <InfoTile label="Cliente" value={selectedClientObj.name} />
@@ -444,25 +445,25 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
             {allGrades.length === 0 ? (
               <Alert variant="light" color="yellow" icon={<WarningCircleIcon size={16} />}>
-                <Text size="0.8rem" c="yellow.8">Nenhum produto com quantidade adicionado.</Text>
+                <Text c="yellow.8">Nenhum produto com quantidade adicionado. Volte para a grade e informe as quantidades por numeração.</Text>
               </Alert>
             ) : (
               <Stack gap="sm">
                 {allGrades.map(({ product, sizes, pairs, value }) => (
-                  <Paper key={product.id} withBorder radius="md" p="md">
+                  <Paper key={product.id} withBorder p="md">
                     <Group justify="space-between" mb="sm" wrap="nowrap">
                       <Box miw={0}>
-                        <Text size="0.85rem" fw={600}>{product.name}</Text>
-                        <Text c="dimmed" size="0.72rem">{product.reference}</Text>
+                        <Text fw={600}>{product.name}</Text>
+                        <Text c="dimmed" size="sm">{product.reference}</Text>
                       </Box>
                       <Box ta="right">
                         <Text className="mono" fw={700}>{formatCurrency(value)}</Text>
-                        <Text c="dimmed" size="0.72rem">{pairs} pares</Text>
+                        <Text c="dimmed" size="sm">{pairs} pares</Text>
                       </Box>
                     </Group>
                     <Group gap={8}>
                       {SIZES.map(sz => sizes[sz] > 0 && (
-                        <Badge key={sz} variant="light" color="neutral" radius="sm" className="mono" styles={{ label: { textTransform: 'none' } }}>
+                        <Badge key={sz} variant="light" color="neutral" className="mono">
                           {sz}: {sizes[sz]}
                         </Badge>
                       ))}
@@ -478,38 +479,37 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               onChange={e => setObs(e.currentTarget.value)}
               rows={3}
               placeholder="Informações adicionais para o pedido..."
-              styles={{ label: { fontSize: '0.78rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
             />
 
             {/* Aviso pedido mínimo */}
             {allGrades.length > 0 && finalTotal < clientPolicy.minOrderValue && (
               <Alert variant="light" color="yellow" icon={<WarningCircleIcon size={14} />} py={8}>
-                <Text size="0.78rem" c="yellow.8">
-                  Pedido abaixo do mínimo de {formatCurrency(clientPolicy.minOrderValue)} para {clientPolicy.name}.
+                <Text c="yellow.8">
+                  Pedido abaixo do mínimo de {formatCurrency(clientPolicy.minOrderValue)} para {clientPolicy.name}. Adicione {formatCurrency(clientPolicy.minOrderValue - finalTotal)} em produtos para enviar sem ajuste.
                 </Text>
               </Alert>
             )}
 
             {/* Breakdown de valor */}
-            <Paper withBorder radius="lg" px={{ base: 'md', sm: 'lg' }} py="md" bg={highlightBg}>
+            <Paper withBorder px={{ base: 'md', sm: 'lg' }} py="md" bg={highlightBg}>
               <Stack gap={8}>
                 <Group justify="space-between">
-                  <Text c="dimmed" size="0.78rem">Subtotal</Text>
-                  <Text className="mono" size="0.9rem">{formatCurrency(grandTotal)}</Text>
+                  <Text c="dimmed" size="sm">Subtotal</Text>
+                  <Text className="mono">{formatCurrency(grandTotal)}</Text>
                 </Group>
                 {discountPct > 0 && (
                   <Group justify="space-between">
-                    <Text c="teal.6" size="0.78rem">Desconto {clientPolicy.name} ({discountPct}%)</Text>
-                    <Text c="teal.6" className="mono" size="0.9rem">-{formatCurrency(discountAmount)}</Text>
+                    <Text c="teal.6" size="sm">Desconto {clientPolicy.name} ({discountPct}%)</Text>
+                    <Text c="teal.6" className="mono">-{formatCurrency(discountAmount)}</Text>
                   </Group>
                 )}
                 <Divider />
                 <Group justify="space-between" gap="xs">
                   <Box>
-                    <Text c="dimmed" size="0.78rem">Total do pedido</Text>
-                    <Text size="0.82rem">{grandPairs} pares · {allGrades.length} produto(s)</Text>
+                    <Text c="dimmed" size="sm">Total do pedido</Text>
+                    <Text>{grandPairs} pares · {allGrades.length} produto(s)</Text>
                   </Box>
-                  <Text className="mono" fw={700} fz={{ base: '1.25rem', sm: '1.5rem' }}>{formatCurrency(finalTotal)}</Text>
+                  <Text className="mono" fw={700} size="xl">{formatCurrency(finalTotal)}</Text>
                 </Group>
               </Stack>
             </Paper>
@@ -530,7 +530,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
         <Group gap="sm">
           {allGrades.length > 0 && step < 4 && (
-            <Text c="dimmed" size="0.78rem" visibleFrom="xs">
+            <Text c="dimmed" size="sm" visibleFrom="xs">
               <Text span fw={600} c="var(--mantine-color-text)" inherit>{grandPairs}</Text> pares · {formatCurrency(grandTotal)}
             </Text>
           )}

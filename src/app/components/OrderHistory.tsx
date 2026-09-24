@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Box, Center, Paper, Text, TextInput, Chip, Badge, ThemeIcon, UnstyledButton, Card } from "@mantine/core";
+import { Stack, Group, Box, Center, Paper, Text, TextInput, Button, Chip, Badge, ThemeIcon, UnstyledButton, Card } from "@mantine/core";
 import historyClasses from "./OrderHistory.module.css";
 import {
   MagnifyingGlassIcon,
@@ -47,11 +47,10 @@ export function OrderStatusBadge({ status }: { status: string }) {
   const StatusIcon = statusIcon[status];
   return (
     <Badge
-      size="sm"
       variant="light"
       color={statusColors[status]}
       leftSection={<StatusIcon size={12} />}
-      styles={{ root: { flexShrink: 0 }, label: { textTransform: 'none' } }}
+      styles={{ root: { flexShrink: 0 } }}
     >
       {status}
     </Badge>
@@ -102,7 +101,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <Card withBorder radius="lg" padding={0}>
+    <Card withBorder padding={0}>
       <UnstyledButton
         onClick={onOpen}
         className={classes.hoverable}
@@ -114,47 +113,47 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           <Box flex={1} miw={0}>
             <Group gap={6} mb={4}>
               <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="0.72rem">{support}</Text>
+              <Text c="dimmed" size="sm">{support}</Text>
             </Group>
-            <Text size="0.85rem" fw={600} truncate>
+            <Text fw={600} truncate>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
             </Text>
             {/* Resumo compacto das colunas abaixo do breakpoint md */}
             <Group hiddenFrom="md" justify="space-between" gap="xs" mt={6} wrap="nowrap">
-              <Text c="dimmed" size="0.75rem" truncate>
+              <Text c="dimmed" size="sm" truncate>
                 {[
                   profile !== 'lojista' ? client?.name ?? order.client : null,
                   profile !== 'rep' ? order.rep : null,
                   `${order.items} pares`,
                 ].filter(Boolean).join(' · ')}
               </Text>
-              <Text className="mono" size="0.9rem" fw={700} flex="none">{formatCurrency(order.total)}</Text>
+              <Text className="mono" fw={700} flex="none">{formatCurrency(order.total)}</Text>
             </Group>
           </Box>
 
           {/* column 2: cliente (admin/rep only) */}
           {profile !== 'lojista' && (
             <Box w={COL.client} flex="none" visibleFrom="md">
-              <Text size="0.8rem" fw={600} truncate>{client?.name ?? order.client}</Text>
-              <Text c="dimmed" size="0.7rem" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
+              <Text fw={600} truncate>{client?.name ?? order.client}</Text>
+              <Text c="dimmed" size="sm" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
             </Box>
           )}
 
           {/* column 3: representante (hidden for rep, viewing their own orders) */}
           {profile !== 'rep' && (
             <Box w={COL.rep} flex="none" visibleFrom="md">
-              <Text size="0.8rem" truncate>{order.rep}</Text>
+              <Text truncate>{order.rep}</Text>
             </Box>
           )}
 
           {/* column 4: quantidade */}
           <Box w={COL.qty} flex="none" visibleFrom="md">
-            <Text size="0.8rem" truncate>{order.items} pares</Text>
+            <Text truncate>{order.items} pares</Text>
           </Box>
 
           {/* column 5: total */}
           <Box w={COL.total} flex="none" ta="right" visibleFrom="md">
-            <Text className="mono" size="0.95rem" fw={700} truncate>{formatCurrency(order.total)}</Text>
+            <Text className="mono" fw={700} truncate>{formatCurrency(order.total)}</Text>
           </Box>
 
           <Center w={COL.caret} flex="none">
@@ -187,6 +186,8 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
     })
     .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
 
+  const hasFilters = search.trim() !== '' || statusFilter !== 'todos';
+
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Filters */}
@@ -202,7 +203,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
           <Group gap={6}>
             {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral" size="sm" styles={{ label: { textTransform: 'capitalize' } }}>
+              <Chip key={s} value={s} variant="filled" color="neutral" styles={{ label: { textTransform: 'capitalize' } }}>
                 {s}
               </Chip>
             ))}
@@ -215,17 +216,14 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         {filtered.length > 0 && (
           <Paper
             withBorder
-            radius="lg"
             px="md"
             py={10}
             visibleFrom="md"
             pos="sticky"
             top={0}
             c="dimmed"
-            fz="0.68rem"
+            fz="sm"
             fw={600}
-            tt="uppercase"
-            lts="0.04em"
             className={historyClasses.stickyHeader}
           >
             <Group gap="md" wrap="nowrap">
@@ -249,13 +247,27 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         ))}
 
         {filtered.length === 0 && (
-          <Paper withBorder radius="lg" py={64}>
+          <Paper withBorder py={64}>
             <Stack align="center" gap={4}>
-              <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+              <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
                 <ClockIcon size={24} />
               </ThemeIcon>
               <Text fw={600}>Nenhum pedido encontrado</Text>
-              <Text c="dimmed" size="0.85rem">Tente ajustar os filtros de busca</Text>
+              {hasFilters ? (
+                <>
+                  <Text c="dimmed" ta="center">Nenhum pedido corresponde à busca ou ao status selecionado.</Text>
+                  <Button onClick={() => { setSearch(''); setStatusFilter('todos'); }} variant="default" mt="md">
+                    Limpar filtros
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Text c="dimmed" ta="center">Os pedidos enviados aparecem aqui. Monte um carrinho a partir do catálogo para criar o primeiro.</Text>
+                  <Button onClick={() => onNavigate('catalog')} mt="md">
+                    Ir ao catálogo
+                  </Button>
+                </>
+              )}
             </Stack>
           </Paper>
         )}
