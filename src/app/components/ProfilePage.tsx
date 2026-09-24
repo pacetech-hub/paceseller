@@ -36,10 +36,10 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
   return (
     <Paper component="section" withBorder radius="md" p="lg">
       <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
-        <ThemeIcon size={36} radius="md" variant="light" color="neutral" style={{ flexShrink: 0 }}>
+        <ThemeIcon size={36} radius="md" variant="light" color="neutral" flex="none">
           <Icon size={16} />
         </ThemeIcon>
-        <Box style={{ flex: 1, minWidth: 0 }}>
+        <Box flex={1} miw={0}>
           <Text fw={600} size="0.92rem">{title}</Text>
           {description && <Text c="dimmed" size="0.75rem" mt={2}>{description}</Text>}
         </Box>
@@ -123,8 +123,8 @@ function LojistaProfile() {
       <Section icon={UserCheckIcon} title="Representante responsável">
         <Field label="Nome" value="Marina Costa" />
         <Field label="Região" value="Sudeste — SP Capital" />
-        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><EnvelopeIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />marina.costa@tesla.com.br</Group>} />
-        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><PhoneIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />(11) 98765-4321</Group>} />
+        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><EnvelopeIcon size={14} color="var(--mantine-color-dimmed)" />marina.costa@tesla.com.br</Group>} />
+        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><PhoneIcon size={14} color="var(--mantine-color-dimmed)" />(11) 98765-4321</Group>} />
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
@@ -137,7 +137,7 @@ function LojistaProfile() {
       <Section icon={LockIcon} title="Senha e acesso">
         <Field label="E-mail de acesso" value="compras@bellamoda.com.br" />
         <Field label="Última alteração de senha" value="há 3 meses" />
-        <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
+        <Button variant="default" color="neutral" size="xs" mt="sm" mr="auto">
           Alterar senha
         </Button>
       </Section>
@@ -201,7 +201,7 @@ function RepProfile() {
         <Field label="Usuário" value="marina.costa" />
         <Field label="Última alteração de senha" value="há 1 mês" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Ativa" />} />
-        <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
+        <Button variant="default" color="neutral" size="xs" mt="sm" mr="auto">
           Alterar senha
         </Button>
       </Section>
@@ -217,14 +217,14 @@ function AdminProfile() {
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
         <Field label="Plano" value={<Badge color="neutral" variant="light">Enterprise</Badge>} />
-        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheckIcon size={14} style={{ color: 'var(--mantine-color-teal-6)' }} />Administrador master</Group>} />
+        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheckIcon size={14} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
       </Section>
 
       <Section icon={PackageIcon} title="Configurações de catálogo">
         <Field label="Linhas ativas" value="Feminino · Masculino · Infantil" />
         <Field label="SKUs publicados" value="1.284" />
         <Field label="Coleção corrente" value="Verão 26" />
-        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><TagIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />A · B · C</Group>} />
+        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><TagIcon size={14} color="var(--mantine-color-dimmed)" />A · B · C</Group>} />
       </Section>
 
       <Section icon={UsersIcon} title="Usuários cadastrados">
@@ -259,11 +259,11 @@ function AdminProfile() {
             { who: 'sistema', what: 'sincronização ERP concluída', when: 'hoje, 06:00' },
           ].map((l, i) => (
             <Group key={i} justify="space-between" gap="sm" py={6} className={interactive.rowDivider} wrap="nowrap">
-              <Box style={{ minWidth: 0 }}>
+              <Box miw={0}>
                 <Text component="span" fw={500} size="0.8rem">{l.who}</Text>
                 <Text component="span" c="dimmed" size="0.78rem" ml={8}>{l.what}</Text>
               </Box>
-              <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{l.when}</Text>
+              <Text c="dimmed" size="0.72rem" flex="none">{l.when}</Text>
             </Group>
           ))}
         </Stack>
@@ -274,7 +274,7 @@ function AdminProfile() {
         <Field label="Última alteração de senha" value="há 14 dias" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Obrigatória" />} />
         <Field label="Sessões ativas" value="2 dispositivos" />
-        <Button variant="default" color="neutral" size="xs" mt="sm" style={{ alignSelf: 'flex-start' }}>
+        <Button variant="default" color="neutral" size="xs" mt="sm" mr="auto">
           Alterar senha
         </Button>
       </Section>
