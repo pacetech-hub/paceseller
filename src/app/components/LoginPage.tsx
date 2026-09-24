@@ -39,9 +39,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const profile = demoAccounts[email.trim().toLowerCase()];
+    const normalized = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+      setEmailError("Informe um e-mail válido, ex.: nome@loja.com.br");
+      return;
+    }
+    const profile = demoAccounts[normalized];
     if (!profile) {
-      setEmailError("Usuário não encontrado");
+      setEmailError("Não encontramos uma conta com este e-mail. Confira o endereço ou escolha uma das contas de demonstração na lista.");
       return;
     }
     setLoading(true);
@@ -58,7 +63,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
         </Box>
 
-        <Title order={2} lts="-0.02em" mb={4}>
+        <Title order={1} mb={4}>
           Bem-vindo de volta!
         </Title>
         <Text c="dimmed" size="sm" mb={{ base: 28, sm: 40 }}>
@@ -77,7 +82,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               setEmailError(null);
             }}
             error={emailError}
-            size="md"
           />
           <PasswordInput
             label="Senha"
@@ -85,7 +89,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             value={password}
             onChange={(e) => setPassword(e.currentTarget.value)}
             mt="md"
-            size="md"
           />
 
           <Group justify="space-between" mt="xl" gap="sm">
@@ -93,9 +96,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               label="Manter conectado"
               checked={keepLoggedIn}
               onChange={(e) => setKeepLoggedIn(e.currentTarget.checked)}
-              size="md"
             />
-            <Anchor component="button" type="button" size="sm" fw={600}>
+            <Anchor component="button" type="button" fw={600} py={8}>
               Esqueceu a senha?
             </Anchor>
           </Group>
@@ -104,8 +106,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             type="submit"
             fullWidth
             mt="xl"
-            size="md"
-            radius="md"
             loading={loading}
             rightSection={<ArrowRightIcon size={16} />}
           >
@@ -114,7 +114,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </Box>
 
         <Box mt="auto" pt="xl">
-          <Text ta="center" c="dimmed" size="xs">
+          <Text ta="center" c="dimmed" size="sm">
             Pace Seller desenvolvido por Pace Tech
           </Text>
         </Box>

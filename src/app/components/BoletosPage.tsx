@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code,
   SimpleGrid, ThemeIcon, UnstyledButton, Collapse, List, Card, Divider,
@@ -160,11 +160,17 @@ const statusLabel: Record<PaymentStatus, string> = {
   atrasado: 'Atrasado',
 };
 
-function copyToClipboard(text: string, label: string) {
-  navigator.clipboard?.writeText(text).then(
-    () => toast.success(`${label} copiado`),
-    () => toast.error(`Não foi possível copiar o ${label.toLowerCase()}`)
-  );
+// Copia o código e devolve se deu certo; a confirmação persistente fica no próprio cartão (botão + texto ao lado)
+async function copyToClipboard(text: string, label: string): Promise<boolean> {
+  try {
+    if (!navigator.clipboard) throw new Error('clipboard indisponível');
+    await navigator.clipboard.writeText(text);
+    toast.success(`${label} copiado`, 'Cole no app do seu banco para pagar');
+    return true;
+  } catch {
+    toast.error(`Não foi possível copiar o ${label.toLowerCase()}`, 'Selecione o código no quadro acima e copie manualmente (Ctrl+C)');
+    return false;
+  }
 }
 
 function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
@@ -205,11 +211,11 @@ function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   );
 }
 
-function CodeBlock({ label, code, size }: { label: string; code: string; size: string }) {
+function CodeBlock({ label, code }: { label: string; code: string }) {
   return (
     <Box>
-      <Text c="dimmed" size="0.7rem" mb={4}>{label}</Text>
-      <Code block className={`mono ${boletos.wrap}`} fz={size}>
+      <Text c="dimmed" size="sm" mb={4}>{label}</Text>
+      <Code block className={`mono ${boletos.wrap}`} fz="sm">
         {code}
       </Code>
     </Box>
@@ -220,6 +226,38 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   const [expanded, setExpanded] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>('boleto');
   const [showQr, setShowQr] = useState(false);
+  // qual código acabou de ser copiado (troca o texto do botão por alguns segundos)
+  const [justCopied, setJustCopied] = useState<PaymentMethod | null>(null);
+  // qual código já foi copiado nesta abertura (mantém a orientação "cole no app do banco" visível)
+  const [copiedOnce, setCopiedOnce] = useState<PaymentMethod | null>(null);
+
+  useEffect(() => {
+    if (!justCopied) return;
+    const t = setTimeout(() => setJustCopied(null), 4000);
+    return () => clearTimeout(t);
+  }, [justCopied]);
+
+  const handleCopy = async (which: PaymentMethod) => {
+    const ok = await copyToClipboard(
+      which === 'boleto' ? payment.boletoLine : payment.pixCode,
+      which === 'boleto' ? 'Código de barras' : 'Código Pix',
+    );
+    if (ok) {
+      setJustCopied(which);
+      setCopiedOnce(which);
+    }
+  };
+
+  const copyHint = (which: PaymentMethod) => copiedOnce === which && (
+    <Group gap={6} wrap="nowrap" role="status">
+      <CheckCircleIcon size={16} color="var(--mantine-color-teal-6)" style={{ flexShrink: 0 }} />
+      <Text size="sm" c="dimmed">
+        {which === 'boleto'
+          ? 'Código de barras copiado. Cole no app do seu banco, na opção de pagar boleto.'
+          : 'Código Pix copiado. Cole no app do seu banco, em Pix Copia e Cola.'}
+      </Text>
+    </Group>
+  );
 
   const isPago = payment.status === 'pago';
   const StatusIcon = statusIcon[payment.status];
@@ -238,25 +276,24 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
         {/* line 1: status + due/payment date */}
         <Group gap={8} mb={4}>
           <Badge
-            size="sm"
             variant="light"
             color={statusColors[payment.status]}
-            leftSection={<StatusIcon size={12} />}
-            styles={{ root: { flexShrink: 0 }, label: { textTransform: 'none' } }}
+            leftSection={<StatusIcon size={14} />}
+            style={{ flexShrink: 0 }}
           >
             {statusLabel[payment.status]}
           </Badge>
-          <Text c="dimmed" size="0.72rem" flex="none">
+          <Text c="dimmed" size="sm" flex="none">
             {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
           </Text>
         </Group>
         {/* line 2: order title */}
-        <Text size="0.85rem" fw={600} truncate mb={2}>{payment.product}</Text>
+        <Text fw={600} truncate mb={2}>{payment.product}</Text>
         {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
-        <Text c="dimmed" size="0.72rem" truncate>{metaParts.join(' · ')}</Text>
+        <Text c="dimmed" size="sm" truncate>{metaParts.join(' · ')}</Text>
       </Box>
 
-      <Text className="mono" size="0.95rem" fw={700} ta="right" flex="none">
+      <Text className="mono" size="lg" fw={700} ta="right" flex="none">
         {formatCurrency(payment.amount)}
       </Text>
 
@@ -272,7 +309,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   );
 
   return (
-    <Card withBorder radius="lg" padding={0}>
+    <Card withBorder padding={0}>
       {isPago ? summary : (
         <UnstyledButton onClick={() => setExpanded(e => !e)} className={classes.hoverable} w="100%" aria-expanded={expanded}>
           {summary}
@@ -286,67 +323,68 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
             <SegmentedControl
               value={method}
               onChange={v => setMethod(v as PaymentMethod)}
-              size="xs"
               mb="sm"
               aria-label="Forma de pagamento"
               data={[
-                { value: 'boleto', label: <Group gap={6} wrap="nowrap"><BarcodeIcon size={14} /> Boleto</Group> },
-                { value: 'pix', label: <Group gap={6} wrap="nowrap"><QrCodeIcon size={14} /> Pix</Group> },
+                { value: 'boleto', label: <Group gap={6} wrap="nowrap"><BarcodeIcon size={16} /> Boleto</Group> },
+                { value: 'pix', label: <Group gap={6} wrap="nowrap"><QrCodeIcon size={16} /> Pix</Group> },
               ]}
             />
 
             {method === 'boleto' ? (
               <Stack gap="sm">
-                <CodeBlock label="Linha digitável" code={payment.boletoLine} size="0.78rem" />
-                <Group gap={8}>
+                <CodeBlock label="Linha digitável" code={payment.boletoLine} />
+                {/* secundária à esquerda, principal (copiar) à direita */}
+                <Group gap={8} justify="flex-end">
                   <Button
-                    onClick={() => copyToClipboard(payment.boletoLine, 'Código de barras')}
-                    variant="filled"
-                    size="xs"
-                    leftSection={<CopyIcon size={14} />}
-                  >
-                    Copiar código de barras
-                  </Button>
-                  <Button
-                    onClick={() => toast.success('Fatura baixada')}
+                    onClick={() => toast.success('Download da fatura iniciado', 'O PDF vai para a pasta Downloads do seu dispositivo')}
                     variant="default"
-                    size="xs"
-                    leftSection={<DownloadSimpleIcon size={14} />}
+                    leftSection={<DownloadSimpleIcon size={16} />}
                   >
                     Baixar fatura
                   </Button>
+                  <Button
+                    onClick={() => handleCopy('boleto')}
+                    variant="filled"
+                    color={justCopied === 'boleto' ? 'teal' : undefined}
+                    leftSection={justCopied === 'boleto' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
+                  >
+                    {justCopied === 'boleto' ? 'Código copiado' : 'Copiar código de barras'}
+                  </Button>
                 </Group>
+                {copyHint('boleto')}
               </Stack>
             ) : (
               <Stack gap="sm">
-                <CodeBlock label="Pix Copia e Cola" code={payment.pixCode} size="0.72rem" />
-                <Group gap={8}>
-                  <Button
-                    onClick={() => copyToClipboard(payment.pixCode, 'Código Pix')}
-                    variant="filled"
-                    size="xs"
-                    leftSection={<CopyIcon size={14} />}
-                  >
-                    Copiar código Pix
-                  </Button>
+                <CodeBlock label="Pix Copia e Cola" code={payment.pixCode} />
+                {/* secundária à esquerda, principal (copiar) à direita */}
+                <Group gap={8} justify="flex-end">
                   <Button
                     onClick={() => setShowQr(v => !v)}
                     variant="default"
-                    size="xs"
-                    leftSection={<QrCodeIcon size={14} />}
+                    leftSection={<QrCodeIcon size={16} />}
                   >
                     {showQr ? 'Ocultar QR Code' : 'Mostrar QR Code Pix'}
                   </Button>
+                  <Button
+                    onClick={() => handleCopy('pix')}
+                    variant="filled"
+                    color={justCopied === 'pix' ? 'teal' : undefined}
+                    leftSection={justCopied === 'pix' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
+                  >
+                    {justCopied === 'pix' ? 'Código copiado' : 'Copiar código Pix'}
+                  </Button>
                 </Group>
+                {copyHint('pix')}
 
                 {showQr && (
                   <Group gap="md" align="flex-start" pt={4}>
-                    <Paper withBorder radius="md" p="sm" bg="white" flex="none">
+                    <Paper withBorder p="sm" bg="white" flex="none">
                       <PixQrCode data={payment.pixCode} />
                     </Paper>
                     <Box flex={1} miw={220}>
-                      <Text size="0.8rem" fw={600} mb={4}>Como pagar</Text>
-                      <List type="ordered" withPadding listStyleType="decimal" size="xs" c="dimmed" spacing={4} fz="0.75rem">
+                      <Text fw={600} mb={4}>Como pagar</Text>
+                      <List type="ordered" withPadding listStyleType="decimal" size="sm" c="dimmed" spacing={4}>
                         <List.Item>Abra o app do seu banco</List.Item>
                         <List.Item>Escolha pagar via Pix com QR Code ou Copia e Cola</List.Item>
                         <List.Item>Escaneie o código ao lado ou cole o código copiado</List.Item>
@@ -416,22 +454,20 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           <Paper
             key={stat.label}
             withBorder
-            radius="lg"
             p="md"
             bd={stat.tone === 'danger' ? '1px solid var(--mantine-color-red-3)' : undefined}
           >
-            <Text c="dimmed" size="0.75rem" fw={600} mb={4}>{stat.label}</Text>
+            <Text c="dimmed" size="sm" fw={600} mb={4}>{stat.label}</Text>
             <Text
               className="mono"
               c={stat.tone === 'danger' ? 'red.6' : undefined}
               fw={700}
               mb={stat.caption ? 4 : 0}
-              fz="1.4rem"
-              lts="-0.01em"
+              fz="xl"
             >
               {stat.value}
             </Text>
-            {stat.caption && <Text c="dimmed" size="0.7rem">{stat.caption}</Text>}
+            {stat.caption && <Text c="dimmed" size="sm">{stat.caption}</Text>}
           </Paper>
         ))}
       </SimpleGrid>
@@ -440,7 +476,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
       <Group gap="sm" wrap="wrap">
         <TextInput
           placeholder={isLojista ? 'Buscar boleto, pedido...' : 'Buscar boleto, pedido, cliente...'}
-          leftSection={<MagnifyingGlassIcon size={14} />}
+          leftSection={<MagnifyingGlassIcon size={16} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
           flex={{ base: '1 1 100%', sm: 1 }}
@@ -449,7 +485,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
           <Group gap={6}>
             {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral" size="sm">
+              <Chip key={s} value={s} variant="filled" color="neutral">
                 {s === 'todos' ? 'Todos' : statusLabel[s]}
               </Chip>
             ))}
@@ -464,13 +500,18 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
         ))}
 
         {filtered.length === 0 && (
-          <Paper withBorder radius="lg" py={64}>
+          <Paper withBorder py={64}>
             <Stack align="center" gap={4}>
-              <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+              <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
                 <ReceiptIcon size={24} />
               </ThemeIcon>
               <Text fw={600}>Nenhum boleto encontrado</Text>
-              <Text c="dimmed" size="0.85rem">Tente ajustar os filtros de busca</Text>
+              <Text c="dimmed" size="sm" ta="center" px="md">
+                Nenhum boleto corresponde à busca ou ao status selecionado. Limpe-os para ver todos os seus boletos.
+              </Text>
+              <Button variant="default" mt="sm" onClick={() => { setSearch(''); setStatusFilter('todos'); }}>
+                Limpar busca e filtros
+              </Button>
             </Stack>
           </Paper>
         )}

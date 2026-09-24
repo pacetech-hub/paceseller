@@ -190,7 +190,6 @@ export function SalesIndicatorsSection({
     <Stack gap="md">
       <Group justify="flex-end">
         <SegmentedControl
-          size="xs"
           value={period}
           onChange={v => setPeriod(v as Period)}
           data={PERIOD_OPTIONS.map(o => ({ value: o.id, label: o.label }))}
@@ -206,7 +205,7 @@ export function SalesIndicatorsSection({
       {/* C: gráfico de colunas x ano anterior + status dos pedidos */}
       <Grid gutter="md">
         <Grid.Col span={{ base: 12, lg: 8 }}>
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
             <CardTitle title="Vendas vs. ano passado" subtitle="Colunas do período atual · linha do mesmo ciclo no ano anterior" />
             <CompositeChart
               h={240}
@@ -228,7 +227,7 @@ export function SalesIndicatorsSection({
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
             <CardTitle title="Pedidos por status" subtitle={`${periodOrders.toLocaleString('pt-BR')} pedidos no período`} />
             <Stack gap={2} mt="sm">
               {statusRows.map(s => (
@@ -236,10 +235,9 @@ export function SalesIndicatorsSection({
                   key={s.key}
                   component="button"
                   onClick={() => onOpenStatus(s.orderStatus)}
-                  label={<Text size="0.8rem">{s.label}</Text>}
-                  leftSection={<ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} radius={2} withShadow={false} />}
-                  rightSection={<Text size="0.82rem" fw={700} className="mono">{s.count}</Text>}
-                  py={6}
+                  label={<Text>{s.label}</Text>}
+                  leftSection={<ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} withShadow={false} />}
+                  rightSection={<Text fw={700} className="mono">{s.count}</Text>}
                   styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
                 />
               ))}
@@ -249,7 +247,7 @@ export function SalesIndicatorsSection({
       </Grid>
 
       {/* D: top 10 vendedores */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
           <CardTitle title="Vendas por representante" />
           <SeeMoreButton onClick={onOpenSalesTeam} label="Ver todos os vendedores" />
@@ -257,24 +255,29 @@ export function SalesIndicatorsSection({
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
-              <Text c="dimmed" size="0.75rem" fw={600} w={20} ta="right" flex="none">{i + 1}</Text>
+              <Text c="dimmed" size="sm" fw={600} w={24} ta="right" flex="none">{i + 1}</Text>
               <Box miw={0} flex={1}>
-                <Text size="0.82rem" fw={600} truncate>{e.name}</Text>
-                <Text c="dimmed" size="0.68rem" truncate>
+                <Text fw={600} truncate>{e.name}</Text>
+                <Text c="dimmed" size="sm" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>
               </Box>
-              <Text size="0.82rem" fw={700} className="mono" flex="none">{brl(e.value)}</Text>
+              <Text fw={700} className="mono" flex="none">{brl(e.value)}</Text>
             </Group>
           ))}
           {ranked.length === 0 && (
-            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum vendedor no período</Text>
+            <Stack align="center" gap="xs" py="lg">
+              <Text c="dimmed" ta="center">Nenhum vendedor registrou vendas neste período.</Text>
+              {period !== 'mes' && (
+                <Button variant="default" onClick={() => setPeriod('mes')}>Ver vendas do mês</Button>
+              )}
+            </Stack>
           )}
         </Stack>
       </Paper>
 
       {/* E: 5 clientes prioritários */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="xs" wrap="nowrap">
           <CardTitle title="Prioridade de contato" />
           <SeeMoreButton onClick={onNavigateClients} label="Ver todos os clientes" />
@@ -285,14 +288,17 @@ export function SalesIndicatorsSection({
               key={c.id}
               component="button"
               onClick={() => onOpenClient(c)}
-              label={<Text size="0.82rem" fw={600} truncate>{c.name}</Text>}
-              description={<Text c="dimmed" size="0.72rem" truncate>{c.reason}</Text>}
+              label={<Text fw={600} truncate>{c.name}</Text>}
+              description={<Text c="dimmed" size="sm" truncate>{c.reason}</Text>}
               rightSection={<CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />}
               styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
             />
           ))}
           {priorityClients.length === 0 && (
-            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum cliente na carteira</Text>
+            <Stack align="center" gap="xs" py="lg">
+              <Text c="dimmed" ta="center">Nenhum cliente precisa de contato agora — a carteira ainda não tem clientes vinculados.</Text>
+              <Button variant="default" onClick={onNavigateClients}>Abrir clientes</Button>
+            </Stack>
           )}
         </Stack>
       </Paper>
@@ -302,10 +308,10 @@ export function SalesIndicatorsSection({
 
 function KpiCard({ label, value, delta }: { label: string; value: string; delta: string }) {
   return (
-    <Paper withBorder radius="lg" p="md">
-      <Text size="0.66rem" fw={700} tt="uppercase" lts="0.05em">{label}</Text>
-      <Text fz={{ base: '1.35rem', sm: '1.6rem' }} fw={700} mt={4} className="mono">{value}</Text>
-      <Text c="teal.7" size="0.72rem" fw={600} mt={4}>{delta}</Text>
+    <Paper withBorder p="md">
+      <Text c="dimmed" size="sm" fw={600}>{label}</Text>
+      <Text size="xl" fw={700} mt={4} className="mono">{value}</Text>
+      <Text c="teal.7" size="sm" fw={600} mt={4}>{delta} vs. período anterior</Text>
     </Paper>
   );
 }
@@ -313,15 +319,15 @@ function KpiCard({ label, value, delta }: { label: string; value: string; delta:
 function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <Box>
-      <Title order={4} size="0.85rem" fw={600}>{title}</Title>
-      {subtitle && <Text c="dimmed" size="0.72rem" mt={2}>{subtitle}</Text>}
+      <Title order={3}>{title}</Title>
+      {subtitle && <Text c="dimmed" size="sm" mt={2}>{subtitle}</Text>}
     </Box>
   );
 }
 
 function SeeMoreButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <Button variant="subtle" size="xs" onClick={onClick} rightSection={<CaretRightIcon size={14} />}>
+    <Button variant="subtle" onClick={onClick} rightSection={<CaretRightIcon size={14} />}>
       {label}
     </Button>
   );

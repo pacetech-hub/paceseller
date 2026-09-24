@@ -16,6 +16,7 @@ import {
   PackageIcon,
   CheckCircleIcon,
   ArrowsClockwiseIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { products, type Product } from "../data/mockData";
 
@@ -26,8 +27,6 @@ const availabilityColors: Record<Product['availability'], string> = {
   'baixo estoque': 'yellow',
   'esgotado': 'red',
 };
-
-const badgeStyles = { label: { textTransform: 'none' as const } };
 
 // cor do número de estoque: zerado, baixo (abaixo do limite) ou ok
 function stockColor(qty: number, lowThreshold: number): string {
@@ -200,22 +199,23 @@ function getStoreStock(product: Product): Record<string, number> {
 const lineOptions = ['Todos', ...Array.from(new Set(products.map(p => p.line)))];
 const categoryOptions = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
 
-function SectionLabel({ children, mb = 6 }: { children: React.ReactNode; mb?: number }) {
+// título de seção da ficha (20px) — diferencia por hierarquia, não por caixa alta
+function SectionLabel({ children, mb = 8 }: { children: React.ReactNode; mb?: number }) {
   return (
-    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb={mb} lts="0.04em">
+    <Title order={2} mb={mb}>
       {children}
-    </Text>
+    </Title>
   );
 }
 
-function AvailabilityBadges({ product, size }: { product: Product; size: 'xs' | 'sm' }) {
+function AvailabilityBadges({ product }: { product: Product }) {
   return (
     <Group gap={6}>
-      <Badge size={size} variant="light" color={availabilityColors[product.availability]} styles={badgeStyles}>
+      <Badge variant="light" color={availabilityColors[product.availability]}>
         {product.availability}
       </Badge>
       {isDiscontinued(product) && (
-        <Badge size={size} variant="light" color="gray" styles={badgeStyles}>Fora de linha</Badge>
+        <Badge variant="light" color="gray">Fora de linha</Badge>
       )}
     </Group>
   );
@@ -228,7 +228,6 @@ function ProductCard({ product, onOpen, compact = false }: { product: Product; o
       type="button"
       onClick={onOpen}
       withBorder
-      radius="lg"
       className={`${interactive.cardButton} ${classes.productCard}`}
       p={0}
     >
@@ -246,14 +245,14 @@ function ProductCard({ product, onOpen, compact = false }: { product: Product; o
       </AspectRatio>
       <Divider color="var(--mantine-color-default-border)" />
       <Box p={compact ? 10 : 'sm'}>
-        <Text c="dimmed" size={compact ? '0.65rem' : '0.68rem'} tt="uppercase">Ref. {product.reference}</Text>
-        <Text fw={600} size={compact ? '0.8rem' : '0.85rem'} truncate mt={compact ? 0 : 2} mb={compact ? 0 : 6}>{product.name}</Text>
+        <Text c="dimmed" size="sm">Ref. {product.reference}</Text>
+        <Text fw={600} truncate mt={compact ? 0 : 2} mb={compact ? 0 : 6}>{product.name}</Text>
         {compact ? (
           isDiscontinued(product) && (
-            <Badge size="xs" variant="light" color="gray" mt={4} styles={badgeStyles}>Fora de linha</Badge>
+            <Badge variant="light" color="gray" mt={4}>Fora de linha</Badge>
           )
         ) : (
-          <AvailabilityBadges product={product} size="xs" />
+          <AvailabilityBadges product={product} />
         )}
       </Box>
     </Paper>
@@ -282,14 +281,15 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <Box>
-        <Title order={2} fw={700} fz="1rem">Ficha Técnica</Title>
-        <Text c="dimmed" size="0.8rem">Consulte informações completas, imagens e medidas de cada produto</Text>
+        <Title order={1}>Ficha Técnica</Title>
+        <Text c="dimmed">Consulte informações completas, imagens e medidas de cada produto</Text>
       </Box>
 
       <Group gap="sm" wrap="wrap">
         <TextInput
           placeholder="Buscar por nome ou referência..."
-          leftSection={<MagnifyingGlassIcon size={14} />}
+          leftSection={<MagnifyingGlassIcon size={18} />}
+          aria-label="Buscar por nome ou referência"
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
           flex={{ base: '1 1 100%', md: 1 }}
@@ -339,13 +339,21 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           ))}
         </SimpleGrid>
       ) : (
-        <Paper withBorder radius="lg" py={64}>
-          <Stack align="center" gap={4}>
-            <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+        <Paper withBorder py={64} px="md">
+          <Stack align="center" gap={4} ta="center">
+            <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
               <PackageIcon size={24} />
             </ThemeIcon>
             <Text fw={600}>Nenhum produto encontrado</Text>
-            <Text c="dimmed" size="0.85rem">Tente ajustar os filtros de busca</Text>
+            <Text c="dimmed">Nenhum produto combina com a busca, a linha e a categoria escolhidas.</Text>
+            <Button
+              mt="md"
+              variant="default"
+              leftSection={<XIcon size={16} />}
+              onClick={() => { setSearch(''); setLine('Todos'); setCategory('Todos'); }}
+            >
+              Limpar busca e filtros
+            </Button>
           </Stack>
         </Paper>
       )}
@@ -369,6 +377,15 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
     setZoomOpen(true);
   };
 
+  // downloads simulados (protótipo): a mensagem descreve o que foi iniciado e onde o arquivo vai parar
+  const DOWNLOADS_NEXT = 'O arquivo vai para a pasta de downloads do navegador';
+  const downloadPhoto = (label: string) =>
+    toast.success(`Download da foto ${label.toLowerCase()} iniciado`, DOWNLOADS_NEXT);
+  const downloadAllImages = () =>
+    toast.success(`Download das ${gallery.length} imagens em um arquivo ZIP iniciado`, DOWNLOADS_NEXT);
+  const downloadPdf = () =>
+    toast.success(`Download do PDF da ficha técnica de ${product.name} iniciado`, DOWNLOADS_NEXT);
+
   const bentoTile = (idx: number, size: BoxProps) => {
     const img = gallery[idx];
     const label = GALLERY_LABELS[idx];
@@ -379,21 +396,38 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           <MagnifyingGlassPlusIcon size={20} className={classes.zoomIcon} />
         </Box>
         {/* legenda visível dizendo qual foto é */}
-        <Text component="span" className={classes.tileLabel} size="0.7rem" fw={600}>{label}</Text>
+        <Text component="span" className={classes.tileLabel} size="sm" fw={600}>{label}</Text>
+        {/* "Baixar" com texto onde o tile tem espaço; nos tiles pequenos do celular fica só o ícone (com tooltip) */}
+        <Button
+          onClick={e => { e.stopPropagation(); downloadPhoto(label); }}
+          aria-label={`Baixar foto ${label.toLowerCase()}`}
+          variant="filled"
+          color="dark"
+          pos="absolute"
+          top={8}
+          right={8}
+          bg="rgba(0, 0, 0, 0.6)"
+          className={classes.downloadButton}
+          leftSection={<DownloadSimpleIcon size={18} />}
+          visibleFrom="md"
+        >
+          Baixar
+        </Button>
         <Tooltip label={`Baixar foto ${label.toLowerCase()}`}>
           <ActionIcon
-            onClick={e => { e.stopPropagation(); toast.success(`Foto ${label.toLowerCase()} baixada`); }}
+            onClick={e => { e.stopPropagation(); downloadPhoto(label); }}
             aria-label={`Baixar foto ${label.toLowerCase()}`}
             variant="filled"
             color="dark"
-            size={28}
+            size="input-sm"
             pos="absolute"
             top={8}
             right={8}
             bg="rgba(0, 0, 0, 0.6)"
             className={classes.downloadButton}
+            hiddenFrom="md"
           >
-            <DownloadSimpleIcon size={14} />
+            <DownloadSimpleIcon size={18} />
           </ActionIcon>
         </Tooltip>
       </Box>
@@ -407,7 +441,6 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           onClick={onBack}
           variant="subtle"
           color="gray"
-          size="compact-sm"
           ml={-12}
           leftSection={<CaretLeftIcon size={16} />}
         >
@@ -416,10 +449,10 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       </Box>
 
       <Group justify="flex-end" gap={8}>
-        <Button onClick={() => toast.success('Imagens baixadas (ZIP)')} variant="default" size="xs" leftSection={<DownloadSimpleIcon size={14} />}>
-          Baixar imagens
+        <Button onClick={downloadAllImages} variant="default" leftSection={<DownloadSimpleIcon size={18} />}>
+          Baixar imagens (ZIP)
         </Button>
-        <Button onClick={() => toast.success('PDF gerado')} size="xs" leftSection={<FileTextIcon size={14} />}>
+        <Button onClick={downloadPdf} leftSection={<FileTextIcon size={18} />}>
           Baixar PDF
         </Button>
       </Group>
@@ -443,39 +476,38 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       </AspectRatio>
 
       {/* Informações do produto */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Stack gap="md">
           <Box>
-            <Text c="dimmed" size="0.72rem" tt="uppercase" mb={2}>Ref. {product.reference}</Text>
-            <Title order={2} fw={700} mb={6} fz="1.15rem">{product.name}</Title>
-            <AvailabilityBadges product={product} size="sm" />
+            <Text c="dimmed" size="sm" mb={2}>Ref. {product.reference}</Text>
+            <Title order={1} mb={6}>{product.name}</Title>
+            <AvailabilityBadges product={product} />
           </Box>
 
           <Box>
             <SectionLabel>Descrição</SectionLabel>
-            <Text size="0.85rem" lh={1.6}>{product.description}</Text>
+            <Text lh={1.6}>{product.description}</Text>
           </Box>
 
           {highlights && (
             <Box>
-              <SectionLabel mb={8}>Destaques do produto</SectionLabel>
+              <SectionLabel>Destaques do produto</SectionLabel>
               <List
                 spacing={10}
-                size="sm"
                 center={false}
-                icon={<Box display="flex" mt={3}><CheckCircleIcon size={14} color="var(--mantine-color-teal-5)" /></Box>}
+                icon={<Box display="flex" mt={4}><CheckCircleIcon size={16} color="var(--mantine-color-teal-5)" /></Box>}
                 styles={{ itemWrapper: { alignItems: 'flex-start' } }}
               >
                 {highlights.items.map((h, i) => (
                   <List.Item key={i}>
-                    <Text size="0.82rem" lh={1.5}>
+                    <Text lh={1.5}>
                       <Text span fw={600} inherit>{h.title}: </Text>
                       {h.description}
                     </Text>
                   </List.Item>
                 ))}
               </List>
-              <Text c="dimmed" size="0.8rem" fs="italic" lh={1.5} mt="sm">
+              <Text c="dimmed" size="sm" fs="italic" lh={1.5} mt="sm">
                 {highlights.tagline}
               </Text>
             </Box>
@@ -484,14 +516,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       </Paper>
 
       {/* Estoque */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-        <SectionLabel mb={8}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+        <SectionLabel>
           {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
         </SectionLabel>
         <Table.ScrollContainer minWidth={320}>
           <Table verticalSpacing={10} horizontalSpacing="md">
             <Table.Thead>
-              <Table.Tr c="dimmed" fz="0.68rem" tt="uppercase" lts="0.04em">
+              <Table.Tr c="dimmed" fz="sm">
                 <Table.Th fw={400} pl={0}>Tamanho</Table.Th>
                 <Table.Th fw={400} ta="center">Estoque fábrica</Table.Th>
                 {profile === 'lojista' && <Table.Th fw={400} ta="center">Estoque loja</Table.Th>}
@@ -504,19 +536,23 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                 const storeLow = storeQty < 3;
                 return (
                   <Table.Tr key={s}>
-                    <Table.Td pl={0} fw={600} fz="0.82rem" className={classes.nowrap}>Nº {s}</Table.Td>
+                    <Table.Td pl={0} fw={600} className={classes.nowrap}>Nº {s}</Table.Td>
                     <Table.Td ta="center">
-                      <Text span className="mono" size="0.8rem" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
+                      <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
                     </Table.Td>
                     {profile === 'lojista' && (
                       <Table.Td>
                         <Group gap={8} justify="flex-end" wrap="nowrap">
-                          <Text span className="mono" size="0.8rem" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
+                          <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
                           {storeLow && (
                             <Button
-                              onClick={() => toast.success(`Reposição rápida solicitada — Nº ${s}`)}
-                              size="compact-sm"
-                              leftSection={<ArrowsClockwiseIcon size={14} />}
+                              onClick={() => toast.success(
+                                `Reposição do Nº ${s} solicitada`,
+                                'O pedido de reposição segue para a fábrica, que confirma o envio',
+                              )}
+                              size="sm"
+                              variant="light"
+                              leftSection={<ArrowsClockwiseIcon size={16} />}
                               flex="none"
                             >
                               Solicitar reposição
@@ -552,7 +588,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         size={672}
         fullScreen={zoomFullScreen}
         centered
-        title={<Text fw={600} size="sm">{product.name} · {GALLERY_LABELS[activeImage]}</Text>}
+        title={<Text fw={600}>{product.name} · {GALLERY_LABELS[activeImage]}</Text>}
       >
         {/* abas com o nome de cada foto para trocar a imagem sem fechar o zoom */}
         <Tabs value={String(activeImage)} onChange={v => v !== null && setActiveImage(Number(v))} mb="md">

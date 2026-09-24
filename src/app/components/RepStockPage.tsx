@@ -30,14 +30,14 @@ export function RepStockPage() {
                 value: tab.id,
                 label: (
                   <Group gap={8} wrap="nowrap">
-                    <Icon size={14} />
+                    <Icon size={16} />
                     {tab.label}
                   </Group>
                 ),
               };
             })}
           />
-          <Badge variant="light" color="gray" leftSection={<EyeIcon size={12} />}>
+          <Badge variant="light" color="gray" leftSection={<EyeIcon size={14} />}>
             Somente visualização
           </Badge>
         </Group>

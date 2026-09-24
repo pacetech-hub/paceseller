@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  Stack, Group, Box, Paper, ThemeIcon, Text, Alert, Button, TextInput,
-  Table, Avatar, Badge, Select, ActionIcon, Card, Divider, Tooltip,
+  Stack, Group, Box, ThemeIcon, Text, Title, Alert, Button, TextInput,
+  Table, Avatar, Badge, Select, Card, Divider,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -15,6 +15,7 @@ import { visoes, defaultPermissions, type VisaoKey, type PermissionsState } from
 import { linkedUsers as initialLinkedUsers, type LinkedUser } from "../data/linkedUsers";
 import { clients, formatDate } from "../data/mockData";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
+import { toast } from "../lib/toast";
 
 type Profile = 'rep' | 'lojista';
 
@@ -68,6 +69,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   const [showInvite, setShowInvite] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteErrors, setInviteErrors] = useState<{ name?: string; email?: string }>({});
 
   const availableProfiles = Object.keys(permissionsState[scope.visao]);
   const subProfile = availableProfiles.find(p => p !== scope.ownerProfile) ?? availableProfiles[availableProfiles.length - 1];
@@ -89,10 +91,18 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, profile: newProfile } : u));
   };
 
-  const removeUser = (id: string) => setUsers(prev => prev.filter(u => u.id !== id));
+  const removeUser = (user: LinkedUser) => {
+    setUsers(prev => prev.filter(u => u.id !== user.id));
+    toast.success(`Vínculo de ${user.name} removido`, 'Ele perdeu o acesso à sua conta. Para reativar, convide-o novamente.');
+  };
 
   const inviteUser = () => {
-    if (!inviteName.trim() || !inviteEmail.trim()) return;
+    // Erros ao lado do campo, dizendo como corrigir
+    const errors: { name?: string; email?: string } = {};
+    if (!inviteName.trim()) errors.name = 'Informe o nome completo do usuário';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail.trim())) errors.email = 'Informe um e-mail válido, ex.: nome@loja.com.br';
+    setInviteErrors(errors);
+    if (errors.name || errors.email) return;
     const newUser: LinkedUser = {
       id: `LU-NEW-${Date.now()}`,
       name: inviteName.trim(),
@@ -107,6 +117,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
     setShowInvite(false);
     setInviteName('');
     setInviteEmail('');
+    toast.success(`Convite enviado para ${newUser.email}`, `${newUser.name} já aparece na lista de usuários vinculados com o perfil ${subProfile}`);
   };
 
   const Icon = scope.icon;
@@ -115,31 +126,30 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   return (
     <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       <Group gap="sm" wrap="nowrap">
-        <ThemeIcon size={40} radius="md" variant="light" color="neutral">
+        <ThemeIcon size={40} variant="light" color="neutral">
           <Icon size={20} />
         </ThemeIcon>
         <Box>
-          <Text fw={700} size="1.05rem" lts="-0.01em">{scope.title}</Text>
-          <Text c="dimmed" size="0.78rem">{scope.subtitle}</Text>
+          <Title order={1}>{scope.title}</Title>
+          <Text c="dimmed" size="sm">{scope.subtitle}</Text>
         </Box>
       </Group>
 
-      <Alert icon={<InfoIcon size={16} />} color="neutral" radius="md" variant="light">
+      <Alert icon={<InfoIcon size={16} />} color="neutral" variant="light">
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
       </Alert>
 
       {/* Usuários vinculados */}
-      <Card withBorder radius="md" padding={0}>
+      <Card withBorder padding={0}>
         <Group justify="space-between" p={{ base: 'md', sm: 'lg' }} wrap="wrap">
           <Box>
-            <Text fw={600} size="0.9rem">Usuários vinculados</Text>
-            <Text c="dimmed" size="0.75rem" mt={2}>{scope.usersHint}</Text>
+            <Title order={2}>Usuários vinculados</Title>
+            <Text c="dimmed" size="sm" mt={2}>{scope.usersHint}</Text>
           </Box>
           <Button
             onClick={() => setShowInvite(v => !v)}
             color="neutral"
-            size="sm"
-            leftSection={<UserPlusIcon size={14} />}
+            leftSection={<UserPlusIcon size={16} />}
           >
             Convidar usuário
           </Button>
@@ -153,21 +163,23 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               <TextInput
                 label="Nome completo"
                 value={inviteName}
-                onChange={e => setInviteName(e.currentTarget.value)}
+                onChange={e => { setInviteName(e.currentTarget.value); setInviteErrors(p => ({ ...p, name: undefined })); }}
                 placeholder="Nome do usuário"
+                error={inviteErrors.name}
               />
               <TextInput
                 label="E-mail"
                 value={inviteEmail}
-                onChange={e => setInviteEmail(e.currentTarget.value)}
+                onChange={e => { setInviteEmail(e.currentTarget.value); setInviteErrors(p => ({ ...p, email: undefined })); }}
                 placeholder="email@exemplo.com.br"
+                error={inviteErrors.email}
               />
-            <Text c="dimmed" size="0.72rem">
+            <Text c="dimmed" size="sm">
               Será convidado com o perfil <Text component="span" fw={600} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
             </Text>
             <Group justify="flex-end" gap="sm">
-              <Button onClick={() => setShowInvite(false)} variant="default" color="neutral" size="sm">Cancelar</Button>
-              <Button onClick={inviteUser} color="neutral" size="sm">Enviar convite</Button>
+              <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default" color="neutral">Cancelar</Button>
+              <Button onClick={inviteUser} color="neutral">Enviar convite</Button>
             </Group>
           </Stack>
           <Divider color="var(--mantine-color-default-border)" />
@@ -175,7 +187,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         )}
 
         <Table.ScrollContainer minWidth={640}>
-        <Table verticalSpacing="sm">
+        <Table verticalSpacing="sm" fz="md">
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Usuário</Table.Th>
@@ -190,10 +202,10 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               <Table.Tr key={u.id}>
                 <Table.Td>
                   <Group gap="sm" wrap="nowrap">
-                    <Avatar radius="xl" size={28} color="neutral">{initials(u.name)}</Avatar>
+                    <Avatar size={28} color="neutral">{initials(u.name)}</Avatar>
                     <Box miw={0}>
-                      <Text fw={600} size="0.82rem" truncate>{u.name}</Text>
-                      <Text c="dimmed" size="0.72rem" truncate>{u.email}</Text>
+                      <Text fw={600} truncate>{u.name}</Text>
+                      <Text c="dimmed" size="sm" truncate>{u.email}</Text>
                     </Box>
                   </Group>
                 </Table.Td>
@@ -202,34 +214,47 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                     value={u.profile}
                     onChange={v => v && changeUserProfile(u.id, v)}
                     data={availableProfiles}
-                    size="xs"
-                    w={160}
+                    w={180}
+                    aria-label={`Perfil de acesso de ${u.name}`}
                     allowDeselect={false}
                   />
                 </Table.Td>
                 <Table.Td>
-                  <Badge size="sm" color={u.status === 'ativo' ? 'green' : 'gray'} variant="light">{u.status}</Badge>
+                  <Badge color={u.status === 'ativo' ? 'green' : 'gray'} variant="light">{u.status}</Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text c="dimmed" size="0.75rem" className="mono">
+                  <Text c="dimmed" size="sm" className="mono">
                     {u.lastLogin === '—' ? '—' : formatDate(u.lastLogin)}
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Tooltip label="Remover vínculo" withArrow>
-                    <ActionIcon onClick={() => removeUser(u.id)} variant="subtle" color="red" aria-label={`Remover vínculo de ${u.name}`}>
-                      <TrashIcon size={14} />
-                    </ActionIcon>
-                  </Tooltip>
+                  <Button
+                    onClick={() => removeUser(u)}
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    leftSection={<TrashIcon size={16} />}
+                    aria-label={`Remover vínculo de ${u.name}`}
+                  >
+                    Remover
+                  </Button>
                 </Table.Td>
               </Table.Tr>
             ))}
             {users.length === 0 && (
               <Table.Tr>
                 <Table.Td colSpan={5}>
-                  <Text c="dimmed" ta="center" py="lg" size="0.82rem">
-                    Nenhum usuário vinculado ainda. Convide o primeiro acima.
-                  </Text>
+                  {/* Estado vazio: explica o motivo e oferece a ação */}
+                  <Stack gap="sm" align="center" py="lg">
+                    <Text c="dimmed" ta="center">
+                      Nenhum usuário vinculado à sua conta ainda. Convide alguém para que ele possa acessar com o perfil {subProfile}.
+                    </Text>
+                    {!showInvite && (
+                      <Button onClick={() => setShowInvite(true)} variant="default" color="neutral" leftSection={<UserPlusIcon size={16} />}>
+                        Convidar usuário
+                      </Button>
+                    )}
+                  </Stack>
                 </Table.Td>
               </Table.Tr>
             )}
@@ -240,8 +265,8 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
 
       {/* O que cada perfil pode acessar */}
       <Box>
-        <Text fw={600} size="0.95rem" mb={4}>O que cada perfil pode acessar</Text>
-        <Text c="dimmed" size="0.75rem" mb="sm">{visaoInfo.desc}. Alterar aqui afeta todos os usuários com o perfil correspondente.</Text>
+        <Title order={2} mb={4}>O que cada perfil pode acessar</Title>
+        <Text c="dimmed" size="sm" mb="sm">{visaoInfo.desc}. Alterar aqui afeta todos os usuários com o perfil correspondente.</Text>
         <PermissionMatrixTable
           matrix={permissionsState[scope.visao]}
           onToggle={togglePermission}

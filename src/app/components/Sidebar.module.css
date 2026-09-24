@@ -20,3 +20,30 @@
 .avatarButton.avatarButton {
   border-left: 1px solid var(--mantine-color-default-border);
 }
+
+/* Itens de navegação: 42px de altura e rótulo de 16px, como os demais controles
+   (classes duplicadas para vencer os tamanhos padrão do próprio NavLink) */
+.navLink.navLink {
+  min-height: 42px;
+}
+
+.navLabel.navLabel {
+  font-size: var(--mantine-font-size-md);
+}
+
+/* Carrinhos/Notificações com texto só em telas largas (≥ 1600px); abaixo disso,
+   ao lado dos itens de navegação, não há espaço e ficam só com ícone + tooltip
+   (classes duplicadas para vencer o display do próprio Indicator) */
+.wideOnly.wideOnly {
+  display: none;
+}
+
+@media (min-width: 100em) {
+  .wideOnly.wideOnly {
+    display: block;
+  }
+
+  .narrowOnly.narrowOnly {
+    display: none;
+  }
+}

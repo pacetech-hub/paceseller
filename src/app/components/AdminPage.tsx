@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  Tabs, Table, ActionIcon, Avatar, Collapse, Alert, Divider, Tooltip,
+  Tabs, Table, Avatar, Collapse, Alert, Divider,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -30,6 +30,7 @@ import { formatDate } from "../data/mockData";
 import { visoes, defaultPermissions, type VisaoKey, type PermissionsState } from "../data/permissions";
 import { linkedUsers } from "../data/linkedUsers";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
+import { toast } from "../lib/toast";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 import classes from "./interactive.module.css";
@@ -44,27 +45,24 @@ const tabs = [
   { id: 'settings', label: 'Configurações', icon: GearIcon },
 ];
 
-const badgeStyles = { label: { textTransform: 'none' as const } };
-
-
 const initials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2);
 
 function ErpSyncNotice({ text }: { text: string }) {
   return (
-    <Alert variant="light" color="neutral" radius="lg" icon={<PlugChargingIcon size={16} />} p="sm">
-      <Text size="0.78rem" lh={1.55}>{text}</Text>
+    <Alert variant="light" color="neutral" icon={<PlugChargingIcon size={16} />} p="sm">
+      <Text size="sm" lh={1.55}>{text}</Text>
     </Alert>
   );
 }
 
 function PolicySection({ icon: SectionIcon, title, hint, children }: { icon: Icon; title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
+    <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
       <Group gap={8} mb={4}>
-        <SectionIcon size={14} />
-        <Title order={4} fw={600} fz="0.85rem">{title}</Title>
+        <SectionIcon size={16} />
+        <Title order={4}>{title}</Title>
       </Group>
-      {hint && <Text c="dimmed" size="0.72rem">{hint}</Text>}
+      {hint && <Text c="dimmed" size="sm">{hint}</Text>}
       <Box mt="sm">{children}</Box>
     </Paper>
   );
@@ -73,9 +71,10 @@ function PolicySection({ icon: SectionIcon, title, hint, children }: { icon: Ico
 function CriteriaChips({ items }: { items: string[] }) {
   return (
     <Group gap={6}>
-      {items.length === 0 && <Text c="dimmed" size="0.75rem">Nenhum item nesta condição</Text>}
+      {/* Somente leitura: a única forma de mudar é pela regra no ERP */}
+      {items.length === 0 && <Text c="dimmed" size="sm">Nenhum item nesta condição. Para incluir, ajuste a regra no ERP da Tesla.</Text>}
       {items.map(v => (
-        <Badge key={v} size="md" variant="light" color="neutral" radius="xl" fw={600} styles={badgeStyles}>{v}</Badge>
+        <Badge key={v} variant="light" color="neutral" fw={600}>{v}</Badge>
       ))}
     </Group>
   );
@@ -84,10 +83,10 @@ function CriteriaChips({ items }: { items: string[] }) {
 function UserCell({ name }: { name: string }) {
   return (
     <Group gap={10} wrap="nowrap">
-      <Avatar size={28} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '0.62rem', fontWeight: 700 } }}>
+      <Avatar size={32} color="neutral" variant="light">
         {initials(name)}
       </Avatar>
-      <Text size="0.82rem" fw={600}>{name}</Text>
+      <Text fw={600}>{name}</Text>
     </Group>
   );
 }
@@ -95,7 +94,7 @@ function UserCell({ name }: { name: string }) {
 // linha de configuração somente leitura (rótulo + descrição à esquerda, valor à direita)
 function SettingRow({ label, desc, children }: { label: string; desc: string; children: React.ReactNode }) {
   return (
-    <Paper withBorder radius="md" p="md" bg="var(--mantine-color-default-hover)">
+    <Paper withBorder p="md" bg="var(--mantine-color-default-hover)">
       {/* Valor abaixo do texto no celular; à direita a partir de xs */}
       <Flex
         direction={{ base: 'column', xs: 'row' }}
@@ -104,8 +103,8 @@ function SettingRow({ label, desc, children }: { label: string; desc: string; ch
         gap={{ base: 'xs', xs: 'md' }}
       >
         <Box>
-          <Text size="0.85rem" fw={600}>{label}</Text>
-          <Text c="dimmed" size="0.75rem">{desc}</Text>
+          <Text fw={600}>{label}</Text>
+          <Text c="dimmed" size="sm">{desc}</Text>
         </Box>
         {children}
       </Flex>
@@ -156,10 +155,17 @@ const coveredClientsMock = [
   { name: 'Calçados Estrela', city: 'Curitiba, PR', rep: 'Carlos Mendes' },
 ];
 
+type AdminUser = typeof mockUsers[number];
+
+const emptyNewUser = { name: '', email: '', role: 'Representante', region: 'Sudeste' };
+
 export function AdminPage() {
   const [activeTab, setActiveTab] = useState('industry-stock');
   const [search, setSearch] = useState('');
   const [showAddUser, setShowAddUser] = useState(false);
+  const [users, setUsers] = useState<AdminUser[]>(mockUsers);
+  const [newUser, setNewUser] = useState(emptyNewUser);
+  const [newUserErrors, setNewUserErrors] = useState<{ name?: string; email?: string }>({});
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | null>(null);
   const criteriaState = initialCriteria;
   const [activeView, setActiveView] = useState<VisaoKey>('industria');
@@ -178,14 +184,47 @@ export function AdminPage() {
     }));
   };
 
-  const filteredUsers = mockUsers.filter(u =>
+  const closeAddUser = () => {
+    setShowAddUser(false);
+    setNewUser(emptyNewUser);
+    setNewUserErrors({});
+  };
+
+  const createUser = () => {
+    // Erros ao lado do campo, dizendo como corrigir
+    const errors: { name?: string; email?: string } = {};
+    if (!newUser.name.trim()) errors.name = 'Informe o nome completo do usuário';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUser.email.trim())) errors.email = 'Informe um e-mail válido, ex.: nome@tesla.com.br';
+    setNewUserErrors(errors);
+    if (errors.name || errors.email) return;
+    const created: AdminUser = {
+      id: `U-NEW-${Date.now()}`,
+      name: newUser.name.trim(),
+      email: newUser.email.trim(),
+      role: newUser.role,
+      region: newUser.region,
+      status: 'ativo',
+      lastLogin: '—',
+    };
+    setUsers(prev => [created, ...prev]);
+    setSearch('');
+    closeAddUser();
+    toast.success(`Usuário ${created.name} criado`, 'Ele já aparece no topo da lista de usuários abaixo');
+  };
+
+  const deleteUser = (user: AdminUser) => {
+    setUsers(prev => prev.filter(u => u.id !== user.id));
+    toast.success(`Usuário ${user.name} excluído`, 'Ele não consegue mais acessar. Para devolver o acesso, adicione-o novamente.');
+  };
+
+  const filteredUsers = users.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Tab bar */}
-      <Paper withBorder radius="lg" p={4}>
+      <Paper withBorder p={4}>
         <Tabs value={activeTab} onChange={v => v && setActiveTab(v)} variant="pills" color="gray">
           <Tabs.List className={admin.tabList}>
             {tabs.map(tab => {
@@ -195,11 +234,11 @@ export function AdminPage() {
                 <Tabs.Tab
                   key={tab.id}
                   value={tab.id}
-                  leftSection={<TabIcon size={14} />}
+                  leftSection={<TabIcon size={16} />}
                   flex="none"
+                  className={admin.tab}
                   styles={{
                     tab: {
-                      fontSize: '0.82rem',
                       fontWeight: active ? 600 : 400,
                       color: active ? 'var(--mantine-color-text)' : 'var(--mantine-color-dimmed)',
                       backgroundColor: active ? 'var(--mantine-color-default-hover)' : undefined,
@@ -228,7 +267,7 @@ export function AdminPage() {
       {activeTab === 'pricing' && !selectedPolicyId && (
         <Stack gap="md">
           <ErpSyncNotice text="Campanhas comerciais são somente leitura neste momento — os dados vêm diretamente das regras cadastradas no ERP da Tesla." />
-          <Text c="dimmed" size="0.85rem">Políticas de preço ativas</Text>
+          <Text c="dimmed">Políticas de preço ativas</Text>
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             {pricePolicies.map(policy => (
               <Paper
@@ -237,13 +276,12 @@ export function AdminPage() {
                 type="button"
                 onClick={() => setSelectedPolicyId(policy.id)}
                 withBorder
-                radius="lg"
                 p={{ base: 'md', sm: 'lg' }}
                 className={`${classes.cardButton} ${classes.hoverable}`}
               >
                 <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
-                  <Title order={3} fw={600} fz="0.9rem">{policy.name}</Title>
-                  <CaretRightIcon size={14} color="var(--mantine-color-dimmed)" />
+                  <Title order={3}>{policy.name}</Title>
+                  <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
                 </Group>
                 <SimpleGrid cols={3} spacing="sm" mb="sm">
                   {[
@@ -252,14 +290,14 @@ export function AdminPage() {
                     { label: 'Pagamento', value: policy.payment },
                   ].map(detail => (
                     <Box key={detail.label}>
-                      <Text c="dimmed" size="0.7rem">{detail.label}</Text>
-                      <Text className={detail.mono ? 'mono' : undefined} size="0.85rem" fw={detail.highlight ? 700 : 600}>
+                      <Text c="dimmed" size="sm">{detail.label}</Text>
+                      <Text className={detail.mono ? 'mono' : undefined} fw={detail.highlight ? 700 : 600}>
                         {detail.value}
                       </Text>
                     </Box>
                   ))}
                 </SimpleGrid>
-                <Text c="dimmed" size="0.72rem">
+                <Text c="dimmed" size="sm">
                   <Text span fw={600} c="var(--mantine-color-text)" inherit>{policy.clients}</Text> clientes nesta política
                 </Text>
               </Paper>
@@ -280,10 +318,8 @@ export function AdminPage() {
                 onClick={() => setSelectedPolicyId(null)}
                 variant="subtle"
                 color="gray"
-                size="xs"
                 ml={-12}
-                leftSection={<ArrowLeftIcon size={14} />}
-                styles={{ label: { fontWeight: 400, fontSize: '0.78rem' } }}
+                leftSection={<ArrowLeftIcon size={16} />}
               >
                 Voltar para políticas
               </Button>
@@ -292,10 +328,10 @@ export function AdminPage() {
             <ErpSyncNotice text="Esta política é somente leitura — a regra ativa vem do ERP da Tesla." />
 
             {/* Identidade */}
-            <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+            <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
               <Box mb="md">
-                <Title order={2} fw={700} mb={4} fz="1.15rem">{policy.name}</Title>
-                <Text c="dimmed" size="0.78rem">Configuração da política comercial</Text>
+                <Title order={1} mb={4}>{policy.name}</Title>
+                <Text c="dimmed" size="sm">Configuração da política comercial</Text>
               </Box>
               <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
                 {[
@@ -304,17 +340,17 @@ export function AdminPage() {
                   { label: 'Pagamento', value: policy.payment },
                   { label: 'Clientes cobertos', value: String(policy.clients) },
                 ].map(d => (
-                  <Paper key={d.label} radius="md" p="sm" bg="var(--mantine-color-default-hover)">
-                    <Text c="dimmed" size="0.7rem" tt="uppercase" mb={4} lts="0.05em">{d.label}</Text>
-                    <Text className={d.mono ? 'mono' : undefined} size="1rem" fw={d.highlight ? 700 : 600}>{d.value}</Text>
+                  <Paper key={d.label} p="sm" bg="var(--mantine-color-default-hover)">
+                    <Text c="dimmed" size="sm" mb={4}>{d.label}</Text>
+                    <Text className={d.mono ? 'mono' : undefined} fw={d.highlight ? 700 : 600}>{d.value}</Text>
                   </Paper>
                 ))}
               </SimpleGrid>
             </Paper>
 
             {/* Aviso precedência */}
-            <Alert variant="light" color="yellow" radius="lg" icon={<InfoIcon size={16} />} p="sm">
-              <Text size="0.78rem" lh={1.55}>
+            <Alert variant="light" color="yellow" icon={<InfoIcon size={16} />} p="sm">
+              <Text size="sm" lh={1.55}>
                 <Text span fw={600} inherit>Precedência:</Text> critérios mais específicos sobrepõem os mais amplos.
                 Clientes específicos &gt; Representantes &gt; Regiões. Produtos específicos &gt; Linhas de produto.
               </Text>
@@ -322,7 +358,7 @@ export function AdminPage() {
 
             {/* Critérios */}
             <Box>
-              <Title order={3} fw={600} mb="sm" fz="0.95rem">Critérios de aplicação</Title>
+              <Title order={3} mb="sm">Critérios de aplicação</Title>
               <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
                 <PolicySection icon={UserCircleIcon} title="Clientes específicos" hint="Lojistas vinculados diretamente. Sobrepõe qualquer outro critério.">
                   <CriteriaChips items={criteria.clients} />
@@ -348,29 +384,29 @@ export function AdminPage() {
             </Box>
 
             {/* Clientes cobertos */}
-            <Card withBorder radius="lg" padding={0}>
+            <Card withBorder padding={0}>
               <Box p={{ base: 'md', sm: 'lg' }}>
-                <Title order={3} fw={600} fz="0.95rem">Clientes cobertos</Title>
-                <Text c="dimmed" size="0.75rem" mt={4}>
+                <Title order={3}>Clientes cobertos</Title>
+                <Text c="dimmed" size="sm" mt={4}>
                   Resultado consolidado dos critérios acima · {policy.clients} lojistas · somente leitura
                 </Text>
               </Box>
               <Divider color="var(--mantine-color-default-border)" />
               <Table.ScrollContainer minWidth={520}>
-              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md" fz="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Lojista', 'Cidade/UF', 'Representante'].map(c => (
-                      <Table.Th key={c} c="dimmed" tt="uppercase" fz="0.7rem" fw={600} lts="0.05em">{c}</Table.Th>
+                      <Table.Th key={c} c="dimmed" fz="sm" fw={600}>{c}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {covered.map(c => (
                     <Table.Tr key={c.name}>
-                      <Table.Td fw={600} fz="0.82rem">{c.name}</Table.Td>
-                      <Table.Td c="dimmed" fz="0.78rem">{c.city}</Table.Td>
-                      <Table.Td c="dimmed" fz="0.78rem">{c.rep}</Table.Td>
+                      <Table.Td fw={600}>{c.name}</Table.Td>
+                      <Table.Td c="dimmed">{c.city}</Table.Td>
+                      <Table.Td c="dimmed">{c.rep}</Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
@@ -385,8 +421,8 @@ export function AdminPage() {
       {activeTab === 'policies' && (
         <Stack gap="md">
           <ErpSyncNotice text="Políticas são somente leitura neste momento — os valores exibidos refletem as regras vigentes no ERP da Tesla." />
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-            <Title order={3} fw={600} size="1rem" mb="md">Configurações de aprovação</Title>
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+            <Title order={3} mb="md">Configurações de aprovação</Title>
             <Stack gap="md">
               {[
                 { label: 'Aprovação automática até', desc: 'Pedidos abaixo deste valor são aprovados automaticamente', value: 'R$ 5.000' },
@@ -400,12 +436,12 @@ export function AdminPage() {
             </Stack>
           </Paper>
 
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-            <Title order={3} fw={600} size="1rem" mb={4}>Inadimplência</Title>
-            <Text c="dimmed" size="0.78rem" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+            <Title order={3} mb={4}>Inadimplência</Title>
+            <Text c="dimmed" size="sm" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
             <SettingRow label="Clientes inadimplentes" desc="Condição de pagamento aplicada automaticamente a clientes com débitos em aberto">
-              <Paper withBorder radius="md" px="sm" py={8} flex="none">
-                <Text size="0.82rem" fw={600}>Apenas pagamento à vista</Text>
+              <Paper withBorder px="sm" py={8} flex="none">
+                <Text fw={600}>Apenas pagamento à vista</Text>
               </Paper>
             </SettingRow>
           </Paper>
@@ -416,56 +452,68 @@ export function AdminPage() {
       {activeTab === 'settings' && (
         <Stack gap="md">
           {/* Usuários */}
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Group justify="space-between" mb="md" gap="sm">
-              <Title order={3} fw={600} size="1rem">Usuários</Title>
+              <Title order={3}>Usuários</Title>
               <Group gap={8}>
                 <TextInput
                   placeholder="Buscar usuário..."
-                  leftSection={<MagnifyingGlassIcon size={14} />}
+                  leftSection={<MagnifyingGlassIcon size={16} />}
                   value={search}
                   onChange={e => setSearch(e.currentTarget.value)}
-                  size="xs"
+                  aria-label="Buscar usuário"
                 />
-                <Button onClick={() => setShowAddUser(!showAddUser)} size="xs" leftSection={<PlusIcon size={14} />}>
+                <Button onClick={() => (showAddUser ? closeAddUser() : setShowAddUser(true))} leftSection={<PlusIcon size={16} />}>
                   Adicionar usuário
                 </Button>
               </Group>
             </Group>
             <Collapse in={showAddUser}>
-              <Paper withBorder radius="lg" p="md" mb="md" bg="var(--mantine-color-default-hover)">
-                <Title order={4} fw={600} mb="sm" fz="0.88rem">Adicionar usuário</Title>
+              <Paper withBorder p="md" mb="md" bg="var(--mantine-color-default-hover)">
+                <Title order={4} mb="sm">Adicionar usuário</Title>
                 {/* Formulário em coluna única */}
                 <Stack gap="md">
-                  <TextInput label="Nome completo" placeholder="Nome do usuário" size="xs" />
-                  <TextInput label="E-mail" placeholder="email@tesla.com.br" size="xs" />
+                  <TextInput
+                    label="Nome completo"
+                    placeholder="Nome do usuário"
+                    value={newUser.name}
+                    onChange={e => { const name = e.currentTarget.value; setNewUser(p => ({ ...p, name })); setNewUserErrors(p => ({ ...p, name: undefined })); }}
+                    error={newUserErrors.name}
+                  />
+                  <TextInput
+                    label="E-mail"
+                    placeholder="email@tesla.com.br"
+                    value={newUser.email}
+                    onChange={e => { const email = e.currentTarget.value; setNewUser(p => ({ ...p, email })); setNewUserErrors(p => ({ ...p, email: undefined })); }}
+                    error={newUserErrors.email}
+                  />
                   <Select
                     label="Perfil"
                     data={['Representante', 'Preposto', 'Lojista', 'Comprador', 'Admin']}
-                    defaultValue="Representante"
+                    value={newUser.role}
+                    onChange={v => v && setNewUser(p => ({ ...p, role: v }))}
                     allowDeselect={false}
-                    size="xs"
                   />
                   <Select
                     label="Região"
                     data={['Sudeste', 'Sul', 'Nordeste', 'Centro-Oeste', 'Norte', 'Nacional']}
-                    defaultValue="Sudeste"
+                    value={newUser.region}
+                    onChange={v => v && setNewUser(p => ({ ...p, region: v }))}
                     allowDeselect={false}
-                    size="xs"
                   />
                 </Stack>
                 <Group justify="flex-end" gap={8} mt="md">
-                  <Button onClick={() => setShowAddUser(false)} variant="default" size="xs">Cancelar</Button>
-                  <Button onClick={() => setShowAddUser(false)} size="xs">Criar usuário</Button>
+                  <Button onClick={closeAddUser} variant="default">Cancelar</Button>
+                  <Button onClick={createUser}>Criar usuário</Button>
                 </Group>
               </Paper>
             </Collapse>
             <Table.ScrollContainer minWidth={800}>
-              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md" fz="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
-                    {['Nome', 'E-mail', 'Perfil', 'Região', 'Status', 'Último acesso', ''].map(col => (
-                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={600}>{col}</Table.Th>
+                    {['Nome', 'E-mail', 'Perfil', 'Região', 'Status', 'Último acesso', 'Ações'].map(col => (
+                      <Table.Th key={col} c="dimmed" fz="sm" fw={600}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -473,44 +521,64 @@ export function AdminPage() {
                   {filteredUsers.map(user => (
                     <Table.Tr key={user.id}>
                       <Table.Td><UserCell name={user.name} /></Table.Td>
-                      <Table.Td c="dimmed" fz="0.78rem">{user.email}</Table.Td>
+                      <Table.Td c="dimmed">{user.email}</Table.Td>
                       <Table.Td>
-                        <Badge size="xs" variant="light" color={user.role === 'Admin' ? 'violet' : 'dark'} styles={badgeStyles}>{user.role}</Badge>
+                        <Badge variant="light" color={user.role === 'Admin' ? 'violet' : 'dark'}>{user.role}</Badge>
                       </Table.Td>
-                      <Table.Td c="dimmed" fz="0.78rem">{user.region}</Table.Td>
+                      <Table.Td c="dimmed">{user.region}</Table.Td>
                       <Table.Td>
-                        <Badge size="xs" variant="light" color="teal" styles={badgeStyles}>{user.status}</Badge>
+                        <Badge variant="light" color="teal">{user.status}</Badge>
                       </Table.Td>
-                      <Table.Td c="dimmed" className="mono" fz="0.75rem">{formatDate(user.lastLogin)}</Table.Td>
+                      <Table.Td c="dimmed" className="mono" fz="sm">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
                       <Table.Td>
+                        {/* Ícone + texto; size="sm" só por estar dentro de linha de tabela */}
                         <Group gap={4} wrap="nowrap">
-                          <Tooltip label="Editar usuário" withArrow>
-                            <ActionIcon variant="subtle" color="gray" size="sm" aria-label={`Editar usuário ${user.name}`}><PencilSimpleLineIcon size={14} /></ActionIcon>
-                          </Tooltip>
-                          <Tooltip label="Excluir usuário" withArrow>
-                            <ActionIcon variant="subtle" color="red" size="sm" aria-label={`Excluir usuário ${user.name}`}><TrashIcon size={14} /></ActionIcon>
-                          </Tooltip>
+                          <Button variant="subtle" color="gray" size="sm" leftSection={<PencilSimpleLineIcon size={16} />} aria-label={`Editar usuário ${user.name}`}>
+                            Editar
+                          </Button>
+                          <Button onClick={() => deleteUser(user)} variant="subtle" color="red" size="sm" leftSection={<TrashIcon size={16} />} aria-label={`Excluir usuário ${user.name}`}>
+                            Excluir
+                          </Button>
                         </Group>
                       </Table.Td>
                     </Table.Tr>
                   ))}
+                  {filteredUsers.length === 0 && (
+                    <Table.Tr>
+                      <Table.Td colSpan={7}>
+                        {/* Estado vazio: explica o motivo e oferece a ação */}
+                        <Stack gap="sm" align="center" py="lg">
+                          <Text c="dimmed" ta="center">
+                            {search
+                              ? `Nenhum usuário encontrado para "${search}". Confira a grafia ou limpe a busca.`
+                              : 'Nenhum usuário cadastrado. Adicione o primeiro para liberar o acesso.'}
+                          </Text>
+                          {search ? (
+                            <Button onClick={() => setSearch('')} variant="default">Limpar busca</Button>
+                          ) : (
+                            <Button onClick={() => setShowAddUser(true)} variant="default" leftSection={<PlusIcon size={16} />}>Adicionar usuário</Button>
+                          )}
+                        </Stack>
+                      </Table.Td>
+                    </Table.Tr>
+                  )}
                 </Table.Tbody>
               </Table>
             </Table.ScrollContainer>
           </Paper>
 
           {/* Usuários vinculados a representantes e lojistas */}
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-            <Title order={3} fw={600} size="1rem">Usuários vinculados</Title>
-            <Text c="dimmed" size="0.78rem" mt={4} mb="md">
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+            <Title order={3}>Usuários vinculados</Title>
+            <Text c="dimmed" size="sm" mt={4} mb="md">
               Contas registradas sob um representante ou lojista (ex.: prepostos e compradores). Cada um gerencia o perfil de acesso da própria equipe.
             </Text>
             <Table.ScrollContainer minWidth={800}>
-              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md" fz="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Usuário', 'E-mail', 'Perfil', 'Vinculado a', 'Status', 'Último acesso'].map(col => (
-                      <Table.Th key={col} c="dimmed" fz="0.72rem" fw={600}>{col}</Table.Th>
+                      <Table.Th key={col} c="dimmed" fz="sm" fw={600}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -518,19 +586,19 @@ export function AdminPage() {
                   {linkedUsers.map(user => (
                     <Table.Tr key={user.id}>
                       <Table.Td><UserCell name={user.name} /></Table.Td>
-                      <Table.Td c="dimmed" fz="0.78rem">{user.email}</Table.Td>
+                      <Table.Td c="dimmed">{user.email}</Table.Td>
                       <Table.Td>
-                        <Badge size="xs" variant="light" color="neutral" styles={badgeStyles}>{user.profile}</Badge>
+                        <Badge variant="light" color="neutral">{user.profile}</Badge>
                       </Table.Td>
                       <Table.Td>
-                        <Badge size="xs" variant="light" color={user.ownerType === 'representante' ? 'yellow' : 'teal'} styles={badgeStyles}>
+                        <Badge variant="light" color={user.ownerType === 'representante' ? 'yellow' : 'teal'}>
                           {user.ownerType === 'representante' ? 'Rep · ' : 'Lojista · '}{user.ownerName}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
-                        <Badge size="xs" variant="light" color={user.status === 'ativo' ? 'teal' : 'gray'} styles={badgeStyles}>{user.status}</Badge>
+                        <Badge variant="light" color={user.status === 'ativo' ? 'teal' : 'gray'}>{user.status}</Badge>
                       </Table.Td>
-                      <Table.Td c="dimmed" className="mono" fz="0.75rem">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
+                      <Table.Td c="dimmed" className="mono" fz="sm">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
@@ -538,8 +606,8 @@ export function AdminPage() {
             </Table.ScrollContainer>
           </Paper>
 
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-            <Title order={3} fw={600} size="1rem" mb="md">Informações da empresa</Title>
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+            <Title order={3} mb="md">Informações da empresa</Title>
             {/* Formulário em coluna única */}
             <Stack gap="md">
               {[
@@ -552,11 +620,16 @@ export function AdminPage() {
                   key={field.label}
                   label={field.label}
                   defaultValue={field.value}
-                  styles={{ label: { fontSize: '0.75rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
                 />
               ))}
             </Stack>
-            <Button mt="lg" fullWidth>Salvar dados da empresa</Button>
+            <Button
+              mt="lg"
+              fullWidth
+              onClick={() => toast.success('Dados da empresa salvos', 'Eles passam a aparecer nos próximos pedidos e boletos emitidos')}
+            >
+              Salvar dados da empresa
+            </Button>
           </Paper>
         </Stack>
       )}
@@ -576,19 +649,18 @@ export function AdminPage() {
                   type="button"
                   onClick={() => setActiveView(v.id)}
                   withBorder
-                  radius="lg"
                   p="md"
                   className={`${classes.cardButton} ${active ? '' : classes.hoverable}`}
                   bd={active ? '1px solid var(--mantine-color-neutral-9)' : undefined}
                   bg={active ? 'var(--mantine-color-neutral-0)' : undefined}
                 >
                   <Group gap="sm" wrap="nowrap">
-                    <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'neutral' : 'gray'} size={36} radius="md">
+                    <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'neutral' : 'gray'} size={36}>
                       <VisaoIcon size={16} />
                     </ThemeIcon>
                     <Box>
-                      <Text size="0.85rem" fw={600}>{v.label}</Text>
-                      <Text c="dimmed" size="0.72rem">{v.desc}</Text>
+                      <Text fw={600}>{v.label}</Text>
+                      <Text c="dimmed" size="sm">{v.desc}</Text>
                     </Box>
                   </Group>
                 </Paper>

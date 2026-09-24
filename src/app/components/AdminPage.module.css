@@ -4,3 +4,10 @@
   flex-wrap: nowrap;
   overflow-x: auto;
 }
+
+/* Abas com texto de 16px e área de clique de 42px, como os demais controles
+   (classe duplicada para vencer o tamanho padrão do próprio Tabs.Tab) */
+.tab.tab {
+  font-size: var(--mantine-font-size-md);
+  min-height: 42px;
+}

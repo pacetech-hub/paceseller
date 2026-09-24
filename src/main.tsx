@@ -21,7 +21,7 @@
       <DatesProvider settings={{ locale: "pt-br" }}>
         {/* Ícones Phosphor no estilo regular em todo o app; tamanho padrão 24px */}
         <IconContext.Provider value={{ size: 24, weight: "regular" }}>
-          <Notifications position="top-center" autoClose={4000} />
+          <Notifications position="top-center" autoClose={6000} />
           <App />
         </IconContext.Provider>
       </DatesProvider>

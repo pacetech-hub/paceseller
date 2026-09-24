@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
-  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image, Tooltip,
+  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import {
@@ -128,8 +128,8 @@ type Mode = 'home' | 'wizard' | 'campaigns';
 const DIMMED = 'var(--mantine-color-dimmed)';
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
-function EmptyState({ title, subtitle, iconSize = 32, withCard = false, py = 40, strongTitle = false }: {
-  title: string; subtitle?: string; iconSize?: number; withCard?: boolean; py?: number; strongTitle?: boolean;
+function EmptyState({ title, subtitle, action, iconSize = 32, withCard = false, py = 40, strongTitle = false }: {
+  title: string; subtitle?: string; action?: React.ReactNode; iconSize?: number; withCard?: boolean; py?: number; strongTitle?: boolean;
 }) {
   const content = (
     <Stack align="center" justify="center" gap={0} py={py} ta="center">
@@ -139,12 +139,13 @@ function EmptyState({ title, subtitle, iconSize = 32, withCard = false, py = 40,
       {strongTitle ? (
         <Text fw={600}>{title}</Text>
       ) : (
-        <Text c="dimmed" size="0.8rem">{title}</Text>
+        <Text c="dimmed">{title}</Text>
       )}
-      {subtitle && <Text c="dimmed" size={strongTitle ? '0.85rem' : '0.72rem'} mt={4}>{subtitle}</Text>}
+      {subtitle && <Text c="dimmed" size="sm" mt={4}>{subtitle}</Text>}
+      {action && <Box mt="md">{action}</Box>}
     </Stack>
   );
-  return withCard ? <Paper withBorder radius="lg">{content}</Paper> : content;
+  return withCard ? <Paper withBorder>{content}</Paper> : content;
 }
 
 function BackLink({ onClick }: { onClick: () => void }) {
@@ -154,10 +155,8 @@ function BackLink({ onClick }: { onClick: () => void }) {
         onClick={onClick}
         variant="subtle"
         color="gray"
-        size="compact-sm"
         ml={-8}
         leftSection={<CaretLeftIcon size={16} />}
-        styles={{ label: { fontSize: '0.82rem' } }}
       >
         Voltar para Marketing IA
       </Button>
@@ -168,15 +167,13 @@ function BackLink({ onClick }: { onClick: () => void }) {
 function PieceInfo({ label, copy }: { label: string; copy: string }) {
   return (
     <Box p="sm">
-      <Text size="0.82rem" fw={600} truncate>{label}</Text>
-      <Text c="dimmed" size="0.72rem" mb={8} lineClamp={2}>{copy}</Text>
+      <Text fw={600} truncate>{label}</Text>
+      <Text c="dimmed" size="sm" mb={8} lineClamp={2}>{copy}</Text>
       <Button
-        onClick={() => toast.success('Arquivo baixado')}
+        onClick={() => toast.success(`Download de "${label}" iniciado`, 'O arquivo vai para a pasta de downloads do navegador')}
         variant="default"
-        size="xs"
         fullWidth
-        leftSection={<DownloadSimpleIcon size={14} />}
-        styles={{ label: { fontSize: '0.78rem' } }}
+        leftSection={<DownloadSimpleIcon size={16} />}
       >
         Baixar peça
       </Button>
@@ -188,15 +185,15 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Header */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
         <Group justify="space-between" wrap="wrap" gap="md">
           <Group gap="sm" wrap="nowrap">
-            <ThemeIcon variant="light" color="neutral" size={40} radius="md">
+            <ThemeIcon variant="light" color="neutral" size={40}>
               <SparkleIcon size={20} />
             </ThemeIcon>
             <Box>
-              <Title order={2} fw={700} fz="1rem">Estúdio de Marketing com IA</Title>
-              <Text c="dimmed" size="0.8rem">Crie campanhas profissionais em menos de 2 minutos</Text>
+              <Title order={1}>Estúdio de Marketing com IA</Title>
+              <Text c="dimmed" size="sm">Crie campanhas profissionais em menos de 2 minutos</Text>
             </Box>
           </Group>
           <Group gap={8} wrap="wrap">
@@ -204,14 +201,12 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               onClick={onManageCampaigns}
               variant="subtle"
               leftSection={<PencilSimpleIcon size={16} />}
-              styles={{ label: { fontSize: '0.82rem' } }}
             >
               Gerenciar campanhas
             </Button>
             <Button
               onClick={onCreate}
               leftSection={<SparkleIcon size={16} />}
-              styles={{ label: { fontSize: '0.85rem' } }}
             >
               Criar campanha
             </Button>
@@ -221,31 +216,26 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
 
       {/* Histórico */}
       <Box>
-        <Text c="dimmed" size="0.7rem" fw={600} mb="sm" tt="uppercase" lts="0.04em">
-          Histórico
-        </Text>
+        <Title order={2} mb="sm">Histórico de peças</Title>
         {history.length > 0 ? (
           <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
             {history.map(item => (
-              <Card key={item.id} withBorder radius="lg" padding={0}>
+              <Card key={item.id} withBorder padding={0}>
                 <AspectRatio ratio={1}>
                   <Box pos="relative" bg="var(--mantine-color-default-hover)">
                     <Image src={item.image} alt={item.formatLabel} h="100%" />
-                    <Tooltip label="Excluir peça do histórico" withArrow>
-                      <ActionIcon
-                        onClick={() => onDelete(item.id)}
-                        aria-label="Excluir peça do histórico"
-                        size={28}
-                        radius="md"
-                        variant="transparent"
-                        pos="absolute"
-                        top={8}
-                        right={8}
-                        className={classes.overlayDelete}
-                      >
-                        <TrashIcon size={14} />
-                      </ActionIcon>
-                    </Tooltip>
+                    <Button
+                      onClick={() => onDelete(item.id)}
+                      aria-label={`Excluir peça ${item.formatLabel} do histórico`}
+                      variant="transparent"
+                      pos="absolute"
+                      top={8}
+                      right={8}
+                      leftSection={<TrashIcon size={16} />}
+                      className={classes.overlayDelete}
+                    >
+                      Excluir
+                    </Button>
                   </Box>
                 </AspectRatio>
                 <PieceInfo label={item.formatLabel} copy={item.copy} />
@@ -253,7 +243,19 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             ))}
           </SimpleGrid>
         ) : (
-          <EmptyState withCard strongTitle iconSize={40} py={64} title="Nenhuma campanha criada ainda" subtitle={'Clique em "Criar campanha" para começar'} />
+          <EmptyState
+            withCard
+            strongTitle
+            iconSize={40}
+            py={64}
+            title="Nenhuma peça no histórico ainda"
+            subtitle="As peças que você salvar ao final do assistente aparecem aqui"
+            action={
+              <Button onClick={onCreate} variant="default" leftSection={<SparkleIcon size={16} />}>
+                Criar campanha
+              </Button>
+            }
+          />
         )}
       </Box>
     </Stack>
@@ -273,16 +275,28 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [nameError, setNameError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Campaign | null>(null);
 
   const selected = campaigns.find(c => c.id === selectedId) ?? null;
 
   const handleCreate = () => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      setNameError('Informe o nome da campanha, ex.: Dia dos Pais');
+      return;
+    }
     onCreateCampaign(newName.trim(), newDescription.trim());
     setNewName('');
     setNewDescription('');
+    setNameError(null);
     setCreating(false);
+  };
+
+  const closeCreate = () => {
+    setCreating(false);
+    setNewName('');
+    setNewDescription('');
+    setNameError(null);
   };
 
   const handleFiles = (files: File[]) => {
@@ -291,24 +305,29 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
     onAddPhotos(selected.id, files.map(f => URL.createObjectURL(f)));
   };
 
-  const inputStyles = {
-    label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' },
-    input: { fontSize: '0.82rem' },
-  };
+  const uploadButton = (
+    <FileButton onChange={handleFiles} accept="image/*" multiple>
+      {props => (
+        <Button {...props} variant="default" leftSection={<UploadSimpleIcon size={16} />}>
+          Enviar cenário
+        </Button>
+      )}
+    </FileButton>
+  );
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <BackLink onClick={onBack} />
 
       <Box>
-        <Title order={2} fw={700} fz="1rem">Gerenciar campanhas</Title>
-        <Text c="dimmed" size="0.8rem">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
+        <Title order={1}>Gerenciar campanhas</Title>
+        <Text c="dimmed" size="sm">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
       </Box>
 
       {/* Lista à esquerda e detalhe à direita a partir de sm; empilhados abaixo disso */}
       <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'flex-start' }} gap="lg">
         {/* Left panel: campaign list */}
-        <Paper withBorder radius="lg" p={8} w={{ base: '100%', sm: 220, md: 256 }} flex="none">
+        <Paper withBorder p={8} w={{ base: '100%', sm: 220, md: 256 }} flex="none">
           <Stack gap={2}>
             {campaigns.map(c => {
               const active = selectedId === c.id;
@@ -321,23 +340,10 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                   data-active={active || undefined}
                 >
                   <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py={10} flex={1} miw={0}>
-                    <Text size="0.85rem" fw={active ? 600 : 400} truncate>
+                    <Text fw={active ? 600 : 400} truncate>
                       {c.name}
                     </Text>
                   </UnstyledButton>
-                  <Tooltip label="Excluir campanha" withArrow>
-                    <ActionIcon
-                      onClick={() => setDeleteTarget(c)}
-                      aria-label={`Excluir campanha ${c.name}`}
-                      variant="subtle"
-                      color="red"
-                      size={26}
-                      mr={6}
-                      className={classes.rowDelete}
-                    >
-                      <TrashIcon size={14} />
-                    </ActionIcon>
-                  </Tooltip>
                 </Group>
               );
             })}
@@ -350,7 +356,6 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             mt={4}
             px="sm"
             leftSection={<PlusIcon size={16} />}
-            styles={{ label: { fontSize: '0.85rem' } }}
           >
             Nova campanha
           </Button>
@@ -360,65 +365,79 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         <Stack gap="md" flex={1} miw={0}>
           {selected ? (
             <>
-              <Paper withBorder radius="lg" p="md">
-                <Title order={3} fw={700} fz="0.95rem">{selected.name}</Title>
-                <Text c="dimmed" size="0.82rem" mt={4}>
-                  {selected.description || 'Sem descrição.'}
-                </Text>
+              <Paper withBorder p="md">
+                <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+                  <Box miw={0} flex={1}>
+                    <Title order={2}>{selected.name}</Title>
+                    <Text c="dimmed" mt={4}>
+                      {selected.description || 'Sem descrição.'}
+                    </Text>
+                  </Box>
+                  <Button
+                    onClick={() => setDeleteTarget(selected)}
+                    variant="default"
+                    c="red"
+                    leftSection={<TrashIcon size={16} />}
+                  >
+                    Excluir campanha
+                  </Button>
+                </Group>
               </Paper>
 
-              <Paper withBorder radius="lg" p="md">
+              <Paper withBorder p="md">
                 <Group justify="space-between" wrap="wrap" gap={8} mb="sm">
-                  <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" lts="0.04em">
+                  <Text fw={600}>
                     {selected.photos.length} {selected.photos.length === 1 ? 'cenário fotográfico' : 'cenários fotográficos'}
                   </Text>
-                  <FileButton onChange={handleFiles} accept="image/*" multiple>
-                    {props => (
-                      <Button
-                        {...props}
-                        variant="default"
-                        size="xs"
-                        leftSection={<UploadSimpleIcon size={14} />}
-                        styles={{ label: { fontSize: '0.78rem' } }}
-                      >
-                        Enviar cenário
-                      </Button>
-                    )}
-                  </FileButton>
+                  {/* Com a lista vazia o botão aparece no estado vazio, abaixo */}
+                  {selected.photos.length > 0 && uploadButton}
                 </Group>
 
                 {selected.photos.length > 0 ? (
                   <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
                     {selected.photos.map((photo, idx) => (
                       <AspectRatio key={idx} ratio={1}>
-                        <Card bd={`1px solid ${BORDER_COLOR}`} radius="md" padding={0} pos="relative" bg="var(--mantine-color-default-hover)">
+                        <Card bd={`1px solid ${BORDER_COLOR}`} padding={0} pos="relative" bg="var(--mantine-color-default-hover)">
                           <Image src={photo} alt={`${selected.name} — cenário ${idx + 1}`} h="100%" />
-                          <Tooltip label="Excluir cenário" withArrow>
-                            <ActionIcon
-                              onClick={() => onDeletePhoto(selected.id, idx)}
-                              aria-label={`Excluir cenário ${idx + 1}`}
-                              size={24}
-                              radius="sm"
-                              variant="transparent"
-                              pos="absolute"
-                              top={6}
-                              right={6}
-                              className={classes.overlayDelete}
-                            >
-                              <TrashIcon size={12} />
-                            </ActionIcon>
-                          </Tooltip>
+                          <Button
+                            onClick={() => onDeletePhoto(selected.id, idx)}
+                            aria-label={`Excluir cenário ${idx + 1}`}
+                            variant="transparent"
+                            pos="absolute"
+                            top={8}
+                            right={8}
+                            leftSection={<TrashIcon size={16} />}
+                            className={classes.overlayDelete}
+                          >
+                            Excluir
+                          </Button>
                         </Card>
                       </AspectRatio>
                     ))}
                   </SimpleGrid>
                 ) : (
-                  <EmptyState title="Nenhum cenário enviado ainda" />
+                  <EmptyState
+                    title="Nenhum cenário enviado ainda"
+                    subtitle="Envie fotos de ambiente para usar como fundo das peças desta campanha"
+                    action={uploadButton}
+                  />
                 )}
               </Paper>
             </>
           ) : (
-            <EmptyState withCard strongTitle iconSize={40} py={64} title="Nenhuma campanha selecionada" subtitle="Selecione uma campanha à esquerda ou crie uma nova" />
+            <EmptyState
+              withCard
+              strongTitle
+              iconSize={40}
+              py={64}
+              title="Nenhuma campanha selecionada"
+              subtitle="Selecione uma campanha na lista ou crie uma nova para enviar cenários"
+              action={
+                <Button onClick={() => setCreating(true)} variant="default" leftSection={<PlusIcon size={16} />}>
+                  Nova campanha
+                </Button>
+              }
+            />
           )}
         </Stack>
       </Flex>
@@ -426,13 +445,13 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
       {/* Create campaign dialog */}
       <Modal
         opened={creating}
-        onClose={() => setCreating(false)}
+        onClose={closeCreate}
         size="sm"
         centered
         title={
           <Box>
-            <Text fw={600} size="0.95rem">Nova campanha</Text>
-            <Text c="dimmed" size="0.78rem">Defina o nome e a descrição deste objetivo de campanha</Text>
+            <Text fw={600} size="lg">Nova campanha</Text>
+            <Text c="dimmed" size="sm">Defina o nome e a descrição deste objetivo de campanha</Text>
           </Box>
         }
       >
@@ -441,9 +460,9 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             data-autofocus
             label="Nome"
             value={newName}
-            onChange={e => setNewName(e.currentTarget.value)}
+            onChange={e => { setNewName(e.currentTarget.value); setNameError(null); }}
             placeholder="Ex.: Dia dos Pais"
-            styles={inputStyles}
+            error={nameError}
           />
           <Textarea
             label="Descrição (opcional)"
@@ -451,18 +470,13 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             onChange={e => setNewDescription(e.currentTarget.value)}
             rows={3}
             placeholder="Descreva o objetivo desta campanha"
-            styles={inputStyles}
           />
         </Stack>
         <Group justify="flex-end" gap={8} mt="lg">
-          <Button
-            onClick={() => { setCreating(false); setNewName(''); setNewDescription(''); }}
-            variant="default"
-            styles={{ label: { fontSize: '0.82rem' } }}
-          >
+          <Button onClick={closeCreate} variant="default">
             Cancelar
           </Button>
-          <Button onClick={handleCreate} disabled={!newName.trim()} styles={{ label: { fontSize: '0.82rem' } }}>
+          <Button onClick={handleCreate}>
             Criar campanha
           </Button>
         </Group>
@@ -476,16 +490,12 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         centered
         withCloseButton={false}
       >
-        <Text fw={600} size="0.95rem">Excluir campanha</Text>
-        <Text c="dimmed" size="0.78rem" mt={6}>
+        <Text fw={600} size="lg">Excluir campanha</Text>
+        <Text c="dimmed" mt={6}>
           Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
         </Text>
         <Group justify="flex-end" gap={8} mt="lg">
-          <Button
-            onClick={() => setDeleteTarget(null)}
-            variant="default"
-            styles={{ label: { fontSize: '0.82rem' } }}
-          >
+          <Button onClick={() => setDeleteTarget(null)} variant="default">
             Cancelar
           </Button>
           <Button
@@ -494,7 +504,6 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
               setDeleteTarget(null);
             }}
             color="red"
-            styles={{ label: { fontSize: '0.82rem' } }}
           >
             Excluir campanha
           </Button>
@@ -508,15 +517,15 @@ function StepHeader({ title, subtitle, right, mb = 'md' }: { title: string; subt
   return (
     <Group justify="space-between" align={right ? 'center' : 'flex-start'} wrap="wrap" gap={8} mb={mb}>
       <Box>
-        <Title order={3} fw={600} fz="1rem">{title}</Title>
-        {subtitle && <Text c="dimmed" size="0.78rem" mt={4}>{subtitle}</Text>}
+        <Title order={2}>{title}</Title>
+        {subtitle && <Text c="dimmed" size="sm" mt={4}>{subtitle}</Text>}
       </Box>
       {right}
     </Group>
   );
 }
 
-function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Profile; campaigns: Campaign[]; onBack: () => void; onFinish: (items: HistoryItem[]) => void }) {
+function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinish }: { profile: Profile; campaigns: Campaign[]; onBack: () => void; onManageCampaigns: () => void; onFinish: (items: HistoryItem[]) => void }) {
   const [step, setStep] = useState(1);
   const [campaignId, setCampaignId] = useState(campaigns[0]?.id ?? '');
   const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set(['instagram-feed']));
@@ -568,18 +577,33 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
       createdAt: 'agora',
     }));
     onFinish(items);
-    toast.success(items.length === 1 ? 'Peça salva no histórico' : `${items.length} peças salvas no histórico`);
+    toast.success(items.length === 1 ? 'Peça salva no histórico' : `${items.length} peças salvas no histórico`, 'Veja em Histórico de peças');
     onBack();
   };
 
   const optionClass = `${interactive.cardButton} ${classes.option}`;
+
+  // Motivo pelo qual o botão principal está desativado, mostrado ao lado da navegação
+  const blockedReason =
+    step === 1 && !campaignId ? 'Crie uma campanha em Gerenciar campanhas para continuar' :
+    step === 2 && selectedFormats.size === 0 ? 'Selecione ao menos um formato para continuar' :
+    step === 3 && selectedProducts.size === 0 ? 'Selecione ao menos um produto para continuar' :
+    step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0) ? 'Adicione um cenário à campanha para continuar' :
+    step === 5 && !prompt.trim() ? 'Escreva o texto da campanha ou escolha uma sugestão' :
+    null;
+
+  const manageCampaignsButton = (
+    <Button onClick={onManageCampaigns} variant="default" leftSection={<PencilSimpleIcon size={16} />}>
+      Gerenciar campanhas
+    </Button>
+  );
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <BackLink onClick={onBack} />
 
       {/* Stepper */}
-      <Paper withBorder radius="lg" p="md">
+      <Paper withBorder p="md">
         <Group justify="space-between" wrap="nowrap" gap={0}>
           {WIZARD_STEPS.map((s, i) => {
             const done = step > s.n;
@@ -589,23 +613,22 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 <Group gap={8} wrap="nowrap">
                   <ActionIcon
                     onClick={() => s.n <= step && setStep(s.n)}
-                    size={28}
-                    radius="xl"
+                    size="input-sm"
                     variant={done || current ? 'filled' : 'light'}
                     color={done || current ? 'neutral' : 'gray'}
                     aria-label={`Etapa ${s.n}: ${s.label}`}
                     flex="none"
-                    fz="0.72rem"
+                    fz="md"
                     fw={700}
                     c={done || current ? undefined : 'dimmed'}
                     className={classes.stepDot}
                     data-current={current || undefined}
                   >
-                    {done ? <CheckIcon size={14} /> : s.n}
+                    {done ? <CheckIcon size={16} /> : s.n}
                   </ActionIcon>
                   <Text
                     visibleFrom="sm"
-                    size="0.76rem"
+                    size="sm"
                     fw={current ? 600 : 400}
                     c={step >= s.n ? undefined : 'dimmed'}
                   >
@@ -620,13 +643,13 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
           })}
         </Group>
         {/* No celular os rótulos das etapas ficam ocultos: mostra a etapa atual por extenso */}
-        <Text hiddenFrom="sm" size="0.8rem" fw={600} mt="sm" aria-live="polite">
+        <Text hiddenFrom="sm" fw={600} mt="sm" aria-live="polite">
           Etapa {step} de {WIZARD_STEPS.length} · {WIZARD_STEPS[step - 1].label}
         </Text>
       </Paper>
 
       {/* Step Content */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         {/* Step 1: Campanha */}
         {step === 1 && (
           <Box>
@@ -641,7 +664,6 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       component="button"
                       type="button"
                       withBorder
-                      radius="lg"
                       onClick={() => setCampaignId(c.id)}
                       className={optionClass}
                       data-selected={isSelected || undefined}
@@ -657,8 +679,8 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       </AspectRatio>
                       <Group p="sm" justify="space-between" align="flex-start" gap={8} wrap="nowrap" bg="var(--mantine-color-default-hover)">
                         <Box miw={0}>
-                          <Text size="0.85rem" fw={600} truncate>{c.name}</Text>
-                          <Text c="dimmed" size="0.72rem" truncate>{c.description || 'Sem descrição'}</Text>
+                          <Text fw={600} truncate>{c.name}</Text>
+                          <Text c="dimmed" size="sm" truncate>{c.description || 'Sem descrição'}</Text>
                         </Box>
                         {isSelected && <Box display="flex" mt={2}><CheckIcon size={16} /></Box>}
                       </Group>
@@ -667,7 +689,11 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 })}
               </SimpleGrid>
             ) : (
-              <EmptyState title="Nenhuma campanha cadastrada" subtitle="Crie uma em Gerenciar campanhas" />
+              <EmptyState
+                title="Nenhuma campanha cadastrada"
+                subtitle="A peça precisa de uma campanha com cenários fotográficos. Crie uma para continuar."
+                action={manageCampaignsButton}
+              />
             )}
           </Box>
         )}
@@ -676,14 +702,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         {step === 2 && (
           <Box>
             <Group justify="space-between" wrap="wrap" gap={8} mb={4}>
-              <Title order={3} fw={600} fz="1rem">Formato da peça</Title>
-              <Text c="dimmed" size="0.78rem">{selectedFormats.size} selecionado(s)</Text>
+              <Title order={2}>Formato da peça</Title>
+              <Text c="dimmed" size="sm">{selectedFormats.size} selecionado(s)</Text>
             </Group>
-            <Text c="dimmed" size="0.78rem" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
+            <Text c="dimmed" size="sm" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
             <Stack gap="lg">
               {FORMAT_GROUPS.map(group => (
                 <Box key={group}>
-                  <Text c="dimmed" size="0.7rem" fw={600} mb={8} tt="uppercase" lts="0.04em">
+                  <Text c="dimmed" size="sm" fw={600} mb={8} tt="uppercase">
                     {group}
                   </Text>
                   <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
@@ -696,18 +722,17 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                           component="button"
                           type="button"
                           withBorder
-                          radius="lg"
                           p="md"
                           onClick={() => toggleFormat(f.id)}
                           className={`${optionClass} ${classes.optionTinted}`}
                           data-selected={isSelected || undefined}
                         >
-                          <ThemeIcon variant="light" color="neutral" size={36} radius="md">
+                          <ThemeIcon variant="light" color="neutral" size={36}>
                             <Icon size={20} />
                           </ThemeIcon>
-                          <Text size="0.85rem" fw={600} mt={8}>{f.label}</Text>
-                          <Text c="dimmed" size="0.72rem">{f.description}</Text>
-                          <Text c="dimmed" size="0.68rem" mt={2}>{f.spec}</Text>
+                          <Text fw={600} mt={8}>{f.label}</Text>
+                          <Text c="dimmed" size="sm">{f.description}</Text>
+                          <Text c="dimmed" size="sm" mt={2}>{f.spec}</Text>
                           {isSelected && <Box mt={8}><CheckIcon size={16} /></Box>}
                         </Paper>
                       );
@@ -725,7 +750,12 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
             <StepHeader
               title="Selecionar produtos"
               subtitle="Escolha até 3 produtos para a campanha"
-              right={<Text c="dimmed" size="0.78rem">{selectedProducts.size}/3 selecionados</Text>}
+              right={
+                <Text c="dimmed" size="sm">
+                  {selectedProducts.size}/3 selecionados
+                  {selectedProducts.size >= 3 && ' · desmarque um para trocar'}
+                </Text>
+              }
             />
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
               {sortedProducts.map(p => {
@@ -737,14 +767,13 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     component="button"
                     type="button"
                     withBorder
-                    radius="lg"
                     p="sm"
                     onClick={() => toggleProduct(p.id)}
                     className={`${optionClass} ${classes.optionTinted}`}
                     data-selected={isSelected || undefined}
                     bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
                   >
-                    <Card radius="md" padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
+                    <Card padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
                       <Image src={p.image} alt={p.name} h="100%" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       {isSelected && (
                         <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
@@ -756,16 +785,14 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       <Badge
                         variant="light"
                         color={tagColors[meta.tag]}
-                        size="xs"
                         mb={4}
-                        styles={{ label: { textTransform: 'capitalize', fontSize: '0.62rem', fontWeight: 600 } }}
                       >
-                        {meta.tag}
+                        {meta.tag.charAt(0).toUpperCase() + meta.tag.slice(1)}
                       </Badge>
                     )}
-                    <Text size="0.75rem" fw={600} truncate>{p.name}</Text>
-                    <Text size="0.72rem" fw={600} className="mono">{formatCurrency(p.price)}</Text>
-                    {meta && <Text c="dimmed" size="0.68rem">Estoque: {meta.stock} pares</Text>}
+                    <Text fw={600} truncate>{p.name}</Text>
+                    <Text fw={600} className="mono">{formatCurrency(p.price)}</Text>
+                    {meta && <Text c="dimmed" size="sm">Estoque: {meta.stock} pares</Text>}
                   </Paper>
                 );
               })}
@@ -790,7 +817,6 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                       component="button"
                       type="button"
                       withBorder
-                      radius="lg"
                       onClick={() => setScenarioIndex(idx)}
                       className={optionClass}
                       data-selected={isSelected || undefined}
@@ -801,15 +827,19 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                         </Box>
                       </AspectRatio>
                       <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
-                        <Text size="0.8rem" fw={600}>Cenário {idx + 1}</Text>
-                        {isSelected && <CheckIcon size={14} />}
+                        <Text fw={600}>Cenário {idx + 1}</Text>
+                        {isSelected && <CheckIcon size={16} />}
                       </Group>
                     </Paper>
                   );
                 })}
               </SimpleGrid>
             ) : (
-              <EmptyState title="Nenhum cenário disponível para esta campanha" subtitle="Adicione cenários em Gerenciar campanhas" />
+              <EmptyState
+                title="Esta campanha ainda não tem cenários"
+                subtitle="Envie ao menos um cenário fotográfico em Gerenciar campanhas para usar como fundo da peça"
+                action={manageCampaignsButton}
+              />
             )}
           </Box>
         )}
@@ -823,10 +853,10 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
               onChange={e => setPrompt(e.currentTarget.value)}
               rows={4}
               mb="sm"
-              styles={{ input: { fontSize: '0.88rem', lineHeight: 1.6, padding: '12px 16px' } }}
+              aria-label="Texto da campanha"
             />
             <Box mb="md">
-              <Text c="dimmed" size="0.75rem" fw={600} mb={8}>Sugestões da IA:</Text>
+              <Text c="dimmed" size="sm" fw={600} mb={8}>Sugestões da IA:</Text>
               <Stack gap={8}>
                 {AI_PROMPTS.map((sugg, i) => (
                   <Paper
@@ -834,12 +864,10 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                     component="button"
                     type="button"
                     withBorder
-                    radius="md"
                     p="sm"
                     onClick={() => setPrompt(sugg)}
                     className={`${interactive.cardButton} ${classes.suggestion}`}
                     data-selected={prompt === sugg || undefined}
-                    fz="0.78rem"
                     lh={1.5}
                   >
                     {sugg}
@@ -847,9 +875,9 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
                 ))}
               </Stack>
             </Box>
-            <Paper radius="md" p="sm" bg="var(--mantine-color-default-hover)">
-              <Text c="dimmed" size="0.75rem">
-                <MagicWandIcon size={14} color="var(--mantine-color-violet-5)" className={classes.inlineIcon} />
+            <Paper p="sm" bg="var(--mantine-color-default-hover)">
+              <Text c="dimmed" size="sm">
+                <MagicWandIcon size={16} color="var(--mantine-color-violet-5)" className={classes.inlineIcon} />
                 A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
               </Text>
             </Paper>
@@ -861,15 +889,13 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
           <Box>
             <StepHeader
               title="Resultado da campanha"
-              subtitle={`${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'}`}
+              subtitle={`${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'} · baixe cada uma ou salve todas no histórico`}
               right={
                 <Button
                   onClick={() => setStep(5)}
                   variant="subtle"
                   color="gray"
-                  size="compact-sm"
-                  leftSection={<ArrowsClockwiseIcon size={14} />}
-                  styles={{ label: { fontSize: '0.78rem' } }}
+                  leftSection={<ArrowsClockwiseIcon size={16} />}
                 >
                   Regenerar peças
                 </Button>
@@ -878,7 +904,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
 
             <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
               {selectedFormatList.map(f => (
-                <Card key={f.id} withBorder radius="lg" padding={0}>
+                <Card key={f.id} withBorder padding={0}>
                   <AspectRatio ratio={1}>
                     <Box bg="var(--mantine-color-default-hover)">
                       <Image src={campaignPreviewMock} alt={f.label} h="100%" />
@@ -892,58 +918,54 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
         )}
       </Paper>
 
-      {/* Navigation */}
-      <Group justify="space-between" gap="sm">
-        <Button
-          onClick={() => setStep(s => Math.max(1, s - 1))}
-          disabled={step === 1}
-          variant="default"
-          leftSection={<CaretLeftIcon size={16} />}
-          styles={{ label: { fontSize: '0.85rem' } }}
-        >
-          {step > 1 ? `Voltar para ${WIZARD_STEPS[step - 2].label}` : 'Voltar'}
-        </Button>
-
-        {step < 5 ? (
-          <Button
-            onClick={() => setStep(s => s + 1)}
-            disabled={
-              (step === 1 && !campaignId) ||
-              (step === 2 && selectedFormats.size === 0) ||
-              (step === 3 && selectedProducts.size === 0) ||
-              (step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0))
-            }
-            rightSection={<CaretRightIcon size={16} />}
-            styles={{ label: { fontSize: '0.85rem' } }}
-          >
-            Avançar para {WIZARD_STEPS[step].label}
-          </Button>
-        ) : step === 5 ? (
-          <Button
-            onClick={handleGenerate}
-            disabled={generating || !prompt}
-            leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
-            styles={{
-              root: {
-                background: 'linear-gradient(135deg, oklch(0.55 0.22 285), oklch(0.6 0.22 262))',
-                color: '#fff',
-                opacity: generating || !prompt ? 0.6 : 1,
-              },
-              label: { fontSize: '0.9rem', fontWeight: 700 },
-            }}
-          >
-            {generating ? 'Gerando peças...' : 'Gerar peças'}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleFinish}
-            leftSection={<CheckIcon size={16} />}
-            styles={{ label: { fontSize: '0.85rem' } }}
-          >
-            Salvar no histórico
-          </Button>
+      {/* Navegação: secundária à esquerda, principal à direita; no celular empilha com a principal por último (embaixo) */}
+      <Stack gap={8}>
+        {blockedReason && (
+          <Text c="dimmed" size="sm" ta={{ base: 'left', xs: 'right' }} aria-live="polite">
+            {blockedReason}
+          </Text>
         )}
-      </Group>
+        <Flex direction={{ base: 'column', xs: 'row' }} justify="flex-end" gap="sm">
+          {step > 1 && (
+            <Button
+              onClick={() => setStep(s => Math.max(1, s - 1))}
+              variant="default"
+              leftSection={<CaretLeftIcon size={16} />}
+            >
+              Voltar para {WIZARD_STEPS[step - 2].label}
+            </Button>
+          )}
+
+          {step < 5 ? (
+            <Button
+              onClick={() => setStep(s => s + 1)}
+              disabled={blockedReason !== null}
+              rightSection={<CaretRightIcon size={16} />}
+            >
+              Avançar para {WIZARD_STEPS[step].label}
+            </Button>
+          ) : step === 5 ? (
+            <Button
+              onClick={handleGenerate}
+              disabled={generating || blockedReason !== null}
+              leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
+              styles={{
+                root: {
+                  background: 'linear-gradient(135deg, oklch(0.55 0.22 285), oklch(0.6 0.22 262))',
+                  color: '#fff',
+                  opacity: generating || blockedReason !== null ? 0.6 : 1,
+                },
+              }}
+            >
+              {generating ? 'Gerando peças...' : 'Gerar peças'}
+            </Button>
+          ) : (
+            <Button onClick={handleFinish} leftSection={<CheckIcon size={16} />}>
+              Salvar no histórico
+            </Button>
+          )}
+        </Flex>
+      </Stack>
     </Stack>
   );
 }
@@ -961,7 +983,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       const fallback = campaigns[idx + 1] ?? campaigns[idx - 1] ?? null;
       setSelectedCampaignId(fallback ? fallback.id : null);
     }
-    toast.success('Campanha excluída');
+    toast.success('Campanha excluída', 'Para criar outra, use "Nova campanha"');
   };
 
   if (mode === 'campaigns') {
@@ -975,15 +997,15 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
           const id = `camp-${Date.now()}`;
           setCampaigns(prev => [{ id, name, description, photos: [] }, ...prev]);
           setSelectedCampaignId(id);
-          toast.success('Campanha criada');
+          toast.success('Campanha criada', 'Agora envie os cenários fotográficos dela em "Enviar cenário"');
         }}
         onAddPhotos={(campaignId, photos) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: [...photos, ...c.photos] } : c));
-          toast.success(photos.length > 1 ? `${photos.length} fotos adicionadas` : 'Foto adicionada');
+          toast.success(photos.length > 1 ? `${photos.length} cenários adicionados` : 'Cenário adicionado', 'Ele já pode ser escolhido na etapa Tema ao criar uma peça');
         }}
         onDeletePhoto={(campaignId, photoIndex) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: c.photos.filter((_, i) => i !== photoIndex) } : c));
-          toast.success('Cenário removido');
+          toast.success('Cenário removido', 'Envie outro em "Enviar cenário" quando quiser');
         }}
         onDeleteCampaign={handleDeleteCampaign}
       />
@@ -996,6 +1018,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
         profile={profile}
         campaigns={campaigns}
         onBack={() => setMode('home')}
+        onManageCampaigns={() => setMode('campaigns')}
         onFinish={items => setHistory(prev => [...items, ...prev])}
       />
     );
@@ -1008,7 +1031,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       onManageCampaigns={() => setMode('campaigns')}
       onDelete={id => {
         setHistory(prev => prev.filter(item => item.id !== id));
-        toast.success('Peça excluída do histórico');
+        toast.success('Peça excluída do histórico', 'Para criar uma nova peça, use "Criar campanha"');
       }}
     />
   );

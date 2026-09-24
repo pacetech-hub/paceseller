@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   SimpleGrid, Paper, Group, Text, ThemeIcon, TextInput, SegmentedControl, Button,
-  Table, Badge, NumberInput, ActionIcon, Avatar, Box, Stack, Card, Tooltip,
+  Table, Badge, NumberInput, Avatar, Box, Stack, Card,
 } from "@mantine/core";
 import {
   WarehouseIcon,
@@ -19,6 +19,7 @@ import {
   PackageIcon,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../data/mockData";
+import { toast } from "../lib/toast";
 import { statusOf, type StockItem, type StockStatusKey } from "../data/stockData";
 
 export type StockFilter = 'todos' | StockStatusKey;
@@ -61,15 +62,15 @@ export function StockKpis({ items }: { items: StockItem[] }) {
       {cards.map(k => {
         const Icon = k.icon;
         return (
-          <Paper key={k.label} withBorder radius="lg" p="md">
+          <Paper key={k.label} withBorder p="md">
             <Group justify="space-between" mb="xs" wrap="nowrap">
-              <Text c="dimmed" size="0.75rem" fw={600}>{k.label}</Text>
-              <ThemeIcon size={28} radius="md" variant="light" color={k.color}>
-                <Icon size={14} />
+              <Text c="dimmed" size="sm" fw={600}>{k.label}</Text>
+              <ThemeIcon size={32} variant="light" color={k.color}>
+                <Icon size={16} />
               </ThemeIcon>
             </Group>
-            <Text fw={700} fz={{ base: '1.15rem', sm: '1.4rem' }} lh={1} lts="-0.02em">{k.value}</Text>
-            <Text c="dimmed" size="0.72rem" mt={4}>{k.sub}</Text>
+            <Text fw={700} fz={{ base: 'lg', sm: 'xl' }} lh={1}>{k.value}</Text>
+            <Text c="dimmed" size="sm" mt={4}>{k.sub}</Text>
           </Paper>
         );
       })}
@@ -83,8 +84,7 @@ export function StockStatusBadge({ item }: { item: Pick<StockItem, 'stock' | 'mi
     <Badge
       variant="light"
       color={st.color}
-      size="sm"
-      leftSection={st.key !== 'ok' ? <WarningIcon size={12} /> : undefined}
+      leftSection={st.key !== 'ok' ? <WarningIcon size={14} /> : undefined}
     >
       {st.label}
     </Badge>
@@ -95,12 +95,13 @@ export function StockStatusBadge({ item }: { item: Pick<StockItem, 'stock' | 'mi
 export function StockProductCell({ item }: { item: StockItem }) {
   return (
     <Group gap="sm" wrap="nowrap">
+      {/* miniatura de produto: quadrado arredondado (8px, igual ao tema), não círculo — não é uma pessoa */}
       <Avatar src={item.image} alt={item.name} radius="md" size={40} color="neutral">
         <PackageIcon size={16} />
       </Avatar>
       <Box miw={0}>
-        <Text size="0.82rem" fw={600} truncate>{item.name}</Text>
-        <Text c="dimmed" size="0.7rem">{item.category} · {formatCurrency(item.price)}</Text>
+        <Text fw={600} truncate>{item.name}</Text>
+        <Text c="dimmed" size="sm">{item.category} · {formatCurrency(item.price)}</Text>
       </Box>
     </Group>
   );
@@ -112,7 +113,7 @@ export function StockTableHeader({ labels }: { labels: string[] }) {
       <Table.Tr>
         {labels.map(h => (
           <Table.Th key={h}>
-            <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" lts="0.06em">{h}</Text>
+            <Text c="dimmed" size="sm" fw={600} tt="uppercase">{h}</Text>
           </Table.Th>
         ))}
       </Table.Tr>
@@ -120,13 +121,16 @@ export function StockTableHeader({ labels }: { labels: string[] }) {
   );
 }
 
-export function StockEmptyRow({ colSpan }: { colSpan: number }) {
+export function StockEmptyRow({ colSpan, onClear }: { colSpan: number; onClear?: () => void }) {
   return (
     <Table.Tr>
       <Table.Td colSpan={colSpan} py="xl">
-        <Stack align="center" gap={6}>
-          <FunnelIcon size={20} color="var(--mantine-color-dimmed)" opacity={0.6} />
-          <Text c="dimmed" size="0.82rem">Nenhum SKU encontrado para os filtros aplicados.</Text>
+        <Stack align="center" gap="sm">
+          <FunnelIcon size={24} color="var(--mantine-color-dimmed)" opacity={0.6} />
+          <Text c="dimmed" ta="center">Nenhum SKU corresponde à busca ou ao filtro de status aplicado.</Text>
+          {onClear && (
+            <Button variant="default" onClick={onClear}>Limpar busca e filtro</Button>
+          )}
         </Stack>
       </Table.Td>
     </Table.Tr>
@@ -143,18 +147,17 @@ interface StockToolbarProps {
 
 export function StockToolbar({ query, onQueryChange, filter, onFilterChange, showBulkActions }: StockToolbarProps) {
   return (
-    <Paper withBorder radius="lg" p="sm">
+    <Paper withBorder p="sm">
       <Group gap="xs" wrap="wrap">
         <TextInput
           value={query}
           onChange={e => onQueryChange(e.currentTarget.value)}
           placeholder="Buscar por SKU ou nome..."
-          leftSection={<MagnifyingGlassIcon size={14} />}
+          leftSection={<MagnifyingGlassIcon size={16} />}
           flex={{ base: '1 1 100%', sm: 1 }}
           miw={{ sm: 200 }}
         />
         <SegmentedControl
-          size="xs"
           w={{ base: '100%', sm: 'auto' }}
           value={filter}
           onChange={v => onFilterChange(v as StockFilter)}
@@ -162,10 +165,10 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
         />
         {showBulkActions && (
           <>
-            <Button variant="default" size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<UploadSimpleIcon size={16} />}>
+            <Button variant="default" flex={{ base: 1, sm: 'none' }} leftSection={<UploadSimpleIcon size={16} />}>
               Importar planilha
             </Button>
-            <Button size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<PlusIcon size={16} />}>
+            <Button flex={{ base: 1, sm: 'none' }} leftSection={<PlusIcon size={16} />}>
               Adicionar SKU
             </Button>
           </>
@@ -175,28 +178,25 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
   );
 }
 
+// Linha de tabela densa: botões size="sm" (36px) com ícone + texto; cancelar à esquerda, salvar (principal) à direita
 export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
   return (
-    <Group gap={4} wrap="nowrap">
-      <Tooltip label="Salvar estoque" withArrow>
-        <ActionIcon variant="filled" onClick={onSave} aria-label="Salvar estoque">
-          <FloppyDiskIcon size={14} />
-        </ActionIcon>
-      </Tooltip>
-      <ActionIcon variant="subtle" color="gray" onClick={onCancel} aria-label="Cancelar edição">
-        <XIcon size={14} />
-      </ActionIcon>
+    <Group gap="xs" wrap="nowrap">
+      <Button variant="default" size="sm" onClick={onCancel} leftSection={<XIcon size={16} />} aria-label="Cancelar edição">
+        Cancelar
+      </Button>
+      <Button variant="filled" size="sm" onClick={onSave} leftSection={<FloppyDiskIcon size={16} />} aria-label="Salvar estoque">
+        Salvar
+      </Button>
     </Group>
   );
 }
 
 export function EditButton({ onClick }: { onClick: () => void }) {
   return (
-    <Tooltip label="Editar estoque" withArrow>
-      <ActionIcon variant="subtle" color="gray" onClick={onClick} aria-label="Editar estoque">
-        <PencilSimpleIcon size={14} />
-      </ActionIcon>
-    </Tooltip>
+    <Button variant="default" size="sm" onClick={onClick} leftSection={<PencilSimpleIcon size={16} />} aria-label="Editar estoque">
+      Editar
+    </Button>
   );
 }
 
@@ -223,6 +223,12 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
   const saveEdit = (sku: string) => {
     onUpdateStock?.(sku, draft);
     setEditing(null);
+    const name = items.find(it => it.sku === sku)?.name ?? sku;
+    toast.success(`Estoque de ${name} atualizado para ${draft} un.`, 'O novo status e a data de atualização já aparecem na tabela');
+  };
+  const clearFilters = () => {
+    setQuery('');
+    setFilter('todos');
   };
 
   const headers = ['Produto', 'SKU', 'Linha', 'Estoque', 'Limiar mín.', 'Status', 'Atualizado', ...(readOnly ? [] : ['Ações'])];
@@ -239,7 +245,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
         showBulkActions={showBulkActions && !readOnly}
       />
 
-      <Card withBorder radius="lg" padding={0}>
+      <Card withBorder padding={0}>
         <Table.ScrollContainer minWidth={900}>
           <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
             <StockTableHeader labels={headers} />
@@ -249,24 +255,24 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
                 return (
                   <Table.Tr key={it.sku}>
                     <Table.Td><StockProductCell item={it} /></Table.Td>
-                    <Table.Td><Text c="dimmed" size="0.75rem" className="mono">{it.sku}</Text></Table.Td>
-                    <Table.Td><Text size="0.78rem">{it.line}</Text></Table.Td>
+                    <Table.Td><Text c="dimmed" size="sm" className="mono">{it.sku}</Text></Table.Td>
+                    <Table.Td><Text>{it.line}</Text></Table.Td>
                     <Table.Td>
                       {isEditing ? (
                         <NumberInput
-                          size="xs"
-                          w={90}
+                          w={110}
+                          aria-label="Estoque atual"
                           min={0}
                           value={draft}
                           onChange={v => setDraft(Number(v) || 0)}
                         />
                       ) : (
-                        <Text size="0.82rem" fw={600} className="mono">{it.stock}</Text>
+                        <Text fw={600} className="mono">{it.stock}</Text>
                       )}
                     </Table.Td>
-                    <Table.Td><Text c="dimmed" size="0.78rem" className="mono">{it.min}</Text></Table.Td>
+                    <Table.Td><Text c="dimmed" className="mono">{it.min}</Text></Table.Td>
                     <Table.Td><StockStatusBadge item={it} /></Table.Td>
-                    <Table.Td><Text c="dimmed" size="0.72rem">{it.updatedAt}</Text></Table.Td>
+                    <Table.Td><Text c="dimmed" size="sm">{it.updatedAt}</Text></Table.Td>
                     {!readOnly && (
                       <Table.Td>
                         {isEditing
@@ -277,7 +283,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
                   </Table.Tr>
                 );
               })}
-              {filtered.length === 0 && <StockEmptyRow colSpan={headers.length} />}
+              {filtered.length === 0 && <StockEmptyRow colSpan={headers.length} onClear={clearFilters} />}
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Stack, Group, Box, Paper, Card, Text, Title, Button, Badge, SimpleGrid, Grid, Table, Progress, Center,
 } from "@mantine/core";
@@ -10,7 +11,9 @@ import {
   LightningIcon,
   ArrowsClockwiseIcon,
   DownloadSimpleIcon,
+  CheckIcon,
 } from "@phosphor-icons/react";
+import { toast } from "../lib/toast";
 import { selloutData, regionData, formatCurrency } from "../data/mockData";
 
 const encalheAlerts = [
@@ -43,26 +46,62 @@ const daysColor = (days: number) => (days > 60 ? 'red.6' : days > 45 ? 'yellow.7
 const giroBarColor = (giro: number) => (giro >= 95 ? 'teal.5' : giro >= 85 ? 'neutral' : 'yellow.5');
 
 const kpis = [
-  { label: 'Taxa de Sell-out', value: '95.3%', sub: 'Coleção Inverno 2026', trend: 'up', trendVal: '+2,1%', color: 'teal.6' },
+  { label: 'Taxa de Sell-out', value: '95,3%', sub: 'Coleção Inverno 2026', trend: 'up', trendVal: '+2,1%', color: 'teal.6' },
   { label: 'Estoque Parado', value: formatCurrency(140000), sub: 'valor em encalhe', trend: 'down', trendVal: '-R$28k', color: 'red.6' },
   { label: 'Giro Médio', value: '28 dias', sub: 'da produção à venda', trend: 'up', trendVal: '-3 dias', color: 'black' },
   { label: 'Alertas Ativos', value: '6', sub: 'produtos em encalhe', trend: 'down', trendVal: '-2 esta semana', color: 'yellow.7' },
 ] as const;
 
 function ChartTitle({ children }: { children: React.ReactNode }) {
-  return <Title order={3} fw={600} fz="0.9rem">{children}</Title>;
+  return <Title order={3}>{children}</Title>;
 }
 
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <Group gap={6} wrap="nowrap">
-      <Paper w={12} h={12} bg={color} radius={3} />
-      <Text c="dimmed" size="0.72rem">{label}</Text>
+      <Paper w={12} h={12} bg={color} />
+      <Text c="dimmed" size="sm">{label}</Text>
     </Group>
   );
 }
 
+// gera um CSV com os dados do gráfico sell-in × sell-out e dispara o download no navegador
+function downloadSelloutCsv(): string {
+  const fileName = 'sell-in-x-sell-out-jan-jun-2026.csv';
+  const rows = [['Mês', 'Sell-in (R$)', 'Sell-out (R$)'], ...selloutData.map(d => [d.month, String(d.sellIn), String(d.sellOut)])];
+  const csv = rows.map(r => r.join(';')).join('\n');
+  const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+  return fileName;
+}
+
 export function SelloutDashboard() {
+  const [checkedAt, setCheckedAt] = useState<string | null>(null);
+  const [handled, setHandled] = useState<string[]>([]);
+
+  const exportChartData = () => {
+    try {
+      const fileName = downloadSelloutCsv();
+      toast.success('Download do CSV iniciado', `Procure ${fileName} na pasta de downloads do navegador`);
+    } catch {
+      toast.error('Não foi possível gerar o CSV', 'Tente novamente; se persistir, recarregue a página');
+    }
+  };
+
+  // mock: os dados são fixos, então a verificação não encontra alertas novos
+  const refreshAlerts = () => {
+    const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    setCheckedAt(time);
+    toast.success('Alertas verificados — nenhum encalhe novo', `Os ${encalheAlerts.length} alertas abaixo continuam ativos`);
+  };
+
+  // marca só nesta tela que a ação sugerida foi feita (não envia nada a outro sistema)
+  const markHandled = (sku: string) => setHandled(prev => [...prev, sku]);
+
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* KPIs */}
@@ -70,15 +109,15 @@ export function SelloutDashboard() {
         {kpis.map(kpi => {
           const TrendIcon = kpi.trend === 'up' ? TrendUpIcon : TrendDownIcon;
           return (
-            <Paper key={kpi.label} withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
-              <Text c="dimmed" size="0.78rem" fw={400} mb={8}>{kpi.label}</Text>
-              <Text className="mono" fw={700} fz="1.4rem" lts="-0.02em">{kpi.value}</Text>
+            <Paper key={kpi.label} withBorder p={{ base: 'md', sm: 'lg' }}>
+              <Text c="dimmed" size="sm" mb={8}>{kpi.label}</Text>
+              <Text className="mono" fw={700} fz={{ base: 'lg', sm: 'xl' }}>{kpi.value}</Text>
               <Group gap={6} mt={6} wrap="nowrap">
                 <Group gap={2} c={kpi.color} wrap="nowrap" flex="none">
                   <TrendIcon size={12} />
-                  <Text size="0.72rem" fw={600} c={kpi.color}>{kpi.trendVal}</Text>
+                  <Text size="sm" fw={600} c={kpi.color}>{kpi.trendVal}</Text>
                 </Group>
-                <Text c="dimmed" size="0.72rem" truncate>{kpi.sub}</Text>
+                <Text c="dimmed" size="sm" truncate>{kpi.sub}</Text>
               </Group>
             </Paper>
           );
@@ -89,14 +128,14 @@ export function SelloutDashboard() {
       <Grid gutter="md">
         {/* Sell-in x Sell-out trend */}
         <Grid.Col span={{ base: 12, lg: 8 }}>
-          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
             <Group justify="space-between" mb="lg">
               <Box>
                 <ChartTitle>Evolução Sell-in × Sell-out</ChartTitle>
-                <Text c="dimmed" size="0.75rem">Jan–Jun 2026 · em R$</Text>
+                <Text c="dimmed" size="sm">Jan–Jun 2026 · em R$</Text>
               </Box>
-              <Button variant="subtle" color="gray" size="xs" leftSection={<DownloadSimpleIcon size={14} />}>
-                Exportar gráfico
+              <Button variant="subtle" color="gray" leftSection={<DownloadSimpleIcon size={16} />} onClick={exportChartData}>
+                Exportar dados (CSV)
               </Button>
             </Group>
             <BarChart
@@ -124,7 +163,7 @@ export function SelloutDashboard() {
 
         {/* Donut giro */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Card withBorder radius="lg" padding="lg" h="100%">
+          <Card withBorder padding="lg" h="100%">
             <Box mb="md"><ChartTitle>Giro da Coleção</ChartTitle></Box>
             <Center flex={1}>
               <Box pos="relative">
@@ -138,8 +177,8 @@ export function SelloutDashboard() {
                   withTooltip={false}
                 />
                 <Stack gap={0} align="center" justify="center" pos="absolute" inset={0} className={classes.donutLabel}>
-                  <Text fw={700} fz="1.4rem" lh={1.1}>78%</Text>
-                  <Text c="dimmed" size="0.65rem">girado</Text>
+                  <Text fw={700} size="xl" lh={1.1}>78%</Text>
+                  <Text c="dimmed" size="sm">girado</Text>
                 </Stack>
               </Box>
             </Center>
@@ -148,9 +187,9 @@ export function SelloutDashboard() {
                 <Group key={d.name} justify="space-between" wrap="nowrap">
                   <Group gap={8} wrap="nowrap">
                     <Paper w={10} h={10} bg={d.color} radius="50%" />
-                    <Text c="dimmed" size="0.75rem">{d.name}</Text>
+                    <Text c="dimmed" size="sm">{d.name}</Text>
                   </Group>
-                  <Text className="mono" size="0.78rem" fw={600}>{formatCurrency(d.value)}</Text>
+                  <Text className="mono" size="sm" fw={600}>{formatCurrency(d.value)}</Text>
                 </Group>
               ))}
             </Stack>
@@ -160,22 +199,22 @@ export function SelloutDashboard() {
 
       {/* Performance por linha */}
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md"><ChartTitle>Performance por Linha</ChartTitle></Box>
           <Stack gap="md">
             {stockByLine.map(line => (
               <Box key={line.name}>
                 <Group justify="space-between" mb={6} wrap="nowrap">
-                  <Text size="0.85rem" fw={600}>{line.name}</Text>
+                  <Text fw={600}>{line.name}</Text>
                   <Group gap="sm" wrap="nowrap">
-                    <Text c="dimmed" className="mono" size="0.72rem">{formatCurrency(line.sellOut)}</Text>
-                    <Text size="0.75rem" fw={700} c={line.giro >= 90 ? 'teal.6' : 'yellow.7'}>{line.giro}%</Text>
+                    <Text c="dimmed" className="mono" size="sm">{formatCurrency(line.sellOut)}</Text>
+                    <Text size="sm" fw={700} c={line.giro >= 90 ? 'teal.6' : 'yellow.7'}>{line.giro}%</Text>
                   </Group>
                 </Group>
-                <Progress value={line.giro} size={8} radius="xl" color={giroBarColor(line.giro)} transitionDuration={800} />
+                <Progress value={line.giro} size={8} color={giroBarColor(line.giro)} transitionDuration={800} />
                 <Group justify="space-between" mt={4}>
-                  <Text c="dimmed" size="0.68rem">Sell-out: {formatCurrency(line.sellOut)}</Text>
-                  <Text c="dimmed" size="0.68rem">Meta: {formatCurrency(line.sellIn)}</Text>
+                  <Text c="dimmed" size="sm">Sell-out: {formatCurrency(line.sellOut)}</Text>
+                  <Text c="dimmed" size="sm">Meta: {formatCurrency(line.sellIn)}</Text>
                 </Group>
               </Box>
             ))}
@@ -183,7 +222,7 @@ export function SelloutDashboard() {
         </Paper>
 
         {/* Regional */}
-        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md"><ChartTitle>Sell-out por Região</ChartTitle></Box>
           <BarChart
             h={200}
@@ -203,16 +242,21 @@ export function SelloutDashboard() {
       </SimpleGrid>
 
       {/* Encalhe Alerts */}
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" mb="md">
-          <Group gap={8}>
-            <WarningIcon size={16} color="var(--mantine-color-yellow-6)" />
-            <ChartTitle>Alertas de Encalhe</ChartTitle>
-            <Badge size="sm" variant="light" color="yellow" styles={{ label: { textTransform: 'none' } }}>
-              {encalheAlerts.length} alertas
-            </Badge>
-          </Group>
-          <Button variant="subtle" color="gray" size="xs" leftSection={<ArrowsClockwiseIcon size={14} />}>
+          <Box>
+            <Group gap={8}>
+              <WarningIcon size={20} color="var(--mantine-color-yellow-6)" />
+              <ChartTitle>Alertas de Encalhe</ChartTitle>
+              <Badge variant="light" color="yellow">
+                {encalheAlerts.length} alertas
+              </Badge>
+            </Group>
+            {checkedAt && (
+              <Text c="dimmed" size="sm" mt={4}>Verificado às {checkedAt} · nenhum alerta novo</Text>
+            )}
+          </Box>
+          <Button variant="subtle" color="gray" leftSection={<ArrowsClockwiseIcon size={16} />} onClick={refreshAlerts}>
             Atualizar alertas
           </Button>
         </Group>
@@ -221,24 +265,31 @@ export function SelloutDashboard() {
             <Table.Thead>
               <Table.Tr>
                 {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ação sugerida'].map(col => (
-                  <Table.Th key={col} c="dimmed" fw={600} pr="md" fz="0.72rem">{col}</Table.Th>
+                  <Table.Th key={col} c="dimmed" fw={600} pr="md" fz="sm">{col}</Table.Th>
                 ))}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {encalheAlerts.map((alert, i) => (
                 <Table.Tr key={i}>
-                  <Table.Td pr="md"><Text size="0.82rem" fw={600}>{alert.product}</Text></Table.Td>
-                  <Table.Td pr="md"><Text c="dimmed" className="mono" size="0.75rem">{alert.sku}</Text></Table.Td>
-                  <Table.Td pr="md"><Text className="mono" size="0.82rem" fw={600}>{alert.stock}</Text></Table.Td>
+                  <Table.Td pr="md"><Text fw={600}>{alert.product}</Text></Table.Td>
+                  <Table.Td pr="md"><Text c="dimmed" className="mono" size="sm">{alert.sku}</Text></Table.Td>
+                  <Table.Td pr="md"><Text className="mono" fw={600}>{alert.stock}</Text></Table.Td>
                   <Table.Td pr="md">
-                    <Text className="mono" size="0.82rem" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque}d</Text>
+                    <Text className="mono" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque}d</Text>
                   </Table.Td>
-                  <Table.Td pr="md"><Text c="dimmed" size="0.78rem">{alert.region}</Text></Table.Td>
+                  <Table.Td pr="md"><Text c="dimmed">{alert.region}</Text></Table.Td>
                   <Table.Td>
-                    <Button variant="default" size="xs" leftSection={<LightningIcon size={14} />}>
-                      {alert.action}
-                    </Button>
+                    {handled.includes(alert.sku) ? (
+                      <Group gap={6} c="teal.7" wrap="nowrap" mih={36}>
+                        <CheckIcon size={16} />
+                        <Text size="sm" fw={600} c="inherit">Ação marcada como feita</Text>
+                      </Group>
+                    ) : (
+                      <Button variant="default" size="sm" leftSection={<LightningIcon size={16} />} onClick={() => markHandled(alert.sku)}>
+                        {alert.action}
+                      </Button>
+                    )}
                   </Table.Td>
                 </Table.Tr>
               ))}

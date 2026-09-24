@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Button, SegmentedControl, Paper, Text } from "@mantine/core";
+import { Stack, Group, Button, SegmentedControl, Paper, Text, Title } from "@mantine/core";
 import { CaretLeftIcon } from "@phosphor-icons/react";
 import { PERIOD_OPTIONS, scaleValue, brl, type Period, type SalesEntity } from "./SalesIndicatorsSection";
 
@@ -19,19 +19,18 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
   return (
     <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       {/* Link de voltar: margem negativa só para alinhar o texto ao conteúdo */}
-      <Button onClick={onBack} variant="subtle" color="neutral" size="sm" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
+      <Button onClick={onBack} variant="subtle" color="neutral" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
         Voltar para indicadores
       </Button>
 
       <Group justify="space-between" wrap="wrap" gap="sm">
-        <Text fw={700} size="1.1rem">
+        <Title order={1}>
           {scope === 'network' ? 'Representantes e prepostos' : 'Meu time'}
-        </Text>
+        </Title>
         <SegmentedControl
           value={period}
           onChange={v => setPeriod(v as Period)}
           color="neutral"
-          size="xs"
           data={PERIOD_OPTIONS.map(opt => ({ value: opt.id, label: opt.label }))}
         />
       </Group>
@@ -40,18 +39,24 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
-              <Text c="dimmed" fw={600} size="0.75rem" ta="right" w={24} flex="none">{i + 1}</Text>
+              <Text c="dimmed" fw={600} size="sm" ta="right" w={24} flex="none">{i + 1}</Text>
               <Stack gap={0} miw={0} flex={1}>
-                <Text fw={600} size="0.85rem" truncate>{e.name}</Text>
-                <Text c="dimmed" size="0.7rem" truncate>
+                <Text fw={600} truncate>{e.name}</Text>
+                <Text c="dimmed" size="sm" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>
               </Stack>
-              <Text fw={700} size="0.85rem" flex="none" className="mono">{brl(e.value)}</Text>
+              <Text fw={700} flex="none" className="mono">{brl(e.value)}</Text>
             </Group>
           ))}
           {ranked.length === 0 && (
-            <Text c="dimmed" ta="center" py="lg" size="0.8rem">Nenhum vendedor encontrado</Text>
+            // Estado vazio: explica o motivo e oferece a saída
+            <Stack gap="sm" align="center" py="lg">
+              <Text c="dimmed" ta="center">
+                Nenhum vendedor com vendas registradas neste período. Escolha outro período acima ou volte para os indicadores.
+              </Text>
+              <Button onClick={onBack} variant="default" color="neutral">Voltar para indicadores</Button>
+            </Stack>
           )}
         </Stack>
       </Paper>

@@ -105,10 +105,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             { count: activeCount, suffix: 'ativos' },
             { count: inactiveCount, suffix: 'inativos' },
           ].map(stat => (
-            <Paper key={stat.suffix} withBorder radius="md" p={{ base: 'sm', sm: 'md' }}>
+            <Paper key={stat.suffix} withBorder p={{ base: 'sm', sm: 'md' }}>
               <Group gap={6} align="baseline">
-                <Text fw={700} fz={{ base: '1.35rem', sm: '1.75rem' }} lh={1} className="mono">{stat.count}</Text>
-                <Text c="dimmed" fz={{ base: 'xs', sm: 'sm' }}>{stat.suffix}</Text>
+                <Text fw={700} fz={{ base: 'lg', sm: 'xl' }} lh={1} className="mono">{stat.count}</Text>
+                <Text c="dimmed" size="sm">{stat.suffix}</Text>
               </Group>
             </Paper>
           ))}
@@ -132,7 +132,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 color="neutral"
                 leftSection={<FunnelIcon size={14} />}
                 rightSection={activeFilterCount > 0 ? (
-                  <Badge circle size="sm" color="neutral">{activeFilterCount}</Badge>
+                  <Badge circle color="neutral">{activeFilterCount}</Badge>
                 ) : undefined}
               >
                 Filtros
@@ -141,10 +141,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Popover.Dropdown w={320} maw="calc(100vw - 32px)">
               <Stack gap="md">
                 <Box>
-                  <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Região</Text>
+                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={6}>Região</Text>
                   <Group gap={6}>
                     {REGIONS.map(r => (
-                      <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="neutral" size="sm">
+                      <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="neutral">
                         {r}
                       </Chip>
                     ))}
@@ -152,10 +152,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 </Box>
 
                 <Box>
-                  <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={6}>Status</Text>
+                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={6}>Status</Text>
                   <Group gap={6}>
                     {STATUS_OPTIONS.map(s => (
-                      <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="neutral" size="sm">
+                      <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="neutral">
                         {s.label}
                       </Chip>
                     ))}
@@ -163,7 +163,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 </Box>
 
                 {activeFilterCount > 0 && (
-                  <Button variant="subtle" color="neutral" size="xs" onClick={clearFilters}>
+                  <Button variant="subtle" color="neutral" onClick={clearFilters}>
                     Limpar filtros
                   </Button>
                 )}
@@ -177,14 +177,14 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 variant={sortActive ? 'light' : 'default'}
                 color="neutral"
                 leftSection={<ArrowsDownUpIcon size={14} />}
-                rightSection={sortActive ? <Badge circle size="sm" color="neutral">1</Badge> : undefined}
+                rightSection={sortActive ? <Badge circle color="neutral">1</Badge> : undefined}
               >
                 Ordenar
               </Button>
             </Popover.Target>
             <Popover.Dropdown w={280} maw="calc(100vw - 32px)">
               <Stack gap={4}>
-                <Text tt="uppercase" c="dimmed" fw={600} size="0.68rem" mb={4}>Ordenar por</Text>
+                <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={4}>Ordenar por</Text>
                 {SORT_OPTIONS.map(opt => (
                   <Button
                     key={opt.value}
@@ -198,7 +198,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   </Button>
                 ))}
                 {sortActive && (
-                  <Button variant="subtle" color="neutral" size="xs" mt={4} onClick={() => setSortOrder(DEFAULT_SORT)}>
+                  <Button variant="subtle" color="neutral" mt={4} onClick={() => setSortOrder(DEFAULT_SORT)}>
                     Restaurar ordenação padrão
                   </Button>
                 )}
@@ -208,7 +208,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         </Group>
 
         {/* Client table */}
-        <Card withBorder radius="md" padding={0}>
+        <Card withBorder padding={0}>
           <Table highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
@@ -230,17 +230,17 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   >
                     <Table.Td>
                       <Group gap="sm" wrap="nowrap">
-                        <Avatar radius="xl" size={36} color="neutral">{client.avatar}</Avatar>
+                        <Avatar size={36} color="neutral">{client.avatar}</Avatar>
                         <Box miw={0}>
                           <Group gap={6} mb={2}>
-                            <Badge size="xs" color={statusColor[client.status]} variant="light">{client.status}</Badge>
-                            {client.inadimplente && <Badge size="xs" color="yellow" variant="light">inadimplente</Badge>}
-                            {isSelected && <Badge size="xs" color="neutral" variant="light">selecionado</Badge>}
+                            <Badge color={statusColor[client.status]} variant="light">{client.status}</Badge>
+                            {client.inadimplente && <Badge color="yellow" variant="light">inadimplente</Badge>}
+                            {isSelected && <Badge color="neutral" variant="light">selecionado</Badge>}
                           </Group>
-                          <Text fw={600} size="sm" truncate>{client.name}</Text>
-                          <Text c="dimmed" size="xs">Último pedido em {formatOrderDate(client.lastOrder)}</Text>
+                          <Text fw={600} truncate>{client.name}</Text>
+                          <Text c="dimmed" size="sm">Último pedido em {formatOrderDate(client.lastOrder)}</Text>
                           {/* Colunas de cidade e representante resumidas abaixo do breakpoint sm */}
-                          <Text c="dimmed" size="xs" hiddenFrom="sm" truncate>
+                          <Text c="dimmed" size="sm" hiddenFrom="sm" truncate>
                             {client.city}/{client.state} · {client.rep}
                           </Text>
                         </Box>
@@ -249,10 +249,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                     <Table.Td visibleFrom="sm">
                       <Group gap={4} wrap="nowrap">
                         <MapPinIcon size={12} color="var(--mantine-color-dimmed)" />
-                        <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
+                        <Text c="dimmed">{client.city}/{client.state}</Text>
                       </Group>
                     </Table.Td>
-                    <Table.Td visibleFrom="sm"><Text size="sm" c="dimmed">{client.rep}</Text></Table.Td>
+                    <Table.Td visibleFrom="sm"><Text c="dimmed">{client.rep}</Text></Table.Td>
                     <Table.Td ta="right">
                       <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
                     </Table.Td>
@@ -264,11 +264,16 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
           {filtered.length === 0 && (
             <Stack align="center" py="xl" gap={4}>
-              <ThemeIcon variant="light" color="neutral" size={48} radius="xl">
+              <ThemeIcon variant="light" color="neutral" size={48}>
                 <UsersIcon size={24} />
               </ThemeIcon>
               <Text fw={600}>Nenhum cliente encontrado</Text>
-              <Text c="dimmed" size="sm">Tente ajustar os filtros</Text>
+              <Text c="dimmed" size="sm" ta="center" px="md">
+                Nenhum cliente corresponde à busca ou aos filtros aplicados. Limpe-os para ver a carteira completa.
+              </Text>
+              <Button variant="default" mt="sm" onClick={() => { setSearch(''); clearFilters(); }}>
+                Limpar busca e filtros
+              </Button>
             </Stack>
           )}
         </Card>

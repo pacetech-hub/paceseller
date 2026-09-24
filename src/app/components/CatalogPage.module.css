@@ -33,32 +33,28 @@
 .overlayAction {
   flex: 1;
   min-width: 0;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 0;
+  padding: 10px 8px;
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: var(--mantine-font-size-md);
   font-weight: 600;
   white-space: nowrap;
   transition: background-color 150ms ease;
-
-  /* Cards estreitos (2 colunas no celular): ações mais compactas */
-  @mixin smaller-than $mantine-breakpoint-sm {
-    gap: 4px;
-    padding: 8px 0;
-    font-size: 0.68rem;
-
-    & svg {
-      display: none;
-    }
-  }
 }
 
 .overlayDetails {
   background-color: var(--mantine-color-gray-1);
   color: var(--mantine-color-text);
+
+  /* Cards estreitos (2 colunas no celular): o card inteiro já abre os detalhes,
+     então só "Compra rápida" fica sobre a imagem, na largura toda e em 16px */
+  @mixin smaller-than $mantine-breakpoint-sm {
+    display: none;
+  }
 }
 
 .overlayDetails:hover {
@@ -79,29 +75,40 @@
   pointer-events: none;
 }
 
-/* Botão de favorito sobre a imagem */
+/* Botão de favorito sobre a imagem: ícone + texto ("Favoritar"/"Favoritado"), compacto */
 .favToggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  padding: 6px;
-  border-radius: 9999px;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--mantine-radius-md);
   border: 1px solid var(--mantine-color-gray-3);
-  background-color: rgb(255 255 255 / 0.8);
-  color: var(--mantine-color-gray-5);
+  background-color: rgb(255 255 255 / 0.9);
+  color: var(--mantine-color-gray-7);
+  font-size: var(--mantine-font-size-md);
+  font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 150ms ease;
 }
 
+.favToggle:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
 .favToggle:hover {
-  color: var(--mantine-color-red-4);
+  color: var(--mantine-color-red-7);
 }
 
 .favToggle[data-active] {
   background-color: var(--mantine-color-red-0);
   border-color: var(--mantine-color-red-2);
-  color: var(--mantine-color-red-4);
+  color: var(--mantine-color-red-7);
 }
 
 /* Miniaturas no modal de detalhes: imagem + rótulo visível da vista (Lateral, Frontal, ...) */

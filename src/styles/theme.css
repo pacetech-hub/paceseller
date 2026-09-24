@@ -60,3 +60,12 @@ body {
 .mantine-CalendarHeader-calendarHeaderLevel {
   font-weight: 600;
 }
+
+/* Etiquetas (Badge): fonte da escala do app — 14px, nunca menor */
+:root {
+  --badge-fz-xs: var(--mantine-font-size-sm);
+  --badge-fz-sm: var(--mantine-font-size-sm);
+  --badge-fz-md: var(--mantine-font-size-sm);
+  --badge-fz-lg: var(--mantine-font-size-sm);
+  --badge-fz-xl: var(--mantine-font-size-md);
+}
