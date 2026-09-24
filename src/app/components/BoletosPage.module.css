@@ -1,0 +1,15 @@
+/* Linha digitável / Pix copia e cola: quebra em qualquer ponto */
+.wrap {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Seta do cartão de pagamento gira quando está aberto */
+.caret {
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.caret[data-expanded] {
+  transform: rotate(180deg);
+}

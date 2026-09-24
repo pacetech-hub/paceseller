@@ -1,0 +1,5 @@
+/* Cartão de campanha selecionado em verde (cores lidas por interactive.choiceCard) */
+.tealChoice {
+  --choice-color: var(--mantine-color-teal-4);
+  --choice-bg: var(--mantine-color-teal-0);
+}
