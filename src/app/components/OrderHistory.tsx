@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, ThemeIcon, UnstyledButton } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
   CaretRightIcon,
@@ -7,7 +8,9 @@ import {
   XCircleIcon,
   SealCheckIcon,
   CheckSquareIcon,
+  type Icon,
 } from "@phosphor-icons/react";
+import classes from "./interactive.module.css";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
@@ -22,21 +25,37 @@ interface OrderHistoryProps {
   initialStatusFilter?: string;
 }
 
+// cor Mantine do badge de cada status do pedido
 export const statusColors: Record<string, string> = {
-  'aprovado': 'text-black bg-black/10',
-  'em análise': 'text-amber-400 bg-amber-400/10',
-  'faturado': 'text-emerald-400 bg-emerald-400/10',
-  'cancelado': 'text-red-400 bg-red-400/10',
-  'entregue': 'text-purple-400 bg-purple-400/10',
+  'aprovado': 'dark',
+  'em análise': 'yellow',
+  'faturado': 'teal',
+  'cancelado': 'red',
+  'entregue': 'violet',
 };
 
-export const statusIcon: Record<string, React.ComponentType<{ className?: string }>> = {
+export const statusIcon: Record<string, Icon> = {
   'aprovado': CheckCircleIcon,
   'em análise': ClockIcon,
   'faturado': SealCheckIcon,
   'cancelado': XCircleIcon,
   'entregue': CheckSquareIcon,
 };
+
+export function OrderStatusBadge({ status }: { status: string }) {
+  const StatusIcon = statusIcon[status];
+  return (
+    <Badge
+      size="sm"
+      variant="light"
+      color={statusColors[status]}
+      leftSection={<StatusIcon size={12} />}
+      styles={{ root: { flexShrink: 0 }, label: { textTransform: 'none' } }}
+    >
+      {status}
+    </Badge>
+  );
+}
 
 export const orderProductNames: Record<string, string> = {
   'PED-2026-0412': 'Tênis Casual — Grade Mista',
@@ -78,60 +97,58 @@ function orderGridTemplate(profile: Profile): string {
 }
 
 function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
-  const StatusIcon = statusIcon[order.status];
   const support = statusSupportText(order);
   const productName = orderProductNames[order.id] ?? order.collection;
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div
+    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+      <UnstyledButton
         onClick={onOpen}
-        className="p-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+        className={classes.hoverable}
+        p="md"
+        w="100%"
         style={{ display: 'grid', gridTemplateColumns: orderGridTemplate(profile), columnGap: '1rem', alignItems: 'center' }}
       >
         {/* column 1: order info */}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[order.status]}`} style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-              <StatusIcon className="w-3 h-3" />
-              {order.status}
-            </span>
-            <span className="text-muted-foreground flex-shrink-0" style={{ fontSize: '0.72rem' }}>{support}</span>
-          </div>
-          <p className="text-foreground truncate" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+        <Box miw={0}>
+          <Group gap={8} mb={4}>
+            <OrderStatusBadge status={order.status} />
+            <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
+          </Group>
+          <Text size="0.85rem" fw={600} truncate>
             <span className="mono">{order.id}</span> — {productName}
-          </p>
-        </div>
+          </Text>
+        </Box>
 
         {/* column 2: cliente (admin/rep only) */}
         {profile !== 'lojista' && (
-          <div className="min-w-0">
-            <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{client?.name ?? order.client}</p>
-            <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{client ? `${client.city} / ${client.state}` : ''}</p>
-          </div>
+          <Box miw={0}>
+            <Text size="0.8rem" fw={500} truncate>{client?.name ?? order.client}</Text>
+            <Text c="dimmed" size="0.7rem" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
+          </Box>
         )}
 
         {/* column 3: representante (hidden for rep, viewing their own orders) */}
         {profile !== 'rep' && (
-          <div className="min-w-0">
-            <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.rep}</p>
-          </div>
+          <Box miw={0}>
+            <Text size="0.8rem" fw={500} truncate>{order.rep}</Text>
+          </Box>
         )}
 
         {/* column 4: quantidade */}
-        <div className="min-w-0">
-          <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 500 }}>{order.items} pares</p>
-        </div>
+        <Box miw={0}>
+          <Text size="0.8rem" fw={500} truncate>{order.items} pares</Text>
+        </Box>
 
         {/* column 5: total */}
-        <div className="text-right min-w-0">
-          <p className="text-foreground mono truncate" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(order.total)}</p>
-        </div>
+        <Box miw={0} ta="right">
+          <Text className="mono" size="0.95rem" fw={700} truncate>{formatCurrency(order.total)}</Text>
+        </Box>
 
-        <CaretRightIcon className="w-4 h-4 text-muted-foreground justify-self-center" />
-      </div>
-    </div>
+        <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)', justifySelf: 'center' }} />
+      </UnstyledButton>
+    </Paper>
   );
 }
 
@@ -157,40 +174,40 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
     .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full space-y-5">
+    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[160px]">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar pedido, cliente, rep..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-            style={{ fontSize: '0.82rem' }}
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {statuses.map(s => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-full transition-colors capitalize ${statusFilter === s ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
-              style={{ fontSize: '0.75rem', fontWeight: 500 }}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Group gap="sm" wrap="wrap">
+        <TextInput
+          placeholder="Buscar pedido, cliente, rep..."
+          leftSection={<MagnifyingGlassIcon size={14} />}
+          value={search}
+          onChange={e => setSearch(e.currentTarget.value)}
+          style={{ flex: 1, minWidth: 160 }}
+        />
+        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
+          <Group gap={6}>
+            {statuses.map(s => (
+              <Chip key={s} value={s} variant="filled" color="neutral" size="sm" styles={{ label: { textTransform: 'capitalize' } }}>
+                {s}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </Group>
 
       {/* Orders */}
-      <div className="space-y-3">
+      <Stack gap="sm">
         {filtered.length > 0 && (
-          <div
-            className="sticky top-0 z-10 bg-card border border-border rounded-xl px-4 py-2.5 text-muted-foreground"
+          <Paper
+            withBorder
+            radius="lg"
+            px="md"
+            py={10}
+            pos="sticky"
+            top={0}
+            c="dimmed"
             style={{
+              zIndex: 10,
               display: 'grid',
               gridTemplateColumns: orderGridTemplate(profile),
               columnGap: '1rem',
@@ -201,33 +218,36 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
               letterSpacing: '0.04em',
             }}
           >
-            <div className="min-w-0">Pedido</div>
-            {profile !== 'lojista' && <div className="min-w-0">Cliente</div>}
-            {profile !== 'rep' && <div className="min-w-0">Representante</div>}
-            <div className="min-w-0">Quantidade</div>
-            <div className="text-right min-w-0">Total</div>
+            <Box miw={0}>Pedido</Box>
+            {profile !== 'lojista' && <Box miw={0}>Cliente</Box>}
+            {profile !== 'rep' && <Box miw={0}>Representante</Box>}
+            <Box miw={0}>Quantidade</Box>
+            <Box miw={0} ta="right">Total</Box>
             <div />
-          </div>
+          </Paper>
         )}
-        <div className="space-y-3">
-          {filtered.map(order => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              profile={profile}
-              onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
-            />
-          ))}
 
-          {filtered.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center bg-card border border-border rounded-xl">
-              <ClockIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
-              <p className="text-foreground" style={{ fontWeight: 600 }}>Nenhum pedido encontrado</p>
-              <p className="text-muted-foreground mt-1" style={{ fontSize: '0.85rem' }}>Tente ajustar os filtros de busca</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+        {filtered.map(order => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            profile={profile}
+            onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
+          />
+        ))}
+
+        {filtered.length === 0 && (
+          <Paper withBorder radius="lg" py={64}>
+            <Stack align="center" gap={4}>
+              <ThemeIcon variant="light" color="neutral" size={48} radius="xl" mb={8}>
+                <ClockIcon size={24} />
+              </ThemeIcon>
+              <Text fw={600}>Nenhum pedido encontrado</Text>
+              <Text c="dimmed" size="0.85rem">Tente ajustar os filtros de busca</Text>
+            </Stack>
+          </Paper>
+        )}
+      </Stack>
+    </Stack>
   );
 }
