@@ -111,7 +111,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             variant="filled"
             icon={null}
             styles={{
-              label: { fontSize: '0.72rem', fontWeight: 500, paddingInline: 10 },
+              label: { fontSize: '0.72rem', fontWeight: 400, paddingInline: 10 },
               iconWrapper: { display: 'none' },
             }}
           >
@@ -135,25 +135,27 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
       >
         <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
         {!isCollapsed && (
-          <ActionIcon
-            onClick={() => setCollapsed(true)}
-            variant="subtle"
-            color="gray"
-            size="sm"
-            ml="auto"
-            visibleFrom="lg"
-            title="Recolher filtros"
-          >
-            <CaretLeftIcon size={16} />
-          </ActionIcon>
+          <Tooltip label="Recolher filtros">
+            <ActionIcon
+              onClick={() => setCollapsed(true)}
+              variant="subtle"
+              color="gray"
+              size="sm"
+              ml="auto"
+              visibleFrom="lg"
+              aria-label="Recolher filtros"
+            >
+              <CaretLeftIcon size={16} />
+            </ActionIcon>
+          </Tooltip>
         )}
       </Group>
       <Divider color={BORDER_COLOR} />
 
       {isCollapsed ? (
         <Stack align="center" pt="md" gap="sm" flex={1}>
-          <Tooltip label="Filtros" position="right" withArrow>
-            <ActionIcon onClick={() => setCollapsed(false)} variant="light" color="neutral" size={32} aria-label="Filtros">
+          <Tooltip label="Expandir filtros" position="right" withArrow>
+            <ActionIcon onClick={() => setCollapsed(false)} variant="light" color="neutral" size={32} aria-label="Expandir filtros">
               <FunnelIcon size={16} />
             </ActionIcon>
           </Tooltip>
@@ -175,12 +177,13 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
             </Group>
             <Select
               size="xs"
+              aria-label="Tabela de preço"
               allowDeselect={false}
               value={filters.priceTable}
               onChange={v => v && onChange({ ...filters, priceTable: v })}
               data={priceTables.map(t => ({ value: t.id, label: `${t.label} — ${t.desc}` }))}
               comboboxProps={{ withinPortal: true }}
-              styles={{ input: { fontSize: '0.78rem', fontWeight: 500 } }}
+              styles={{ input: { fontSize: '0.78rem' } }}
             />
           </Box>
           <Divider color={BORDER_COLOR} />
@@ -200,11 +203,11 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
                 onClick={reset}
                 variant="subtle"
                 color="gray"
-                size="compact-xs"
-                leftSection={<XIcon size={12} />}
-                styles={{ label: { fontSize: '0.7rem', fontWeight: 400 } }}
+                size="compact-sm"
+                leftSection={<XIcon size={14} />}
+                styles={{ label: { fontSize: '0.72rem', fontWeight: 400 } }}
               >
-                Limpar
+                Limpar filtros
               </Button>
             )}
           </Group>
@@ -216,6 +219,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               value={filters.search}
               onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
               placeholder="Buscar produto..."
+              aria-label="Buscar produto"
               leftSection={<MagnifyingGlassIcon size={14} />}
               styles={{ input: { fontSize: '0.78rem' } }}
             />
@@ -258,6 +262,8 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
                           type="button"
                           onClick={() => toggleColor(c)}
                           title={c}
+                          aria-label={`Cor ${c}`}
+                          aria-pressed={active}
                           color={bg}
                           size={20}
                           withShadow={false}
@@ -315,22 +321,26 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
               {profile === 'rep' ? <UsersIcon size={14} /> : <StorefrontIcon size={14} />}
             </ThemeIcon>
             <Box flex={1} miw={0}>
-              <Text lh={1.5} size="0.78rem" fw={500} truncate>
+              <Text lh={1.5} size="0.78rem" fw={600} truncate>
                 {profile === 'rep' ? 'Representante' : 'Lojista'}
               </Text>
               <Text lh={1.5} size="0.7rem" c="dimmed" truncate>
                 {profile === 'rep' ? 'marcos@tesla.com.br' : 'loja@tesla.com.br'}
               </Text>
             </Box>
-            <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" title="Sair">
-              <SignOutIcon size={14} />
-            </ActionIcon>
+            <Tooltip label="Sair da conta">
+              <ActionIcon onClick={onLogout} variant="subtle" color="red" size="sm" aria-label="Sair da conta">
+                <SignOutIcon size={14} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
         ) : (
           <Group justify="center">
-            <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} title="Expandir filtros">
-              <CaretRightIcon size={16} />
-            </ActionIcon>
+            <Tooltip label="Expandir filtros" position="right" withArrow>
+              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} aria-label="Expandir filtros">
+                <CaretRightIcon size={16} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
         )}
       </Box>
@@ -358,7 +368,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
           pos="absolute"
           top={12}
           right={12}
-          aria-label="Fechar"
+          aria-label="Fechar filtros"
         >
           <XIcon size={16} />
         </ActionIcon>

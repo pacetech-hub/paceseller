@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, type BoxProps,
+  ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, type BoxProps,
 } from "@mantine/core";
 import { useSmallerThan } from "../lib/responsive";
 import { toast } from "../lib/toast";
@@ -152,6 +152,9 @@ function getGallery(product: Product): string[] {
   const unique = Array.from(new Set([product.image, ...sameLine]));
   return Array.from({ length: 6 }, (_, i) => unique[i % unique.length]);
 }
+
+// nome de cada foto da galeria, na mesma ordem de getGallery — usado nas legendas e nas abas do zoom
+const GALLERY_LABELS = ['Lateral', 'Frontal', 'Traseira', 'Solado', 'Detalhe', 'Em uso'];
 
 // bento com as 6 imagens do produto, em 3 linhas de mesma altura:
 // metade esquerda = foto 1 (2 linhas) + foto 5; metade direita = foto 2, fotos 3|4, foto 6
@@ -368,26 +371,31 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
 
   const bentoTile = (idx: number, size: BoxProps) => {
     const img = gallery[idx];
+    const label = GALLERY_LABELS[idx];
     return (
       <Box key={idx} onClick={() => openZoom(idx)} className={classes.tile} {...size}>
-        <Image src={img} alt={`${product.name} — foto ${idx + 1}`} fit="cover" pos="absolute" inset={0} w="100%" h="100%" />
+        <Image src={img} alt={`${product.name} — ${label}`} fit="cover" pos="absolute" inset={0} w="100%" h="100%" />
         <Box className={classes.overlay}>
           <MagnifyingGlassPlusIcon size={20} className={classes.zoomIcon} />
         </Box>
-        <ActionIcon
-          onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
-          aria-label="Baixar imagem"
-          variant="filled"
-          color="dark"
-          size={28}
-          pos="absolute"
-          top={8}
-          right={8}
-          bg="rgba(0, 0, 0, 0.6)"
-          className={classes.downloadButton}
-        >
-          <DownloadSimpleIcon size={14} />
-        </ActionIcon>
+        {/* legenda visível dizendo qual foto é */}
+        <Text component="span" className={classes.tileLabel} size="0.7rem" fw={600}>{label}</Text>
+        <Tooltip label={`Baixar foto ${label.toLowerCase()}`}>
+          <ActionIcon
+            onClick={e => { e.stopPropagation(); toast.success(`Foto ${label.toLowerCase()} baixada`); }}
+            aria-label={`Baixar foto ${label.toLowerCase()}`}
+            variant="filled"
+            color="dark"
+            size={28}
+            pos="absolute"
+            top={8}
+            right={8}
+            bg="rgba(0, 0, 0, 0.6)"
+            className={classes.downloadButton}
+          >
+            <DownloadSimpleIcon size={14} />
+          </ActionIcon>
+        </Tooltip>
       </Box>
     );
   };
@@ -400,7 +408,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           variant="subtle"
           color="gray"
           size="compact-sm"
-          px={4}
+          ml={-12}
           leftSection={<CaretLeftIcon size={16} />}
         >
           Voltar para Ficha Técnica
@@ -507,12 +515,11 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                           {storeLow && (
                             <Button
                               onClick={() => toast.success(`Reposição rápida solicitada — Nº ${s}`)}
-                              size="compact-xs"
-                              leftSection={<ArrowsClockwiseIcon size={12} />}
+                              size="compact-sm"
+                              leftSection={<ArrowsClockwiseIcon size={14} />}
                               flex="none"
-                              fz="0.65rem"
                             >
-                              Reposição rápida
+                              Solicitar reposição
                             </Button>
                           )}
                         </Group>
@@ -545,9 +552,17 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         size={672}
         fullScreen={zoomFullScreen}
         centered
-        title={<Text fw={600} size="sm">{product.name}</Text>}
+        title={<Text fw={600} size="sm">{product.name} · {GALLERY_LABELS[activeImage]}</Text>}
       >
-        <Image src={gallery[activeImage]} alt={product.name} fit="contain" />
+        {/* abas com o nome de cada foto para trocar a imagem sem fechar o zoom */}
+        <Tabs value={String(activeImage)} onChange={v => v !== null && setActiveImage(Number(v))} mb="md">
+          <Tabs.List className={classes.zoomTabs}>
+            {GALLERY_LABELS.map((label, i) => (
+              <Tabs.Tab key={label} value={String(i)}>{label}</Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs>
+        <Image src={gallery[activeImage]} alt={`${product.name} — ${GALLERY_LABELS[activeImage]}`} fit="contain" />
       </Modal>
     </Stack>
   );

@@ -3,7 +3,7 @@ import { toast } from "../lib/toast";
 import { useSmallerThan } from "../lib/responsive";
 import {
   ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
-  Paper, ScrollArea, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  Paper, ScrollArea, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
@@ -17,6 +17,7 @@ import {
   PackageIcon,
   EyeIcon,
   LightningIcon,
+  MinusIcon,
   PlusIcon,
   StorefrontIcon,
   UserCheckIcon,
@@ -100,17 +101,21 @@ function StarRating({ rating }: { rating: number }) {
 function QtyStepper({ value, onChange, buttonSize, inputWidth = 32 }: { value: number; onChange: (v: number) => void; buttonSize: number; inputWidth?: number }) {
   return (
     <Group gap={2} wrap="nowrap">
-      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value - 1)} fz="0.7rem" lh={1}>−</ActionIcon>
+      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value - 1)} aria-label="Diminuir quantidade">
+        <MinusIcon size={Math.round(buttonSize * 0.6)} />
+      </ActionIcon>
       <NumberInput
         value={value}
         onChange={v => onChange(Number(v) || 0)}
         hideControls
-        variant="unstyled"
         w={inputWidth}
         size="xs"
-        styles={{ input: { textAlign: 'center', fontSize: '0.72rem', fontWeight: 600, minHeight: 0, height: 22, padding: 0 } }}
+        aria-label="Quantidade"
+        styles={{ input: { textAlign: 'center', fontSize: '0.72rem', fontWeight: 600, minHeight: 0, height: 22, paddingInline: 2 } }}
       />
-      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value + 1)} fz="0.7rem" lh={1}>+</ActionIcon>
+      <ActionIcon size={buttonSize} variant="default" radius="sm" onClick={() => onChange(value + 1)} aria-label="Aumentar quantidade">
+        <PlusIcon size={Math.round(buttonSize * 0.6)} />
+      </ActionIcon>
     </Group>
   );
 }
@@ -122,7 +127,7 @@ function GradeHeader({ onClose }: { onClose?: () => void }) {
         Compra rápida — Grade
       </Text>
       {onClose && (
-        <ActionIcon onClick={onClose} variant="subtle" color="gray" size="sm" aria-label="Fechar">
+        <ActionIcon onClick={onClose} variant="subtle" color="gray" size="sm" aria-label="Fechar compra rápida">
           <XIcon size={14} />
         </ActionIcon>
       )}
@@ -170,9 +175,9 @@ function GradeCompact({ product, onAdd, onClose }: {
           onClick={() => onAdd(qtys)}
           disabled={total === 0}
           leftSection={<ShoppingCartIcon size={14} />}
-          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+          styles={{ label: { fontSize: '0.78rem' } }}
         >
-          Adicionar
+          Adicionar ao carrinho
         </Button>
       </Box>
     </>
@@ -244,9 +249,9 @@ function GradeInline({ product, onAdd, onClose }: {
             onClick={() => onAdd(qtys)}
             disabled={total === 0}
             leftSection={<ShoppingCartIcon size={14} />}
-            styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+            styles={{ label: { fontSize: '0.78rem' } }}
           >
-            Adicionar
+            Adicionar ao carrinho
           </Button>
         </Group>
       </Box>
@@ -293,7 +298,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
           <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
             <Group gap={8} align="flex-start" wrap="nowrap">
               <Box flex={1} miw={0}>
-                <Text lh={1.5} c="dimmed" size="0.7rem" fw={500}>{product.reference}</Text>
+                <Text lh={1.5} c="dimmed" size="0.7rem" fw={600}>{product.reference}</Text>
                 <Text lh={1.5} size="0.9rem" fw={600}>{product.name}</Text>
                 <Text lh={1.5} c="dimmed" size="0.75rem">{product.line} · {product.category} · {product.collection}</Text>
               </Box>
@@ -324,7 +329,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
                 size={32}
                 variant={product.isFavorite ? 'light' : 'default'}
                 color={product.isFavorite ? 'red' : 'gray'}
-                aria-label="Favoritar"
+                aria-label={product.isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
               >
                 <HeartIcon size={14} weight={product.isFavorite ? 'fill' : 'regular'} />
               </ActionIcon>
@@ -332,9 +337,8 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
                 onClick={onQuickBuy}
                 disabled={product.availability === 'esgotado'}
                 size="compact-md"
-                h={32}
                 leftSection={<LightningIcon size={14} />}
-                styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+                styles={{ label: { fontSize: '0.78rem' } }}
               >
                 Compra rápida
               </Button>
@@ -374,6 +378,8 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
           onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleFav(); }}
           className={classes.favToggle}
           data-active={product.isFavorite || undefined}
+          role="button"
+          aria-label={product.isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
         >
           <HeartIcon size={14} weight={product.isFavorite ? 'fill' : 'regular'} />
         </Box>
@@ -400,7 +406,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         <Badge variant="light" color={availBadgeColor} size="sm" mb={8} styles={{ label: { textTransform: 'none', fontSize: '0.62rem', fontWeight: 600 } }}>
           {product.availability}
         </Badge>
-        <Text lh={1.5} c="dimmed" size="0.68rem" fw={500} tt="uppercase" lts="0.05em">{product.line} · {product.reference}</Text>
+        <Text lh={1.5} c="dimmed" size="0.68rem" fw={600} tt="uppercase" lts="0.05em">{product.line} · {product.reference}</Text>
         <Text lh={1.5} mt={2} truncate size="0.95rem" fw={600}>{product.name}</Text>
         <Text lh={1.5} c="dimmed" size="0.75rem">{product.material}</Text>
 
@@ -443,7 +449,12 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
   onToggleFav: () => void; isFavorite: boolean;
 }) {
   const [activeImg, setActiveImg] = useState(0);
-  const images = [product.image, product.image, product.image];
+  // cada miniatura tem um rótulo visível dizendo qual vista do produto ela mostra
+  const images = [
+    { src: product.image, label: 'Lateral' },
+    { src: product.image, label: 'Frontal' },
+    { src: product.image, label: 'Solado' },
+  ];
   // Abaixo do breakpoint sm o modal ocupa a tela inteira
   const fullScreen = useSmallerThan('sm');
   return (
@@ -457,7 +468,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
       padding={0}
       overlayProps={{ backgroundOpacity: 0.7 }}
       title={
-        <Text lh={1.5} component="span" c="dimmed" size="0.72rem" fw={500} tt="uppercase" lts="0.06em">
+        <Text lh={1.5} component="span" c="dimmed" size="0.72rem" fw={600} tt="uppercase" lts="0.06em">
           {product.line} · {product.reference}
         </Text>
       }
@@ -471,12 +482,24 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
           <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
             <Paper pos="relative" w="100%" pt="90%" radius="lg" bg="#fff">
-              <Image src={images[activeImg]} alt={product.name} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
+              <Image src={images[activeImg].src} alt={`${product.name} — vista ${images[activeImg].label.toLowerCase()}`} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
             </Paper>
-            <Group gap={8}>
+            <Group gap={8} role="tablist" aria-label="Vistas do produto">
               {images.map((img, i) => (
-                <UnstyledButton key={i} onClick={() => setActiveImg(i)} className={classes.thumb} data-active={activeImg === i || undefined}>
-                  <Image src={img} alt="" h="100%" />
+                <UnstyledButton
+                  key={img.label}
+                  onClick={() => setActiveImg(i)}
+                  className={classes.thumbButton}
+                  data-active={activeImg === i || undefined}
+                  role="tab"
+                  aria-selected={activeImg === i}
+                >
+                  <Box className={classes.thumb}>
+                    <Image src={img.src} alt="" h="100%" />
+                  </Box>
+                  <Text lh={1.5} ta="center" size="0.72rem" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
+                    {img.label}
+                  </Text>
                 </UnstyledButton>
               ))}
             </Group>
@@ -491,7 +514,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                   variant={isFavorite ? 'light' : 'default'}
                   color={isFavorite ? 'red' : 'gray'}
                   flex="none"
-                  aria-label="Favoritar"
+                  aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                 >
                   <HeartIcon size={16} weight={isFavorite ? 'fill' : 'regular'} />
                 </ActionIcon>
@@ -510,18 +533,18 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
             <SimpleGrid cols={2} spacing="sm">
               <Box>
                 <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" lts="0.05em">Material</Text>
-                <Text lh={1.5} mt={2} size="0.85rem" fw={500}>{product.material}</Text>
+                <Text lh={1.5} mt={2} size="0.85rem" fw={600}>{product.material}</Text>
               </Box>
               <Box>
                 <Text lh={1.5} c="dimmed" size="0.7rem" tt="uppercase" lts="0.05em">Coleção</Text>
-                <Text lh={1.5} mt={2} size="0.85rem" fw={500}>{product.collection}</Text>
+                <Text lh={1.5} mt={2} size="0.85rem" fw={600}>{product.collection}</Text>
               </Box>
             </SimpleGrid>
             <Box>
               <Text lh={1.5} c="dimmed" mb={6} size="0.7rem" tt="uppercase" lts="0.05em">Cores</Text>
               <Group gap={6}>
                 {product.colors.map(c => (
-                  <Badge key={c} variant="light" color="gray" size="lg" styles={{ label: { textTransform: 'none', fontSize: '0.75rem', fontWeight: 500, color: 'var(--mantine-color-text)' } }}>{c}</Badge>
+                  <Badge key={c} variant="light" color="gray" size="lg" styles={{ label: { textTransform: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--mantine-color-text)' } }}>{c}</Badge>
                 ))}
               </Group>
             </Box>
@@ -647,8 +670,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   });
 
   const sorted = [...filtered].sort((a, b) => {
-    if (sortBy === 'preço ↑') return a.price - b.price;
-    if (sortBy === 'preço ↓') return b.price - a.price;
+    if (sortBy === 'menor preço') return a.price - b.price;
+    if (sortBy === 'maior preço') return b.price - a.price;
     if (sortBy === 'mais vendidos') return b.soldUnits - a.soldUnits;
     if (sortBy === 'avaliação') return b.rating - a.rating;
     return 0;
@@ -667,7 +690,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
   const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void) => (
     <Box>
-      <Text lh={1.5} c="dimmed" mb={8} size="0.75rem" fw={500}>{label}</Text>
+      <Text lh={1.5} c="dimmed" mb={8} size="0.75rem" fw={600}>{label}</Text>
       <Chip.Group multiple={false} value={value} onChange={onSelect}>
         <Group gap={6}>
           {options.map(o => (
@@ -677,7 +700,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
               size="xs"
               variant="filled"
               icon={null}
-              styles={{ label: { fontSize: '0.75rem', fontWeight: 500, paddingInline: 12 }, iconWrapper: { display: 'none' } }}
+              styles={{ label: { fontSize: '0.75rem', fontWeight: 400, paddingInline: 12 }, iconWrapper: { display: 'none' } }}
             >
               {o}
             </Chip>
@@ -730,15 +753,15 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         {!usingExternal && (
           <Button
             onClick={() => setShowFilters(!showFilters)}
-            variant={showFilters || hasActiveFilters ? 'light' : 'default'}
-            color="neutral"
+            variant="default"
             leftSection={<FunnelIcon size={16} />}
             rightSection={hasActiveFilters ? (
               <ColorSwatch color="var(--mantine-color-neutral-9)" size={6} withShadow={false} />
             ) : undefined}
-            styles={{ label: { fontSize: '0.83rem', fontWeight: 500 } }}
+            aria-expanded={showFilters}
+            styles={{ label: { fontSize: '0.83rem' } }}
           >
-            Filtros
+            {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
           </Button>
         )}
 
@@ -748,27 +771,40 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           allowDeselect={false}
           value={sortBy}
           onChange={v => v && setSortBy(v)}
-          data={['relevância', 'mais vendidos', 'avaliação', 'preço ↑', 'preço ↓']}
+          aria-label="Ordenar produtos"
+          data={[
+            { value: 'relevância', label: 'Relevância' },
+            { value: 'mais vendidos', label: 'Mais vendidos' },
+            { value: 'avaliação', label: 'Melhor avaliação' },
+            { value: 'menor preço', label: 'Menor preço' },
+            { value: 'maior preço', label: 'Maior preço' },
+          ]}
           styles={{ input: { fontSize: '0.83rem' } }}
         />
 
         <ActionIcon.Group>
-          <ActionIcon
-            onClick={() => setViewMode('grid')}
-            variant={viewMode === 'grid' ? 'filled' : 'default'}
-            size={36}
-            aria-label="Grade"
-          >
-            <GridNineIcon size={16} />
-          </ActionIcon>
-          <ActionIcon
-            onClick={() => setViewMode('list')}
-            variant={viewMode === 'list' ? 'filled' : 'default'}
-            size={36}
-            aria-label="Lista"
-          >
-            <ListBulletsIcon size={16} />
-          </ActionIcon>
+          <Tooltip label="Ver em grade">
+            <ActionIcon
+              onClick={() => setViewMode('grid')}
+              variant={viewMode === 'grid' ? 'filled' : 'default'}
+              size={36}
+              aria-label="Ver em grade"
+              aria-pressed={viewMode === 'grid'}
+            >
+              <GridNineIcon size={16} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Ver em lista">
+            <ActionIcon
+              onClick={() => setViewMode('list')}
+              variant={viewMode === 'list' ? 'filled' : 'default'}
+              size={36}
+              aria-label="Ver em lista"
+              aria-pressed={viewMode === 'list'}
+            >
+              <ListBulletsIcon size={16} />
+            </ActionIcon>
+          </Tooltip>
         </ActionIcon.Group>
       </Group>
 
@@ -867,7 +903,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             <Box px="lg" py="md">
               <Text lh={1.5} fw={700} size="0.95rem">Adicionar ao carrinho</Text>
               <Text lh={1.5} c="dimmed" mt={4} size="0.78rem">
-                {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={500} inherit>{confirmAdd.product.name}</Text>
+                {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>
               </Text>
             </Box>
             <Divider color={BORDER_COLOR} />
@@ -897,9 +933,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 }}
                 variant="default"
                 bd={DASHED_BORDER}
-                px={12}
                 leftSection={<PlusIcon size={14} />}
-                styles={{ label: { fontSize: '0.82rem', fontWeight: 500 }, section: { marginInlineEnd: 6 } }}
+                styles={{ label: { fontSize: '0.82rem' }, section: { marginInlineEnd: 6 } }}
               >
                 Criar novo carrinho
               </Button>
@@ -912,9 +947,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   }
                   setConfirmAdd(null);
                 }}
-                styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+                styles={{ label: { fontSize: '0.82rem' } }}
               >
-                OK
+                Adicionar ao carrinho
               </Button>
             </Group>
           </>
@@ -940,7 +975,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
                 </Text>
               </Box>
-              <ActionIcon onClick={() => setPendingAdd(null)} variant="subtle" color="gray" aria-label="Fechar">
+              <ActionIcon onClick={() => setPendingAdd(null)} variant="subtle" color="gray" aria-label="Fechar seleção de carrinho">
                 <XIcon size={16} />
               </ActionIcon>
             </Group>
@@ -971,7 +1006,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                     bg="var(--mantine-color-neutral-0)"
                     bd="1px solid var(--mantine-color-neutral-3)"
                   >
-                    <Stack gap={8}>
+                    <Stack gap="md">
                       <TextInput
                         autoFocus
                         label="Nome do novo carrinho"
@@ -979,7 +1014,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                         onChange={e => setCreatingNewName(e.currentTarget.value)}
                         placeholder="Ex.: Reposição Inverno 26"
                         styles={{
-                          label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)', marginBottom: 8 },
+                          label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' },
                           input: { fontSize: '0.82rem' },
                         }}
                       />
@@ -988,7 +1023,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                           onClick={() => { setCreatingMode(false); setCreatingNewName(''); }}
                           variant="default"
                           size="xs"
-                          styles={{ label: { fontSize: '0.78rem', fontWeight: 400 } }}
+                          styles={{ label: { fontSize: '0.78rem' } }}
                         >
                           Cancelar
                         </Button>
@@ -1001,9 +1036,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                             }
                           }}
                           size="xs"
-                          styles={{ label: { fontSize: '0.78rem', fontWeight: 600 } }}
+                          styles={{ label: { fontSize: '0.78rem' } }}
                         >
-                          Criar e adicionar
+                          Criar carrinho e adicionar
                         </Button>
                       </Group>
                     </Stack>
@@ -1014,9 +1049,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                     variant="default"
                     bd={DASHED_BORDER}
                     fullWidth
-                    h={44}
                     leftSection={<PlusIcon size={14} />}
-                    styles={{ label: { fontSize: '0.82rem', fontWeight: 600 } }}
+                    styles={{ label: { fontSize: '0.82rem' } }}
                   >
                     Criar novo carrinho
                   </Button>

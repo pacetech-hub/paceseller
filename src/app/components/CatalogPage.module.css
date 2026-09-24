@@ -104,8 +104,16 @@
   color: var(--mantine-color-red-4);
 }
 
-/* Miniaturas no modal de detalhes */
-.thumb.thumb {
+/* Miniaturas no modal de detalhes: imagem + rótulo visível da vista (Lateral, Frontal, ...) */
+.thumbButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+}
+
+.thumb {
   width: 64px;
   height: 64px;
   border-radius: var(--mantine-radius-md);
@@ -115,7 +123,7 @@
   transition: border-color 150ms ease;
 }
 
-.thumb.thumb[data-active] {
+.thumbButton[data-active] .thumb {
   border-color: var(--mantine-color-neutral-9);
 }
 
