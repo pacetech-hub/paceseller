@@ -5,6 +5,21 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * Responsive breakpoints — aligned with Mantine's default theme.breakpoints
+ * so Tailwind prefixes (xs:, sm:, md:, lg:, xl:, max-*) and Mantine props
+ * (visibleFrom, SimpleGrid cols, etc.) switch at the same widths.
+ *   xs 36em (576px) · sm 48em (768px) · md 62em (992px) · lg 75em (1200px) · xl 88em (1408px)
+ */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-xs: 36em;
+  --breakpoint-sm: 48em;
+  --breakpoint-md: 62em;
+  --breakpoint-lg: 75em;
+  --breakpoint-xl: 88em;
+}
+
+/*
  * Design system definition.
  *
  * The @theme inline block maps CSS custom properties to Tailwind utility
