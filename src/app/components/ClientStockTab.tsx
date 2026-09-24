@@ -48,10 +48,10 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
         limit={8}
         placeholder="Buscar cliente por nome ou código..."
         nothingFoundMessage="Nenhum cliente encontrado."
-        leftSection={<MagnifyingGlassIcon className="w-3.5 h-3.5" />}
+        leftSection={<MagnifyingGlassIcon size={14} />}
         renderOption={({ option }) => (
           <Group gap="xs" wrap="nowrap" w="100%">
-            <StorefrontIcon className="w-3.5 h-3.5" style={{ flexShrink: 0, color: 'var(--mantine-color-dimmed)' }} />
+            <StorefrontIcon size={14} style={{ flexShrink: 0, color: 'var(--mantine-color-dimmed)' }} />
             <Text size="0.82rem" truncate style={{ flex: 1 }}>{option.label}</Text>
             <Text c="dimmed" size="0.7rem" className="mono">{option.value}</Text>
           </Group>
@@ -61,7 +61,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
       {!selected && (
         <Paper withBorder radius="lg" py={64}>
           <Stack align="center" gap="sm">
-            <StorefrontIcon className="w-10 h-10" style={{ opacity: 0.3 }} />
+            <StorefrontIcon size={40} style={{ opacity: 0.3 }} />
             <Text c="dimmed" size="0.88rem">Busque um cliente acima para ver o estoque reportado por ele.</Text>
           </Stack>
         </Paper>
@@ -72,12 +72,12 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
           <Paper withBorder radius="lg" p="md">
             <Group gap="sm" wrap="nowrap">
               <ThemeIcon size={40} radius="md" variant="light">
-                <StorefrontIcon className="w-4 h-4" />
+                <StorefrontIcon size={16} />
               </ThemeIcon>
               <Box miw={0}>
                 <Text size="0.92rem" fw={700} truncate>{selected.name}</Text>
                 <Group gap={6} c="dimmed" wrap="nowrap">
-                  <MapPinIcon className="w-3 h-3" />
+                  <MapPinIcon size={12} />
                   <Text size="0.75rem" c="dimmed">{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
                 </Group>
               </Box>

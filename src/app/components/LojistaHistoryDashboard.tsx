@@ -104,7 +104,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             <Text c="dimmed" size="0.82rem">Visão de sell-in × sell-out e linhas em destaque</Text>
           </Box>
           <Group gap="xs">
-            <CalendarBlankIcon className="w-4 h-4" style={{ color: 'var(--mantine-color-dimmed)' }} />
+            <CalendarBlankIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
             <SegmentedControl
               size="xs"
               value={period}
@@ -115,7 +115,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
               variant="default"
               size="sm"
               onClick={() => onNavigate('history')}
-              leftSection={<DownloadSimpleIcon className="w-3.5 h-3.5" />}
+              leftSection={<DownloadSimpleIcon size={14} />}
             >
               Exportar
             </Button>
@@ -131,10 +131,10 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
               <Paper key={k.label} withBorder radius="lg" p="md">
                 <Group justify="space-between" mb="xs">
                   <ThemeIcon size={32} radius="md" variant="light">
-                    <Icon className="w-4 h-4" />
+                    <Icon size={16} />
                   </ThemeIcon>
                   <Group gap={4} c={k.up ? 'teal.7' : 'red.6'} wrap="nowrap">
-                    <TrendIcon className="w-3 h-3" />
+                    <TrendIcon size={12} />
                     <Text size="0.72rem" fw={700} c="inherit">{k.trend}</Text>
                   </Group>
                 </Group>
@@ -176,7 +176,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             <Paper withBorder radius="lg" p="lg" h="100%">
               <Group justify="space-between" mb="md">
                 <Group gap="xs">
-                  <TrophyIcon className="w-4 h-4" style={{ color: 'var(--mantine-color-yellow-6)' }} />
+                  <TrophyIcon size={16} style={{ color: 'var(--mantine-color-yellow-6)' }} />
                   <Title order={3} size="0.95rem" fw={700}>Linhas mais vendidas</Title>
                 </Group>
                 <Text c="dimmed" size="0.72rem">{periods.find(p => p.id === period)?.label}</Text>

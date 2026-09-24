@@ -16,6 +16,7 @@ import {
   StockKpis, StockToolbar, StockTableHeader, StockProductCell, StockStatusBadge, StockEmptyRow,
   EditActions, EditButton, filterStock, type StockFilter,
 } from "./StockTable";
+import interactive from "./interactive.module.css";
 
 type Mode = 'manual' | 'integration';
 
@@ -68,7 +69,7 @@ export function StockPage() {
           <Group justify="space-between" gap="sm" wrap="wrap">
             <Group gap="sm" wrap="nowrap">
               <ThemeIcon size={40} radius="md" variant="light">
-                <WarehouseIcon className="w-5 h-5" />
+                <WarehouseIcon size={20} />
               </ThemeIcon>
               <Box>
                 <Title order={2} size="1.05rem" fw={700} style={{ letterSpacing: '-0.01em' }}>Meu Estoque · Tesla Footwear</Title>
@@ -87,7 +88,7 @@ export function StockPage() {
                   value: o.value,
                   label: (
                     <Group gap={6} wrap="nowrap">
-                      <Icon className="w-3.5 h-3.5" />
+                      <Icon size={14} />
                       {o.label}
                     </Group>
                   ),
@@ -104,7 +105,7 @@ export function StockPage() {
           <Paper withBorder radius="lg" p="lg">
             <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
               <ThemeIcon size={36} radius="md" variant="light" style={{ flexShrink: 0 }}>
-                <PlugIcon className="w-4 h-4" />
+                <PlugIcon size={16} />
               </ThemeIcon>
               <Box style={{ flex: 1 }}>
                 <Title order={3} size="0.9rem" fw={600}>Integração com seu sistema de estoque</Title>
@@ -113,7 +114,7 @@ export function StockPage() {
                 </Text>
               </Box>
               {integrationConnected && (
-                <Badge variant="light" color="teal" leftSection={<CheckCircleIcon className="w-3 h-3" />}>
+                <Badge variant="light" color="teal" leftSection={<CheckCircleIcon size={12} />}>
                   Conectado
                 </Badge>
               )}
@@ -122,7 +123,7 @@ export function StockPage() {
             <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm" mb="md">
               {INTEGRATIONS.map(p => (
                 <UnstyledButton key={p} onClick={() => setIntegrationConnected(true)}>
-                  <Paper withBorder radius="md" p="sm" className="hover:bg-secondary/40 transition-colors">
+                  <Paper withBorder radius="md" p="sm" className={interactive.hoverable}>
                     <Text size="0.82rem" fw={600}>{p}</Text>
                     <Text c="dimmed" size="0.7rem" mt={2}>Conectar via OAuth</Text>
                   </Paper>
@@ -134,7 +135,7 @@ export function StockPage() {
               <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
                 <Group justify="space-between" gap="sm">
                   <Group gap="xs" wrap="nowrap">
-                    <ArrowsClockwiseIcon className="w-3.5 h-3.5" style={{ color: 'var(--mantine-color-dimmed)' }} />
+                    <ArrowsClockwiseIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />
                     <Text c="dimmed" size="0.75rem">Última sincronização: hoje, 14:02 · próxima em 38min</Text>
                   </Group>
                   <Button variant="light" size="xs">Sincronizar agora</Button>

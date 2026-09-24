@@ -300,8 +300,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
-  type DropdownItem = { label: string; icon: React.ComponentType<{ className?: string }>; view?: View; action?: () => void };
-  type HeaderItem = { label: string; icon: React.ComponentType<{ className?: string }>; view: View };
+  type DropdownItem = { label: string; icon: Icon; view?: View; action?: () => void };
+  type HeaderItem = { label: string; icon: Icon; view: View };
 
   const headerItems: HeaderItem[] =
     profile === 'admin'
@@ -359,12 +359,22 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   };
 
   return (
-    <Box component="header" className="border-b border-border bg-background/80 backdrop-blur" h={56} px="lg" style={{ flexShrink: 0 }}>
+    <Box
+      component="header"
+      h={56}
+      px="lg"
+      style={{
+        flexShrink: 0,
+        borderBottom: '1px solid var(--mantine-color-default-border)',
+        backgroundColor: 'color-mix(in srgb, var(--mantine-color-body) 80%, transparent)',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
       <Group h="100%" gap="sm" wrap="nowrap">
         <Group style={{ flex: 1, minWidth: 0 }} gap="sm" wrap="nowrap">
           {currentView !== 'catalog' && (
-            <Box className="border-r border-border" pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-              <img src={teslaLogo} alt="Tesla Footwear" className="h-6 w-auto object-contain" />
+            <Box pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0, borderRight: '1px solid var(--mantine-color-default-border)' }}>
+              <img src={teslaLogo} alt="Tesla Footwear" style={{ height: 24, width: 'auto', objectFit: 'contain' }} />
             </Box>
           )}
           {/* Nav items à esquerda quando existem, caso contrário título */}
@@ -380,11 +390,11 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                     variant={active ? 'light' : 'subtle'}
                     color="neutral"
                     size="sm"
-                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    leftSection={<Icon size={14} />}
                     title={item.label}
                     styles={{ label: { fontWeight: active ? 600 : 500 } }}
                   >
-                    <span className="hidden md:inline">{item.label}</span>
+                    <Text span visibleFrom="md" inherit>{item.label}</Text>
                   </Button>
                 );
               })}
@@ -403,14 +413,14 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           {/* Cart(s) — todos os perfis usam multi-carrinhos */}
           <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
             <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" size="lg" title="Carrinhos">
-              <BasketIcon className="w-4 h-4" />
+              <BasketIcon size={16} />
             </ActionIcon>
           </Indicator>
 
           {/* Notifications */}
           <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6}>
             <ActionIcon variant="subtle" color="neutral" size="lg" title="Notificações">
-              <BellIcon className="w-4 h-4" />
+              <BellIcon size={16} />
             </ActionIcon>
           </Indicator>
 
@@ -421,7 +431,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               variant="default"
               color="neutral"
               size="sm"
-              leftSection={<StorefrontIcon className="w-3.5 h-3.5" />}
+              leftSection={<StorefrontIcon size={14} />}
               title="Ver histórico de pedidos deste cliente"
             >
               {selectedClient.name}
@@ -437,10 +447,9 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 radius="xl"
                 size={32}
                 ml={4}
-                className="border-l border-border"
-                style={{ borderRadius: '50%' }}
+                style={{ borderRadius: '50%', borderLeft: '1px solid var(--mantine-color-default-border)' }}
               >
-                <ProfileIcon className="w-3.5 h-3.5" color={profileInfo.color} />
+                <ProfileIcon size={14} color={profileInfo.color} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
@@ -450,7 +459,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 return (
                   <Menu.Item
                     key={item.label}
-                    leftSection={<Icon className="w-3.5 h-3.5" />}
+                    leftSection={<Icon size={14} />}
                     color={item.label === 'Sair' ? 'red' : undefined}
                     onClick={() => handleDropdownItem(item)}
                   >
