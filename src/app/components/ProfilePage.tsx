@@ -34,14 +34,14 @@ interface ProfilePageProps {
 // ---------- helpers ----------
 function Section({ icon: Icon, title, description, children }: { icon: PhosphorIcon; title: string; description?: string; children: React.ReactNode }) {
   return (
-    <Paper component="section" withBorder radius="md" p={{ base: 'md', sm: 'lg' }}>
+    <Paper component="section" withBorder p={{ base: 'md', sm: 'lg' }}>
       <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
-        <ThemeIcon size={36} radius="md" variant="light" color="neutral" flex="none">
-          <Icon size={16} />
+        <ThemeIcon size={36} variant="light" color="neutral" flex="none">
+          <Icon size={20} />
         </ThemeIcon>
         <Box flex={1} miw={0}>
-          <Text fw={600} size="0.92rem">{title}</Text>
-          {description && <Text c="dimmed" size="0.75rem" mt={2}>{description}</Text>}
+          <Text fw={600} size="lg">{title}</Text>
+          {description && <Text c="dimmed" size="sm" mt={2}>{description}</Text>}
         </Box>
       </Group>
       <Stack gap={0}>{children}</Stack>
@@ -54,10 +54,10 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
     <Grid gutter="sm" align="flex-start" py={6} className={interactive.rowDivider}>
       {/* Rótulo acima do valor no celular; lado a lado a partir de xs */}
       <Grid.Col span={{ base: 12, xs: 4 }}>
-        <Text c="dimmed" size="0.75rem">{label}</Text>
+        <Text c="dimmed" size="sm">{label}</Text>
       </Grid.Col>
       <Grid.Col span={{ base: 12, xs: 8 }}>
-        <Text size="0.82rem" ff={mono ? 'monospace' : undefined}>{value}</Text>
+        <Text ff={mono ? 'monospace' : undefined}>{value}</Text>
       </Grid.Col>
     </Grid>
   );
@@ -71,8 +71,8 @@ function ToggleRow({ label, description, defaultChecked = false }: { label: stri
       defaultChecked={defaultChecked}
       py="xs"
       styles={{ body: { justifyContent: 'space-between', alignItems: 'flex-start' }, labelWrapper: { flex: 1 } }}
-      label={<Text size="0.82rem" fw={600}>{label}</Text>}
-      description={description && <Text size="0.72rem" c="dimmed">{description}</Text>}
+      label={<Text fw={600}>{label}</Text>}
+      description={description && <Text size="sm" c="dimmed">{description}</Text>}
     />
   );
 }
@@ -117,7 +117,7 @@ function LojistaProfile() {
       <Section icon={CreditCardIcon} title="Situação financeira" description="Sincronizado com o ERP">
         <Field label="Limite de crédito" value="R$ 25.000,00" />
         <Field label="Utilizado" value="R$ 8.420,00" />
-        <Field label="Disponível" value={<Text c="teal" span fw={600} size="0.82rem">R$ 16.580,00</Text>} />
+        <Field label="Disponível" value={<Text c="teal" span fw={600}>R$ 16.580,00</Text>} />
         <Field label="Status" value={<StatusPill ok label="Adimplente" />} />
       </Section>
 
@@ -138,7 +138,7 @@ function LojistaProfile() {
       <Section icon={LockIcon} title="Senha e acesso">
         <Field label="E-mail de acesso" value="compras@bellamoda.com.br" />
         <Field label="Última alteração de senha" value="há 3 meses" />
-        <Button variant="default" color="neutral" size="xs" mt="sm" mr="auto">
+        <Button variant="default" color="neutral" mt="sm" mr="auto">
           Alterar senha
         </Button>
       </Section>
@@ -160,24 +160,24 @@ function RepProfile() {
 
       <Section icon={TargetIcon} title="Metas do período" description="Ciclo Verão 26 · jan–abr">
         <Field label="Meta sell-in" value="R$ 480.000,00" />
-        <Field label="Realizado" value={<Text c="teal" span fw={600} size="0.82rem">R$ 312.450,00 (65%)</Text>} />
+        <Field label="Realizado" value={<Text c="teal" span fw={600}>R$ 312.450,00 (65%)</Text>} />
         <Field label="Faltam" value="R$ 167.550,00" />
-        <Progress value={65} color="teal" size="sm" radius="xl" mt="sm" />
+        <Progress value={65} color="teal" size="sm" mt="sm" />
       </Section>
 
       <Section icon={StorefrontIcon} title="Carteira de lojas" description="32 lojas vinculadas">
         <SimpleGrid cols={3} spacing="xs" mb="xs">
-          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
-            <Text c="teal" fw={700} size="1.1rem">24</Text>
-            <Text c="dimmed" size="0.68rem">Ativas</Text>
+          <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+            <Text c="teal" fw={700} size="xl">24</Text>
+            <Text c="dimmed" size="sm">Ativas</Text>
           </Paper>
-          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
-            <Text c="orange" fw={700} size="1.1rem">5</Text>
-            <Text c="dimmed" size="0.68rem">Inativas</Text>
+          <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+            <Text c="orange" fw={700} size="xl">5</Text>
+            <Text c="dimmed" size="sm">Inativas</Text>
           </Paper>
-          <Paper withBorder radius="md" p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
-            <Text c="red" fw={700} size="1.1rem">3</Text>
-            <Text c="dimmed" size="0.68rem">Bloqueadas</Text>
+          <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+            <Text c="red" fw={700} size="xl">3</Text>
+            <Text c="dimmed" size="sm">Bloqueadas</Text>
           </Paper>
         </SimpleGrid>
         <Field label="Top cliente" value="Bella Moda — R$ 42.180,00" />
@@ -202,7 +202,7 @@ function RepProfile() {
         <Field label="Usuário" value="marina.costa" />
         <Field label="Última alteração de senha" value="há 1 mês" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Ativa" />} />
-        <Button variant="default" color="neutral" size="xs" mt="sm" mr="auto">
+        <Button variant="default" color="neutral" mt="sm" mr="auto">
           Alterar senha
         </Button>
       </Section>
@@ -230,13 +230,13 @@ function AdminProfile() {
 
       <Section icon={UsersIcon} title="Usuários cadastrados">
         <SimpleGrid cols={2} spacing="xs" mb="xs">
-          <Paper withBorder radius="md" p="sm">
-            <Text fw={700} size="1.2rem">18</Text>
-            <Text c="dimmed" size="0.72rem">Representantes</Text>
+          <Paper withBorder p="sm">
+            <Text fw={700} size="xl">18</Text>
+            <Text c="dimmed" size="sm">Representantes</Text>
           </Paper>
-          <Paper withBorder radius="md" p="sm">
-            <Text fw={700} size="1.2rem">342</Text>
-            <Text c="dimmed" size="0.72rem">Lojistas</Text>
+          <Paper withBorder p="sm">
+            <Text fw={700} size="xl">342</Text>
+            <Text c="dimmed" size="sm">Lojistas</Text>
           </Paper>
         </SimpleGrid>
         <Field label="Convites pendentes" value="4" />
@@ -261,10 +261,10 @@ function AdminProfile() {
           ].map((l, i) => (
             <Group key={i} justify="space-between" gap="sm" py={6} className={interactive.rowDivider} wrap="nowrap">
               <Box miw={0}>
-                <Text component="span" fw={600} size="0.8rem">{l.who}</Text>
-                <Text component="span" c="dimmed" size="0.78rem" ml={8}>{l.what}</Text>
+                <Text component="span" fw={600}>{l.who}</Text>
+                <Text component="span" c="dimmed" ml={8}>{l.what}</Text>
               </Box>
-              <Text c="dimmed" size="0.72rem" flex="none">{l.when}</Text>
+              <Text c="dimmed" size="sm" flex="none">{l.when}</Text>
             </Group>
           ))}
         </Stack>
@@ -275,7 +275,7 @@ function AdminProfile() {
         <Field label="Última alteração de senha" value="há 14 dias" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Obrigatória" />} />
         <Field label="Sessões ativas" value="2 dispositivos" />
-        <Button variant="default" color="neutral" size="xs" mt="sm" mr="auto">
+        <Button variant="default" color="neutral" mt="sm" mr="auto">
           Alterar senha
         </Button>
       </Section>

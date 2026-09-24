@@ -11,7 +11,7 @@
   color: #fff;
 }
 
-/* Linha da lista de campanhas: botão de excluir aparece no hover */
+/* Linha da lista de campanhas */
 .campaignRow {
   border-radius: var(--mantine-radius-md);
   transition: background-color 150ms ease;
@@ -23,23 +23,6 @@
 
 .campaignRow[data-active] {
   background-color: var(--mantine-color-neutral-0);
-}
-
-.rowDelete {
-  opacity: 0;
-  transition: opacity 150ms ease;
-}
-
-.campaignRow:hover .rowDelete,
-.rowDelete:focus-visible {
-  opacity: 1;
-}
-
-/* Em telas de toque não há hover: o botão de excluir fica sempre visível */
-@media (hover: none) {
-  .rowDelete {
-    opacity: 1;
-  }
 }
 
 /* Cartão selecionável do assistente */
