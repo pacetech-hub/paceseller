@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Stack, Group, Box, Center, Paper, Text, TextInput, Chip, Badge, ThemeIcon, UnstyledButton } from "@mantine/core";
+import { Stack, Group, Box, Center, Paper, Text, TextInput, Chip, Badge, ThemeIcon, UnstyledButton, Card } from "@mantine/core";
+import historyClasses from "./OrderHistory.module.css";
 import {
   MagnifyingGlassIcon,
   CaretRightIcon,
@@ -100,7 +101,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+    <Card withBorder radius="lg" padding={0}>
       <UnstyledButton
         onClick={onOpen}
         className={classes.hoverable}
@@ -112,7 +113,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           <Box flex={1} miw={0}>
             <Group gap={8} mb={4}>
               <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
+              <Text c="dimmed" size="0.72rem" flex="none">{support}</Text>
             </Group>
             <Text size="0.85rem" fw={600} truncate>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
@@ -145,11 +146,11 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           </Box>
 
           <Center w={COL.caret} flex="none">
-            <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+            <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
           </Center>
         </Group>
       </UnstyledButton>
-    </Paper>
+    </Card>
   );
 }
 
@@ -183,7 +184,8 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          style={{ flex: 1, minWidth: 160 }}
+          flex={1}
+          miw={160}
         />
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
           <Group gap={6}>
@@ -207,13 +209,11 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
             pos="sticky"
             top={0}
             c="dimmed"
-            style={{
-              zIndex: 10,
-              fontSize: '0.68rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-            }}
+            fz="0.68rem"
+            fw={600}
+            tt="uppercase"
+            lts="0.04em"
+            className={historyClasses.stickyHeader}
           >
             <Group gap="md" wrap="nowrap">
               <Box flex={1} miw={0}>Pedido</Box>

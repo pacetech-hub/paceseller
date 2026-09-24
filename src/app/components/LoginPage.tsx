@@ -52,7 +52,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <Box mih="100vh" bgsz="cover" bgp="30% center" style={{ backgroundColor: 'var(--mantine-color-dark-7)', backgroundImage: `url(${loginBanner})` }}>
+    <Box mih="100vh" bg={`var(--mantine-color-dark-7) url(${loginBanner})`} bgsz="cover" bgp="30% center">
       <Paper className={classes.form} radius={0} px={30} pb={30} pt={{ base: 48, sm: 80 }}>
         <Box mb={50}>
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
