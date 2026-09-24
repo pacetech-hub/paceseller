@@ -325,7 +325,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
 
   return (
     <Paper withBorder radius="lg" className={classes.card} style={{ overflow: 'hidden' }}>
-      <UnstyledButton onClick={onOpenDetail} className={classes.imageButton}>
+      <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" mb={-12} bg="white" style={{ overflow: 'hidden' }}>
         {!imgError ? (
           <Image
             src={product.image}
@@ -858,7 +858,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   setCreatingNewName('');
                 }}
                 variant="default"
-                className={classes.dashed}
+                style={{ borderStyle: 'dashed' }}
                 px={12}
                 leftSection={<PlusIcon size={14} />}
                 styles={{ label: { fontSize: '0.82rem', fontWeight: 500 }, section: { marginInlineEnd: 6 } }}
@@ -972,7 +972,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 <Button
                   onClick={() => setCreatingMode(true)}
                   variant="default"
-                  className={classes.dashed}
+                  style={{ borderStyle: 'dashed' }}
                   fullWidth
                   h={44}
                   leftSection={<PlusIcon size={14} />}

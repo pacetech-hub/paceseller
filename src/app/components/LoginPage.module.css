@@ -1,11 +1,3 @@
-.wrapper {
-  min-height: 100vh;
-  background-color: var(--mantine-color-dark-7);
-  background-image: url("../../assets/banner-edicao-limitada.webp");
-  background-size: cover;
-  background-position: 30% center;
-}
-
 /* Doubled class so it wins over Paper's own display rule */
 .form.form {
   display: flex;
@@ -21,8 +13,4 @@
     max-width: 100%;
     border-right: 0;
   }
-}
-
-.title {
-  letter-spacing: -0.02em;
 }
