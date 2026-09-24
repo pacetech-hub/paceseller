@@ -65,7 +65,7 @@ export function StockKpis({ items }: { items: StockItem[] }) {
             <Group justify="space-between" mb="xs" wrap="nowrap">
               <Text c="dimmed" size="0.75rem" fw={500}>{k.label}</Text>
               <ThemeIcon size={28} radius="md" variant="light" color={k.color}>
-                <Icon className="w-3.5 h-3.5" />
+                <Icon size={14} />
               </ThemeIcon>
             </Group>
             <Text fw={700} size="1.4rem" lh={1} style={{ letterSpacing: '-0.02em' }}>{k.value}</Text>
@@ -84,7 +84,7 @@ export function StockStatusBadge({ item }: { item: Pick<StockItem, 'stock' | 'mi
       variant="light"
       color={st.color}
       size="sm"
-      leftSection={st.key !== 'ok' ? <WarningIcon className="w-3 h-3" /> : undefined}
+      leftSection={st.key !== 'ok' ? <WarningIcon size={12} /> : undefined}
     >
       {st.label}
     </Badge>
@@ -96,7 +96,7 @@ export function StockProductCell({ item }: { item: StockItem }) {
   return (
     <Group gap="sm" wrap="nowrap">
       <Avatar src={item.image} alt={item.name} radius="md" size={40} color="neutral">
-        <PackageIcon className="w-4 h-4" />
+        <PackageIcon size={16} />
       </Avatar>
       <Box miw={0}>
         <Text size="0.82rem" fw={500} truncate>{item.name}</Text>
@@ -125,7 +125,7 @@ export function StockEmptyRow({ colSpan }: { colSpan: number }) {
     <Table.Tr>
       <Table.Td colSpan={colSpan} py="xl">
         <Stack align="center" gap={6}>
-          <FunnelIcon className="w-5 h-5" style={{ opacity: 0.6, color: 'var(--mantine-color-dimmed)' }} />
+          <FunnelIcon size={20} style={{ opacity: 0.6, color: 'var(--mantine-color-dimmed)' }} />
           <Text c="dimmed" size="0.82rem">Nenhum SKU encontrado para os filtros aplicados.</Text>
         </Stack>
       </Table.Td>
@@ -149,7 +149,7 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
           value={query}
           onChange={e => onQueryChange(e.currentTarget.value)}
           placeholder="Buscar por SKU ou nome..."
-          leftSection={<MagnifyingGlassIcon className="w-3.5 h-3.5" />}
+          leftSection={<MagnifyingGlassIcon size={14} />}
           style={{ flex: 1, minWidth: 200 }}
         />
         <SegmentedControl
@@ -160,10 +160,10 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
         />
         {showBulkActions && (
           <>
-            <Button variant="default" size="sm" leftSection={<UploadSimpleIcon className="w-3.5 h-3.5" />}>
+            <Button variant="default" size="sm" leftSection={<UploadSimpleIcon size={14} />}>
               Importar planilha
             </Button>
-            <Button size="sm" leftSection={<PlusIcon className="w-3.5 h-3.5" />}>
+            <Button size="sm" leftSection={<PlusIcon size={14} />}>
               Adicionar SKU
             </Button>
           </>
@@ -177,10 +177,10 @@ export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel
   return (
     <Group gap={4} wrap="nowrap">
       <ActionIcon variant="light" onClick={onSave} aria-label="Salvar">
-        <FloppyDiskIcon className="w-3.5 h-3.5" />
+        <FloppyDiskIcon size={14} />
       </ActionIcon>
       <ActionIcon variant="subtle" color="gray" onClick={onCancel} aria-label="Cancelar">
-        <XIcon className="w-3.5 h-3.5" />
+        <XIcon size={14} />
       </ActionIcon>
     </Group>
   );
@@ -189,7 +189,7 @@ export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel
 export function EditButton({ onClick }: { onClick: () => void }) {
   return (
     <ActionIcon variant="subtle" color="gray" onClick={onClick} aria-label="Editar">
-      <PencilSimpleIcon className="w-3.5 h-3.5" />
+      <PencilSimpleIcon size={14} />
     </ActionIcon>
   );
 }

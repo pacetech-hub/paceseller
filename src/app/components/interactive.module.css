@@ -31,3 +31,21 @@
   border-color: var(--choice-color, var(--mantine-color-neutral-9));
   background-color: var(--choice-bg, var(--mantine-color-neutral-0));
 }
+
+/* Linha de lista com divisória inferior, exceto no último item */
+.rowDivider {
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.rowDivider:last-child {
+  border-bottom: 0;
+}
+
+/* Texto discreto que fica com a cor normal no hover */
+.hoverText {
+  transition: color 150ms ease;
+}
+
+.hoverText:hover {
+  color: var(--mantine-color-text) !important;
+}

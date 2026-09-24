@@ -20,8 +20,7 @@ export const mantineTheme = createTheme({
   primaryShade: 9,
   colors: { neutral },
   fontFamily: "Roboto, system-ui, sans-serif",
-  // Breakpoints padrão do Mantine, declarados explicitamente e espelhados no
-  // Tailwind (src/styles/theme.css) para manter o responsivo consistente.
+  // Breakpoints padrão do Mantine, declarados explicitamente.
   breakpoints: {
     xs: "36em",
     sm: "48em",

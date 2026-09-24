@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Box } from "@mantine/core";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
@@ -284,7 +285,7 @@ export default function App() {
   const hideSidebar = currentView !== 'catalog';
 
   return (
-    <div className="h-screen flex bg-background text-foreground overflow-hidden">
+    <Box h="100vh" style={{ display: 'flex', overflow: 'hidden' }}>
       {isFiltersCatalog ? (
         <LojistaFiltersSidebar
           filters={catalogFilters}
@@ -303,7 +304,7 @@ export default function App() {
           selectedClient={selectedClient}
         />
       )}
-      <div className="flex-1 flex flex-col min-w-0">
+      <Box style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <TopBar
           title={viewInfo.title}
           subtitle={viewInfo.subtitle}
@@ -315,10 +316,10 @@ export default function App() {
           cartCount={cartsClient ? clientCarts.length : carts.length}
           selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
         />
-        <main className="flex-1 overflow-y-auto">
+        <Box component="main" style={{ flex: 1, overflowY: 'auto' }}>
           {renderView()}
-        </main>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }

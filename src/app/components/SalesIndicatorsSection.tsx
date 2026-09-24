@@ -287,7 +287,7 @@ export function SalesIndicatorsSection({
               onClick={() => onOpenClient(c)}
               label={<Text size="0.82rem" fw={600} truncate>{c.name}</Text>}
               description={<Text c="dimmed" size="0.72rem" truncate>{c.reason}</Text>}
-              rightSection={<CaretRightIcon className="w-4 h-4" style={{ color: 'var(--mantine-color-dimmed)' }} />}
+              rightSection={<CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />}
               style={{ borderRadius: 'var(--mantine-radius-md)' }}
             />
           ))}
@@ -321,7 +321,7 @@ function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
 
 function SeeMoreButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button variant="subtle" size="compact-sm" onClick={onClick} rightSection={<CaretRightIcon className="w-3 h-3" />}>
+    <Button variant="subtle" size="compact-sm" onClick={onClick} rightSection={<CaretRightIcon size={12} />}>
       Ver mais
     </Button>
   );

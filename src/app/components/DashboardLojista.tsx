@@ -280,7 +280,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               size="compact-sm"
               mt="sm"
               onClick={() => onNavigate('catalog')}
-              rightSection={<CaretRightIcon className="w-3.5 h-3.5" />}
+              rightSection={<CaretRightIcon size={14} />}
             >
               Ver no catálogo
             </Button>
