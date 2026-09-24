@@ -240,7 +240,7 @@ export function SalesIndicatorsSection({
                   leftSection={<ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} radius={2} withShadow={false} />}
                   rightSection={<Text size="0.82rem" fw={700} className="mono">{s.count}</Text>}
                   py={6}
-                  style={{ borderRadius: 'var(--mantine-radius-md)' }}
+                  styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
                 />
               ))}
             </Stack>
@@ -257,14 +257,14 @@ export function SalesIndicatorsSection({
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
-              <Text c="dimmed" size="0.75rem" fw={600} w={20} ta="right" style={{ flexShrink: 0 }}>{i + 1}</Text>
-              <Box miw={0} style={{ flex: 1 }}>
+              <Text c="dimmed" size="0.75rem" fw={600} w={20} ta="right" flex="none">{i + 1}</Text>
+              <Box miw={0} flex={1}>
                 <Text size="0.82rem" fw={500} truncate>{e.name}</Text>
                 <Text c="dimmed" size="0.68rem" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>
               </Box>
-              <Text size="0.82rem" fw={700} className="mono" style={{ flexShrink: 0 }}>{brl(e.value)}</Text>
+              <Text size="0.82rem" fw={700} className="mono" flex="none">{brl(e.value)}</Text>
             </Group>
           ))}
           {ranked.length === 0 && (
@@ -287,8 +287,8 @@ export function SalesIndicatorsSection({
               onClick={() => onOpenClient(c)}
               label={<Text size="0.82rem" fw={600} truncate>{c.name}</Text>}
               description={<Text c="dimmed" size="0.72rem" truncate>{c.reason}</Text>}
-              rightSection={<CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />}
-              style={{ borderRadius: 'var(--mantine-radius-md)' }}
+              rightSection={<CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />}
+              styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
             />
           ))}
           {priorityClients.length === 0 && (
@@ -303,7 +303,7 @@ export function SalesIndicatorsSection({
 function KpiCard({ label, value, delta }: { label: string; value: string; delta: string }) {
   return (
     <Paper withBorder radius="lg" p="md">
-      <Text size="0.66rem" fw={700} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{label}</Text>
+      <Text size="0.66rem" fw={700} tt="uppercase" lts="0.05em">{label}</Text>
       <Text size="1.6rem" fw={700} mt={4} className="mono">{value}</Text>
       <Text c="teal.7" size="0.72rem" fw={600} mt={4}>{delta}</Text>
     </Paper>

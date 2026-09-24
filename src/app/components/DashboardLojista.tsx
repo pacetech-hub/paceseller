@@ -35,7 +35,7 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
   return (
     <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
       <Text c="dimmed" size="0.72rem" fw={500}>{lab}</Text>
-      <Text c={color} size="1.1rem" fw={700} style={{ letterSpacing: '-0.02em' }}>{val}</Text>
+      <Text c={color} size="1.1rem" fw={700} lts="-0.02em">{val}</Text>
       {sub && <Text c="dimmed" size="0.68rem" mt={2}>{sub}</Text>}
     </Paper>
   );
@@ -50,7 +50,7 @@ function Badge({ children, tone = 'ok' }: { children: React.ReactNode; tone?: 'o
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{children}</Text>;
+  return <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" lts="0.05em">{children}</Text>;
 }
 
 function ListItem({ title, meta, right }: { title: string; meta: string; right?: React.ReactNode }) {
@@ -58,7 +58,7 @@ function ListItem({ title, meta, right }: { title: string; meta: string; right?:
     <Paper withBorder radius="md" p="sm">
       <Group align="flex-start" gap="xs" wrap="nowrap">
         <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} mt={6} withShadow={false} />
-        <Box style={{ flex: 1 }}>
+        <Box flex={1}>
           <Text size="0.8rem" fw={500}>{title}</Text>
           <Text c="dimmed" size="0.72rem">{meta}</Text>
         </Box>
@@ -100,8 +100,8 @@ function Rank({ rows }: { rows: { n: string; v: number }[] }) {
     <Stack gap="xs">
       {rows.map(r => (
         <Group key={r.n} gap="sm" wrap="nowrap">
-          <Text size="0.8rem" truncate style={{ flex: 1 }}>{r.n}</Text>
-          <Progress value={(r.v / max) * 100} size={6} radius="xl" style={{ flex: 1 }} />
+          <Text size="0.8rem" truncate flex={1}>{r.n}</Text>
+          <Progress value={(r.v / max) * 100} size={6} radius="xl" flex={1} />
           <Text size="0.75rem" fw={600} w={48} ta="right" className="mono">{fmt(r.v)}</Text>
         </Group>
       ))}
@@ -135,7 +135,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
       <Stack gap="lg">
         <Group justify="space-between" align="flex-start" gap="sm">
           <Box>
-            <Title order={2} size="1.3rem" fw={700} style={{ letterSpacing: '-0.02em' }}>Meus indicadores</Title>
+            <Title order={2} size="1.3rem" fw={700} lts="-0.02em">Meus indicadores</Title>
             <Text c="dimmed" size="0.82rem" mt={4}>Loja Pé Quente — Gramado, RS · últimos 90 dias</Text>
           </Box>
           <Group gap="xs">

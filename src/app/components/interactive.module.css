@@ -49,3 +49,8 @@
 .hoverText:hover {
   color: var(--mantine-color-text) !important;
 }
+
+/* Elemento clicável sem outro efeito visual */
+.clickable {
+  cursor: pointer;
+}

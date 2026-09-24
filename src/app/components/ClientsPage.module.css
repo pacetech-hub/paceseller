@@ -1,9 +1,0 @@
-/* Contadores com algarismos de largura fixa */
-.tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Linha da tabela de clientes: clicável */
-.row {
-  cursor: pointer;
-}

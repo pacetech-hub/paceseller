@@ -3,7 +3,7 @@ import {
   Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
   Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box, Card,
 } from "@mantine/core";
-import classes from "./ClientsPage.module.css";
+import interactive from "./interactive.module.css";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -107,7 +107,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
           ].map(stat => (
             <Paper key={stat.suffix} withBorder radius="md" p="md">
               <Group gap={8} align="baseline">
-                <Text fw={700} fz="1.75rem" lh={1} className={classes.tabular}>{stat.count}</Text>
+                <Text fw={700} fz="1.75rem" lh={1} className="mono">{stat.count}</Text>
                 <Text c="dimmed" size="sm" fw={500}>{stat.suffix}</Text>
               </Group>
             </Paper>
@@ -226,7 +226,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                     key={client.id}
                     onClick={() => handleSelectClient(client)}
                     bg={isSelected ? 'var(--mantine-color-neutral-0)' : undefined}
-                    className={classes.row}
+                    className={interactive.clickable}
                   >
                     <Table.Td>
                       <Group gap="sm" wrap="nowrap">

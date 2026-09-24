@@ -1,4 +1,4 @@
-import { Paper, Group, Stack, Text, Badge, Table, Checkbox } from "@mantine/core";
+import { Paper, Group, Stack, Text, Badge, Table, Checkbox, Card, Divider } from "@mantine/core";
 import { profileDescriptions } from "../data/permissions";
 import interactive from "./interactive.module.css";
 
@@ -13,8 +13,8 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
   const modulos = Object.keys(matrix[perfis[0]]);
 
   return (
-    <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
-      <Stack gap={8} p="lg" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
+    <Card withBorder radius="md" padding={0}>
+      <Stack gap={8} p="lg">
         <Group gap="sm">
           {perfis.map(perfil => (
             <Badge key={perfil} color="neutral" variant="light">{perfil}</Badge>
@@ -28,6 +28,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
           ))}
         </Stack>
       </Stack>
+      <Divider color="var(--mantine-color-default-border)" />
 
       <Table verticalSpacing="sm">
         <Table.Thead>
@@ -61,19 +62,21 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
         </Table.Tbody>
       </Table>
 
-      <Group justify="space-between" p="lg" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+      <Divider color="var(--mantine-color-default-border)" />
+      <Group justify="space-between" p="lg">
         <Text c="dimmed" size="0.72rem">Clique em qualquer célula para alternar a permissão</Text>
         <Text
           component="button"
           onClick={onReset}
           c="dimmed"
           size="0.72rem"
-          style={{ cursor: 'pointer', background: 'none', border: 'none' }}
-          className={interactive.hoverText}
+          bg="none"
+          bd="none"
+          className={`${interactive.clickable} ${interactive.hoverText}`}
         >
           Restaurar padrões
         </Text>
       </Group>
-    </Paper>
+    </Card>
   );
 }

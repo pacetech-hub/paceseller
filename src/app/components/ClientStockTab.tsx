@@ -51,8 +51,8 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
         leftSection={<MagnifyingGlassIcon size={14} />}
         renderOption={({ option }) => (
           <Group gap="xs" wrap="nowrap" w="100%">
-            <StorefrontIcon size={14} style={{ flexShrink: 0, color: 'var(--mantine-color-dimmed)' }} />
-            <Text size="0.82rem" truncate style={{ flex: 1 }}>{option.label}</Text>
+            <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
+            <Text size="0.82rem" truncate flex={1}>{option.label}</Text>
             <Text c="dimmed" size="0.7rem" className="mono">{option.value}</Text>
           </Group>
         )}
@@ -61,7 +61,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
       {!selected && (
         <Paper withBorder radius="lg" py={64}>
           <Stack align="center" gap="sm">
-            <StorefrontIcon size={40} style={{ opacity: 0.3 }} />
+            <StorefrontIcon size={40} opacity={0.3} />
             <Text c="dimmed" size="0.88rem">Busque um cliente acima para ver o estoque reportado por ele.</Text>
           </Stack>
         </Paper>

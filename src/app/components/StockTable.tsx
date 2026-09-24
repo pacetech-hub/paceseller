@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   SimpleGrid, Paper, Group, Text, ThemeIcon, TextInput, SegmentedControl, Button,
-  Table, Badge, NumberInput, ActionIcon, Avatar, Box, Stack,
+  Table, Badge, NumberInput, ActionIcon, Avatar, Box, Stack, Card,
 } from "@mantine/core";
 import {
   WarehouseIcon,
@@ -68,7 +68,7 @@ export function StockKpis({ items }: { items: StockItem[] }) {
                 <Icon size={14} />
               </ThemeIcon>
             </Group>
-            <Text fw={700} size="1.4rem" lh={1} style={{ letterSpacing: '-0.02em' }}>{k.value}</Text>
+            <Text fw={700} size="1.4rem" lh={1} lts="-0.02em">{k.value}</Text>
             <Text c="dimmed" size="0.72rem" mt={4}>{k.sub}</Text>
           </Paper>
         );
@@ -112,7 +112,7 @@ export function StockTableHeader({ labels }: { labels: string[] }) {
       <Table.Tr>
         {labels.map(h => (
           <Table.Th key={h}>
-            <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.06em' }}>{h}</Text>
+            <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" lts="0.06em">{h}</Text>
           </Table.Th>
         ))}
       </Table.Tr>
@@ -125,7 +125,7 @@ export function StockEmptyRow({ colSpan }: { colSpan: number }) {
     <Table.Tr>
       <Table.Td colSpan={colSpan} py="xl">
         <Stack align="center" gap={6}>
-          <FunnelIcon size={20} style={{ opacity: 0.6, color: 'var(--mantine-color-dimmed)' }} />
+          <FunnelIcon size={20} color="var(--mantine-color-dimmed)" opacity={0.6} />
           <Text c="dimmed" size="0.82rem">Nenhum SKU encontrado para os filtros aplicados.</Text>
         </Stack>
       </Table.Td>
@@ -150,7 +150,8 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
           onChange={e => onQueryChange(e.currentTarget.value)}
           placeholder="Buscar por SKU ou nome..."
           leftSection={<MagnifyingGlassIcon size={14} />}
-          style={{ flex: 1, minWidth: 200 }}
+          flex={1}
+          miw={200}
         />
         <SegmentedControl
           size="xs"
@@ -233,7 +234,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
         showBulkActions={showBulkActions && !readOnly}
       />
 
-      <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+      <Card withBorder radius="lg" padding={0}>
         <Table.ScrollContainer minWidth={900}>
           <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
             <StockTableHeader labels={headers} />
@@ -275,7 +276,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>
-      </Paper>
+      </Card>
     </Stack>
   );
 }

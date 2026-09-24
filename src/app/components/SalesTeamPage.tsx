@@ -39,14 +39,14 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
-              <Text c="dimmed" fw={600} size="0.75rem" ta="right" w={24} style={{ flexShrink: 0 }}>{i + 1}</Text>
-              <Stack gap={0} style={{ minWidth: 0, flex: 1 }}>
+              <Text c="dimmed" fw={600} size="0.75rem" ta="right" w={24} flex="none">{i + 1}</Text>
+              <Stack gap={0} miw={0} flex={1}>
                 <Text fw={500} size="0.85rem" truncate>{e.name}</Text>
                 <Text c="dimmed" size="0.7rem" truncate>
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>
               </Stack>
-              <Text fw={700} size="0.85rem" style={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{brl(e.value)}</Text>
+              <Text fw={700} size="0.85rem" flex="none" className="mono">{brl(e.value)}</Text>
             </Group>
           ))}
           {ranked.length === 0 && (

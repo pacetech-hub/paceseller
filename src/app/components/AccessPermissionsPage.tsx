@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, Paper, ThemeIcon, Text, Alert, Button, TextInput,
-  Table, Avatar, Badge, Select, ActionIcon, SimpleGrid,
+  Table, Avatar, Badge, Select, ActionIcon, SimpleGrid, Card, Divider,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -119,7 +119,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
           <Icon size={20} />
         </ThemeIcon>
         <Box>
-          <Text fw={700} size="1.05rem" style={{ letterSpacing: '-0.01em' }}>{scope.title}</Text>
+          <Text fw={700} size="1.05rem" lts="-0.01em">{scope.title}</Text>
           <Text c="dimmed" size="0.78rem">{scope.subtitle}</Text>
         </Box>
       </Group>
@@ -129,8 +129,8 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
       </Alert>
 
       {/* Usuários vinculados */}
-      <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
-        <Group justify="space-between" p="lg" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }} wrap="wrap">
+      <Card withBorder radius="md" padding={0}>
+        <Group justify="space-between" p="lg" wrap="wrap">
           <Box>
             <Text fw={600} size="0.9rem">Usuários vinculados</Text>
             <Text c="dimmed" size="0.75rem" mt={2}>{scope.usersHint}</Text>
@@ -144,9 +144,11 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             Convidar usuário
           </Button>
         </Group>
+        <Divider color="var(--mantine-color-default-border)" />
 
         {showInvite && (
-          <Stack gap="sm" p="lg" bg="var(--mantine-color-default-hover)" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
+          <>
+          <Stack gap="sm" p="lg" bg="var(--mantine-color-default-hover)">
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
               <TextInput
                 label="Nome completo"
@@ -169,6 +171,8 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               <Button onClick={inviteUser} color="neutral" size="sm">Convidar</Button>
             </Group>
           </Stack>
+          <Divider color="var(--mantine-color-default-border)" />
+          </>
         )}
 
         <Table verticalSpacing="sm">
@@ -187,7 +191,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 <Table.Td>
                   <Group gap="sm" wrap="nowrap">
                     <Avatar radius="xl" size={28} color="neutral">{initials(u.name)}</Avatar>
-                    <Box style={{ minWidth: 0 }}>
+                    <Box miw={0}>
                       <Text fw={500} size="0.82rem" truncate>{u.name}</Text>
                       <Text c="dimmed" size="0.72rem" truncate>{u.email}</Text>
                     </Box>
@@ -207,7 +211,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   <Badge size="sm" color={u.status === 'ativo' ? 'green' : 'gray'} variant="light">{u.status}</Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text c="dimmed" size="0.75rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <Text c="dimmed" size="0.75rem" className="mono">
                     {u.lastLogin === '—' ? '—' : formatDate(u.lastLogin)}
                   </Text>
                 </Table.Td>
@@ -229,7 +233,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             )}
           </Table.Tbody>
         </Table>
-      </Paper>
+      </Card>
 
       {/* O que cada perfil pode acessar */}
       <Box>

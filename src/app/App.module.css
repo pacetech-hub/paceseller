@@ -1,0 +1,8 @@
+/* Casca da aplicação: ocupa a tela toda; só a área principal rola */
+.shell {
+  overflow: hidden;
+}
+
+.main {
+  overflow-y: auto;
+}

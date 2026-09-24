@@ -1,0 +1,4 @@
+/* Cabeçalho das colunas fica por cima dos cartões ao rolar */
+.stickyHeader {
+  z-index: 10;
+}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Container, Stack, Paper, Group, Box, Text, Title, ThemeIcon, SegmentedControl, SimpleGrid,
-  UnstyledButton, Badge, Button, Table, NumberInput,
+  UnstyledButton, Badge, Button, Table, NumberInput, Card,
 } from "@mantine/core";
 import {
   WarehouseIcon,
@@ -72,7 +72,7 @@ export function StockPage() {
                 <WarehouseIcon size={20} />
               </ThemeIcon>
               <Box>
-                <Title order={2} size="1.05rem" fw={700} style={{ letterSpacing: '-0.01em' }}>Meu Estoque · Tesla Footwear</Title>
+                <Title order={2} size="1.05rem" fw={700} lts="-0.01em">Meu Estoque · Tesla Footwear</Title>
                 <Text c="dimmed" size="0.78rem">
                   Mantenha seu estoque atualizado para que o catálogo mostre alertas de ruptura corretamente para seus clientes finais.
                 </Text>
@@ -104,10 +104,10 @@ export function StockPage() {
         {mode === 'integration' && (
           <Paper withBorder radius="lg" p="lg">
             <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
-              <ThemeIcon size={36} radius="md" variant="light" style={{ flexShrink: 0 }}>
+              <ThemeIcon size={36} radius="md" variant="light" flex="none">
                 <PlugIcon size={16} />
               </ThemeIcon>
-              <Box style={{ flex: 1 }}>
+              <Box flex={1}>
                 <Title order={3} size="0.9rem" fw={600}>Integração com seu sistema de estoque</Title>
                 <Text c="dimmed" size="0.78rem" mt={2}>
                   Sincronize automaticamente seu ERP / sistema de gestão. Os dados são lidos a cada hora.
@@ -135,7 +135,7 @@ export function StockPage() {
               <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
                 <Group justify="space-between" gap="sm">
                   <Group gap="xs" wrap="nowrap">
-                    <ArrowsClockwiseIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                    <ArrowsClockwiseIcon size={14} color="var(--mantine-color-dimmed)" />
                     <Text c="dimmed" size="0.75rem">Última sincronização: hoje, 14:02 · próxima em 38min</Text>
                   </Group>
                   <Button variant="light" size="xs">Sincronizar agora</Button>
@@ -153,7 +153,7 @@ export function StockPage() {
           showBulkActions={mode === 'manual'}
         />
 
-        <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+        <Card withBorder radius="lg" padding={0}>
           <Table.ScrollContainer minWidth={900}>
             <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
               <StockTableHeader labels={HEADERS} />
@@ -197,7 +197,7 @@ export function StockPage() {
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>
-        </Paper>
+        </Card>
       </Stack>
     </Container>
   );

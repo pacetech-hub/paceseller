@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Box } from "@mantine/core";
+import { Box, Stack } from "@mantine/core";
+import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
@@ -285,7 +286,7 @@ export default function App() {
   const hideSidebar = currentView !== 'catalog';
 
   return (
-    <Box h="100vh" style={{ display: 'flex', overflow: 'hidden' }}>
+    <Box h="100vh" display="flex" className={classes.shell}>
       {isFiltersCatalog ? (
         <LojistaFiltersSidebar
           filters={catalogFilters}
@@ -304,7 +305,7 @@ export default function App() {
           selectedClient={selectedClient}
         />
       )}
-      <Box style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <Stack gap={0} flex={1} miw={0}>
         <TopBar
           title={viewInfo.title}
           subtitle={viewInfo.subtitle}
@@ -316,10 +317,10 @@ export default function App() {
           cartCount={cartsClient ? clientCarts.length : carts.length}
           selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
         />
-        <Box component="main" style={{ flex: 1, overflowY: 'auto' }}>
+        <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>
-      </Box>
+      </Stack>
     </Box>
   );
 }

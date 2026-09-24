@@ -3,6 +3,7 @@ import {
   Container, Stack, Group, Grid, SimpleGrid, Paper, Title, Text, ThemeIcon, SegmentedControl, Button,
   Progress, Box, Center,
 } from "@mantine/core";
+import classes from "./LojistaHistoryDashboard.module.css";
 import { AreaChart, BarChart } from "@mantine/charts";
 import {
   TrendUpIcon,
@@ -100,11 +101,11 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         {/* Header */}
         <Group justify="space-between" gap="sm">
           <Box>
-            <Title order={1} size="1.4rem" fw={700} style={{ letterSpacing: '-0.02em' }}>Histórico de Compras</Title>
+            <Title order={1} size="1.4rem" fw={700} lts="-0.02em">Histórico de Compras</Title>
             <Text c="dimmed" size="0.82rem">Visão de sell-in × sell-out e linhas em destaque</Text>
           </Box>
           <Group gap="xs">
-            <CalendarBlankIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+            <CalendarBlankIcon size={16} color="var(--mantine-color-dimmed)" />
             <SegmentedControl
               size="xs"
               value={period}
@@ -139,7 +140,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                   </Group>
                 </Group>
                 <Text c="dimmed" size="0.72rem" fw={500}>{k.label}</Text>
-                <Text size="1.15rem" fw={700} className="mono" style={{ letterSpacing: '-0.01em' }}>{k.value}</Text>
+                <Text size="1.15rem" fw={700} className="mono" lts="-0.01em">{k.value}</Text>
                 <Text c="dimmed" size="0.7rem">{k.sub}</Text>
               </Paper>
             );
@@ -176,7 +177,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             <Paper withBorder radius="lg" p="lg" h="100%">
               <Group justify="space-between" mb="md">
                 <Group gap="xs">
-                  <TrophyIcon size={16} style={{ color: 'var(--mantine-color-yellow-6)' }} />
+                  <TrophyIcon size={16} color="var(--mantine-color-yellow-6)" />
                   <Title order={3} size="0.95rem" fw={700}>Linhas mais vendidas</Title>
                 </Group>
                 <Text c="dimmed" size="0.72rem">{periods.find(p => p.id === period)?.label}</Text>
@@ -214,7 +215,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                       radius="md"
                       p="sm"
                       bg={top ? 'var(--mantine-color-yellow-0)' : 'var(--mantine-color-gray-0)'}
-                      style={top ? { borderColor: 'var(--mantine-color-yellow-4)' } : undefined}
+                      bd={top ? '1px solid var(--mantine-color-yellow-4)' : undefined}
                     >
                       <Group justify="space-between" mb={6} wrap="nowrap">
                         <Group gap="xs" wrap="nowrap" miw={0}>
@@ -223,7 +224,8 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                             h={20}
                             bg={top ? 'yellow.5' : 'gray.2'}
                             c={top ? 'white' : 'dimmed'}
-                            style={{ borderRadius: '50%', flexShrink: 0 }}
+                            flex="none"
+                            className={classes.rank}
                           >
                             <Text size="0.65rem" fw={700} c="inherit">{i + 1}</Text>
                           </Center>
