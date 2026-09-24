@@ -101,20 +101,18 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         {/* Header */}
         <Group justify="space-between" gap="sm">
           <Box>
-            <Title order={1} size="1.4rem" fw={700} lts="-0.02em">Histórico de Compras</Title>
-            <Text c="dimmed" size="0.82rem">Visão de sell-in × sell-out e linhas em destaque</Text>
+            <Title order={2}>Histórico de Compras</Title>
+            <Text c="dimmed">Visão de sell-in × sell-out e linhas em destaque</Text>
           </Box>
           <Group gap="xs">
             <CalendarBlankIcon size={16} color="var(--mantine-color-dimmed)" />
             <SegmentedControl
-              size="xs"
               value={period}
               onChange={v => setPeriod(v as typeof period)}
               data={periods.map(p => ({ value: p.id, label: p.label }))}
             />
             <Button
               variant="default"
-              size="sm"
               onClick={() => onNavigate('history')}
               leftSection={<ClockCounterClockwiseIcon size={16} />}
             >
@@ -129,29 +127,29 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             const Icon = k.icon;
             const TrendIcon = k.up ? TrendUpIcon : TrendDownIcon;
             return (
-              <Paper key={k.label} withBorder radius="lg" p="md">
+              <Paper key={k.label} withBorder p="md">
                 <Group justify="space-between" mb="xs">
-                  <ThemeIcon size={32} radius="md" variant="light">
+                  <ThemeIcon size={32} variant="light">
                     <Icon size={16} />
                   </ThemeIcon>
                   <Group gap={4} c={k.up ? 'teal.7' : 'red.6'} wrap="nowrap">
                     <TrendIcon size={12} />
-                    <Text size="0.72rem" fw={700} c="inherit">{k.trend}</Text>
+                    <Text size="sm" fw={700} c="inherit">{k.trend}</Text>
                   </Group>
                 </Group>
-                <Text c="dimmed" size="0.72rem" fw={400}>{k.label}</Text>
-                <Text size="1.15rem" fw={700} className="mono" lts="-0.01em">{k.value}</Text>
-                <Text c="dimmed" size="0.7rem">{k.sub}</Text>
+                <Text c="dimmed" size="sm">{k.label}</Text>
+                <Text fz={{ base: 'lg', sm: 'xl' }} fw={700} className="mono">{k.value}</Text>
+                <Text c="dimmed" size="sm">{k.sub}</Text>
               </Paper>
             );
           })}
         </SimpleGrid>
 
         {/* Sell-in x Sell-out chart */}
-        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md">
-            <Title order={3} size="0.95rem" fw={700}>Sell-in × Sell-out</Title>
-            <Text c="dimmed" size="0.74rem">Comparativo mensal</Text>
+            <Title order={3}>Sell-in × Sell-out</Title>
+            <Text c="dimmed" size="sm">Comparativo mensal</Text>
           </Box>
           <AreaChart
             h={260}
@@ -174,13 +172,13 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         {/* Linhas em destaque */}
         <Grid gutter="lg">
           <Grid.Col span={{ base: 12, lg: 8 }}>
-            <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
+            <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="md">
                 <Group gap="xs">
-                  <TrophyIcon size={16} color="var(--mantine-color-yellow-6)" />
-                  <Title order={3} size="0.95rem" fw={700}>Linhas mais vendidas</Title>
+                  <TrophyIcon size={20} color="var(--mantine-color-yellow-6)" />
+                  <Title order={3}>Linhas mais vendidas</Title>
                 </Group>
-                <Text c="dimmed" size="0.72rem">{periods.find(p => p.id === period)?.label}</Text>
+                <Text c="dimmed" size="sm">{periods.find(p => p.id === period)?.label}</Text>
               </Group>
               <BarChart
                 h={260}
@@ -200,10 +198,10 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, lg: 4 }}>
-            <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
+            <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="sm">
-                <Title order={3} size="0.95rem" fw={700}>Ranking</Title>
-                <Text c="dimmed" size="0.72rem">Top 5</Text>
+                <Title order={3}>Ranking</Title>
+                <Text c="dimmed" size="sm">Top 5</Text>
               </Group>
               <Stack gap="xs">
                 {lines.map((l, i) => {
@@ -212,7 +210,6 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                     <Paper
                       key={l.name}
                       withBorder
-                      radius="md"
                       p="sm"
                       bg={top ? 'var(--mantine-color-yellow-0)' : 'var(--mantine-color-gray-0)'}
                       bd={top ? '1px solid var(--mantine-color-yellow-4)' : undefined}
@@ -220,24 +217,24 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                       <Group justify="space-between" mb={6} wrap="nowrap">
                         <Group gap="xs" wrap="nowrap" miw={0}>
                           <Center
-                            w={20}
-                            h={20}
+                            w={24}
+                            h={24}
                             bg={top ? 'yellow.5' : 'gray.2'}
                             c={top ? 'white' : 'dimmed'}
                             flex="none"
                             className={classes.rank}
                           >
-                            <Text size="0.65rem" fw={700} c="inherit">{i + 1}</Text>
+                            <Text size="sm" fw={700} c="inherit">{i + 1}</Text>
                           </Center>
-                          <Text size="0.82rem" fw={600} truncate>{l.name}</Text>
+                          <Text fw={600} truncate>{l.name}</Text>
                         </Group>
-                        <Text c={l.growth >= 0 ? 'teal.7' : 'red.6'} size="0.7rem" fw={700}>
+                        <Text c={l.growth >= 0 ? 'teal.7' : 'red.6'} size="sm" fw={700}>
                           {l.growth >= 0 ? '+' : ''}{l.growth}%
                         </Text>
                       </Group>
                       <Group justify="space-between">
-                        <Text c="dimmed" size="0.72rem">{l.units} pares</Text>
-                        <Text size="0.72rem" fw={600} className="mono">{formatCurrency(l.revenue)}</Text>
+                        <Text c="dimmed" size="sm">{l.units} pares</Text>
+                        <Text size="sm" fw={600} className="mono">{formatCurrency(l.revenue)}</Text>
                       </Group>
                       <Progress value={(l.revenue / maxRev) * 100} size={4} mt={6} color={top ? 'yellow.5' : undefined} />
                     </Paper>

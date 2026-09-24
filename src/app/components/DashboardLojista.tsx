@@ -21,9 +21,9 @@ const POS = 'teal.7';
 function Card({ title, hint, span = 12, children }: { title: string; hint?: string; span?: number; children: React.ReactNode }) {
   return (
     <Grid.Col span={{ base: 12, lg: span }}>
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
-        <Title order={3} size="0.9rem" fw={600}>{title}</Title>
-        {hint && <Text c="dimmed" size="0.72rem" mt={4}>{hint}</Text>}
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
+        <Title order={3}>{title}</Title>
+        {hint && <Text c="dimmed" size="sm" mt={4}>{hint}</Text>}
         <Box mt="sm">{children}</Box>
       </Paper>
     </Grid.Col>
@@ -33,34 +33,34 @@ function Card({ title, hint, span = 12, children }: { title: string; hint?: stri
 function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string; tone?: 'amber' | 'neg' | 'pos' | 'muted' }) {
   const color = tone === 'amber' || tone === 'neg' ? WARN : tone === 'pos' ? POS : undefined;
   return (
-    <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
-      <Text c="dimmed" size="0.72rem" fw={400}>{lab}</Text>
-      <Text c={color} size="1.1rem" fw={700} lts="-0.02em">{val}</Text>
-      {sub && <Text c="dimmed" size="0.68rem" mt={2}>{sub}</Text>}
+    <Paper withBorder p="sm" bg="var(--mantine-color-gray-0)">
+      <Text c="dimmed" size="sm">{lab}</Text>
+      <Text c={color} size="lg" fw={700}>{val}</Text>
+      {sub && <Text c="dimmed" size="sm" mt={2}>{sub}</Text>}
     </Paper>
   );
 }
 
 function Badge({ children, tone = 'ok', icon }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'risk'; icon?: React.ReactNode }) {
   return (
-    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : 'yellow'} size="sm" tt="none" leftSection={icon}>
+    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : 'yellow'} leftSection={icon}>
       {children}
     </MantineBadge>
   );
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" lts="0.05em">{children}</Text>;
+  return <Text c="dimmed" size="sm" fw={600} tt="uppercase">{children}</Text>;
 }
 
 function ListItem({ title, meta, right }: { title: string; meta: string; right?: React.ReactNode }) {
   return (
-    <Paper withBorder radius="md" p="sm">
+    <Paper withBorder p="sm">
       <Group align="flex-start" gap="xs" wrap="nowrap">
         <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} mt={6} withShadow={false} />
         <Box flex={1}>
-          <Text size="0.8rem" fw={600}>{title}</Text>
-          <Text c="dimmed" size="0.72rem">{meta}</Text>
+          <Text fw={600}>{title}</Text>
+          <Text c="dimmed" size="sm">{meta}</Text>
         </Box>
         {right}
       </Group>
@@ -72,11 +72,11 @@ function StatusStack({ segs }: { segs: { n: string; q: number; color: string; ac
   const tot = segs.reduce((a, b) => a + b.q, 0);
   return (
     <>
-      <Progress.Root size={24} radius="sm">
+      <Progress.Root size={24}>
         {segs.map(s => (
           <Tooltip key={s.n} label={`${s.n}: ${s.q}`} withArrow>
             <Progress.Section value={(s.q / tot) * 100} color={s.color}>
-              <Progress.Label fz="0.7rem">{s.q / tot >= 0.1 ? s.q : ''}</Progress.Label>
+              <Progress.Label fz="sm">{s.q / tot >= 0.1 ? s.q : ''}</Progress.Label>
             </Progress.Section>
           </Tooltip>
         ))}
@@ -84,9 +84,9 @@ function StatusStack({ segs }: { segs: { n: string; q: number; color: string; ac
       <Group gap="sm" mt="sm">
         {segs.map(s => (
           <Group key={s.n} gap={6} wrap="nowrap">
-            <ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} radius={2} withShadow={false} />
-            <Text c="dimmed" size="0.72rem">{s.n} · {s.q}</Text>
-            {s.action && <MantineBadge variant="light" color="yellow" size="xs" radius="sm" tt="none">ação</MantineBadge>}
+            <ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} withShadow={false} />
+            <Text c="dimmed" size="sm">{s.n} · {s.q}</Text>
+            {s.action && <MantineBadge variant="light" color="yellow">ação</MantineBadge>}
           </Group>
         ))}
       </Group>
@@ -100,9 +100,9 @@ function Rank({ rows }: { rows: { n: string; v: number }[] }) {
     <Stack gap="xs">
       {rows.map(r => (
         <Group key={r.n} gap="sm" wrap="nowrap">
-          <Text size="0.8rem" truncate flex={1}>{r.n}</Text>
-          <Progress value={(r.v / max) * 100} size={6} radius="xl" flex={1} />
-          <Text size="0.75rem" fw={600} w={48} ta="right" className="mono">{fmt(r.v)}</Text>
+          <Text truncate flex={1}>{r.n}</Text>
+          <Progress value={(r.v / max) * 100} size={6} flex={1} />
+          <Text size="sm" fw={600} w={56} ta="right" className="mono">{fmt(r.v)}</Text>
         </Group>
       ))}
     </Stack>
@@ -112,7 +112,7 @@ function Rank({ rows }: { rows: { n: string; v: number }[] }) {
 function SimpleTable({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
     <Table.ScrollContainer minWidth={480}>
-      <Table fz="0.78rem" verticalSpacing={8} horizontalSpacing={8}>
+      <Table verticalSpacing={8} horizontalSpacing={8}>
         <Table.Thead>
           <Table.Tr>
             {head.map(h => <Table.Th key={h} fw={600} c="dimmed">{h}</Table.Th>)}
@@ -135,8 +135,8 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
       <Stack gap="lg">
         <Group justify="space-between" align="flex-start" gap="sm">
           <Box>
-            <Title order={2} size="1.3rem" fw={700} lts="-0.02em">Meus indicadores</Title>
-            <Text c="dimmed" size="0.82rem" mt={4}>Loja Pé Quente — Gramado, RS · últimos 90 dias</Text>
+            <Title order={2}>Meus indicadores</Title>
+            <Text c="dimmed" mt={4}>Loja Pé Quente — Gramado, RS · últimos 90 dias</Text>
           </Box>
           <Group gap="xs">
             {['Período: Últimos 90 dias', 'Coleção: Todas', 'Status: Todos'].map(c => (
@@ -187,15 +187,15 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             />
             <Group gap={4} c={POS} mt="xs" wrap="nowrap">
               <TrendUpIcon size={14} />
-              <Text c="inherit" size="0.75rem" fw={600}>+8% jul vs jun · +44% vs fev</Text>
+              <Text c="inherit" size="sm" fw={600}>+8% jul vs jun · +44% vs fev</Text>
             </Group>
           </Card>
 
           <Card title="Pedidos repetidos" hint="Contados pelo botão “repetir pedido” do histórico" span={5}>
-            <Text size="1.8rem" fw={700}>4</Text>
+            <Text size="xl" fw={700}>4</Text>
             <Group gap={4} c={POS} wrap="nowrap">
               <TrendUpIcon size={14} />
-              <Text c="inherit" size="0.75rem" fw={600}>+2 vs período anterior</Text>
+              <Text c="inherit" size="sm" fw={600}>+2 vs período anterior</Text>
             </Group>
             <Stack gap="xs" mt="sm">
               {[
@@ -283,7 +283,6 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </Stack>
             <Button
               variant="subtle"
-              size="xs"
               mt="sm"
               onClick={() => onNavigate('catalog')}
               rightSection={<CaretRightIcon size={14} />}
