@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
 import {
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Badge, ThemeIcon, SimpleGrid,
+  SegmentedControl, Popover, UnstyledButton, Divider,
+} from "@mantine/core";
+import {
   ShoppingCartIcon,
   PlusIcon,
   MagnifyingGlassIcon,
@@ -12,7 +16,9 @@ import {
   ShoppingBagIcon,
   EyeIcon,
   UserCheckIcon,
+  type Icon,
 } from "@phosphor-icons/react";
+import classes from "./interactive.module.css";
 import { clients, formatCurrency, type Client } from "../data/mockData";
 
 export type CartCreator = 'lojista' | 'rep';
@@ -43,22 +49,24 @@ export const mockCarts: MockCart[] = [
   { id: 'CART-006', clientId: clients[6].id, clientName: clients[6].name, cartName: 'Pedido teste Sul', items: 1, pairs: 12, total: 1480.00, updatedAt: '2026-06-11', rep: clients[6].rep, createdBy: 'rep' },
 ];
 
-const creatorStyle: Record<CartCreator, { icon: React.ComponentType<{ className?: string }>; className: string }> = {
-  lojista: { icon: StorefrontIcon, className: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
-  rep: { icon: UserCheckIcon, className: 'bg-amber-500/15 text-amber-600 dark:text-amber-400' },
+const creatorStyle: Record<CartCreator, { icon: Icon; color: string }> = {
+  lojista: { icon: StorefrontIcon, color: 'teal' },
+  rep: { icon: UserCheckIcon, color: 'yellow' },
 };
+
+const badgeStyles = { label: { textTransform: 'none' as const } };
 
 /** Identifica quem montou o carrinho — o próprio lojista ou o representante — em relação a quem está olhando. */
 function CreatorBadge({ createdBy, viewerRole }: { createdBy?: CartCreator; viewerRole: CartCreator }) {
   if (!createdBy) return null;
-  const { icon: Icon, className } = creatorStyle[createdBy];
+  const { icon: CreatorIcon, color } = creatorStyle[createdBy];
   const isViewer = createdBy === viewerRole;
   const label = isViewer ? 'Você' : createdBy === 'lojista' ? 'Lojista' : 'Representante';
   const title = createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante';
   return (
-    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${className}`} style={{ fontSize: '0.65rem', fontWeight: 600 }} title={title}>
-      <Icon className="w-2.5 h-2.5" /> {label}
-    </span>
+    <Badge size="xs" radius="sm" variant="light" color={color} leftSection={<CreatorIcon size={10} />} styles={badgeStyles} title={title}>
+      {label}
+    </Badge>
   );
 }
 
@@ -119,238 +127,228 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
   };
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto w-full">
-      <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+    <Box p="lg" maw={1400} mx="auto" w="100%">
+      <Group justify="space-between" align="flex-start" gap="sm" mb="lg">
         <div>
-          <h2 className="text-foreground" style={{ fontWeight: 700, fontSize: '1.15rem' }}>
+          <Title order={2} fw={700} style={{ fontSize: '1.15rem' }}>
             {lockClient ? 'Meus carrinhos' : selectedClient && !showAll ? `Carrinhos de ${selectedClient.name}` : 'Carrinhos em construção'}
-          </h2>
-          <p className="text-muted-foreground" style={{ fontSize: '0.82rem' }}>
+          </Title>
+          <Text c="dimmed" size="0.82rem">
             {lockClient
               ? 'Carrinhos da sua loja. Você pode manter mais de um, e ver os que o representante montou para você.'
               : selectedClient && !showAll
               ? 'Carrinhos vinculados ao cliente atual. Você pode manter mais de um.'
               : 'Cada carrinho está vinculado a um cliente. Abrir um carrinho de outro cliente troca o cliente ativo.'}
-          </p>
+          </Text>
         </div>
         {!newOpen && (
-          <button
+          <Button
             onClick={() => canCreate && setNewOpen(true)}
             disabled={!canCreate}
             title={canCreate ? 'Criar novo carrinho' : 'Selecione um cliente para criar um carrinho'}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors ${canCreate ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'}`}
-            style={{ fontSize: '0.83rem', fontWeight: 600 }}
+            leftSection={<PlusIcon size={16} />}
           >
-            <PlusIcon className="w-4 h-4" /> Novo carrinho
-          </button>
+            Novo carrinho
+          </Button>
         )}
-      </div>
+      </Group>
 
       {/* Bloco sem cliente selecionado: busca rápida + atalho para carteira */}
       {!lockClient && !selectedClient && (
-        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-5">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
-              <UsersIcon className="w-4 h-4 text-primary" />
-            </div>
+        <Paper withBorder radius="lg" p="md" mb="lg" bg="var(--mantine-color-neutral-0)">
+          <Group gap="sm" mb="sm" wrap="nowrap">
+            <ThemeIcon variant="light" color="neutral" size={32} radius="md">
+              <UsersIcon size={16} />
+            </ThemeIcon>
             <div>
-              <p className="text-foreground" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Selecione um cliente para criar um carrinho</p>
-              <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>Busque pelo nome ou abra sua carteira de clientes.</p>
+              <Text fw={600} size="0.85rem">Selecione um cliente para criar um carrinho</Text>
+              <Text c="dimmed" size="0.75rem">Busque pelo nome ou abra sua carteira de clientes.</Text>
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <div className="flex items-center gap-2 rounded-lg bg-background border border-border px-3 py-2">
-                <MagnifyingGlassIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                <input
+          </Group>
+          <Group gap={8} align="stretch" wrap="wrap">
+            <Popover opened={!!clientQuery} width="target" position="bottom-start" offset={4} shadow="md">
+              <Popover.Target>
+                <TextInput
                   value={clientQuery}
-                  onChange={e => setClientQuery(e.target.value)}
+                  onChange={e => setClientQuery(e.currentTarget.value)}
                   placeholder="Buscar cliente por nome ou código..."
-                  className="flex-1 bg-transparent outline-none text-foreground placeholder-muted-foreground"
-                  style={{ fontSize: '0.82rem' }}
+                  leftSection={<MagnifyingGlassIcon size={14} />}
+                  style={{ flex: 1, minWidth: 220 }}
                 />
-              </div>
-              {clientQuery && clientMatches.length > 0 && (
-                <div className="absolute z-10 left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-                  {clientMatches.map(c => (
-                    <button
+              </Popover.Target>
+              <Popover.Dropdown p={4}>
+                {clientMatches.length > 0 ? (
+                  clientMatches.map(c => (
+                    <UnstyledButton
                       key={c.id}
                       onClick={() => {
                         onSelectClient?.(c);
                         setClientQuery('');
                         setNewOpen(true);
                       }}
-                      className="w-full text-left px-3 py-2 hover:bg-secondary/60 flex items-center gap-2 transition-colors"
+                      className={classes.hoverable}
+                      w="100%"
+                      px="sm"
+                      py={8}
+                      style={{ borderRadius: 'var(--mantine-radius-sm)' }}
                     >
-                      <StorefrontIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-foreground" style={{ fontSize: '0.82rem' }}>{c.name}</span>
-                      <span className="text-muted-foreground ml-auto mono" style={{ fontSize: '0.7rem' }}>{c.id}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {clientQuery && clientMatches.length === 0 && (
-                <div className="absolute z-10 left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 text-muted-foreground" style={{ fontSize: '0.78rem' }}>
-                  Nenhum cliente encontrado.
-                </div>
-              )}
-            </div>
+                      <Group gap={8} wrap="nowrap">
+                        <StorefrontIcon size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                        <Text size="0.82rem">{c.name}</Text>
+                        <Text c="dimmed" size="0.7rem" ml="auto" className="mono">{c.id}</Text>
+                      </Group>
+                    </UnstyledButton>
+                  ))
+                ) : (
+                  <Text c="dimmed" size="0.78rem" p="sm">Nenhum cliente encontrado.</Text>
+                )}
+              </Popover.Dropdown>
+            </Popover>
             {onNavigateClients && (
-              <button
-                onClick={onNavigateClients}
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-                style={{ fontSize: '0.8rem', fontWeight: 600 }}
-              >
-                <UsersIcon className="w-3.5 h-3.5" />
+              <Button onClick={onNavigateClients} variant="default" leftSection={<UsersIcon size={14} />}>
                 Buscar clientes em carteira
-              </button>
+              </Button>
             )}
-          </div>
-        </div>
+          </Group>
+        </Paper>
       )}
 
       {/* Toggle para ver carrinhos de outros clientes */}
       {!lockClient && selectedClient && (
-        <div className="flex items-center gap-2 mb-4">
-          <button
-            onClick={() => setShowAll(false)}
-            className={`px-3 py-1.5 rounded-md border transition-colors ${!showAll ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
-            style={{ fontSize: '0.78rem', fontWeight: 600 }}
-          >
-            Deste cliente
-          </button>
-          <button
-            onClick={() => setShowAll(true)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border transition-colors ${showAll ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
-            style={{ fontSize: '0.78rem', fontWeight: 600 }}
-          >
-            <ArrowsLeftRightIcon className="w-3.5 h-3.5" />
-            Todos os clientes
-            {otherCarts.length > 0 && (
-              <span className={`ml-1 px-1.5 rounded ${showAll ? 'bg-primary-foreground/20' : 'bg-muted'}`} style={{ fontSize: '0.7rem' }}>
-                +{otherCarts.length}
-              </span>
-            )}
-          </button>
-        </div>
+        <SegmentedControl
+          value={showAll ? 'all' : 'client'}
+          onChange={v => setShowAll(v === 'all')}
+          size="sm"
+          mb="md"
+          data={[
+            { value: 'client', label: 'Deste cliente' },
+            {
+              value: 'all',
+              label: (
+                <Group gap={6} wrap="nowrap" justify="center">
+                  <ArrowsLeftRightIcon size={14} />
+                  Todos os clientes
+                  {otherCarts.length > 0 && (
+                    <Badge size="xs" variant="default" radius="sm">+{otherCarts.length}</Badge>
+                  )}
+                </Group>
+              ),
+            },
+          ]}
+        />
       )}
 
       {newOpen && selectedClient && (
-        <div className="bg-card border border-border rounded-xl p-4 mb-5">
-          <p className="text-foreground mb-1" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Criar novo carrinho</p>
-          <p className="text-muted-foreground mb-3 flex items-center gap-1.5" style={{ fontSize: '0.78rem' }}>
-            <StorefrontIcon className="w-3 h-3" /> Cliente: <span className="text-foreground" style={{ fontWeight: 600 }}>{selectedClient.name}</span>
-          </p>
-          <div>
-            <label className="block text-muted-foreground mb-1" style={{ fontSize: '0.72rem' }}>Nome do carrinho</label>
-            <input
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              placeholder="Ex.: Reposição Inverno 26"
-              className="w-full px-2.5 py-2 rounded-md border border-border bg-surface text-foreground placeholder-muted-foreground outline-none focus:border-primary"
-              style={{ fontSize: '0.82rem' }}
-            />
-          </div>
-          <div className="flex justify-end gap-2 mt-3">
-            <button onClick={() => setNewOpen(false)} className="px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground" style={{ fontSize: '0.8rem' }}>Cancelar</button>
-            <button onClick={handleCreate} className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Criar e abrir</button>
-          </div>
-        </div>
+        <Paper withBorder radius="lg" p="md" mb="lg">
+          <Text fw={600} size="0.9rem" mb={4}>Criar novo carrinho</Text>
+          <Group gap={6} mb="sm" c="dimmed">
+            <StorefrontIcon size={12} />
+            <Text size="0.78rem" c="dimmed">
+              Cliente: <Text span fw={600} c="var(--mantine-color-text)" inherit>{selectedClient.name}</Text>
+            </Text>
+          </Group>
+          <TextInput
+            label="Nome do carrinho"
+            value={newName}
+            onChange={e => setNewName(e.currentTarget.value)}
+            placeholder="Ex.: Reposição Inverno 26"
+            styles={{ label: { fontSize: '0.72rem', fontWeight: 400, color: 'var(--mantine-color-dimmed)' } }}
+          />
+          <Group justify="flex-end" gap={8} mt="sm">
+            <Button onClick={() => setNewOpen(false)} variant="default" size="xs">Cancelar</Button>
+            <Button onClick={handleCreate} size="xs">Criar e abrir</Button>
+          </Group>
+        </Paper>
       )}
 
-      <div className="flex items-center gap-2 rounded-lg bg-secondary/40 border border-border px-3 py-2 mb-5 max-w-md">
-        <MagnifyingGlassIcon className="w-3.5 h-3.5 text-muted-foreground" />
-        <input
-          value={q}
-          onChange={e => setQ(e.target.value)}
-          placeholder="Buscar por cliente ou nome do carrinho..."
-          className="flex-1 bg-transparent outline-none text-foreground placeholder-muted-foreground"
-          style={{ fontSize: '0.82rem' }}
-        />
-      </div>
+      <TextInput
+        value={q}
+        onChange={e => setQ(e.currentTarget.value)}
+        placeholder="Buscar por cliente ou nome do carrinho..."
+        leftSection={<MagnifyingGlassIcon size={14} />}
+        maw={448}
+        mb="lg"
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
         {filtered.map(c => {
           const isOther = selectedClient && c.clientId !== selectedClient.id;
+          const ctx: CartContext = { id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy };
           return (
-            <div
-              key={c.id}
-              className="bg-card border border-border rounded-xl p-4 hover:border-primary/50 hover:bg-secondary/30 transition-all group relative flex flex-col"
-            >
+            <Paper key={c.id} withBorder radius="lg" pos="relative" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {isOther && (
-                <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400" style={{ fontSize: '0.65rem', fontWeight: 600 }}>
-                  <ArrowsLeftRightIcon className="w-2.5 h-2.5" /> troca cliente
-                </span>
-              )}
-              <button
-                onClick={() => onOpenCart({ id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy })}
-                className="text-left flex-1"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <ShoppingCartIcon className="w-4 h-4 text-primary" />
-                  </div>
-                  <span className="text-foreground mono" style={{ fontSize: '0.95rem', fontWeight: 700 }}>{formatCurrency(c.total)}</span>
-                </div>
-                <p className="text-foreground group-hover:text-primary transition-colors truncate" style={{ fontWeight: 600, fontSize: '0.92rem' }}>{c.cartName}</p>
-                <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
-                  <StorefrontIcon className="w-3 h-3" />
-                  <span className="truncate" style={{ fontSize: '0.76rem' }}>{c.clientName}</span>
-                </div>
-                <div className="mt-2">
-                  <CreatorBadge createdBy={c.createdBy} viewerRole={viewerRole} />
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border">
-                  <div className="flex items-center gap-1 text-muted-foreground" title="Itens">
-                    <PackageIcon className="w-3 h-3" />
-                    <span style={{ fontSize: '0.72rem' }}>{c.items} itens</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground" title="Pares">
-                    <span className="mono" style={{ fontSize: '0.72rem' }}>{c.pairs} pares</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground justify-end" title="Atualizado">
-                    <CalendarBlankIcon className="w-3 h-3" />
-                    <span style={{ fontSize: '0.72rem' }}>{new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 mt-2 text-muted-foreground">
-                  <UserIcon className="w-3 h-3" />
-                  <span className="truncate" style={{ fontSize: '0.7rem' }}>Rep: {c.rep}</span>
-                </div>
-              </button>
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                <button
-                  onClick={() => onOpenCart({ id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy })}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-                  style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                <Badge
+                  size="xs"
+                  radius="sm"
+                  variant="light"
+                  color="yellow"
+                  leftSection={<ArrowsLeftRightIcon size={10} />}
+                  styles={badgeStyles}
+                  pos="absolute"
+                  top={12}
+                  right={12}
+                  style={{ zIndex: 1 }}
                 >
-                  <EyeIcon className="w-3.5 h-3.5" /> Detalhes
-                </button>
+                  troca cliente
+                </Badge>
+              )}
+              <UnstyledButton onClick={() => onOpenCart(ctx)} className={classes.hoverable} p="md" pb={0} style={{ flex: 1 }}>
+                <Group justify="space-between" align="flex-start" mb="sm">
+                  <ThemeIcon variant="light" color="neutral" size={40} radius="md">
+                    <ShoppingCartIcon size={16} />
+                  </ThemeIcon>
+                  <Text className="mono" size="0.95rem" fw={700}>{formatCurrency(c.total)}</Text>
+                </Group>
+                <Text fw={600} size="0.92rem" truncate>{c.cartName}</Text>
+                <Group gap={6} mt={4} c="dimmed" wrap="nowrap">
+                  <StorefrontIcon size={12} />
+                  <Text size="0.76rem" c="dimmed" truncate>{c.clientName}</Text>
+                </Group>
+                <Box mt={8}>
+                  <CreatorBadge createdBy={c.createdBy} viewerRole={viewerRole} />
+                </Box>
+                <Divider mt="sm" />
+                <SimpleGrid cols={3} spacing={8} pt="sm">
+                  <Group gap={4} c="dimmed" wrap="nowrap" title="Itens">
+                    <PackageIcon size={12} />
+                    <Text size="0.72rem" c="dimmed">{c.items} itens</Text>
+                  </Group>
+                  <Text size="0.72rem" c="dimmed" className="mono" title="Pares">{c.pairs} pares</Text>
+                  <Group gap={4} c="dimmed" wrap="nowrap" justify="flex-end" title="Atualizado">
+                    <CalendarBlankIcon size={12} />
+                    <Text size="0.72rem" c="dimmed">{new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
+                  </Group>
+                </SimpleGrid>
+                <Group gap={4} mt={8} pb="md" c="dimmed" wrap="nowrap">
+                  <UserIcon size={12} />
+                  <Text size="0.7rem" c="dimmed" truncate>Rep: {c.rep}</Text>
+                </Group>
+              </UnstyledButton>
+              <Group gap={8} p="md" pt="sm" grow style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+                <Button onClick={() => onOpenCart(ctx)} variant="default" size="xs" leftSection={<EyeIcon size={14} />}>
+                  Detalhes
+                </Button>
                 {onGoToCatalog && (
-                  <button
-                    onClick={() => onGoToCatalog({ id: c.id, clientId: c.clientId, clientName: c.clientName, cartName: c.cartName, createdBy: c.createdBy })}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                    style={{ fontSize: '0.75rem', fontWeight: 600 }}
-                  >
-                    <ShoppingBagIcon className="w-3.5 h-3.5" /> Catálogo
-                  </button>
+                  <Button onClick={() => onGoToCatalog(ctx)} size="xs" leftSection={<ShoppingBagIcon size={14} />}>
+                    Catálogo
+                  </Button>
                 )}
-              </div>
-            </div>
+              </Group>
+            </Paper>
           );
         })}
-      </div>
+      </SimpleGrid>
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <ShoppingCartIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p style={{ fontSize: '0.88rem' }}>
+        <Stack align="center" gap={8} py={64}>
+          <ShoppingCartIcon size={40} style={{ opacity: 0.3, color: 'var(--mantine-color-dimmed)' }} />
+          <Text c="dimmed" size="0.88rem" ta="center">
             {selectedClient && !showAll
               ? `Nenhum carrinho para ${selectedClient.name} ainda. Crie um novo ou veja carrinhos de outros clientes.`
               : 'Nenhum carrinho encontrado.'}
-          </p>
-        </div>
+          </Text>
+        </Stack>
       )}
-    </div>
+    </Box>
   );
 }
