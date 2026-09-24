@@ -840,7 +840,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
             ) : (
               <EmptyState
                 title="Esta campanha ainda não tem cenários"
-                subtitle="Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" para usar como fundo da peça"
+                subtitle='Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" para usar como fundo da peça'
                 action={manageCampaignsButton}
               />
             )}
