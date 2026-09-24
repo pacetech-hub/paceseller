@@ -14,6 +14,7 @@ import {
   Title,
 } from "@mantine/core";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
+import loginBanner from "../../assets/banner-edicao-limitada.webp";
 import classes from "./LoginPage.module.css";
 
 type Profile = "admin" | "rep" | "lojista";
@@ -51,13 +52,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <Box className={classes.wrapper}>
+    <Box mih="100vh" bgsz="cover" bgp="30% center" style={{ backgroundColor: 'var(--mantine-color-dark-7)', backgroundImage: `url(${loginBanner})` }}>
       <Paper className={classes.form} radius={0} px={30} pb={30} pt={{ base: 48, sm: 80 }}>
         <Box mb={50}>
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
         </Box>
 
-        <Title order={2} className={classes.title} mb={4}>
+        <Title order={2} lts="-0.02em" mb={4}>
           Bem-vindo de volta!
         </Title>
         <Text c="dimmed" size="sm" mb={40}>
