@@ -1,0 +1,6 @@
+/* Abas em uma única linha, com rolagem horizontal em telas estreitas
+   (classe duplicada para vencer a regra flex-wrap do próprio Tabs.List) */
+.tabList.tabList {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}

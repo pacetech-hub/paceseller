@@ -71,3 +71,15 @@
   border-color: var(--mantine-color-violet-3);
   background-color: var(--mantine-color-violet-0);
 }
+
+/* Etapa atual do assistente: anel ao redor do número */
+.stepDot[data-current] {
+  box-shadow: 0 0 0 2px var(--mantine-color-body), 0 0 0 4px var(--mantine-color-neutral-3);
+}
+
+/* Ícone alinhado ao texto corrido */
+.inlineIcon {
+  display: inline;
+  vertical-align: -2px;
+  margin-right: 6px;
+}
