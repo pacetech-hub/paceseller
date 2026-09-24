@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  ActionIcon, Modal, Table, Image, AspectRatio, List, type BoxProps,
+  ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, type BoxProps,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import classes from "./FichaTecnicaPage.module.css";
@@ -198,7 +198,7 @@ const categoryOptions = ['Todos', ...Array.from(new Set(products.map(p => p.cate
 
 function SectionLabel({ children, mb = 6 }: { children: React.ReactNode; mb?: number }) {
   return (
-    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb={mb} style={{ letterSpacing: '0.04em' }}>
+    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb={mb} lts="0.04em">
       {children}
     </Text>
   );
@@ -227,7 +227,6 @@ function ProductCard({ product, onOpen, compact = false }: { product: Product; o
       radius="lg"
       className={`${interactive.cardButton} ${classes.productCard}`}
       p={0}
-      style={{ overflow: 'hidden' }}
     >
       {/* o Box mantém o quadrado mesmo se a imagem falhar e for escondida */}
       <AspectRatio ratio={1}>
@@ -241,7 +240,8 @@ function ProductCard({ product, onOpen, compact = false }: { product: Product; o
           />
         </Box>
       </AspectRatio>
-      <Box p={compact ? 10 : 'sm'} style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+      <Divider color="var(--mantine-color-default-border)" />
+      <Box p={compact ? 10 : 'sm'}>
         <Text c="dimmed" size={compact ? '0.65rem' : '0.68rem'} tt="uppercase">Ref. {product.reference}</Text>
         <Text fw={600} size={compact ? '0.8rem' : '0.85rem'} truncate mt={compact ? 0 : 2} mb={compact ? 0 : 6}>{product.name}</Text>
         {compact ? (
@@ -278,7 +278,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   return (
     <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
       <Box>
-        <Title order={2} fw={700} style={{ fontSize: '1rem' }}>Ficha Técnica</Title>
+        <Title order={2} fw={700} fz="1rem">Ficha Técnica</Title>
         <Text c="dimmed" size="0.8rem">Consulte informações completas, imagens e medidas de cada produto</Text>
       </Box>
 
@@ -288,7 +288,8 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          style={{ flex: 1, minWidth: 200 }}
+          flex={1}
+          miw={200}
         />
         <Select
           value={line}
@@ -372,7 +373,8 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           pos="absolute"
           top={8}
           right={8}
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}
+          bg="rgba(0, 0, 0, 0.6)"
+          className={classes.downloadButton}
         >
           <DownloadSimpleIcon size={14} />
         </ActionIcon>
@@ -406,7 +408,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
 
       {/* Bento grid — 6 imagens do produto */}
       <AspectRatio ratio={4 / 3}>
-        <Group gap={BENTO_GAP} wrap="nowrap" align="stretch" style={{ borderRadius: 'var(--mantine-radius-lg)', overflow: 'hidden' }}>
+        <Group gap={BENTO_GAP} wrap="nowrap" align="stretch" className={classes.bento}>
           <Stack gap={BENTO_GAP} flex={1}>
             {bentoTile(0, { flex: 1 })}
             {bentoTile(4, { h: BENTO_ROW })}
@@ -427,7 +429,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         <Stack gap="md">
           <Box>
             <Text c="dimmed" size="0.72rem" tt="uppercase" mb={2}>Ref. {product.reference}</Text>
-            <Title order={2} fw={700} mb={6} style={{ fontSize: '1.15rem' }}>{product.name}</Title>
+            <Title order={2} fw={700} mb={6} fz="1.15rem">{product.name}</Title>
             <AvailabilityBadges product={product} size="sm" />
           </Box>
 
@@ -443,7 +445,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                 spacing={10}
                 size="sm"
                 center={false}
-                icon={<CheckCircleIcon size={14} style={{ color: 'var(--mantine-color-teal-5)', marginTop: 3 }} />}
+                icon={<Box display="flex" mt={3}><CheckCircleIcon size={14} color="var(--mantine-color-teal-5)" /></Box>}
                 styles={{ itemWrapper: { alignItems: 'flex-start' } }}
               >
                 {highlights.items.map((h, i) => (
@@ -471,7 +473,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         <Table.ScrollContainer minWidth={320}>
           <Table verticalSpacing={10} horizontalSpacing="md">
             <Table.Thead>
-              <Table.Tr c="dimmed" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <Table.Tr c="dimmed" fz="0.68rem" tt="uppercase" lts="0.04em">
                 <Table.Th fw={400} pl={0}>Tamanho</Table.Th>
                 <Table.Th fw={400} ta="center">Estoque fábrica</Table.Th>
                 {profile === 'lojista' && <Table.Th fw={400} ta="center">Estoque loja</Table.Th>}
@@ -484,7 +486,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                 const storeLow = storeQty < 3;
                 return (
                   <Table.Tr key={s}>
-                    <Table.Td pl={0} fw={600} style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}>Nº {s}</Table.Td>
+                    <Table.Td pl={0} fw={600} fz="0.82rem" className={classes.nowrap}>Nº {s}</Table.Td>
                     <Table.Td ta="center">
                       <Text span className="mono" size="0.8rem" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
                     </Table.Td>
@@ -497,7 +499,8 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                               onClick={() => toast.success(`Reposição rápida solicitada — Nº ${s}`)}
                               size="compact-xs"
                               leftSection={<ArrowsClockwiseIcon size={12} />}
-                              style={{ flexShrink: 0, fontSize: '0.65rem' }}
+                              flex="none"
+                              fz="0.65rem"
                             >
                               Reposição rápida
                             </Button>

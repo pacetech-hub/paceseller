@@ -31,11 +31,27 @@
   opacity: 1;
 }
 
-/* Cartões de produto: borda levemente mais escura no hover */
+/* Cartões de produto: recorta a imagem nos cantos; borda levemente mais escura no hover */
 .productCard {
+  overflow: hidden;
   transition: border-color 150ms ease;
 }
 
 .productCard:hover {
   border-color: var(--mantine-color-gray-4);
+}
+
+/* Grade de imagens com cantos arredondados */
+.bento {
+  border-radius: var(--mantine-radius-lg);
+  overflow: hidden;
+}
+
+/* Botão de baixar sobre a imagem: fundo escuro translúcido com desfoque */
+.downloadButton {
+  backdrop-filter: blur(4px);
+}
+
+.nowrap {
+  white-space: nowrap;
 }
