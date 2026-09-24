@@ -24,7 +24,7 @@ const badgeStyles = { label: { textTransform: 'none' as const } };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb="sm" style={{ letterSpacing: '0.04em' }}>
+    <Text c="dimmed" size="0.7rem" fw={600} tt="uppercase" mb="sm" lts="0.04em">
       {children}
     </Text>
   );
@@ -130,25 +130,26 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                   h={48}
                   radius="md"
                   fit="cover"
-                  style={{ border: '1px solid var(--mantine-color-default-border)', flexShrink: 0 }}
+                  bd="1px solid var(--mantine-color-default-border)"
+                  flex="none"
                 />
-                <Box miw={0} style={{ flex: 1 }}>
+                <Box miw={0} flex={1}>
                   <Text size="0.85rem" fw={600} truncate>{product.name}</Text>
                   <Text c="dimmed" size="0.72rem">Ref. {product.reference}</Text>
                 </Box>
-                <Text size="0.85rem" fw={600} style={{ flexShrink: 0 }}>{quantity} pares</Text>
+                <Text size="0.85rem" fw={600} flex="none">{quantity} pares</Text>
               </Group>
             ))
           ) : (
             <Group gap="sm" wrap="nowrap">
               <ThemeIcon variant="default" size={48} radius="md">
-                <PackageIcon size={20} style={{ color: 'var(--mantine-color-dimmed)' }} />
+                <PackageIcon size={20} color="var(--mantine-color-dimmed)" />
               </ThemeIcon>
-              <Box miw={0} style={{ flex: 1 }}>
+              <Box miw={0} flex={1}>
                 <Text size="0.85rem" fw={600} truncate>{productName}</Text>
                 <Text c="dimmed" size="0.72rem">{order.collection}</Text>
               </Box>
-              <Text size="0.85rem" fw={600} style={{ flexShrink: 0 }}>{order.items} pares</Text>
+              <Text size="0.85rem" fw={600} flex="none">{order.items} pares</Text>
             </Group>
           )}
         </Stack>
@@ -163,7 +164,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           <Grid.Col span={{ base: 18, sm: 8 }} miw={0}>
             <Group gap={8} mb={4}>
               <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
+              <Text c="dimmed" size="0.72rem" flex="none">{support}</Text>
             </Group>
             <Text size="0.85rem" fw={600}>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
@@ -186,7 +187,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
 
           {/* column 3: NF de compra */}
           <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
-            <Text c="dimmed" size="0.68rem" fw={600} tt="uppercase" mb={6} style={{ letterSpacing: '0.04em' }}>
+            <Text c="dimmed" size="0.68rem" fw={600} tt="uppercase" mb={6} lts="0.04em">
               NF de compra
             </Text>
             {order.status === 'faturado' || order.status === 'entregue' ? (

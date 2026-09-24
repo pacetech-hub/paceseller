@@ -1,0 +1,4 @@
+/* Rótulo central do donut não bloqueia o hover do gráfico */
+.donutLabel {
+  pointer-events: none;
+}
