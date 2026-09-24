@@ -27,11 +27,17 @@ const inputStyles = {
   error: { marginTop: 6 },
 };
 
+const RADIUS = "0.5rem";
+
+// Controles grandes também no desktop: campos e botões com 42px de altura e fonte de 16px.
+const CONTROL_SIZE = "md";
+
 const inputDefaults = {
   // Sem asterisco vermelho: campos opcionais são indicados por "(opcional)" no rótulo.
   withAsterisk: false,
-  radius: "sm",
+  radius: "md",
   variant: "default",
+  size: CONTROL_SIZE,
 } as const;
 
 export const mantineTheme = createTheme({
@@ -47,23 +53,56 @@ export const mantineTheme = createTheme({
     lg: "75em",
     xl: "88em",
   },
+  // Um único arredondamento (8px) para botões, campos, cartões e modais: valores parecidos
+  // mas diferentes (6/8/12/16px) quebram o "caminho previsível" do olhar.
   defaultRadius: "md",
   radius: {
-    sm: "0.375rem",
-    md: "0.5rem",
-    lg: "0.75rem",
-    xl: "1rem",
+    xs: RADIUS,
+    sm: RADIUS,
+    md: RADIUS,
+    lg: RADIUS,
+    xl: RADIUS,
+  },
+  // Base de 16px e poucos tamanhos: 14 (apoio/metadados), 16 (texto, campos e ações),
+  // 20 (títulos de seção) e 28 (título de página / números de destaque).
+  // xs é igual a sm para que nenhum texto interno do Mantine fique abaixo de 14px.
+  fontSizes: {
+    xs: "0.875rem",
+    sm: "0.875rem",
+    md: "1rem",
+    lg: "1.25rem",
+    xl: "1.75rem",
   },
   headings: {
     fontFamily: "Roboto, system-ui, sans-serif",
     fontWeight: "700",
+    sizes: {
+      h1: { fontSize: "1.75rem", lineHeight: "1.3" },
+      h2: { fontSize: "1.25rem", lineHeight: "1.35" },
+      h3: { fontSize: "1.25rem", lineHeight: "1.35" },
+      h4: { fontSize: "1rem", lineHeight: "1.5" },
+      h5: { fontSize: "1rem", lineHeight: "1.5" },
+      h6: { fontSize: "1rem", lineHeight: "1.5" },
+    },
   },
   components: {
     Button: {
+      defaultProps: { size: CONTROL_SIZE },
       styles: { label: { fontWeight: SEMIBOLD } },
     },
+    // Botões só com ícone: mesma altura dos campos (42px) e cantos iguais aos demais botões.
+    ActionIcon: { defaultProps: { size: "input-md", radius: "md" } },
+    CloseButton: { defaultProps: { size: "input-md", radius: "md" } },
+    SegmentedControl: { defaultProps: { size: CONTROL_SIZE, radius: "md" }, styles: { label: { fontWeight: SEMIBOLD } } },
+    Chip: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },
+    Checkbox: { defaultProps: { size: CONTROL_SIZE, radius: "sm" } },
+    Radio: { defaultProps: { size: CONTROL_SIZE } },
+    Switch: { defaultProps: { size: CONTROL_SIZE } },
+    Pagination: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },
+    // Etiquetas de status: texto de 14px, sem caixa alta, mesmo arredondamento dos botões.
+    Badge: { defaultProps: { size: "lg", radius: "md", tt: "none" } },
     InputWrapper: { defaultProps: { withAsterisk: false }, styles: inputStyles },
-    Input: { defaultProps: { radius: "sm", variant: "default" } },
+    Input: { defaultProps: { radius: "md", variant: "default", size: CONTROL_SIZE } },
     TextInput: { defaultProps: inputDefaults, styles: inputStyles },
     PasswordInput: { defaultProps: inputDefaults, styles: inputStyles },
     NumberInput: { defaultProps: inputDefaults, styles: inputStyles },
@@ -76,7 +115,6 @@ export const mantineTheme = createTheme({
     DatePickerInput: { defaultProps: inputDefaults, styles: inputStyles },
     ColorInput: { defaultProps: inputDefaults, styles: inputStyles },
     // Rótulos internos do Mantine que usariam peso 500
-    SegmentedControl: { styles: { label: { fontWeight: SEMIBOLD } } },
     Stepper: { styles: { stepLabel: { fontWeight: SEMIBOLD } } },
     Menu: { styles: { label: { fontWeight: SEMIBOLD } } },
     Combobox: { styles: { groupLabel: { fontWeight: SEMIBOLD } } },
