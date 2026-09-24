@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  ActionIcon, Modal, Table, Image, AspectRatio, List,
+  ActionIcon, Modal, Table, Image, AspectRatio, List, type BoxProps,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import classes from "./FichaTecnicaPage.module.css";
@@ -152,13 +152,10 @@ function getGallery(product: Product): string[] {
   return Array.from({ length: 6 }, (_, i) => unique[i % unique.length]);
 }
 
-// spans para montar um bento grid (4 colunas x 3 linhas) com as 6 imagens do produto
-function bentoSpan(index: number): React.CSSProperties {
-  if (index === 0) return { gridColumn: 'span 2', gridRow: 'span 2' };
-  if (index === 1) return { gridColumn: 'span 2', gridRow: 'span 1' };
-  if (index === 2 || index === 3) return { gridColumn: 'span 1', gridRow: 'span 1' };
-  return { gridColumn: 'span 2', gridRow: 'span 1' };
-}
+// bento com as 6 imagens do produto, em 3 linhas de mesma altura:
+// metade esquerda = foto 1 (2 linhas) + foto 5; metade direita = foto 2, fotos 3|4, foto 6
+const BENTO_GAP = 8;
+const BENTO_ROW = `calc((100% - ${2 * BENTO_GAP}px) / 3)`;
 
 const colorPalette = ['Preto', 'Branco', 'Cinza', 'Vermelho', 'Azul', 'Navy', 'Bege', 'Marrom'];
 
@@ -358,6 +355,31 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
     setZoomOpen(true);
   };
 
+  const bentoTile = (idx: number, size: BoxProps) => {
+    const img = gallery[idx];
+    return (
+      <Box key={idx} onClick={() => openZoom(idx)} className={classes.tile} {...size}>
+        <Image src={img} alt={`${product.name} — foto ${idx + 1}`} fit="cover" pos="absolute" inset={0} w="100%" h="100%" />
+        <Box className={classes.overlay}>
+          <MagnifyingGlassPlusIcon size={20} className={classes.zoomIcon} />
+        </Box>
+        <ActionIcon
+          onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
+          aria-label="Baixar imagem"
+          variant="filled"
+          color="dark"
+          size={28}
+          pos="absolute"
+          top={8}
+          right={8}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}
+        >
+          <DownloadSimpleIcon size={14} />
+        </ActionIcon>
+      </Box>
+    );
+  };
+
   return (
     <Stack gap="lg" p="lg" maw={1200} mx="auto" w="100%">
       <Box>
@@ -384,38 +406,20 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
 
       {/* Bento grid — 6 imagens do produto */}
       <AspectRatio ratio={4 / 3}>
-        <Box
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gridTemplateRows: 'repeat(3, 1fr)',
-            gap: 8,
-            borderRadius: 'var(--mantine-radius-lg)',
-            overflow: 'hidden',
-          }}
-        >
-          {gallery.map((img, idx) => (
-            <Box key={idx} onClick={() => openZoom(idx)} className={classes.tile} style={bentoSpan(idx)}>
-              <Image src={img} alt={`${product.name} — foto ${idx + 1}`} fit="cover" pos="absolute" inset={0} w="100%" h="100%" />
-              <Box className={classes.overlay}>
-                <MagnifyingGlassPlusIcon size={20} className={classes.zoomIcon} />
-              </Box>
-              <ActionIcon
-                onClick={e => { e.stopPropagation(); toast.success('Imagem baixada'); }}
-                aria-label="Baixar imagem"
-                variant="filled"
-                color="dark"
-                size={28}
-                pos="absolute"
-                top={8}
-                right={8}
-                style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}
-              >
-                <DownloadSimpleIcon size={14} />
-              </ActionIcon>
-            </Box>
-          ))}
-        </Box>
+        <Group gap={BENTO_GAP} wrap="nowrap" align="stretch" style={{ borderRadius: 'var(--mantine-radius-lg)', overflow: 'hidden' }}>
+          <Stack gap={BENTO_GAP} flex={1}>
+            {bentoTile(0, { flex: 1 })}
+            {bentoTile(4, { h: BENTO_ROW })}
+          </Stack>
+          <Stack gap={BENTO_GAP} flex={1}>
+            {bentoTile(1, { flex: 1 })}
+            <Group gap={BENTO_GAP} wrap="nowrap" align="stretch" h={BENTO_ROW}>
+              {bentoTile(2, { flex: 1 })}
+              {bentoTile(3, { flex: 1 })}
+            </Group>
+            {bentoTile(5, { h: BENTO_ROW })}
+          </Stack>
+        </Group>
       </AspectRatio>
 
       {/* Informações do produto */}

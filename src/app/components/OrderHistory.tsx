@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, ThemeIcon, UnstyledButton } from "@mantine/core";
+import { Stack, Group, Box, Center, Paper, Text, TextInput, Chip, Badge, ThemeIcon, UnstyledButton } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
   CaretRightIcon,
@@ -90,11 +90,9 @@ export function statusSupportText(order: Order): string {
 }
 
 // shared column template so the legend row and every card line up exactly
-function orderGridTemplate(profile: Profile): string {
-  if (profile === 'rep') return 'minmax(0,1fr) 160px 100px 130px 20px'; // pedido, cliente, quantidade, total
-  if (profile === 'lojista') return 'minmax(0,1fr) 150px 100px 130px 20px'; // pedido, representante, quantidade, total
-  return 'minmax(0,1fr) 160px 150px 100px 130px 20px'; // admin: pedido, cliente, representante, quantidade, total
-}
+// Larguras fixas das colunas; a coluna do pedido ocupa o espaço restante.
+// Cliente só aparece para admin/rep e representante só para admin/lojista.
+const COL = { client: 160, rep: 150, qty: 100, total: 130, caret: 20 } as const;
 
 function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
   const support = statusSupportText(order);
@@ -108,45 +106,48 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
         className={classes.hoverable}
         p="md"
         w="100%"
-        style={{ display: 'grid', gridTemplateColumns: orderGridTemplate(profile), columnGap: '1rem', alignItems: 'center' }}
       >
-        {/* column 1: order info */}
-        <Box miw={0}>
-          <Group gap={8} mb={4}>
-            <OrderStatusBadge status={order.status} />
-            <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
-          </Group>
-          <Text size="0.85rem" fw={600} truncate>
-            <Text span inherit className="mono">{order.id}</Text> — {productName}
-          </Text>
-        </Box>
-
-        {/* column 2: cliente (admin/rep only) */}
-        {profile !== 'lojista' && (
-          <Box miw={0}>
-            <Text size="0.8rem" fw={500} truncate>{client?.name ?? order.client}</Text>
-            <Text c="dimmed" size="0.7rem" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
+        <Group gap="md" wrap="nowrap">
+          {/* column 1: order info */}
+          <Box flex={1} miw={0}>
+            <Group gap={8} mb={4}>
+              <OrderStatusBadge status={order.status} />
+              <Text c="dimmed" size="0.72rem" style={{ flexShrink: 0 }}>{support}</Text>
+            </Group>
+            <Text size="0.85rem" fw={600} truncate>
+              <Text span inherit className="mono">{order.id}</Text> — {productName}
+            </Text>
           </Box>
-        )}
 
-        {/* column 3: representante (hidden for rep, viewing their own orders) */}
-        {profile !== 'rep' && (
-          <Box miw={0}>
-            <Text size="0.8rem" fw={500} truncate>{order.rep}</Text>
+          {/* column 2: cliente (admin/rep only) */}
+          {profile !== 'lojista' && (
+            <Box w={COL.client} flex="none">
+              <Text size="0.8rem" fw={500} truncate>{client?.name ?? order.client}</Text>
+              <Text c="dimmed" size="0.7rem" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
+            </Box>
+          )}
+
+          {/* column 3: representante (hidden for rep, viewing their own orders) */}
+          {profile !== 'rep' && (
+            <Box w={COL.rep} flex="none">
+              <Text size="0.8rem" fw={500} truncate>{order.rep}</Text>
+            </Box>
+          )}
+
+          {/* column 4: quantidade */}
+          <Box w={COL.qty} flex="none">
+            <Text size="0.8rem" fw={500} truncate>{order.items} pares</Text>
           </Box>
-        )}
 
-        {/* column 4: quantidade */}
-        <Box miw={0}>
-          <Text size="0.8rem" fw={500} truncate>{order.items} pares</Text>
-        </Box>
+          {/* column 5: total */}
+          <Box w={COL.total} flex="none" ta="right">
+            <Text className="mono" size="0.95rem" fw={700} truncate>{formatCurrency(order.total)}</Text>
+          </Box>
 
-        {/* column 5: total */}
-        <Box miw={0} ta="right">
-          <Text className="mono" size="0.95rem" fw={700} truncate>{formatCurrency(order.total)}</Text>
-        </Box>
-
-        <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)', justifySelf: 'center' }} />
+          <Center w={COL.caret} flex="none">
+            <CaretRightIcon size={16} style={{ color: 'var(--mantine-color-dimmed)' }} />
+          </Center>
+        </Group>
       </UnstyledButton>
     </Paper>
   );
@@ -208,22 +209,20 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
             c="dimmed"
             style={{
               zIndex: 10,
-              display: 'grid',
-              gridTemplateColumns: orderGridTemplate(profile),
-              columnGap: '1rem',
-              alignItems: 'center',
               fontSize: '0.68rem',
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
             }}
           >
-            <Box miw={0}>Pedido</Box>
-            {profile !== 'lojista' && <Box miw={0}>Cliente</Box>}
-            {profile !== 'rep' && <Box miw={0}>Representante</Box>}
-            <Box miw={0}>Quantidade</Box>
-            <Box miw={0} ta="right">Total</Box>
-            <Box />
+            <Group gap="md" wrap="nowrap">
+              <Box flex={1} miw={0}>Pedido</Box>
+              {profile !== 'lojista' && <Box w={COL.client} flex="none">Cliente</Box>}
+              {profile !== 'rep' && <Box w={COL.rep} flex="none">Representante</Box>}
+              <Box w={COL.qty} flex="none">Quantidade</Box>
+              <Box w={COL.total} flex="none" ta="right">Total</Box>
+              <Box w={COL.caret} flex="none" />
+            </Group>
           </Paper>
         )}
 
