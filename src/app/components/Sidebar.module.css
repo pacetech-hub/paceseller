@@ -1,0 +1,22 @@
+/* Barra lateral fixa: borda à direita e animação ao recolher/expandir */
+.aside {
+  border-right: 1px solid var(--mantine-color-default-border);
+  transition: width 200ms ease;
+}
+
+/* Cabeçalho translúcido com desfoque do conteúdo que rola por baixo */
+.header {
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  backdrop-filter: blur(8px);
+}
+
+/* Logo do cabeçalho separado dos itens de navegação */
+.headerLogo {
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+/* Avatar do menu do usuário com traço à esquerda
+   (classe duplicada para vencer a borda do próprio ActionIcon) */
+.avatarButton.avatarButton {
+  border-left: 1px solid var(--mantine-color-default-border);
+}

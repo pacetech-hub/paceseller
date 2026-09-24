@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
-  Group, Button, ActionIcon, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton,
+  Group, Button, ActionIcon, Affix, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
+  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider,
 } from "@mantine/core";
 import {
   SquaresFourIcon,
@@ -32,6 +32,7 @@ import {
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
+import classes from "./Sidebar.module.css";
 
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
@@ -53,7 +54,7 @@ const profileLabels: Record<Profile, { label: string; icon: Icon; color: string 
   lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'var(--mantine-color-teal-4)' },
 };
 
-const SIDEBAR_BORDER = '1px solid var(--mantine-color-default-border)';
+const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
 interface SidebarProps {
   currentView: View;
@@ -112,13 +113,14 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
   const renderContent = (isCollapsed: boolean) => (
     <Stack gap={0} h="100%">
       {/* Logo */}
+      {/* 55px + divisória de 1px = 56px, alinhado ao cabeçalho */}
       <Group
-        h={56}
+        h={55}
         px="md"
         gap="sm"
         wrap="nowrap"
         justify={isCollapsed ? 'center' : 'flex-start'}
-        style={{ borderBottom: SIDEBAR_BORDER, flexShrink: 0 }}
+        flex="none"
       >
         <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
         {!isCollapsed && (
@@ -135,6 +137,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
           </ActionIcon>
         )}
       </Group>
+      <Divider color={BORDER_COLOR} />
 
       {/* Profile pill */}
       {!isCollapsed && (
@@ -149,7 +152,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       {/* Selected client chip — rep only */}
       {!isCollapsed && profile === 'rep' && selectedClient && (
         <Paper withBorder radius="md" mx="sm" mt={8} px="sm" py={8}>
-          <Text c="dimmed" size="0.62rem" fw={500} tt="uppercase" style={{ letterSpacing: '0.06em' }}>Pedindo para</Text>
+          <Text c="dimmed" size="0.62rem" fw={500} tt="uppercase" lts="0.06em">Pedindo para</Text>
           <Text size="0.82rem" fw={600} truncate mt={2}>{selectedClient.name}</Text>
         </Paper>
       )}
@@ -159,7 +162,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         <UnstyledButton mx="sm" mt="sm">
           <Paper withBorder radius="md" px="sm" py={8}>
             <Group gap={8} wrap="nowrap" c="dimmed">
-              <MagnifyingGlassIcon size={14} style={{ flexShrink: 0 }} />
+              <MagnifyingGlassIcon size={14} />
               <Text size="0.78rem" c="dimmed">Buscar...</Text>
               <Kbd size="xs" ml="auto">⌘K</Kbd>
             </Group>
@@ -168,7 +171,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       )}
 
       {/* Nav */}
-      <ScrollArea component="nav" style={{ flex: 1 }} px={8} py="sm">
+      <ScrollArea component="nav" flex={1} px={8} py="sm">
         <Stack gap={2} align={isCollapsed ? 'center' : 'stretch'}>
           {visibleItems.map(item => {
             const ItemIcon = item.icon;
@@ -212,7 +215,8 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       </ScrollArea>
 
       {/* Bottom */}
-      <Box p={8} style={{ borderTop: SIDEBAR_BORDER, flexShrink: 0 }}>
+      <Divider color={BORDER_COLOR} />
+      <Box p={8} flex="none">
         {isCollapsed ? (
           <Group justify="center">
             <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" size={36} title="Expandir menu">
@@ -224,7 +228,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
             <Avatar size={28} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '0.65rem', fontWeight: 700 } }}>
               TF
             </Avatar>
-            <Box style={{ flex: 1, minWidth: 0 }}>
+            <Box flex={1} miw={0}>
               <Text size="0.78rem" fw={500} truncate>Tesla Footwear</Text>
               <Text size="0.7rem" c="dimmed" truncate>admin@tesla.com.br</Text>
             </Box>
@@ -239,19 +243,16 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
 
   return (
     <>
-      <ActionIcon
-        onClick={() => setMobileOpen(true)}
-        hiddenFrom="lg"
-        variant="default"
-        size="lg"
-        pos="fixed"
-        top={16}
-        left={16}
-        style={{ zIndex: 50 }}
-        aria-label="Abrir menu"
-      >
-        <ListIcon size={16} />
-      </ActionIcon>
+      <Affix position={{ top: 16, left: 16 }} zIndex={50} hiddenFrom="lg">
+        <ActionIcon
+          onClick={() => setMobileOpen(true)}
+          variant="default"
+          size="lg"
+          aria-label="Abrir menu"
+        >
+          <ListIcon size={16} />
+        </ActionIcon>
+      </Affix>
 
       <Drawer
         opened={mobileOpen}
@@ -271,7 +272,8 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         h="100%"
         w={collapsed ? 52 : 260}
         bg="var(--mantine-color-body)"
-        style={{ borderRight: SIDEBAR_BORDER, flexShrink: 0, transition: 'width 200ms ease' }}
+        flex="none"
+        className={classes.aside}
       >
         {renderContent(collapsed)}
       </Box>
@@ -359,19 +361,16 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
       component="header"
       h={56}
       px="lg"
-      style={{
-        flexShrink: 0,
-        borderBottom: '1px solid var(--mantine-color-default-border)',
-        backgroundColor: 'color-mix(in srgb, var(--mantine-color-body) 80%, transparent)',
-        backdropFilter: 'blur(8px)',
-      }}
+      flex="none"
+      bg="color-mix(in srgb, var(--mantine-color-body) 80%, transparent)"
+      className={classes.header}
     >
       <Group h="100%" gap="sm" wrap="nowrap">
-        <Group style={{ flex: 1, minWidth: 0 }} gap="sm" wrap="nowrap">
+        <Group flex={1} miw={0} gap="sm" wrap="nowrap">
           {currentView !== 'catalog' && (
-            <Box pr="sm" mr={4} h={32} style={{ display: 'flex', alignItems: 'center', flexShrink: 0, borderRight: '1px solid var(--mantine-color-default-border)' }}>
+            <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
               <Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />
-            </Box>
+            </Group>
           )}
           {/* Nav items à esquerda quando existem, caso contrário título */}
           {headerItems.length > 0 ? (
@@ -396,14 +395,14 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               })}
             </Group>
           ) : (
-            <Box style={{ minWidth: 0 }}>
-              <Text truncate fw={600} size="0.95rem" style={{ letterSpacing: '-0.01em' }}>{title}</Text>
+            <Box miw={0}>
+              <Text truncate fw={600} size="0.95rem" lts="-0.01em">{title}</Text>
               {subtitle && <Text truncate c="dimmed" size="0.75rem" visibleFrom="sm">{subtitle}</Text>}
             </Box>
           )}
         </Group>
 
-        <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+        <Group gap={4} wrap="nowrap" flex="none">
           {actions}
 
           {/* Cart(s) — todos os perfis usam multi-carrinhos */}
@@ -443,7 +442,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 radius="xl"
                 size={32}
                 ml={4}
-                style={{ borderRadius: '50%', borderLeft: '1px solid var(--mantine-color-default-border)' }}
+                className={classes.avatarButton}
               >
                 <ProfileIcon size={14} color={profileInfo.color} />
               </ActionIcon>

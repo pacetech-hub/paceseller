@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, ThemeIcon,
-  SimpleGrid, Stepper, Table, NumberInput, ActionIcon, Alert, Image, ScrollArea, UnstyledButton, Divider,
+  SimpleGrid, Stepper, Table, NumberInput, ActionIcon, Alert, Image, ScrollArea, Divider,
 } from "@mantine/core";
 import {
   CaretLeftIcon,
@@ -66,16 +66,16 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
           {filtered.map(p => {
             const isSelected = selected?.id === p.id;
             return (
-              <UnstyledButton
+              <Paper
                 key={p.id}
+                component="button"
+                type="button"
                 onClick={() => onSelect(p)}
-                className={isSelected ? undefined : classes.hoverable}
+                className={isSelected ? classes.cardButton : `${classes.cardButton} ${classes.hoverable}`}
+                radius="md"
                 p={8}
-                style={{
-                  borderRadius: 'var(--mantine-radius-md)',
-                  border: `1px solid ${isSelected ? 'var(--mantine-color-neutral-3)' : 'transparent'}`,
-                  backgroundColor: isSelected ? highlightBg : undefined,
-                }}
+                bd={`1px solid ${isSelected ? 'var(--mantine-color-neutral-3)' : 'transparent'}`}
+                bg={isSelected ? highlightBg : undefined}
               >
                 <Group gap="sm" wrap="nowrap">
                   <Image
@@ -86,16 +86,16 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
                     radius="sm"
                     fit="cover"
                     bg="var(--mantine-color-default-hover)"
-                    style={{ flexShrink: 0 }}
+                    flex="none"
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
-                  <Box miw={0} style={{ flex: 1 }}>
+                  <Box miw={0} flex={1}>
                     <Text size="0.82rem" fw={500} truncate>{p.name}</Text>
                     <Text c="dimmed" size="0.7rem">{p.reference} · {formatCurrency(p.price)}</Text>
                   </Box>
-                  {isSelected && <CheckIcon size={16} style={{ flexShrink: 0 }} />}
+                  {isSelected && <CheckIcon size={16} />}
                 </Group>
-              </UnstyledButton>
+              </Paper>
             );
           })}
         </Stack>
@@ -184,7 +184,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           <ThemeIcon variant="light" color="teal" size={64} radius="xl" mb="lg">
             <CheckIcon size={32} />
           </ThemeIcon>
-          <Title order={2} fw={700} style={{ fontSize: '1.3rem' }}>Pedido enviado!</Title>
+          <Title order={2} fw={700} fz="1.3rem">Pedido enviado!</Title>
           <Text c="dimmed" size="0.85rem" mt={8} mb={4}>
             Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>PED-2026-0413</Text> criado com sucesso.
           </Text>
@@ -212,7 +212,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
       {selectedClient && (
         <Paper withBorder radius="lg" px="md" py="sm">
           <Group gap={10} wrap="nowrap">
-            <StorefrontIcon size={16} style={{ flexShrink: 0 }} />
+            <StorefrontIcon size={16} />
             <Text c="dimmed" size="0.82rem">Pedindo para</Text>
             <Text size="0.85rem" fw={700}>{selectedClient.name}</Text>
           </Group>
@@ -308,7 +308,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 <Title order={3} fw={600} size="1rem">{selectedProduct.name}</Title>
                 <Text c="dimmed" size="0.78rem">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </Box>
-              <Button onClick={handleAutoFill} variant="light" color="yellow" size="xs" leftSection={<LightningIcon size={14} />} style={{ flexShrink: 0 }}>
+              <Button onClick={handleAutoFill} variant="light" color="yellow" size="xs" leftSection={<LightningIcon size={14} />} flex="none">
                 Sugestão IA
               </Button>
             </Group>
@@ -323,17 +323,17 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             <Table.ScrollContainer minWidth={900}>
               <Table withRowBorders horizontalSpacing={4}>
                 <Table.Thead>
-                  <Table.Tr style={{ borderBottom: 'none' }}>
-                    <Table.Th c="dimmed" fw={500} style={{ fontSize: '0.72rem' }}>Numeração</Table.Th>
+                  <Table.Tr bd="none">
+                    <Table.Th c="dimmed" fw={500} fz="0.72rem">Numeração</Table.Th>
                     {SIZES.map(sz => (
-                      <Table.Th key={sz} c="dimmed" fw={500} ta="center" style={{ fontSize: '0.72rem' }}>Nº {sz}</Table.Th>
+                      <Table.Th key={sz} c="dimmed" fw={500} ta="center" fz="0.72rem">Nº {sz}</Table.Th>
                     ))}
-                    <Table.Th c="dimmed" fw={500} ta="right" style={{ fontSize: '0.72rem' }}>Total</Table.Th>
+                    <Table.Th c="dimmed" fw={500} ta="right" fz="0.72rem">Total</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   <Table.Tr>
-                    <Table.Td c="dimmed" style={{ fontSize: '0.78rem' }}>Estoque</Table.Td>
+                    <Table.Td c="dimmed" fz="0.78rem">Estoque</Table.Td>
                     {SIZES.map(sz => {
                       const stock = selectedProduct.grades[sz] || 0;
                       return (
@@ -345,7 +345,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                     <Table.Td />
                   </Table.Tr>
                   <Table.Tr>
-                    <Table.Td fw={500} style={{ fontSize: '0.82rem' }}>Quantidade</Table.Td>
+                    <Table.Td fw={500} fz="0.82rem">Quantidade</Table.Td>
                     {SIZES.map(sz => {
                       const qty = currentGrades[sz] || 0;
                       const stock = selectedProduct.grades[sz] || 0;
@@ -383,7 +383,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                               <PlusIcon size={12} />
                             </ActionIcon>
                           </Group>
-                          {over && <Text c="red.6" mt={2} style={{ fontSize: '0.6rem' }}>Sem estoque</Text>}
+                          {over && <Text c="red.6" mt={2} fz="0.6rem">Sem estoque</Text>}
                         </Table.Td>
                       );
                     })}
@@ -402,7 +402,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   <Text c="dimmed" size="0.75rem">Subtotal deste produto</Text>
                   <Text size="0.82rem">{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
                 </Box>
-                <Text className="mono" fw={700} style={{ fontSize: '1.2rem' }}>{formatCurrency(totalValue)}</Text>
+                <Text className="mono" fw={700} fz="1.2rem">{formatCurrency(totalValue)}</Text>
               </Group>
             </Paper>
 
@@ -502,7 +502,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                     <Text c="dimmed" size="0.78rem">Total do pedido</Text>
                     <Text size="0.82rem">{grandPairs} pares · {allGrades.length} produto(s)</Text>
                   </Box>
-                  <Text className="mono" fw={700} style={{ fontSize: '1.5rem' }}>{formatCurrency(finalTotal)}</Text>
+                  <Text className="mono" fw={700} fz="1.5rem">{formatCurrency(finalTotal)}</Text>
                 </Group>
               </Stack>
             </Paper>
