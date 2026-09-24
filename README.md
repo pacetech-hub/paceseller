@@ -1,11 +1,13 @@
+# Pace Seller
 
-  # Execute Action
+React + Vite app built with [Mantine UI](https://mantine.dev) 7.
 
-  This is a code bundle for Execute Action. The original project is available at https://www.figma.com/design/77ZGd4r6Utjar8JhtnccZG/Execute-Action.
+Design source: https://www.figma.com/design/77ZGd4r6Utjar8JhtnccZG/Execute-Action
 
-  ## Running the code
+## Running the code
 
-  Run `bun install` to install the dependencies.
+Run `bun install` to install the dependencies.
 
-  Run `bun run dev` to start the development server.
-  
+Run `bun run dev` to start the development server.
+
+Run `bun run build` to create a production build.
