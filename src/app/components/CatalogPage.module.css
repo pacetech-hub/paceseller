@@ -98,3 +98,20 @@
 .thumb.thumb[data-active] {
   border-color: var(--mantine-color-neutral-9);
 }
+
+/* Grade de produtos: cada card mantém sua própria altura (a compra rápida abre só naquele card) */
+.grid {
+  align-items: start;
+}
+
+/* Foto do card alinhada à base da área da imagem */
+.cardImage {
+  object-position: bottom;
+}
+
+/* Corpo rolável do modal de detalhes; a grade de compra fica fixa embaixo */
+.detailBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
