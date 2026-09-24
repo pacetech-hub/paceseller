@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
-  Tabs, Table, Avatar, Collapse, Alert, Divider,
+  Tabs, Table, Avatar, Collapse, Alert, Divider, Radio,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -27,7 +27,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { formatDate } from "../data/mockData";
-import { visoes, defaultPermissions, type VisaoKey, type PermissionsState } from "../data/permissions";
+import { visoes, defaultPermissions, profileDescriptions, type VisaoKey, type PermissionsState } from "../data/permissions";
 import { linkedUsers } from "../data/linkedUsers";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
 import { toast } from "../lib/toast";
@@ -156,6 +156,9 @@ const coveredClientsMock = [
 ];
 
 type AdminUser = typeof mockUsers[number];
+
+// Perfis possíveis de um novo usuário (poucas opções fixas: cartões de rádio com descrição)
+const roleOptions = ['Representante', 'Preposto', 'Lojista', 'Comprador', 'Admin'];
 
 const emptyNewUser = { name: '', email: '', role: 'Representante', region: 'Sudeste' };
 
@@ -321,7 +324,7 @@ export function AdminPage() {
                 ml={-12}
                 leftSection={<ArrowLeftIcon size={16} />}
               >
-                Voltar para políticas
+                Voltar para Políticas
               </Button>
             </Box>
 
@@ -455,16 +458,16 @@ export function AdminPage() {
           <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Group justify="space-between" mb="md" gap="sm">
               <Title order={3}>Usuários</Title>
-              <Group gap={8}>
+              <Group gap="sm">
                 <TextInput
-                  placeholder="Buscar usuário..."
+                  placeholder="Buscar por nome ou e-mail"
                   leftSection={<MagnifyingGlassIcon size={16} />}
                   value={search}
                   onChange={e => setSearch(e.currentTarget.value)}
                   aria-label="Buscar usuário"
                 />
                 <Button onClick={() => (showAddUser ? closeAddUser() : setShowAddUser(true))} leftSection={<PlusIcon size={16} />}>
-                  Adicionar usuário
+                  Adicionar Usuário
                 </Button>
               </Group>
             </Group>
@@ -475,25 +478,40 @@ export function AdminPage() {
                 <Stack gap="md">
                   <TextInput
                     label="Nome completo"
-                    placeholder="Nome do usuário"
+                    placeholder="ex.: Maria Silva"
+                    maxLength={100}
                     value={newUser.name}
                     onChange={e => { const name = e.currentTarget.value; setNewUser(p => ({ ...p, name })); setNewUserErrors(p => ({ ...p, name: undefined })); }}
                     error={newUserErrors.name}
                   />
                   <TextInput
                     label="E-mail"
-                    placeholder="email@tesla.com.br"
+                    placeholder="nome@tesla.com.br"
                     value={newUser.email}
                     onChange={e => { const email = e.currentTarget.value; setNewUser(p => ({ ...p, email })); setNewUserErrors(p => ({ ...p, email: undefined })); }}
                     error={newUserErrors.email}
                   />
-                  <Select
+                  <Radio.Group
                     label="Perfil"
-                    data={['Representante', 'Preposto', 'Lojista', 'Comprador', 'Admin']}
+                    name="new-user-role"
                     value={newUser.role}
-                    onChange={v => v && setNewUser(p => ({ ...p, role: v }))}
-                    allowDeselect={false}
-                  />
+                    onChange={v => setNewUser(p => ({ ...p, role: v }))}
+                  >
+                    <Stack gap="xs">
+                      {roleOptions.map(role => (
+                        <Radio.Card key={role} value={role} p="sm" className={classes.choiceCard}>
+                          {/* Rádio alinhado à primeira linha do texto */}
+                          <Group align="flex-start" gap="sm" wrap="nowrap">
+                            <Radio.Indicator color="neutral" mt={2} />
+                            <Box flex={1} miw={0}>
+                              <Text fw={600}>{role}</Text>
+                              <Text c="dimmed" size="sm">{profileDescriptions[role]}</Text>
+                            </Box>
+                          </Group>
+                        </Radio.Card>
+                      ))}
+                    </Stack>
+                  </Radio.Group>
                   <Select
                     label="Região"
                     data={['Sudeste', 'Sul', 'Nordeste', 'Centro-Oeste', 'Norte', 'Nacional']}
@@ -502,9 +520,9 @@ export function AdminPage() {
                     allowDeselect={false}
                   />
                 </Stack>
-                <Group justify="flex-end" gap={8} mt="md">
+                <Group justify="flex-end" gap="sm" mt="md">
                   <Button onClick={closeAddUser} variant="default">Cancelar</Button>
-                  <Button onClick={createUser}>Criar usuário</Button>
+                  <Button onClick={createUser}>Criar Usuário</Button>
                 </Group>
               </Paper>
             </Collapse>
@@ -523,7 +541,7 @@ export function AdminPage() {
                       <Table.Td><UserCell name={user.name} /></Table.Td>
                       <Table.Td c="dimmed">{user.email}</Table.Td>
                       <Table.Td>
-                        <Badge variant="light" color={user.role === 'Admin' ? 'violet' : 'dark'}>{user.role}</Badge>
+                        <Badge variant="light" color="neutral">{user.role}</Badge>
                       </Table.Td>
                       <Table.Td c="dimmed">{user.region}</Table.Td>
                       <Table.Td>
@@ -532,7 +550,7 @@ export function AdminPage() {
                       <Table.Td c="dimmed" className="mono" fz="sm">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
                       <Table.Td>
                         {/* Ícone + texto; size="sm" só por estar dentro de linha de tabela */}
-                        <Group gap={4} wrap="nowrap">
+                        <Group gap="sm" wrap="nowrap">
                           <Button variant="subtle" color="gray" size="sm" leftSection={<PencilSimpleLineIcon size={16} />} aria-label={`Editar usuário ${user.name}`}>
                             Editar
                           </Button>
@@ -554,9 +572,9 @@ export function AdminPage() {
                               : 'Nenhum usuário cadastrado. Adicione o primeiro para liberar o acesso.'}
                           </Text>
                           {search ? (
-                            <Button onClick={() => setSearch('')} variant="default">Limpar busca</Button>
+                            <Button onClick={() => setSearch('')} variant="default">Limpar Busca</Button>
                           ) : (
-                            <Button onClick={() => setShowAddUser(true)} variant="default" leftSection={<PlusIcon size={16} />}>Adicionar usuário</Button>
+                            <Button onClick={() => setShowAddUser(true)} variant="default" leftSection={<PlusIcon size={16} />}>Adicionar Usuário</Button>
                           )}
                         </Stack>
                       </Table.Td>
@@ -591,7 +609,8 @@ export function AdminPage() {
                         <Badge variant="light" color="neutral">{user.profile}</Badge>
                       </Table.Td>
                       <Table.Td>
-                        <Badge variant="light" color={user.ownerType === 'representante' ? 'yellow' : 'teal'}>
+                        {/* Vínculo não é status: neutro */}
+                        <Badge variant="light" color="neutral">
                           {user.ownerType === 'representante' ? 'Rep · ' : 'Lojista · '}{user.ownerName}
                         </Badge>
                       </Table.Td>
@@ -611,15 +630,17 @@ export function AdminPage() {
             {/* Formulário em coluna única */}
             <Stack gap="md">
               {[
-                { label: 'Nome da empresa', value: 'Tesla Footwear Indústria LTDA' },
-                { label: 'CNPJ', value: '12.345.678/0001-90' },
-                { label: 'Website', value: 'teslafootwear.com.br' },
-                { label: 'Suporte', value: 'suporte@tesla.com.br' },
+                { label: 'Nome da empresa', value: 'Tesla Footwear Indústria LTDA', placeholder: 'ex.: Tesla Footwear Indústria LTDA', maxLength: 120 },
+                { label: 'CNPJ', value: '12.345.678/0001-90', placeholder: '00.000.000/0000-00', maxLength: 18 },
+                { label: 'Website', value: 'teslafootwear.com.br', placeholder: 'ex.: suaempresa.com.br' },
+                { label: 'Suporte', value: 'suporte@tesla.com.br', placeholder: 'nome@empresa.com.br' },
               ].map(field => (
                 <TextInput
                   key={field.label}
                   label={field.label}
                   defaultValue={field.value}
+                  placeholder={field.placeholder}
+                  maxLength={field.maxLength}
                 />
               ))}
             </Stack>
@@ -628,7 +649,7 @@ export function AdminPage() {
               fullWidth
               onClick={() => toast.success('Dados da empresa salvos', 'Eles passam a aparecer nos próximos pedidos e boletos emitidos')}
             >
-              Salvar dados da empresa
+              Salvar Dados da Empresa
             </Button>
           </Paper>
         </Stack>

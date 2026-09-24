@@ -50,10 +50,11 @@ interface NavItem {
   badge?: number;
 }
 
+// Perfil não é status: ícone sempre neutro (amarelo/verde ficam reservados para atenção/sucesso)
 const profileLabels: Record<Profile, { label: string; icon: Icon; color: string }> = {
-  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'var(--mantine-color-black)' },
-  rep: { label: 'Representante', icon: UsersIcon, color: 'var(--mantine-color-yellow-5)' },
-  lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'var(--mantine-color-teal-4)' },
+  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'currentColor' },
+  rep: { label: 'Representante', icon: UsersIcon, color: 'currentColor' },
+  lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'currentColor' },
 };
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
@@ -152,7 +153,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
           <Paper withBorder px="sm" mih={42} display="flex" style={{ alignItems: 'center' }}>
             <Group gap={8} wrap="nowrap" c="dimmed" w="100%">
               <MagnifyingGlassIcon size={16} />
-              <Text c="dimmed">Buscar...</Text>
+              <Text c="dimmed" truncate>Buscar por produto ou cliente</Text>
               <Kbd ml="auto">⌘K</Kbd>
             </Group>
           </Paper>
@@ -205,8 +206,8 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       <Box p={8} flex="none">
         {isCollapsed ? (
           <Group justify="center">
-            <Tooltip label="Expandir menu" position="right" withArrow>
-              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" aria-label="Expandir menu">
+            <Tooltip label="Expandir Menu" position="right" withArrow>
+              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" aria-label="Expandir Menu">
                 <CaretRightIcon size={16} />
               </ActionIcon>
             </Tooltip>
@@ -225,7 +226,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
             visibleFrom="lg"
             leftSection={<CaretLeftIcon size={16} />}
           >
-            Recolher menu
+            Recolher Menu
           </Button>
           <Group gap={8} px="sm" py={8} wrap="nowrap">
             <Avatar size={32} color="neutral" variant="light">
@@ -259,7 +260,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         <ActionIcon
           onClick={() => setMobileOpen(true)}
           variant="default"
-          aria-label="Abrir menu"
+          aria-label="Abrir Menu"
         >
           <ListIcon size={16} />
         </ActionIcon>
@@ -387,7 +388,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               opened={navOpened}
               onClick={toggleNav}
               hiddenFrom="sm"
-              aria-label="Abrir navegação"
+              aria-label="Abrir Navegação"
             />
           )}
           {/* Filtros: ícone + texto quando há espaço; só ícone (com tooltip) no celular */}
@@ -403,12 +404,12 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               >
                 Filtros
               </Button>
-              <Tooltip label="Abrir filtros" withArrow>
+              <Tooltip label="Abrir Filtros" withArrow>
                 <ActionIcon
                   onClick={onOpenFilters}
                   hiddenFrom="sm"
                   variant="default"
-                  aria-label="Abrir filtros"
+                  aria-label="Abrir Filtros"
                 >
                   <FunnelIcon size={16} />
                 </ActionIcon>
@@ -422,7 +423,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           )}
           {/* Nav items à esquerda quando existem, caso contrário título */}
           {headerItems.length > 0 ? (
-            <Group gap={4} wrap="nowrap" visibleFrom="sm">
+            <Group gap="sm" wrap="nowrap" visibleFrom="sm">
               {headerItems.map(item => {
                 const Icon = item.icon;
                 const active = currentView === item.view;
@@ -450,7 +451,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           )}
         </Group>
 
-        <Group gap={4} wrap="nowrap" flex="none">
+        <Group gap="sm" wrap="nowrap" flex="none">
           {actions}
 
           {/* Cart(s) — todos os perfis usam multi-carrinhos.
@@ -461,8 +462,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             </Button>
           </Indicator>
           <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.narrowOnly}>
-            <Tooltip label="Ver carrinhos" withArrow>
-              <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" aria-label="Ver carrinhos">
+            <Tooltip label="Ver Carrinhos" withArrow>
+              <ActionIcon onClick={() => onNavigate('carts')} variant="subtle" color="neutral" aria-label="Ver Carrinhos">
                 <BasketIcon size={16} />
               </ActionIcon>
             </Tooltip>
@@ -475,8 +476,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             </Button>
           </Indicator>
           <Indicator disabled={notifications === 0} size={8} color="neutral" offset={6} className={classes.narrowOnly}>
-            <Tooltip label="Ver notificações" withArrow>
-              <ActionIcon variant="subtle" color="neutral" aria-label="Ver notificações">
+            <Tooltip label="Ver Notificações" withArrow>
+              <ActionIcon variant="subtle" color="neutral" aria-label="Ver Notificações">
                 <BellIcon size={16} />
               </ActionIcon>
             </Tooltip>
@@ -497,13 +498,13 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               >
                 {selectedClient.name}
               </Button>
-              <Tooltip label="Ver histórico de pedidos" withArrow>
+              <Tooltip label="Ver Histórico de Pedidos" withArrow>
                 <ActionIcon
                   onClick={() => onNavigate('history')}
                   hiddenFrom="sm"
                   variant="default"
                   color="neutral"
-                  aria-label={`Ver histórico de pedidos de ${selectedClient.name}`}
+                  aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
                 >
                   <StorefrontIcon size={16} />
                 </ActionIcon>
@@ -517,8 +518,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               <ActionIcon
                 variant="light"
                 color="neutral"
-                ml={4}
-                aria-label="Abrir menu da conta"
+                aria-label="Abrir Menu da Conta"
                 className={classes.avatarButton}
               >
                 <ProfileIcon size={16} color={profileInfo.color} />

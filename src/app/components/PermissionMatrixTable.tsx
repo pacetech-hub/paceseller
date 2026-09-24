@@ -1,4 +1,4 @@
-import { Group, Stack, Text, Badge, Table, Checkbox, Card, Divider, Button } from "@mantine/core";
+import { Group, Stack, Box, Text, Badge, Table, Checkbox, Card, Divider, Button } from "@mantine/core";
 import { profileDescriptions } from "../data/permissions";
 import { toast } from "../lib/toast";
 
@@ -47,15 +47,24 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
               {perfis.map(perfil => {
                 const allowed = matrix[perfil][modulo];
                 return (
-                  <Table.Td key={perfil} ta="center">
-                    <Checkbox
-                      checked={allowed}
-                      onChange={() => onToggle(perfil, modulo)}
-                      color="neutral"
+                  <Table.Td key={perfil} p={0}>
+                    {/* A célula inteira é a área de clique (label envolve o checkbox), com no mínimo 44px de altura */}
+                    <Box
+                      component="label"
+                      display="flex"
+                      mih={44}
+                      px="md"
                       title={allowed ? 'Clique para revogar' : 'Clique para conceder'}
-                      aria-label={`${modulo} · ${perfil}`}
-                      styles={{ input: { cursor: 'pointer' } }}
-                    />
+                      style={{ alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    >
+                      <Checkbox
+                        checked={allowed}
+                        onChange={() => onToggle(perfil, modulo)}
+                        color="neutral"
+                        aria-label={`${modulo} · ${perfil}`}
+                        styles={{ input: { cursor: 'pointer' } }}
+                      />
+                    </Box>
                   </Table.Td>
                 );
               })}
@@ -66,7 +75,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
       </Table.ScrollContainer>
 
       <Divider color="var(--mantine-color-default-border)" />
-      <Group justify="space-between" gap="xs" p={{ base: 'md', sm: 'lg' }}>
+      <Group justify="space-between" gap="sm" p={{ base: 'md', sm: 'lg' }}>
         <Text c="dimmed" size="sm">Clique em qualquer célula para alternar a permissão</Text>
         {/* Ação de baixa ênfase: não compete com as demais ações da página */}
         <Button
@@ -75,7 +84,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
             toast.success('Permissões padrão restauradas', 'Todos os perfis desta tabela voltaram à configuração original');
           }}
           variant="subtle" color="gray">
-          Restaurar permissões padrão
+          Restaurar Permissões Padrão
         </Button>
       </Group>
     </Card>

@@ -20,7 +20,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
     <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       {/* Link de voltar: margem negativa só para alinhar o texto ao conteúdo */}
       <Button onClick={onBack} variant="subtle" color="neutral" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
-        Voltar para indicadores
+        Voltar para Indicadores
       </Button>
 
       <Group justify="space-between" wrap="wrap" gap="sm">
@@ -55,7 +55,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
               <Text c="dimmed" ta="center">
                 Nenhum vendedor com vendas registradas neste período. Escolha outro período acima ou volte para os indicadores.
               </Text>
-              <Button onClick={onBack} variant="default" color="neutral">Voltar para indicadores</Button>
+              <Button onClick={onBack} variant="default" color="neutral">Voltar para Indicadores</Button>
             </Stack>
           )}
         </Stack>
