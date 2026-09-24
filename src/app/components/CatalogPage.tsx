@@ -183,11 +183,9 @@ function GradeInline({ product, onAdd, onClose }: {
   const subtotal = total * product.price;
   const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
 
-  const colCount = sizes.length;
-  const gridTemplate = `90px repeat(${colCount}, minmax(0, 1fr)) 60px`;
-  const rowStyle = { display: 'grid', alignItems: 'center', gridTemplateColumns: gridTemplate } as const;
+  // colunas: rótulo (90px) · uma por numeração, de largura igual · total (60px)
   const rowLabel = (text: string) => (
-    <Text lh={1.5} px={8} py={6} c="dimmed" size="0.62rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{text}</Text>
+    <Text lh={1.5} w={90} flex="none" px={8} py={6} c="dimmed" size="0.62rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>{text}</Text>
   );
 
   return (
@@ -195,33 +193,33 @@ function GradeInline({ product, onAdd, onClose }: {
       <GradeHeader onClose={onClose} />
 
       <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
-        <Box bg="var(--mantine-color-default-hover)" style={{ ...rowStyle, borderBottom: BORDER }}>
+        <Group gap={0} wrap="nowrap" bg="var(--mantine-color-default-hover)" style={{ borderBottom: BORDER }}>
           {rowLabel('Numeração')}
           {sizes.map(s => (
-            <Text lh={1.5} key={s} px={4} py={6} ta="center" size="0.72rem" fw={600}>Nº {s}</Text>
+            <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" size="0.72rem" fw={600}>Nº {s}</Text>
           ))}
-          <Text lh={1.5} px={4} py={6} ta="center" c="dimmed" size="0.62rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>Total</Text>
-        </Box>
+          <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.62rem" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>Total</Text>
+        </Group>
 
-        <Box style={{ ...rowStyle, borderBottom: BORDER }}>
+        <Group gap={0} wrap="nowrap" style={{ borderBottom: BORDER }}>
           {rowLabel('Estoque')}
           {sizes.map(s => (
-            <Text lh={1.5} key={s} px={4} py={6} ta="center" c="teal.6" size="0.72rem" fw={600}>{product.grades[s]}</Text>
+            <Text lh={1.5} key={s} flex={1} miw={0} px={4} py={6} ta="center" c="teal.6" size="0.72rem" fw={600}>{product.grades[s]}</Text>
           ))}
-          <Text lh={1.5} px={4} py={6} ta="center" c="dimmed" size="0.7rem">
+          <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" c="dimmed" size="0.7rem">
             {Object.values(product.grades).reduce((a, b) => a + b, 0)}
           </Text>
-        </Box>
+        </Group>
 
-        <Box style={rowStyle}>
+        <Group gap={0} wrap="nowrap">
           {rowLabel('Quantidade')}
           {sizes.map(s => (
-            <Group key={s} px={4} py={6} gap={2} justify="center" wrap="nowrap">
+            <Group key={s} flex={1} miw={0} px={4} py={6} gap={2} justify="center" wrap="nowrap">
               <QtyStepper value={qtys[s]} onChange={v => set(s, v)} buttonSize={16} inputWidth={26} />
             </Group>
           ))}
-          <Text lh={1.5} px={4} py={6} ta="center" className="mono" size="0.78rem" fw={700}>{total}</Text>
-        </Box>
+          <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" className="mono" size="0.78rem" fw={700}>{total}</Text>
+        </Group>
       </Paper>
 
       <Group justify="flex-end" gap="sm" mt={8} mb={4} wrap="nowrap">

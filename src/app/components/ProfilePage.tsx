@@ -22,7 +22,7 @@ import {
   XCircleIcon,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
-import { SimpleGrid, Paper, Group, Stack, Box, Text, ThemeIcon, Switch, Badge, Button, Progress } from "@mantine/core";
+import { SimpleGrid, Grid, Paper, Group, Stack, Box, Text, ThemeIcon, Switch, Badge, Button, Progress } from "@mantine/core";
 import interactive from "./interactive.module.css";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -51,10 +51,14 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
 
 function Field({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
-    <SimpleGrid cols={3} spacing="sm" py={6} className={interactive.rowDivider} style={{ alignItems: 'start' }}>
-      <Text c="dimmed" size="0.75rem">{label}</Text>
-      <Text fw={500} size="0.82rem" ff={mono ? 'monospace' : undefined} style={{ gridColumn: 'span 2' }}>{value}</Text>
-    </SimpleGrid>
+    <Grid gutter="sm" align="flex-start" py={6} className={interactive.rowDivider}>
+      <Grid.Col span={4}>
+        <Text c="dimmed" size="0.75rem">{label}</Text>
+      </Grid.Col>
+      <Grid.Col span={8}>
+        <Text fw={500} size="0.82rem" ff={mono ? 'monospace' : undefined}>{value}</Text>
+      </Grid.Col>
+    </Grid>
   );
 }
 
