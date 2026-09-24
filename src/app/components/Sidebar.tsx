@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import {
   Group, Button, ActionIcon, Affix, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider,
+  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   SquaresFourIcon,
   PackageIcon,
@@ -28,6 +29,7 @@ import {
   WarehouseIcon,
   ReceiptIcon,
   FileTextIcon,
+  FunnelIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -292,9 +294,12 @@ interface TopBarProps {
   onLogout: () => void;
   cartCount?: number;
   selectedClient?: Client | null;
+  /** Quando informado (catálogo), mostra o botão que abre o Drawer de filtros abaixo do breakpoint lg */
+  onOpenFilters?: () => void;
 }
 
-export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient }: TopBarProps) {
+export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient, onOpenFilters }: TopBarProps) {
+  const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
@@ -360,21 +365,43 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
     <Box
       component="header"
       h={56}
-      px="lg"
+      px={{ base: 'sm', sm: 'lg' }}
       flex="none"
       bg="color-mix(in srgb, var(--mantine-color-body) 80%, transparent)"
       className={classes.header}
     >
-      <Group h="100%" gap="sm" wrap="nowrap">
-        <Group flex={1} miw={0} gap="sm" wrap="nowrap">
+      <Group h="100%" gap="xs" wrap="nowrap">
+        <Group flex={1} miw={0} gap="xs" wrap="nowrap">
+          {/* Abaixo do breakpoint sm a navegação principal vai para o Drawer do Burger */}
+          {headerItems.length > 0 && (
+            <Burger
+              opened={navOpened}
+              onClick={toggleNav}
+              hiddenFrom="sm"
+              size="sm"
+              aria-label="Abrir navegação"
+            />
+          )}
+          {onOpenFilters && (
+            <ActionIcon
+              onClick={onOpenFilters}
+              hiddenFrom="lg"
+              variant="default"
+              size="lg"
+              aria-label="Abrir filtros"
+              title="Filtros"
+            >
+              <FunnelIcon size={16} />
+            </ActionIcon>
+          )}
           {currentView !== 'catalog' && (
             <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
-              <Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />
+              <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
             </Group>
           )}
           {/* Nav items à esquerda quando existem, caso contrário título */}
           {headerItems.length > 0 ? (
-            <Group gap={4} wrap="nowrap">
+            <Group gap={4} wrap="nowrap" visibleFrom="sm">
               {headerItems.map(item => {
                 const Icon = item.icon;
                 const active = currentView === item.view;
@@ -421,16 +448,32 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
 
           {/* Client chip — before avatar */}
           {selectedClient && (
-            <Button
-              onClick={() => onNavigate('history')}
-              variant="default"
-              color="neutral"
-              size="sm"
-              leftSection={<StorefrontIcon size={14} />}
-              title="Ver histórico de pedidos deste cliente"
-            >
-              {selectedClient.name}
-            </Button>
+            <>
+              <Button
+                onClick={() => onNavigate('history')}
+                variant="default"
+                color="neutral"
+                size="sm"
+                maw={{ sm: 180, lg: 260 }}
+                visibleFrom="sm"
+                leftSection={<StorefrontIcon size={14} />}
+                title="Ver histórico de pedidos deste cliente"
+                styles={{ label: { overflow: 'hidden', textOverflow: 'ellipsis' } }}
+              >
+                {selectedClient.name}
+              </Button>
+              <ActionIcon
+                onClick={() => onNavigate('history')}
+                hiddenFrom="sm"
+                variant="default"
+                color="neutral"
+                size="lg"
+                aria-label={`Ver histórico de pedidos de ${selectedClient.name}`}
+                title={selectedClient.name}
+              >
+                <StorefrontIcon size={16} />
+              </ActionIcon>
+            </>
           )}
 
           {/* Avatar + dropdown */}
@@ -466,6 +509,37 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           </Menu>
         </Group>
       </Group>
+
+      <Drawer
+        opened={navOpened}
+        onClose={closeNav}
+        hiddenFrom="sm"
+        size={280}
+        title={<Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />}
+      >
+        <Stack gap={2}>
+          {headerItems.map(item => {
+            const Icon = item.icon;
+            const active = currentView === item.view;
+            return (
+              <NavLink
+                key={item.label}
+                component="button"
+                onClick={() => { onNavigate(item.view); closeNav(); }}
+                active={active}
+                color="neutral"
+                variant="light"
+                label={item.label}
+                leftSection={<Icon size={16} />}
+                styles={{
+                  root: { borderRadius: 'var(--mantine-radius-sm)' },
+                  label: { fontSize: '0.88rem', fontWeight: active ? 600 : 400 },
+                }}
+              />
+            );
+          })}
+        </Stack>
+      </Drawer>
     </Box>
   );
 }

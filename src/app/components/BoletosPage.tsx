@@ -411,7 +411,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   ];
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Financial summary */}
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
         {stats.map(stat => (
@@ -445,8 +445,8 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          flex={1}
-          miw={160}
+          flex={{ base: '1 1 100%', sm: 1 }}
+          miw={{ sm: 160 }}
         />
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
           <Group gap={6}>

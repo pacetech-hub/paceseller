@@ -17,7 +17,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
     .sort((a, b) => b.value - a.value);
 
   return (
-    <Stack gap="lg" maw={1400} mx="auto" p="lg">
+    <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       <Button onClick={onBack} variant="subtle" color="neutral" size="sm" leftSection={<CaretLeftIcon size={16} />} px={0}>
         Voltar
       </Button>
@@ -35,7 +35,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
         />
       </Group>
 
-      <Paper withBorder radius="md" p="lg">
+      <Paper withBorder radius="md" p={{ base: 'md', sm: 'lg' }}>
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">

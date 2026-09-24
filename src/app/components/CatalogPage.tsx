@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { toast } from "../lib/toast";
+import { useSmallerThan } from "../lib/responsive";
 import {
-  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Group, Modal, NumberInput,
+  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
   Paper, ScrollArea, Select, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
@@ -200,7 +201,9 @@ function GradeInline({ product, onAdd, onClose }: {
       <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
         <GradeHeader onClose={onClose} />
 
-        <Card withBorder radius="md" padding={0}>
+        {/* Em telas estreitas a grade rola na horizontal em vez de espremer os steppers */}
+        <ScrollArea type="auto" offsetScrollbars="x">
+        <Card withBorder radius="md" padding={0} miw={150 + sizes.length * 66}>
           <Group gap={0} wrap="nowrap" bg="var(--mantine-color-default-hover)">
             {rowLabel('Numeração')}
             {sizes.map(s => (
@@ -231,6 +234,7 @@ function GradeInline({ product, onAdd, onClose }: {
             <Text lh={1.5} w={60} flex="none" px={4} py={6} ta="center" className="mono" size="0.78rem" fw={700}>{total}</Text>
           </Group>
         </Card>
+        </ScrollArea>
 
         <Group justify="flex-end" gap="sm" mt={8} mb={4} wrap="nowrap">
           <Text lh={1.5} c="dimmed" size="0.7rem">
@@ -273,8 +277,9 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
   if (viewMode === 'list') {
     return (
       <Card withBorder radius="lg" padding={0}>
-        <Group p="md" gap="md" wrap="nowrap">
-          <UnstyledButton onClick={onOpenDetail} w={80} h={80} flex="none">
+        {/* Abaixo de sm o bloco de preço/ações desce para uma linha própria */}
+        <Flex p={{ base: 'sm', sm: 'md' }} gap={{ base: 'sm', sm: 'md' }} wrap={{ base: 'wrap', sm: 'nowrap' }} align="center">
+          <UnstyledButton onClick={onOpenDetail} w={{ base: 64, sm: 80 }} h={{ base: 64, sm: 80 }} flex="none">
             <Paper radius="md" bg="#fff" h="100%">
               {!imgError ? (
                 <Image src={product.image} alt={product.name} h="100%" radius="md" onError={() => setImgError(true)} />
@@ -292,7 +297,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
                 <Text lh={1.5} size="0.9rem" fw={600}>{product.name}</Text>
                 <Text lh={1.5} c="dimmed" size="0.75rem">{product.line} · {product.category} · {product.collection}</Text>
               </Box>
-              <StarRating rating={product.rating} />
+              <Box visibleFrom="xs"><StarRating rating={product.rating} /></Box>
             </Group>
             <Group gap="sm" mt={8}>
               <Badge variant="light" color={availBadgeColor} size="sm" styles={{ label: { textTransform: 'none', fontSize: '0.65rem', fontWeight: 600 } }}>{product.availability}</Badge>
@@ -300,8 +305,15 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
               <Text lh={1.5} c="dimmed" size="0.72rem">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
             </Group>
           </UnstyledButton>
-          <Stack gap={8} align="flex-end" flex="none">
-            <Box ta="right">
+          <Flex
+            gap={8}
+            direction={{ base: 'row', sm: 'column' }}
+            align={{ base: 'center', sm: 'flex-end' }}
+            justify="space-between"
+            w={{ base: '100%', sm: 'auto' }}
+            flex="none"
+          >
+            <Box ta={{ base: 'left', sm: 'right' }}>
               <Text lh={1.5} className="mono" size="1.1rem" fw={700} lts="-0.01em">{formatCurrency(product.price)}</Text>
               <Text lh={1.5} c="dimmed" td="line-through" size="0.75rem">{formatCurrency(product.priceRetail)}</Text>
               <Text lh={1.5} c={PRIMARY_TEXT} size="0.65rem" fw={600}>+ IVA</Text>
@@ -327,8 +339,8 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
                 Compra rápida
               </Button>
             </Group>
-          </Stack>
-        </Group>
+          </Flex>
+        </Flex>
         {gradeOpen && (
           <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
         )}
@@ -392,9 +404,9 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         <Text lh={1.5} mt={2} truncate size="0.95rem" fw={600}>{product.name}</Text>
         <Text lh={1.5} c="dimmed" size="0.75rem">{product.material}</Text>
 
-        <Group justify="space-between" mt={8} wrap="nowrap">
+        <Group justify="space-between" mt={8} gap={4} wrap="nowrap">
           <StarRating rating={product.rating} />
-          <Text lh={1.5} c="dimmed" size="0.68rem">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
+          <Text lh={1.5} c="dimmed" size="0.68rem" flex="none" visibleFrom="xs">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
         </Group>
 
         <Divider mt="sm" color={BORDER_COLOR} />
@@ -404,7 +416,8 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             <Text lh={1.5} c="dimmed" td="line-through" size="0.72rem">{formatCurrency(product.priceRetail)}</Text>
             <Text lh={1.5} c={PRIMARY_TEXT} size="0.62rem" fw={600}>+ IVA</Text>
           </Box>
-          <Group gap={6} wrap="nowrap">
+          {/* Nos cards estreitos do celular (2 colunas) as cores ficam só no detalhe */}
+          <Group gap={6} wrap="nowrap" visibleFrom="sm">
             {product.colors.slice(0, 3).map(color => (
               <Text lh={1.5} key={color} c="dimmed" size="0.62rem">
                 {color === product.colors[0] ? color : '·'}
@@ -431,13 +444,16 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
 }) {
   const [activeImg, setActiveImg] = useState(0);
   const images = [product.image, product.image, product.image];
+  // Abaixo do breakpoint sm o modal ocupa a tela inteira
+  const fullScreen = useSmallerThan('sm');
   return (
     <Modal
       opened
       onClose={onClose}
       centered
       size="56rem"
-      radius="xl"
+      fullScreen={fullScreen}
+      radius={fullScreen ? 0 : 'xl'}
       padding={0}
       overlayProps={{ backgroundOpacity: 0.7 }}
       title={
@@ -446,7 +462,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
         </Text>
       }
       styles={{
-        content: { display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' },
+        content: { display: 'flex', flexDirection: 'column', maxHeight: fullScreen ? '100dvh' : '90vh', overflow: 'hidden' },
         header: { padding: '12px 20px', minHeight: 0, borderBottom: BORDER },
         body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0 },
       }}
@@ -465,7 +481,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
               ))}
             </Group>
           </Stack>
-          <Stack gap="md" p="lg">
+          <Stack gap="md" p={{ base: 'md', sm: 'lg' }}>
             <Box>
               <Group justify="space-between" align="flex-start" gap={8} wrap="nowrap">
                 <Title order={2} size="1.4rem" fw={700} lts="-0.01em">{product.name}</Title>
@@ -687,7 +703,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   );
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Promo Banner */}
       <Card withBorder radius="xl" shadow="xs" padding={0}>
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
@@ -695,9 +711,10 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
       {/* Header + Controls */}
       <Group gap="sm" wrap="wrap">
+        {/* Abaixo de sm a busca ocupa a linha inteira; ordenação e modo de exibição ficam na linha de baixo */}
         <TextInput
-          flex={1}
-          miw={200}
+          flex={{ base: '1 1 100%', sm: 1 }}
+          miw={{ sm: 200 }}
           placeholder="Buscar produto, referência, linha..."
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
@@ -726,7 +743,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         )}
 
         <Select
-          w={170}
+          flex={{ base: 1, sm: 'none' }}
+          w={{ sm: 170 }}
           allowDeselect={false}
           value={sortBy}
           onChange={v => v && setSortBy(v)}
@@ -814,7 +832,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           <Text lh={1.5} c="dimmed" mt={4} size="0.85rem">Tente ajustar os filtros ou a busca</Text>
         </Stack>
       ) : viewMode === 'grid' ? (
-        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" className={classes.grid}>
+        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={{ base: 'sm', sm: 'md' }} className={classes.grid}>
           {sorted.map(product => renderProductCard(product, 'grid'))}
         </SimpleGrid>
       ) : (

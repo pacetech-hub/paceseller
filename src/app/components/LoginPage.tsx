@@ -52,16 +52,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <Box mih="100vh" bg={`var(--mantine-color-dark-7) url(${loginBanner})`} bgsz="cover" bgp="30% center">
-      <Paper className={classes.form} radius={0} px={30} pb={30} pt={{ base: 48, sm: 80 }}>
-        <Box mb={50}>
+    <Box mih="100dvh" bg={`var(--mantine-color-dark-7) url(${loginBanner})`} bgsz="cover" bgp="30% center">
+      <Paper className={classes.form} radius={0} px={{ base: 'lg', xs: 30 }} pb={30} pt={{ base: 48, sm: 80 }}>
+        <Box mb={{ base: 32, sm: 50 }}>
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
         </Box>
 
         <Title order={2} lts="-0.02em" mb={4}>
           Bem-vindo de volta!
         </Title>
-        <Text c="dimmed" size="sm" mb={40}>
+        <Text c="dimmed" size="sm" mb={{ base: 28, sm: 40 }}>
           Catálogo digital, pedidos por grade, marketing com IA e sell-out em uma única plataforma.
         </Text>
 
@@ -90,7 +90,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             radius="md"
           />
 
-          <Group justify="space-between" mt="xl">
+          <Group justify="space-between" mt="xl" gap="sm">
             <Checkbox
               label="Manter conectado"
               checked={keepLoggedIn}

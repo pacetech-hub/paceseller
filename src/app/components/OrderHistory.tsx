@@ -91,6 +91,7 @@ export function statusSupportText(order: Order): string {
 }
 
 // shared column template so the legend row and every card line up exactly
+// (a partir do breakpoint md; abaixo dele o card vira uma lista empilhada)
 // Larguras fixas das colunas; a coluna do pedido ocupa o espaço restante.
 // Cliente só aparece para admin/rep e representante só para admin/lojista.
 const COL = { client: 160, rep: 150, qty: 100, total: 130, caret: 20 } as const;
@@ -105,24 +106,35 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
       <UnstyledButton
         onClick={onOpen}
         className={classes.hoverable}
-        p="md"
+        p={{ base: 'sm', sm: 'md' }}
         w="100%"
       >
         <Group gap="md" wrap="nowrap">
           {/* column 1: order info */}
           <Box flex={1} miw={0}>
-            <Group gap={8} mb={4}>
+            <Group gap={6} mb={4}>
               <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="0.72rem" flex="none">{support}</Text>
+              <Text c="dimmed" size="0.72rem">{support}</Text>
             </Group>
             <Text size="0.85rem" fw={600} truncate>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
             </Text>
+            {/* Resumo compacto das colunas abaixo do breakpoint md */}
+            <Group hiddenFrom="md" justify="space-between" gap="xs" mt={6} wrap="nowrap">
+              <Text c="dimmed" size="0.75rem" truncate>
+                {[
+                  profile !== 'lojista' ? client?.name ?? order.client : null,
+                  profile !== 'rep' ? order.rep : null,
+                  `${order.items} pares`,
+                ].filter(Boolean).join(' · ')}
+              </Text>
+              <Text className="mono" size="0.9rem" fw={700} flex="none">{formatCurrency(order.total)}</Text>
+            </Group>
           </Box>
 
           {/* column 2: cliente (admin/rep only) */}
           {profile !== 'lojista' && (
-            <Box w={COL.client} flex="none">
+            <Box w={COL.client} flex="none" visibleFrom="md">
               <Text size="0.8rem" fw={500} truncate>{client?.name ?? order.client}</Text>
               <Text c="dimmed" size="0.7rem" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
             </Box>
@@ -130,18 +142,18 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
 
           {/* column 3: representante (hidden for rep, viewing their own orders) */}
           {profile !== 'rep' && (
-            <Box w={COL.rep} flex="none">
+            <Box w={COL.rep} flex="none" visibleFrom="md">
               <Text size="0.8rem" fw={500} truncate>{order.rep}</Text>
             </Box>
           )}
 
           {/* column 4: quantidade */}
-          <Box w={COL.qty} flex="none">
+          <Box w={COL.qty} flex="none" visibleFrom="md">
             <Text size="0.8rem" fw={500} truncate>{order.items} pares</Text>
           </Box>
 
           {/* column 5: total */}
-          <Box w={COL.total} flex="none" ta="right">
+          <Box w={COL.total} flex="none" ta="right" visibleFrom="md">
             <Text className="mono" size="0.95rem" fw={700} truncate>{formatCurrency(order.total)}</Text>
           </Box>
 
@@ -176,7 +188,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
     .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Filters */}
       <Group gap="sm" wrap="wrap">
         <TextInput
@@ -184,8 +196,8 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           leftSection={<MagnifyingGlassIcon size={14} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
-          flex={1}
-          miw={160}
+          flex={{ base: '1 1 100%', sm: 1 }}
+          miw={{ sm: 160 }}
         />
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
           <Group gap={6}>
@@ -206,6 +218,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
             radius="lg"
             px="md"
             py={10}
+            visibleFrom="md"
             pos="sticky"
             top={0}
             c="dimmed"

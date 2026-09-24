@@ -143,7 +143,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
   if (!client) {
     return (
-      <Stack gap="md" p="lg" maw={1400} mx="auto">
+      <Stack gap="md" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
         {backButton}
         <Text c="dimmed">Nenhum cliente selecionado.</Text>
       </Stack>
@@ -157,11 +157,11 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   const stuckProducts = products.filter(p => stockStatusOf(p) === 'parado');
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
       {backButton}
 
       {/* Header */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <Group gap="md" wrap="nowrap" miw={0}>
           <Avatar size={56} radius="xl" color="neutral" variant="light" styles={{ placeholder: { fontSize: '1rem', fontWeight: 700 } }}>
             {client.avatar}
@@ -275,7 +275,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <RankCard title="Tipo com mais vendas" items={typeRanks} />
         </SimpleGrid>
 
-        <Paper withBorder radius="lg" p="lg">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Group gap="sm" mb="sm" wrap="nowrap">
             <ThemeIcon variant="light" color="gray" size={32} radius="md">
               <ListMagnifyingGlassIcon size={16} />
@@ -311,7 +311,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       </Stack>
 
       {/* Sugestões de venda */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <Title order={3} fw={600} mb="sm" fz="0.95rem">Sugestões de venda</Title>
 
         <Group gap={6} mb="md">
@@ -359,7 +359,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
 function RankCard({ title, items, renderLabel }: { title: string; items: RankItem[]; renderLabel?: (item: RankItem) => React.ReactNode }) {
   return (
-    <Paper withBorder radius="lg" p="lg">
+    <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
       <Title order={4} fw={600} mb="sm" fz="0.85rem">{title}</Title>
       <Stack gap="sm">
         {items.map(item => (

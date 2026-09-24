@@ -18,7 +18,7 @@ const TICKET = 5000;
 
 export function DashboardRep({ onNavigate, selectedClient, onSelectClient, onOpenOrderStatus }: DashboardRepProps) {
   return (
-    <Container size={1400} p="lg" w="100%">
+    <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       {/* VENDAS */}
       <SalesIndicatorsSection
         scope="own"

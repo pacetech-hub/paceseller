@@ -64,13 +64,13 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 export function SelloutDashboard() {
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* KPIs */}
       <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
         {kpis.map(kpi => {
           const TrendIcon = kpi.trend === 'up' ? TrendUpIcon : TrendDownIcon;
           return (
-            <Paper key={kpi.label} withBorder radius="lg" p="lg">
+            <Paper key={kpi.label} withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
               <Text c="dimmed" size="0.78rem" fw={500} mb={8}>{kpi.label}</Text>
               <Text className="mono" fw={700} fz="1.4rem" lts="-0.02em">{kpi.value}</Text>
               <Group gap={6} mt={6} wrap="nowrap">
@@ -89,7 +89,7 @@ export function SelloutDashboard() {
       <Grid gutter="md">
         {/* Sell-in x Sell-out trend */}
         <Grid.Col span={{ base: 12, lg: 8 }}>
-          <Paper withBorder radius="lg" p="lg" h="100%">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
             <Group justify="space-between" mb="lg">
               <Box>
                 <ChartTitle>Evolução Sell-in × Sell-out</ChartTitle>
@@ -160,7 +160,7 @@ export function SelloutDashboard() {
 
       {/* Performance por linha */}
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-        <Paper withBorder radius="lg" p="lg">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md"><ChartTitle>Performance por Linha</ChartTitle></Box>
           <Stack gap="md">
             {stockByLine.map(line => (
@@ -183,7 +183,7 @@ export function SelloutDashboard() {
         </Paper>
 
         {/* Regional */}
-        <Paper withBorder radius="lg" p="lg">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md"><ChartTitle>Sell-out por Região</ChartTitle></Box>
           <BarChart
             h={200}
@@ -203,7 +203,7 @@ export function SelloutDashboard() {
       </SimpleGrid>
 
       {/* Encalhe Alerts */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" mb="md">
           <Group gap={8}>
             <WarningIcon size={16} color="var(--mantine-color-yellow-6)" />

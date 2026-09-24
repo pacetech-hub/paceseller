@@ -127,9 +127,9 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
   };
 
   return (
-    <Box p="lg" maw={1400} mx="auto" w="100%">
+    <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <Group justify="space-between" align="flex-start" gap="sm" mb="lg">
-        <Box>
+        <Box flex="1 1 260px" miw={0}>
           <Title order={2} fw={700} fz="1.15rem">
             {lockClient ? 'Meus carrinhos' : selectedClient && !showAll ? `Carrinhos de ${selectedClient.name}` : 'Carrinhos em construção'}
           </Title>
@@ -147,6 +147,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             disabled={!canCreate}
             title={canCreate ? 'Criar novo carrinho' : 'Selecione um cliente para criar um carrinho'}
             leftSection={<PlusIcon size={16} />}
+            w={{ base: '100%', xs: 'auto' }}
           >
             Novo carrinho
           </Button>
@@ -160,7 +161,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             <ThemeIcon variant="light" color="neutral" size={32} radius="md">
               <UsersIcon size={16} />
             </ThemeIcon>
-            <Box>
+            <Box miw={0}>
               <Text fw={600} size="0.85rem">Selecione um cliente para criar um carrinho</Text>
               <Text c="dimmed" size="0.75rem">Busque pelo nome ou abra sua carteira de clientes.</Text>
             </Box>
@@ -173,8 +174,8 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   onChange={e => setClientQuery(e.currentTarget.value)}
                   placeholder="Buscar cliente por nome ou código..."
                   leftSection={<MagnifyingGlassIcon size={14} />}
-                  flex={1}
-                  miw={220}
+                  flex={{ base: '1 1 100%', sm: 1 }}
+                  miw={{ sm: 220 }}
                 />
               </Popover.Target>
               <Popover.Dropdown p={4}>
@@ -208,7 +209,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
               </Popover.Dropdown>
             </Popover>
             {onNavigateClients && (
-              <Button onClick={onNavigateClients} variant="default" leftSection={<UsersIcon size={14} />}>
+              <Button onClick={onNavigateClients} variant="default" w={{ base: '100%', sm: 'auto' }} leftSection={<UsersIcon size={14} />}>
                 Buscar clientes em carteira
               </Button>
             )}
@@ -223,6 +224,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           onChange={v => setShowAll(v === 'all')}
           size="sm"
           mb="md"
+          w={{ base: '100%', xs: 'auto' }}
           data={[
             { value: 'client', label: 'Deste cliente' },
             {

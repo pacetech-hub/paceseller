@@ -21,7 +21,7 @@ const POS = 'teal.7';
 function Card({ title, hint, span = 12, children }: { title: string; hint?: string; span?: number; children: React.ReactNode }) {
   return (
     <Grid.Col span={{ base: 12, lg: span }}>
-      <Paper withBorder radius="lg" p="lg" h="100%">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
         <Title order={3} size="0.9rem" fw={600}>{title}</Title>
         {hint && <Text c="dimmed" size="0.72rem" mt={4}>{hint}</Text>}
         <Box mt="sm">{children}</Box>
@@ -131,7 +131,7 @@ const histData = [
 
 export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
   return (
-    <Container size={1400} p="lg" w="100%">
+    <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="lg">
         <Group justify="space-between" align="flex-start" gap="sm">
           <Box>

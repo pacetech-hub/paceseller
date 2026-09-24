@@ -23,8 +23,16 @@
   opacity: 1;
 }
 
+/* Em telas de toque não há hover: as ações ficam sempre visíveis */
+@media (hover: none) {
+  .overlay {
+    opacity: 1;
+  }
+}
+
 .overlayAction {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +41,19 @@
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 600;
+  white-space: nowrap;
   transition: background-color 150ms ease;
+
+  /* Cards estreitos (2 colunas no celular): ações mais compactas */
+  @mixin smaller-than $mantine-breakpoint-sm {
+    gap: 4px;
+    padding: 8px 0;
+    font-size: 0.68rem;
+
+    & svg {
+      display: none;
+    }
+  }
 }
 
 .overlayDetails {

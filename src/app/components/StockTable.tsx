@@ -57,7 +57,7 @@ export function StockKpis({ items }: { items: StockItem[] }) {
   ];
 
   return (
-    <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
+    <SimpleGrid cols={{ base: 2, lg: 4 }} spacing={{ base: 'sm', sm: 'md' }}>
       {cards.map(k => {
         const Icon = k.icon;
         return (
@@ -68,7 +68,7 @@ export function StockKpis({ items }: { items: StockItem[] }) {
                 <Icon size={14} />
               </ThemeIcon>
             </Group>
-            <Text fw={700} size="1.4rem" lh={1} lts="-0.02em">{k.value}</Text>
+            <Text fw={700} fz={{ base: '1.15rem', sm: '1.4rem' }} lh={1} lts="-0.02em">{k.value}</Text>
             <Text c="dimmed" size="0.72rem" mt={4}>{k.sub}</Text>
           </Paper>
         );
@@ -150,21 +150,22 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
           onChange={e => onQueryChange(e.currentTarget.value)}
           placeholder="Buscar por SKU ou nome..."
           leftSection={<MagnifyingGlassIcon size={14} />}
-          flex={1}
-          miw={200}
+          flex={{ base: '1 1 100%', sm: 1 }}
+          miw={{ sm: 200 }}
         />
         <SegmentedControl
           size="xs"
+          w={{ base: '100%', sm: 'auto' }}
           value={filter}
           onChange={v => onFilterChange(v as StockFilter)}
           data={STOCK_FILTER_OPTIONS}
         />
         {showBulkActions && (
           <>
-            <Button variant="default" size="sm" leftSection={<UploadSimpleIcon size={14} />}>
+            <Button variant="default" size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<UploadSimpleIcon size={14} />}>
               Importar planilha
             </Button>
-            <Button size="sm" leftSection={<PlusIcon size={14} />}>
+            <Button size="sm" flex={{ base: 1, sm: 'none' }} leftSection={<PlusIcon size={14} />}>
               Adicionar SKU
             </Button>
           </>

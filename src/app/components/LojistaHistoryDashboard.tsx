@@ -96,7 +96,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
   ];
 
   return (
-    <Container size={1400} p="lg" w="100%">
+    <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="lg">
         {/* Header */}
         <Group justify="space-between" gap="sm">
@@ -148,7 +148,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         </SimpleGrid>
 
         {/* Sell-in x Sell-out chart */}
-        <Paper withBorder radius="lg" p="lg">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md">
             <Title order={3} size="0.95rem" fw={700}>Sell-in × Sell-out</Title>
             <Text c="dimmed" size="0.74rem">Comparativo mensal</Text>
@@ -174,7 +174,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         {/* Linhas em destaque */}
         <Grid gutter="lg">
           <Grid.Col span={{ base: 12, lg: 8 }}>
-            <Paper withBorder radius="lg" p="lg" h="100%">
+            <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="md">
                 <Group gap="xs">
                   <TrophyIcon size={16} color="var(--mantine-color-yellow-6)" />
@@ -200,7 +200,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, lg: 4 }}>
-            <Paper withBorder radius="lg" p="lg" h="100%">
+            <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="sm">
                 <Title order={3} size="0.95rem" fw={700}>Ranking</Title>
                 <Text c="dimmed" size="0.72rem">Top 5</Text>

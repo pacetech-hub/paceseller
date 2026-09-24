@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Stack, Group, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
+  Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
   Tabs, Table, ActionIcon, Avatar, Collapse, Alert, Divider,
 } from "@mantine/core";
 import {
@@ -59,7 +59,7 @@ function ErpSyncNotice({ text }: { text: string }) {
 
 function PolicySection({ icon: SectionIcon, title, hint, children }: { icon: Icon; title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <Paper withBorder radius="lg" p="lg" h="100%">
+    <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
       <Group gap={8} mb={4}>
         <SectionIcon size={14} />
         <Title order={4} fw={600} fz="0.85rem">{title}</Title>
@@ -96,13 +96,19 @@ function UserCell({ name }: { name: string }) {
 function SettingRow({ label, desc, children }: { label: string; desc: string; children: React.ReactNode }) {
   return (
     <Paper withBorder radius="md" p="md" bg="var(--mantine-color-default-hover)">
-      <Group justify="space-between" wrap="nowrap" gap="md">
+      {/* Valor abaixo do texto no celular; à direita a partir de xs */}
+      <Flex
+        direction={{ base: 'column', xs: 'row' }}
+        justify="space-between"
+        align={{ base: 'flex-start', xs: 'center' }}
+        gap={{ base: 'xs', xs: 'md' }}
+      >
         <Box>
           <Text size="0.85rem" fw={500}>{label}</Text>
           <Text c="dimmed" size="0.75rem">{desc}</Text>
         </Box>
         {children}
-      </Group>
+      </Flex>
     </Paper>
   );
 }
@@ -177,7 +183,7 @@ export function AdminPage() {
   );
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Tab bar */}
       <Paper withBorder radius="lg" p={4}>
         <Tabs value={activeTab} onChange={v => v && setActiveTab(v)} variant="pills" color="gray">
@@ -232,7 +238,7 @@ export function AdminPage() {
                 onClick={() => setSelectedPolicyId(policy.id)}
                 withBorder
                 radius="lg"
-                p="lg"
+                p={{ base: 'md', sm: 'lg' }}
                 className={`${classes.cardButton} ${classes.hoverable}`}
               >
                 <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
@@ -286,7 +292,7 @@ export function AdminPage() {
             <ErpSyncNotice text="Esta política é somente leitura — a regra ativa vem do ERP da Tesla." />
 
             {/* Identidade */}
-            <Paper withBorder radius="lg" p="lg">
+            <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
               <Box mb="md">
                 <Title order={2} fw={700} mb={4} fz="1.15rem">{policy.name}</Title>
                 <Text c="dimmed" size="0.78rem">Configuração da política comercial</Text>
@@ -343,13 +349,14 @@ export function AdminPage() {
 
             {/* Clientes cobertos */}
             <Card withBorder radius="lg" padding={0}>
-              <Box p="lg">
+              <Box p={{ base: 'md', sm: 'lg' }}>
                 <Title order={3} fw={600} fz="0.95rem">Clientes cobertos</Title>
                 <Text c="dimmed" size="0.75rem" mt={4}>
                   Resultado consolidado dos critérios acima · {policy.clients} lojistas · somente leitura
                 </Text>
               </Box>
               <Divider color="var(--mantine-color-default-border)" />
+              <Table.ScrollContainer minWidth={520}>
               <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
@@ -368,6 +375,7 @@ export function AdminPage() {
                   ))}
                 </Table.Tbody>
               </Table>
+              </Table.ScrollContainer>
             </Card>
           </Stack>
         );
@@ -377,7 +385,7 @@ export function AdminPage() {
       {activeTab === 'policies' && (
         <Stack gap="md">
           <ErpSyncNotice text="Políticas são somente leitura neste momento — os valores exibidos refletem as regras vigentes no ERP da Tesla." />
-          <Paper withBorder radius="lg" p="lg">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} fw={600} size="1rem" mb="md">Configurações de aprovação</Title>
             <Stack gap="md">
               {[
@@ -392,7 +400,7 @@ export function AdminPage() {
             </Stack>
           </Paper>
 
-          <Paper withBorder radius="lg" p="lg">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} fw={600} size="1rem" mb={4}>Inadimplência</Title>
             <Text c="dimmed" size="0.78rem" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
             <SettingRow label="Clientes inadimplentes" desc="Condição de pagamento aplicada automaticamente a clientes com débitos em aberto">
@@ -408,7 +416,7 @@ export function AdminPage() {
       {activeTab === 'settings' && (
         <Stack gap="md">
           {/* Usuários */}
-          <Paper withBorder radius="lg" p="lg">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Group justify="space-between" mb="md" gap="sm">
               <Title order={3} fw={600} size="1rem">Usuários</Title>
               <Group gap={8}>
@@ -427,7 +435,7 @@ export function AdminPage() {
             <Collapse in={showAddUser}>
               <Paper withBorder radius="lg" p="md" mb="md" bg="var(--mantine-color-default-hover)">
                 <Title order={4} fw={600} mb="sm" fz="0.88rem">Adicionar usuário</Title>
-                <SimpleGrid cols={2} spacing="sm">
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                   <TextInput label="Nome completo" placeholder="Nome do usuário" size="xs" />
                   <TextInput label="E-mail" placeholder="email@tesla.com.br" size="xs" />
                   <Select
@@ -487,7 +495,7 @@ export function AdminPage() {
           </Paper>
 
           {/* Usuários vinculados a representantes e lojistas */}
-          <Paper withBorder radius="lg" p="lg">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} fw={600} size="1rem">Usuários vinculados</Title>
             <Text c="dimmed" size="0.78rem" mt={4} mb="md">
               Contas registradas sob um representante ou lojista (ex.: prepostos e compradores). Cada um gerencia o perfil de acesso da própria equipe.
@@ -525,9 +533,9 @@ export function AdminPage() {
             </Table.ScrollContainer>
           </Paper>
 
-          <Paper withBorder radius="lg" p="lg">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} fw={600} size="1rem" mb="md">Informações da empresa</Title>
-            <SimpleGrid cols={2} spacing="md">
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               {[
                 { label: 'Nome da empresa', value: 'Tesla Footwear Indústria LTDA' },
                 { label: 'CNPJ', value: '12.345.678/0001-90' },
@@ -551,7 +559,7 @@ export function AdminPage() {
       {activeTab === 'permissions' && (
         <Stack gap="md">
           {/* Visão selector */}
-          <SimpleGrid cols={3} spacing="sm">
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
             {visoes.map(v => {
               const VisaoIcon = v.icon;
               const active = activeView === v.id;

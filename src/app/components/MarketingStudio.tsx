@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Stack, Group, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
+  Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
   Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
@@ -186,9 +186,9 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
 
 function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Header */}
-      <Paper withBorder radius="lg" p="lg" bg="var(--mantine-color-default-hover)">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
         <Group justify="space-between" wrap="wrap" gap="md">
           <Group gap="sm" wrap="nowrap">
             <ThemeIcon variant="light" color="neutral" size={40} radius="md">
@@ -199,7 +199,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               <Text c="dimmed" size="0.8rem">Crie campanhas profissionais em menos de 2 minutos</Text>
             </Box>
           </Group>
-          <Group gap={8} wrap="nowrap" flex="none">
+          <Group gap={8} wrap="wrap">
             <Button
               onClick={onManageCampaigns}
               variant="subtle"
@@ -295,7 +295,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
   };
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <BackLink onClick={onBack} />
 
       <Box>
@@ -303,9 +303,10 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         <Text c="dimmed" size="0.8rem">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
       </Box>
 
-      <Group align="flex-start" gap="lg" wrap="nowrap">
+      {/* Lista à esquerda e detalhe à direita a partir de sm; empilhados abaixo disso */}
+      <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'flex-start' }} gap="lg">
         {/* Left panel: campaign list */}
-        <Paper withBorder radius="lg" p={8} w={256} flex="none">
+        <Paper withBorder radius="lg" p={8} w={{ base: '100%', sm: 220, md: 256 }} flex="none">
           <Stack gap={2}>
             {campaigns.map(c => {
               const active = selectedId === c.id;
@@ -414,7 +415,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             <EmptyState withCard strongTitle iconSize={40} py={64} title="Nenhuma campanha selecionada" subtitle="Selecione uma campanha à esquerda ou crie uma nova" />
           )}
         </Stack>
-      </Group>
+      </Flex>
 
       {/* Create campaign dialog */}
       <Modal
@@ -568,7 +569,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
   const optionClass = `${interactive.cardButton} ${classes.option}`;
 
   return (
-    <Stack gap="lg" p="lg" maw={1400} mx="auto" w="100%">
+    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <BackLink onClick={onBack} />
 
       {/* Stepper */}
@@ -615,7 +616,7 @@ function CampaignWizard({ profile, campaigns, onBack, onFinish }: { profile: Pro
       </Paper>
 
       {/* Step Content */}
-      <Paper withBorder radius="lg" p="lg">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
         {/* Step 1: Campanha */}
         {step === 1 && (
           <Box>

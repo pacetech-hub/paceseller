@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Accordion, ActionIcon, Affix, Badge, Box, Button, Chip, ColorSwatch, Divider, Drawer, Group, Image,
+  Accordion, ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Divider, Drawer, Group, Image,
   ScrollArea, Select, SimpleGrid, Slider, Stack, Text, TextInput, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import {
@@ -9,7 +9,6 @@ import {
   StackIcon,
   PaletteIcon,
   CurrencyDollarIcon,
-  ListIcon,
   XIcon,
   SignOutIcon,
   CaretLeftIcon,
@@ -77,11 +76,13 @@ interface Props {
   onLogout: () => void;
   profile?: 'lojista' | 'rep' | 'admin';
   selectedClient?: Client | null;
+  /** Abaixo do breakpoint lg os filtros abrem num Drawer, acionado pelo botão de filtros do TopBar */
+  mobileOpened?: boolean;
+  onMobileClose?: () => void;
 }
 
-export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = 'lojista' }: Props) {
+export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = 'lojista', mobileOpened = false, onMobileClose }: Props) {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
   const toggleColor = (c: string) => {
@@ -338,20 +339,9 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
 
   return (
     <>
-      <Affix position={{ top: 16, left: 16 }} zIndex={50} hiddenFrom="lg">
-        <ActionIcon
-          onClick={() => setMobileOpen(true)}
-          variant="default"
-          size="lg"
-          aria-label="Abrir filtros"
-        >
-          <ListIcon size={16} />
-        </ActionIcon>
-      </Affix>
-
       <Drawer
-        opened={mobileOpen}
-        onClose={() => setMobileOpen(false)}
+        opened={mobileOpened}
+        onClose={() => onMobileClose?.()}
         hiddenFrom="lg"
         size={288}
         padding={0}
@@ -361,7 +351,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
         {renderContent(false)}
         {/* Depois do conteúdo no DOM, para ficar por cima dele sem z-index */}
         <ActionIcon
-          onClick={() => setMobileOpen(false)}
+          onClick={() => onMobileClose?.()}
           variant="subtle"
           color="gray"
           size="sm"

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Box, Stack } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
@@ -66,6 +67,7 @@ export default function App() {
   );
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
+  const [filtersOpened, { open: openFilters, close: closeFilters }] = useDisclosure(false);
 
   // Todos os perfis suportam múltiplos carrinhos.
   const multiCart = true;
@@ -286,7 +288,7 @@ export default function App() {
   const hideSidebar = currentView !== 'catalog';
 
   return (
-    <Box h="100vh" display="flex" className={classes.shell}>
+    <Box h="100dvh" display="flex" className={classes.shell}>
       {isFiltersCatalog ? (
         <LojistaFiltersSidebar
           filters={catalogFilters}
@@ -294,6 +296,8 @@ export default function App() {
           onLogout={handleLogout}
           profile={profile as 'lojista' | 'rep' | 'admin'}
           selectedClient={selectedClient}
+          mobileOpened={filtersOpened}
+          onMobileClose={closeFilters}
         />
       ) : hideSidebar ? null : (
         <Sidebar
@@ -316,6 +320,7 @@ export default function App() {
           onLogout={handleLogout}
           cartCount={cartsClient ? clientCarts.length : carts.length}
           selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
+          onOpenFilters={isFiltersCatalog ? openFilters : undefined}
         />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}

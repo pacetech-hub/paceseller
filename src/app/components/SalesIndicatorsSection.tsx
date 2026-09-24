@@ -198,7 +198,7 @@ export function SalesIndicatorsSection({
       </Group>
 
       {/* A + B */}
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+      <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="md">
         <KpiCard label="Pedidos no período" value={periodOrders.toLocaleString('pt-BR')} delta={ordersDelta} />
         <KpiCard label="Faturamento" value={formatCompactCurrency(periodValue)} delta={financeDelta} />
       </SimpleGrid>
@@ -206,7 +206,7 @@ export function SalesIndicatorsSection({
       {/* C: gráfico de colunas x ano anterior + status dos pedidos */}
       <Grid gutter="md">
         <Grid.Col span={{ base: 12, lg: 8 }}>
-          <Paper withBorder radius="lg" p="lg" h="100%">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
             <CardTitle title="Vendas vs. ano passado" subtitle="Colunas do período atual · linha do mesmo ciclo no ano anterior" />
             <CompositeChart
               h={240}
@@ -228,7 +228,7 @@ export function SalesIndicatorsSection({
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Paper withBorder radius="lg" p="lg" h="100%">
+          <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} h="100%">
             <CardTitle title="Pedidos por status" subtitle={`${periodOrders.toLocaleString('pt-BR')} pedidos no período`} />
             <Stack gap={2} mt="sm">
               {statusRows.map(s => (
@@ -249,8 +249,8 @@ export function SalesIndicatorsSection({
       </Grid>
 
       {/* D: top 10 vendedores */}
-      <Paper withBorder radius="lg" p="lg">
-        <Group justify="space-between" gap="xs" mb="sm">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
           <CardTitle title="Vendas por representante" />
           <SeeMoreButton onClick={onOpenSalesTeam} />
         </Group>
@@ -274,8 +274,8 @@ export function SalesIndicatorsSection({
       </Paper>
 
       {/* E: 5 clientes prioritários */}
-      <Paper withBorder radius="lg" p="lg">
-        <Group justify="space-between" gap="xs" mb="xs">
+      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+        <Group justify="space-between" gap="xs" mb="xs" wrap="nowrap">
           <CardTitle title="Prioridade de contato" />
           <SeeMoreButton onClick={onNavigateClients} />
         </Group>
@@ -304,7 +304,7 @@ function KpiCard({ label, value, delta }: { label: string; value: string; delta:
   return (
     <Paper withBorder radius="lg" p="md">
       <Text size="0.66rem" fw={700} tt="uppercase" lts="0.05em">{label}</Text>
-      <Text size="1.6rem" fw={700} mt={4} className="mono">{value}</Text>
+      <Text fz={{ base: '1.35rem', sm: '1.6rem' }} fw={700} mt={4} className="mono">{value}</Text>
       <Text c="teal.7" size="0.72rem" fw={600} mt={4}>{delta}</Text>
     </Paper>
   );
