@@ -15,6 +15,25 @@ const neutral: MantineColorsTuple = [
   "#000000",
 ];
 
+// Tipografia: apenas três pesos — regular (400), semibold (600) e bold (700).
+// O Mantine usa 500 em alguns rótulos internos; aqui eles passam para semibold.
+const SEMIBOLD = 600;
+
+// Campos de formulário: retângulo com borda visível e o rótulo próximo do próprio campo
+// (o espaço entre campos vem do Stack do formulário, sempre maior que este).
+const inputStyles = {
+  label: { fontWeight: SEMIBOLD, marginBottom: 6 },
+  description: { marginBottom: 6 },
+  error: { marginTop: 6 },
+};
+
+const inputDefaults = {
+  // Sem asterisco vermelho: campos opcionais são indicados por "(opcional)" no rótulo.
+  withAsterisk: false,
+  radius: "sm",
+  variant: "default",
+} as const;
+
 export const mantineTheme = createTheme({
   primaryColor: "neutral",
   primaryShade: 9,
@@ -37,5 +56,32 @@ export const mantineTheme = createTheme({
   },
   headings: {
     fontFamily: "Roboto, system-ui, sans-serif",
+    fontWeight: "700",
+  },
+  components: {
+    Button: {
+      styles: { label: { fontWeight: SEMIBOLD } },
+    },
+    InputWrapper: { defaultProps: { withAsterisk: false }, styles: inputStyles },
+    Input: { defaultProps: { radius: "sm", variant: "default" } },
+    TextInput: { defaultProps: inputDefaults, styles: inputStyles },
+    PasswordInput: { defaultProps: inputDefaults, styles: inputStyles },
+    NumberInput: { defaultProps: inputDefaults, styles: inputStyles },
+    Textarea: { defaultProps: inputDefaults, styles: inputStyles },
+    Select: { defaultProps: inputDefaults, styles: inputStyles },
+    MultiSelect: { defaultProps: inputDefaults, styles: inputStyles },
+    Autocomplete: { defaultProps: inputDefaults, styles: inputStyles },
+    FileInput: { defaultProps: inputDefaults, styles: inputStyles },
+    DateInput: { defaultProps: inputDefaults, styles: inputStyles },
+    DatePickerInput: { defaultProps: inputDefaults, styles: inputStyles },
+    ColorInput: { defaultProps: inputDefaults, styles: inputStyles },
+    // Rótulos internos do Mantine que usariam peso 500
+    SegmentedControl: { styles: { label: { fontWeight: SEMIBOLD } } },
+    Stepper: { styles: { stepLabel: { fontWeight: SEMIBOLD } } },
+    Menu: { styles: { label: { fontWeight: SEMIBOLD } } },
+    Combobox: { styles: { groupLabel: { fontWeight: SEMIBOLD } } },
+    Notification: { styles: { title: { fontWeight: SEMIBOLD } } },
+    Timeline: { styles: { itemTitle: { fontWeight: SEMIBOLD } } },
+    Tabs: { styles: { tab: { fontWeight: SEMIBOLD } } },
   },
 });

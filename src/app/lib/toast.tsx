@@ -5,7 +5,7 @@ import { CheckIcon, XIcon } from "@phosphor-icons/react";
 // agora exibida pelo sistema de notificações do Mantine.
 export const toast = {
   success: (message: string) =>
-    notifications.show({ message, color: "teal", icon: <CheckIcon size={16} weight="bold" /> }),
+    notifications.show({ message, color: "teal", icon: <CheckIcon size={16} /> }),
   error: (message: string) =>
-    notifications.show({ message, color: "red", icon: <XIcon size={16} weight="bold" /> }),
+    notifications.show({ message, color: "red", icon: <XIcon size={16} /> }),
 };

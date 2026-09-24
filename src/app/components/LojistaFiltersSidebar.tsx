@@ -266,7 +266,7 @@ export function LojistaFiltersSidebar({ filters, onChange, onLogout, profile = '
                           className={classes.swatch}
                           data-active={active || undefined}
                         >
-                          {active && <CheckIcon size={9} weight="bold" />}
+                          {active && <CheckIcon size={9} />}
                         </ColorSwatch>
                       );
                     })}
