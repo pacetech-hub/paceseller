@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Group, Button, ActionIcon, Affix, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger,
+  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger, Popover,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -30,11 +30,13 @@ import {
   ReceiptIcon,
   FileTextIcon,
   CrosshairIcon,
+  UserCircleIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 import classes from "./Sidebar.module.css";
+import { AppsGridMenu, type AppsGridItem } from "./AppsGridMenu";
 
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
@@ -304,7 +306,6 @@ interface TopBarProps {
   onLogout: () => void;
   cartCount?: number;
   selectedClient?: Client | null;
-  /** Quando informado (catálogo), mostra o botão que abre o Drawer de filtros abaixo do breakpoint lg */
 }
 
 export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient }: TopBarProps) {
@@ -312,7 +313,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
-  type DropdownItem = { label: string; icon: Icon; view?: View; action?: () => void };
   type HeaderItem = { label: string; icon: Icon; view: View };
 
   const headerItems: HeaderItem[] =
@@ -344,33 +344,57 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
         ];
 
-  const dropdownItems: DropdownItem[] =
+  // Menu único: todas as páginas do perfil (inclusive as que não cabem na barra do topo)
+  const menuItems: AppsGridItem<View>[] =
     profile === 'admin'
       ? [
-          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
-          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
-          { icon: SignOutIcon, label: 'Sair', action: onLogout },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard', color: 'blue' },
+          { icon: CrosshairIcon, label: 'Radar', view: 'radar', color: 'red' },
+          { icon: UsersIcon, label: 'Clientes', view: 'clients', color: 'teal' },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog', color: 'indigo' },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history', color: 'cyan' },
+          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos', color: 'green' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica', color: 'orange' },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing', color: 'grape' },
+          { icon: ShieldIcon, label: 'Administração', view: 'admin', color: 'gray' },
+          { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile', color: 'pink' },
         ]
       : profile === 'rep'
       ? [
-          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
-          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
-          { icon: SignOutIcon, label: 'Sair', action: onLogout },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard', color: 'blue' },
+          { icon: CrosshairIcon, label: 'Radar', view: 'radar', color: 'red' },
+          { icon: StorefrontIcon, label: 'Clientes', view: 'clients', color: 'teal' },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog', color: 'indigo' },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history', color: 'cyan' },
+          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock', color: 'yellow' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica', color: 'orange' },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing', color: 'grape' },
+          { icon: ShieldIcon, label: 'Permissões', view: 'permissions', color: 'gray' },
+          { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile', color: 'pink' },
         ]
       : [
-          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
-          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: UsersIcon, label: 'Meu Perfil', view: 'profile' },
-          { icon: SignOutIcon, label: 'Sair', action: onLogout },
+          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard', color: 'blue' },
+          { icon: CrosshairIcon, label: 'Radar', view: 'radar', color: 'red' },
+          { icon: PackageIcon, label: 'Catálogo', view: 'catalog', color: 'indigo' },
+          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history', color: 'cyan' },
+          { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock', color: 'yellow' },
+          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos', color: 'green' },
+          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica', color: 'orange' },
+          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing', color: 'grape' },
+          { icon: ShieldIcon, label: 'Permissões', view: 'permissions', color: 'gray' },
+          { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile', color: 'pink' },
         ];
 
-  const handleDropdownItem = (item: DropdownItem) => {
-    if (item.action) { item.action(); return; }
-    if (item.view) onNavigate(item.view);
+  const [appsOpened, setAppsOpened] = useState(false);
+  const selectPage = (view: View) => {
+    onNavigate(view);
+    setAppsOpened(false);
+    closeNav();
+  };
+  const logout = () => {
+    setAppsOpened(false);
+    closeNav();
+    onLogout();
   };
 
   return (
@@ -384,8 +408,8 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
     >
       <Group h="100%" gap="xs" wrap="nowrap">
         <Group flex={1} miw={0} gap="xs" wrap="nowrap">
-          {/* Abaixo do breakpoint sm a navegação principal vai para o Drawer do Burger */}
-          {headerItems.length > 0 && (
+          {/* Abaixo do breakpoint sm todas as páginas ficam no Drawer do Burger */}
+          {menuItems.length > 0 && (
             <Burger
               opened={navOpened}
               onClick={toggleNav}
@@ -487,37 +511,39 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             </>
           )}
 
-          {/* Avatar + dropdown */}
-          <Menu position="bottom-end" offset={8} shadow="md" width={192}>
-            <Menu.Target>
+          {/* Menu único com todas as páginas (a partir de sm; no celular o Burger abre o mesmo menu) */}
+          <Popover
+            opened={appsOpened}
+            onChange={setAppsOpened}
+            position="bottom-end"
+            offset={8}
+            shadow="md"
+            width={360}
+            withinPortal
+          >
+            <Popover.Target>
               <ActionIcon
+                onClick={() => setAppsOpened(o => !o)}
+                visibleFrom="sm"
                 variant="light"
                 color="neutral"
-                aria-label="Abrir Menu da Conta"
+                aria-label="Abrir Menu"
+                aria-expanded={appsOpened}
                 className={classes.avatarButton}
               >
                 <ProfileIcon size={16} color={profileInfo.color} />
               </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>{profileInfo.label}</Menu.Label>
-              {dropdownItems.map(item => {
-                const Icon = item.icon;
-                return (
-                  <Menu.Item
-                    key={item.label}
-                    leftSection={<Icon size={16} />}
-                    fz="md"
-                    mih={42}
-                    color={item.label === 'Sair' ? 'red' : undefined}
-                    onClick={() => handleDropdownItem(item)}
-                  >
-                    {item.label}
-                  </Menu.Item>
-                );
-              })}
-            </Menu.Dropdown>
-          </Menu>
+            </Popover.Target>
+            <Popover.Dropdown p={0} bd={0} bg="transparent">
+              <AppsGridMenu
+                title={profileInfo.label}
+                items={menuItems}
+                currentView={currentView}
+                onSelect={selectPage}
+                onLogout={logout}
+              />
+            </Popover.Dropdown>
+          </Popover>
         </Group>
       </Group>
 
@@ -525,29 +551,16 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         opened={navOpened}
         onClose={closeNav}
         hiddenFrom="sm"
-        size={280}
+        size={340}
         title={<Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />}
       >
-        <Stack gap={2}>
-          {headerItems.map(item => {
-            const Icon = item.icon;
-            const active = currentView === item.view;
-            return (
-              <NavLink
-                key={item.label}
-                component="button"
-                onClick={() => { onNavigate(item.view); closeNav(); }}
-                active={active}
-                color="neutral"
-                variant="light"
-                label={item.label}
-                leftSection={<Icon size={16} />}
-                classNames={{ root: classes.navLink, label: classes.navLabel }}
-                styles={{ label: { fontWeight: active ? 600 : 400 } }}
-              />
-            );
-          })}
-        </Stack>
+        <AppsGridMenu
+          title={profileInfo.label}
+          items={menuItems}
+          currentView={currentView}
+          onSelect={selectPage}
+          onLogout={logout}
+        />
       </Drawer>
     </Box>
   );
