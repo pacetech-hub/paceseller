@@ -30,6 +30,7 @@ import {
   ReceiptIcon,
   FileTextIcon,
   FunnelIcon,
+  CrosshairIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -39,7 +40,7 @@ import classes from "./Sidebar.module.css";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team';
+  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -320,6 +321,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
     profile === 'admin'
       ? [
           { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
           { icon: UsersIcon, label: 'Clientes', view: 'clients' as View },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
@@ -328,6 +330,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
       : profile === 'rep'
       ? [
           { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
           { icon: StorefrontIcon, label: 'Clientes', view: 'clients' as View },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
           { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' as View },
@@ -336,6 +339,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         ]
       : [
           { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' },
+          { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
           { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },

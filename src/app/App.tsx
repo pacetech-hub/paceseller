@@ -30,6 +30,7 @@ import { LojistaFiltersSidebar, defaultFilters, type CatalogFilters } from "./co
 import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
 import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
+import { RadarPage } from "./components/RadarPage";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -53,6 +54,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
   'ficha-tecnica': { title: 'Ficha Técnica', subtitle: 'Informações completas, imagens e medidas dos produtos' },
   'sales-team': { title: 'Vendedores', subtitle: 'Representantes e prepostos' },
+  radar: { title: 'Radar', subtitle: 'Ações recomendadas para reposição e cobertura de estoque' },
 };
 
 export default function App() {
@@ -271,6 +273,8 @@ export default function App() {
         return <StockPage />;
       case 'industry-stock':
         return <RepStockPage />;
+      case 'radar':
+        return <RadarPage profile={profile} />;
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:
