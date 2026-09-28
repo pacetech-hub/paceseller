@@ -296,7 +296,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         {/* Abaixo de sm o bloco de preço/ações desce para uma linha própria */}
         <Flex p={{ base: 'sm', sm: 'md' }} gap={{ base: 'sm', sm: 'md' }} wrap={{ base: 'wrap', sm: 'nowrap' }} align="center">
           <UnstyledButton onClick={onOpenDetail} w={{ base: 64, sm: 80 }} h={{ base: 64, sm: 80 }} flex="none">
-            <Paper bg="#fff" h="100%">
+            <Paper bg="white" h="100%">
               {!imgError ? (
                 <Image src={product.image} alt={product.name} h="100%" onError={() => setImgError(true)} />
               ) : (
@@ -365,59 +365,79 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
 
   return (
     <Card withBorder padding={0} className={classes.card}>
-      <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" bg="white">
-        {!imgError ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fit="contain"
-            pos="absolute"
-            inset={0}
-            h="100%"
-            pt={8}
-            px={8}
-            className={classes.cardImage}
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <Group pos="absolute" inset={0} justify="center">
-            <PackageIcon size={40} color={DIMMED} opacity={0.3} />
-          </Group>
-        )}
+      {/* Imagem clicável; favoritar e ações ficam por cima como irmãos (botão não pode ficar dentro de botão) */}
+      <Box pos="relative">
+        <UnstyledButton
+          onClick={onOpenDetail}
+          pos="relative"
+          display="block"
+          w="100%"
+          pt="80%"
+          bg="white"
+          aria-label={`Ver detalhes de ${product.name}`}
+        >
+          {!imgError ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fit="contain"
+              pos="absolute"
+              inset={0}
+              h="100%"
+              pt={8}
+              px={8}
+              className={classes.cardImage}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <Group pos="absolute" inset={0} justify="center">
+              <PackageIcon size={40} color={DIMMED} opacity={0.3} />
+            </Group>
+          )}
+        </UnstyledButton>
         {/* Favoritar com ícone + texto, compacto para caber no card estreito */}
-        <Box
-          component="span"
-          onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleFav(); }}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onToggleFav(); }
-          }}
-          className={classes.favToggle}
-          data-active={product.isFavorite || undefined}
-          role="button"
-          tabIndex={0}
+        <Button
+          onClick={onToggleFav}
+          pos="absolute"
+          top={8}
+          right={8}
+          size="sm"
+          px={10}
+          variant={product.isFavorite ? 'light' : 'default'}
+          color="neutral"
+          leftSection={<HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />}
           aria-pressed={!!product.isFavorite}
         >
-          <HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />
           {product.isFavorite ? 'Favoritado' : 'Favoritar'}
-        </Box>
-        <Box className={classes.overlay}>
-          <Box
-            component="span"
-            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onOpenDetail(); }}
-            className={`${classes.overlayAction} ${classes.overlayDetails}`}
+        </Button>
+        {/* Ações sobre a imagem: aparecem no hover/foco; em telas de toque ficam sempre visíveis */}
+        <Group pos="absolute" left={8} right={8} bottom={8} gap="sm" wrap="nowrap" className={classes.overlay}>
+          {/* Cards estreitos (2 colunas no celular): o card inteiro já abre os detalhes */}
+          <Button
+            onClick={onOpenDetail}
+            flex={1}
+            miw={0}
+            px={8}
+            variant="default"
+            visibleFrom="sm"
+            leftSection={<EyeIcon size={18} />}
           >
-            <EyeIcon size={18} /> Detalhes
-          </Box>
-          <Box
-            component="span"
-            onClick={(e: React.MouseEvent) => { e.stopPropagation(); if (product.availability !== 'esgotado') onQuickBuy(); }}
-            className={`${classes.overlayAction} ${classes.overlayBuy}`}
-            data-disabled={product.availability === 'esgotado' || undefined}
+            Detalhes
+          </Button>
+          <Button
+            onClick={onQuickBuy}
+            flex={1}
+            miw={0}
+            px={{ base: 4, sm: 8 }}
+            color="neutral"
+            classNames={{ section: classes.quickBuySection }}
+            disabled={product.availability === 'esgotado'}
+            leftSection={<LightningIcon size={18} />}
           >
-            <LightningIcon size={18} /> Compra Rápida
-          </Box>
-        </Box>
-      </UnstyledButton>
+            Compra Rápida
+          </Button>
+        </Group>
+      </Box>
 
       <UnstyledButton onClick={onOpenDetail} display="block" w="100%" p="sm">
         <Badge variant="light" color={availBadgeColor} mb={8}>
@@ -498,7 +518,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
       <Box className={classes.detailBody}>
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
           <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
-            <Paper pos="relative" w="100%" pt="90%" bg="#fff">
+            <Paper pos="relative" w="100%" pt="90%" bg="white">
               <Image src={images[activeImg].src} alt={`${product.name} — vista ${images[activeImg].label.toLowerCase()}`} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
             </Paper>
             <Group gap={8} role="tablist" aria-label="Vistas do produto">
@@ -797,8 +817,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           onChange={v => setViewMode(v as 'grid' | 'list')}
           aria-label="Modo de exibição"
           data={[
-            { value: 'grid', label: <Group gap={6} wrap="nowrap" justify="center"><GridNineIcon size={18} /><span>Grade</span></Group> },
-            { value: 'list', label: <Group gap={6} wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><span>Lista</span></Group> },
+            { value: 'grid', label: <Group gap={6} wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
+            { value: 'list', label: <Group gap={6} wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
           ]}
         />
       </Group>

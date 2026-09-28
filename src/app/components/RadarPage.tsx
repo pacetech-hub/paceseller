@@ -73,17 +73,18 @@ function ActionCard({ action }: { action: RadarAction }) {
             <Text size="sm">{action.suggestion}</Text>
           </Paper>
         )}
-        <Button
-          variant="subtle"
-          color="neutral"
-          mt="auto"
-          rightSection={<ArrowRightIcon size={16} />}
-          onClick={action.onAction}
-          // Botão terciário alinhado ao texto do card (compensa o padding lateral).
-          style={{ alignSelf: 'flex-start', marginLeft: 'calc(var(--button-padding-x) * -1)' }}
-        >
-          {action.ctaLabel}
-        </Button>
+        <Group mt="auto">
+          {/* Botão terciário alinhado ao texto do card (compensa o padding lateral) */}
+          <Button
+            variant="subtle"
+            color="neutral"
+            ml="calc(var(--button-padding-x) * -1)"
+            rightSection={<ArrowRightIcon size={16} />}
+            onClick={action.onAction}
+          >
+            {action.ctaLabel}
+          </Button>
+        </Group>
       </Stack>
     </Paper>
   );

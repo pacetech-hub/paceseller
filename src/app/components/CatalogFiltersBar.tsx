@@ -176,7 +176,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
                   size={32}
                   withShadow={false}
                   bd={`2px solid ${active ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR}`}
-                  c={bg === '#fff' ? '#111' : '#fff'}
+                  c={bg === '#fff' ? 'black' : 'white'}
                   className={classes.swatch}
                   data-active={active || undefined}
                 >
