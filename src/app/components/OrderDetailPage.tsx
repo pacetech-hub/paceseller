@@ -32,6 +32,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 // deterministic line-item breakdown per order — quantities sum to order.items
 const orderLineItems: Record<string, Array<{ productId: string; quantity: number }>> = {
+  '4790-1': [{ productId: 'P009', quantity: 48 }],
   'PED-2026-0412': [{ productId: 'P001', quantity: 70 }, { productId: 'P005', quantity: 54 }],
   'PED-2026-0411': [{ productId: 'P003', quantity: 40 }, { productId: 'P004', quantity: 46 }],
   'PED-2026-0410': [{ productId: 'P002', quantity: 90 }, { productId: 'P006', quantity: 78 }],
