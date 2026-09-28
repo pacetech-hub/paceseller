@@ -5,7 +5,8 @@ import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
 import { Sidebar, TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
-import { clients as clientsList, type Client, type Order } from "./data/mockData";
+import { clients as clientsList, orders as ordersList, products as productsList, type Client, type Order } from "./data/mockData";
+import { toast } from "./lib/toast";
 import { DashboardAdmin } from "./components/DashboardAdmin";
 import { DashboardRep, CURRENT_REP_NAME } from "./components/DashboardRep";
 import { SalesTeamPage } from "./components/SalesTeamPage";
@@ -33,6 +34,9 @@ import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
 import { RadarPage } from "./components/RadarPage";
 
 type Profile = 'admin' | 'rep' | 'lojista';
+
+// Nome do usuário lojista logado (mock até existir autenticação real).
+const CURRENT_LOJISTA_NAME = 'Juliana';
 
 const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Visão geral do seu negócio' },
@@ -69,6 +73,7 @@ export default function App() {
   );
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
+  const [catalogDetailId, setCatalogDetailId] = useState<string | null>(null);
   const [filtersOpened, { open: openFilters, close: closeFilters }] = useDisclosure(false);
 
   // Todos os perfis suportam múltiplos carrinhos.
@@ -115,7 +120,34 @@ export default function App() {
     setCurrentView('order-detail');
   };
 
-  const navigate = (view: View) => setCurrentView(view);
+  const navigate = (view: View) => {
+    setCatalogDetailId(null);
+    setCurrentView(view);
+  };
+
+  // Radar → abre o catálogo já com o detalhe do produto.
+  const openProductDetail = (productId: string) => {
+    setCatalogDetailId(productId);
+    setCurrentView('catalog');
+  };
+
+  // Radar → adiciona a quantidade sugerida ao carrinho ativo ou cria um novo.
+  const restockProduct = (productId: string, quantity: number) => {
+    const product = productsList.find(p => p.id === productId);
+    if (!product) return;
+    const cart = activeCart ?? createCart(`Reposição ${product.line}`);
+    if (!cart) return;
+    if (!activeCart) setActiveCart(cart);
+    toast.success(
+      `${quantity} pares de ${product.name} adicionados em "${cart.cartName}"`,
+      'Revise as quantidades e envie o pedido em Carrinho',
+    );
+  };
+
+  const openOrderById = (orderId: string) => {
+    const order = ordersList.find(o => o.id === orderId);
+    if (order) openOrder(order);
+  };
 
   const viewInfo = currentView === 'dashboard'
     ? {
@@ -157,6 +189,7 @@ export default function App() {
             selectedClient={selectedClient}
             externalFilters={useFilters ? catalogFilters : undefined}
             onExternalFiltersChange={useFilters ? setCatalogFilters : undefined}
+            initialDetailProductId={catalogDetailId}
             clientCarts={cartsClient ? clientCarts : carts}
             activeCartId={activeCart?.id ?? null}
             onPickCart={(ctx) => {
@@ -274,7 +307,15 @@ export default function App() {
       case 'industry-stock':
         return <RepStockPage />;
       case 'radar':
-        return <RadarPage profile={profile} />;
+        return (
+          <RadarPage
+            profile={profile}
+            userName={CURRENT_LOJISTA_NAME}
+            onOpenProduct={openProductDetail}
+            onRestock={restockProduct}
+            onOpenOrder={openOrderById}
+          />
+        );
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:

@@ -72,6 +72,8 @@ interface CatalogPageProps {
   activeCartId?: string | null;
   onPickCart?: (ctx: CartContext) => void;
   onCreateCart?: (name: string) => CartContext | null;
+  /** Abre o detalhe deste produto ao entrar no catálogo (ex.: vindo do Radar). */
+  initialDetailProductId?: string | null;
 }
 
 const lines = ['Todos', 'Premium', 'Urban', 'Sport'];
@@ -608,7 +610,7 @@ const CART_MODAL_STYLES = {
   body: { padding: 0 },
 } as const;
 
-export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChange, clientCarts, activeCartId, onPickCart, onCreateCart }: CatalogPageProps) {
+export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChange, clientCarts, activeCartId, onPickCart, onCreateCart, initialDetailProductId }: CatalogPageProps) {
   const usingExternal = !!externalFilters;
   const [internalSearch, setInternalSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -621,7 +623,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
     new Set(products.filter(p => p.isFavorite).map(p => p.id))
   );
   const [gradeOpenId, setGradeOpenId] = useState<string | null>(null);
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+  const [detailProduct, setDetailProduct] = useState<Product | null>(
+    () => products.find(p => p.id === initialDetailProductId) ?? null
+  );
   // Multi-cart picker
   const multiCartEnabled = Array.isArray(clientCarts);
   const [pendingAdd, setPendingAdd] = useState<{ product: Product; qtys: Record<string, number> } | null>(null);

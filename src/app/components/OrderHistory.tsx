@@ -60,6 +60,7 @@ export function OrderStatusBadge({ status }: { status: string }) {
 }
 
 export const orderProductNames: Record<string, string> = {
+  '4790-1': 'Tênis Fusion — Coleção 2026',
   'PED-2026-0412': 'Tênis Casual — Grade Mista',
   'PED-2026-0411': 'Sapatos Sociais — Linha Executiva',
   'PED-2026-0410': 'Botas Impermeáveis — Coleção Verão 26',
