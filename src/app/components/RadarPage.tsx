@@ -74,11 +74,13 @@ function ActionCard({ action }: { action: RadarAction }) {
           </Paper>
         )}
         <Button
-          variant="default"
+          variant="subtle"
+          color="neutral"
           mt="auto"
           rightSection={<ArrowRightIcon size={16} />}
           onClick={action.onAction}
-          style={{ alignSelf: 'flex-start' }}
+          // Botão terciário alinhado ao texto do card (compensa o padding lateral).
+          style={{ alignSelf: 'flex-start', marginLeft: 'calc(var(--button-padding-x) * -1)' }}
         >
           {action.ctaLabel}
         </Button>
