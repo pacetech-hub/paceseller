@@ -75,6 +75,8 @@ interface CatalogPageProps {
   onCreateCart?: (name: string) => CartContext | null;
   /** Abre o detalhe deste produto ao entrar no catálogo (ex.: vindo do Radar). */
   initialDetailProductId?: string | null;
+  /** Ordenação inicial ao entrar no catálogo (ex.: "mais vendidos" vindo do Radar). */
+  initialSortBy?: string | null;
 }
 
 const lines = ['Todos', 'Premium', 'Urban', 'Sport'];
@@ -631,14 +633,14 @@ const CART_MODAL_STYLES = {
   body: { padding: 0 },
 } as const;
 
-export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChange, clientCarts, activeCartId, onPickCart, onCreateCart, initialDetailProductId }: CatalogPageProps) {
+export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChange, clientCarts, activeCartId, onPickCart, onCreateCart, initialDetailProductId, initialSortBy }: CatalogPageProps) {
   const usingExternal = !!externalFilters;
   const [internalSearch, setInternalSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedLine, setSelectedLine] = useState('Todos');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedCollection, setSelectedCollection] = useState('Todas');
-  const [sortBy, setSortBy] = useState('relevância');
+  const [sortBy, setSortBy] = useState(initialSortBy ?? 'relevância');
   const [showFilters, setShowFilters] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(
     new Set(products.filter(p => p.isFavorite).map(p => p.id))

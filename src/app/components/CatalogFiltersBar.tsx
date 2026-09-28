@@ -31,7 +31,7 @@ export const priceTables = [
   { id: 'atacado', label: 'Atacado', desc: 'Acima de 50 pares' },
 ];
 
-const lines = ['Todos', 'Premium', 'Urban', 'Sport', 'Flow', 'Flow XL', 'Coil', 'Hertz', 'Hertz Art'];
+const lines = ['Todos', 'Premium', 'Urban', 'Sport', 'Flow', 'Flow XL', 'Coil', 'Hertz', 'Hertz Art', 'Fusion', 'TG II'];
 const categories = ['Todos', 'Social', 'Casual', 'Esportivo', 'Sandália', 'Bota'];
 
 const allColors = Array.from(

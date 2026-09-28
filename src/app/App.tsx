@@ -73,6 +73,7 @@ export default function App() {
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
   const [catalogDetailId, setCatalogDetailId] = useState<string | null>(null);
+  const [catalogSortBy, setCatalogSortBy] = useState<string | null>(null);
 
   // Todos os perfis suportam múltiplos carrinhos.
   const multiCart = true;
@@ -120,11 +121,21 @@ export default function App() {
 
   const navigate = (view: View) => {
     setCatalogDetailId(null);
+    setCatalogSortBy(null);
     setCurrentView(view);
+  };
+
+  // Radar → abre o catálogo filtrado por linha e/ou com uma ordenação.
+  const openCatalog = ({ line, sortBy }: { line?: string; sortBy?: string }) => {
+    setCatalogDetailId(null);
+    setCatalogSortBy(sortBy ?? null);
+    setCatalogFilters(f => ({ ...defaultFilters, priceTable: f.priceTable, line: line ?? defaultFilters.line }));
+    setCurrentView('catalog');
   };
 
   // Radar → abre o catálogo já com o detalhe do produto.
   const openProductDetail = (productId: string) => {
+    setCatalogSortBy(null);
     setCatalogDetailId(productId);
     setCurrentView('catalog');
   };
@@ -188,6 +199,7 @@ export default function App() {
             externalFilters={useFilters ? catalogFilters : undefined}
             onExternalFiltersChange={useFilters ? setCatalogFilters : undefined}
             initialDetailProductId={catalogDetailId}
+            initialSortBy={catalogSortBy}
             clientCarts={cartsClient ? clientCarts : carts}
             activeCartId={activeCart?.id ?? null}
             onPickCart={(ctx) => {
@@ -312,6 +324,7 @@ export default function App() {
             onOpenProduct={openProductDetail}
             onRestock={restockProduct}
             onOpenOrder={openOrderById}
+            onOpenCatalog={openCatalog}
           />
         );
       case 'permissions':
