@@ -29,7 +29,6 @@ import {
   WarehouseIcon,
   ReceiptIcon,
   FileTextIcon,
-  FunnelIcon,
   CrosshairIcon,
   type Icon,
 } from "@phosphor-icons/react";
@@ -306,10 +305,9 @@ interface TopBarProps {
   cartCount?: number;
   selectedClient?: Client | null;
   /** Quando informado (catálogo), mostra o botão que abre o Drawer de filtros abaixo do breakpoint lg */
-  onOpenFilters?: () => void;
 }
 
-export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient, onOpenFilters }: TopBarProps) {
+export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient }: TopBarProps) {
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
@@ -395,36 +393,9 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               aria-label="Abrir Navegação"
             />
           )}
-          {/* Filtros: ícone + texto quando há espaço; só ícone (com tooltip) no celular */}
-          {onOpenFilters && (
-            <>
-              <Button
-                onClick={onOpenFilters}
-                visibleFrom="sm"
-                hiddenFrom="lg"
-                variant="default"
-                flex="none"
-                leftSection={<FunnelIcon size={16} />}
-              >
-                Filtros
-              </Button>
-              <Tooltip label="Abrir Filtros" withArrow>
-                <ActionIcon
-                  onClick={onOpenFilters}
-                  hiddenFrom="sm"
-                  variant="default"
-                  aria-label="Abrir Filtros"
-                >
-                  <FunnelIcon size={16} />
-                </ActionIcon>
-              </Tooltip>
-            </>
-          )}
-          {currentView !== 'catalog' && (
-            <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
-              <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
-            </Group>
-          )}
+          <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
+            <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
+          </Group>
           {/* Nav items à esquerda quando existem, caso contrário título */}
           {headerItems.length > 0 ? (
             <Group gap="sm" wrap="nowrap" visibleFrom="sm">

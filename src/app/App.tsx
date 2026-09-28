@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Box, Stack } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
-import { Sidebar, TopBar } from "./components/Sidebar";
+import { TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
 import { clients as clientsList, orders as ordersList, products as productsList, type Client, type Order } from "./data/mockData";
 import { toast } from "./lib/toast";
@@ -27,7 +26,7 @@ import { ProfilePage } from "./components/ProfilePage";
 import { BoletosPage } from "./components/BoletosPage";
 import { OrderDetailPage } from "./components/OrderDetailPage";
 import { FichaTecnicaPage } from "./components/FichaTecnicaPage";
-import { LojistaFiltersSidebar, defaultFilters, type CatalogFilters } from "./components/LojistaFiltersSidebar";
+import { defaultFilters, type CatalogFilters } from "./components/CatalogFiltersBar";
 import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
 import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
@@ -74,7 +73,6 @@ export default function App() {
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
   const [catalogDetailId, setCatalogDetailId] = useState<string | null>(null);
-  const [filtersOpened, { open: openFilters, close: closeFilters }] = useDisclosure(false);
 
   // Todos os perfis suportam múltiplos carrinhos.
   const multiCart = true;
@@ -329,31 +327,8 @@ export default function App() {
     }
   };
 
-  const isFiltersCatalog = currentView === 'catalog';
-  const hideSidebar = currentView !== 'catalog';
-
   return (
     <Box h="100dvh" display="flex" className={classes.shell}>
-      {isFiltersCatalog ? (
-        <LojistaFiltersSidebar
-          filters={catalogFilters}
-          onChange={setCatalogFilters}
-          onLogout={handleLogout}
-          profile={profile as 'lojista' | 'rep' | 'admin'}
-          selectedClient={selectedClient}
-          mobileOpened={filtersOpened}
-          onMobileClose={closeFilters}
-        />
-      ) : hideSidebar ? null : (
-        <Sidebar
-          currentView={currentView}
-          onNavigate={navigate}
-          profile={profile}
-          onLogout={handleLogout}
-          notifications={4}
-          selectedClient={selectedClient}
-        />
-      )}
       <Stack gap={0} flex={1} miw={0}>
         <TopBar
           title={viewInfo.title}
@@ -365,7 +340,6 @@ export default function App() {
           onLogout={handleLogout}
           cartCount={cartsClient ? clientCarts.length : carts.length}
           selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
-          onOpenFilters={isFiltersCatalog ? openFilters : undefined}
         />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}

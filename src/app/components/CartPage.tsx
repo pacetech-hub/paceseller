@@ -22,7 +22,7 @@ import {
   UserCheckIcon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency } from "../data/mockData";
-import { priceTables } from "./LojistaFiltersSidebar";
+import { priceTables } from "./CatalogFiltersBar";
 import type { CartContext, CartCreator } from "./CartsListPage";
 import classes from "./interactive.module.css";
 

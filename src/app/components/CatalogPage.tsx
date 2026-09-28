@@ -28,6 +28,7 @@ import interactive from "./interactive.module.css";
 import classes from "./CatalogPage.module.css";
 
 import type { CartContext, CartCreator } from "./CartsListPage";
+import { CatalogFiltersBar } from "./CatalogFiltersBar";
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 const BORDER = `1px solid ${BORDER_COLOR}`;
@@ -748,6 +749,11 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+      {/* Tabela de preço e filtros no topo da página */}
+      {usingExternal && onExternalFiltersChange && (
+        <CatalogFiltersBar filters={externalFilters!} onChange={onExternalFiltersChange} />
+      )}
+
       {/* Promo Banner */}
       <Card withBorder shadow="xs" padding={0}>
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
@@ -886,7 +892,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           <Text lh={1.5} fw={600}>Nenhum produto encontrado</Text>
           <Text lh={1.5} c="dimmed" mt={4}>
             {usingExternal
-              ? 'Nenhum produto combina com a busca e os filtros da barra lateral. Mude a busca ou ajuste os filtros.'
+              ? 'Nenhum produto combina com a busca e os filtros. Mude a busca ou ajuste os filtros no topo da página.'
               : 'Nenhum produto combina com a busca e os filtros atuais.'}
           </Text>
           {canClearFromEmpty && (
