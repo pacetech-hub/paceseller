@@ -3,13 +3,14 @@ import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box,
 } from "@mantine/core";
 import {
-  CrosshairIcon, TrendUpIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
+  CrosshairIcon, TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
+  RocketLaunchIcon, UsersThreeIcon,
   type Icon,
 } from "@phosphor-icons/react";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 type Period = 'hoje' | '15d' | '30d';
-type Tone = 'opportunity' | 'stock' | 'alert';
+type Tone = 'opportunity' | 'stock' | 'alert' | 'launch' | 'benchmark' | 'lowTurnover';
 
 interface RadarPageProps {
   profile: Profile;
@@ -17,6 +18,7 @@ interface RadarPageProps {
   onOpenProduct: (productId: string) => void;
   onRestock: (productId: string, quantity: number) => void;
   onOpenOrder: (orderId: string) => void;
+  onOpenCatalog: (opts: { line?: string; sortBy?: string }) => void;
 }
 
 interface RadarAction {
@@ -42,6 +44,9 @@ const TONES: Record<Tone, { color: string; icon: Icon }> = {
   opportunity: { color: 'teal.7', icon: TrendUpIcon },
   stock: { color: 'yellow.8', icon: PackageIcon },
   alert: { color: 'red.7', icon: WarningIcon },
+  launch: { color: 'blue.7', icon: RocketLaunchIcon },
+  benchmark: { color: 'violet.7', icon: UsersThreeIcon },
+  lowTurnover: { color: 'gray.7', icon: TrendDownIcon },
 };
 
 export function getGreeting(date = new Date()): string {
@@ -90,7 +95,7 @@ function ActionCard({ action }: { action: RadarAction }) {
   );
 }
 
-function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder }: Omit<RadarPageProps, 'profile'>) {
+function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenCatalog }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Period>('hoje');
 
   const actions: RadarAction[] = [
@@ -127,6 +132,73 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder }: Omit<
       description: 'Previsão de entrega vencida',
       ctaLabel: 'Ver pedido',
       onAction: () => onOpenOrder('4790-1'),
+    },
+    {
+      id: 'low-stock-tg2',
+      period: '15d',
+      tone: 'stock',
+      eyebrow: 'Estoque baixo · 15 dias',
+      metric: '60 un.',
+      title: 'Tênis Tesla TG II Black Reflect',
+      description: 'Sugestão de reposição antes de faltar',
+      suggestion: 'Sugestão: repor 60 unidades',
+      ctaLabel: 'Repor agora',
+      onAction: () => onRestock('P010', 60),
+    },
+    {
+      id: 'launch-fusion-mix',
+      period: '15d',
+      tone: 'launch',
+      eyebrow: 'Lançamento · 12 dias',
+      metric: '6 lojas',
+      title: 'Linha Fusion',
+      description: 'Ainda não chegou no seu mix — lojas parecidas já compram',
+      ctaLabel: 'Ver coleção',
+      onAction: () => onOpenCatalog({ line: 'Fusion' }),
+    },
+    {
+      id: 'launch-tg2-low-turnover',
+      period: '15d',
+      tone: 'launch',
+      eyebrow: 'Lançamento · 28 dias',
+      metric: 'Giro baixo',
+      title: 'Tênis Tesla TG II Black Reflect',
+      description: 'Ainda com giro abaixo do esperado desde o lançamento',
+      ctaLabel: 'Ver produto',
+      onAction: () => onOpenProduct('P010'),
+    },
+    {
+      id: 'benchmark-coil-black-white',
+      period: '15d',
+      tone: 'benchmark',
+      eyebrow: 'Benchmark',
+      metric: '+30%',
+      title: 'Lojas parecidas venderam mais',
+      description: 'Modelo Coil Black White, mesma faixa de porte',
+      ctaLabel: 'Comparar',
+      onAction: () => onOpenProduct('P011'),
+    },
+    {
+      id: 'no-turnover-flow-xl',
+      period: '30d',
+      tone: 'lowTurnover',
+      eyebrow: 'Baixo giro',
+      metric: 'Sem giro',
+      title: 'Tênis Tesla Flow XL Black',
+      description: 'Sem giro nos últimos 30 dias — bom candidato pra impulsionar com campanha',
+      ctaLabel: 'Ver produto',
+      onAction: () => onOpenProduct('P008'),
+    },
+    {
+      id: 'trending-skus',
+      period: '30d',
+      tone: 'opportunity',
+      eyebrow: 'Produtos em alta',
+      metric: '6 SKUs',
+      title: 'Vendendo acima da média',
+      description: 'Coil Black White, Denim, Hertz All Black Furta Cor e mais 3',
+      ctaLabel: 'Ver todos',
+      onAction: () => onOpenCatalog({ sortBy: 'mais vendidos' }),
     },
   ];
 
