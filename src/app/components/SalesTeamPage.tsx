@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Stack, Group, Button, SegmentedControl, Paper, Text, Title } from "@mantine/core";
 import { CaretLeftIcon } from "@phosphor-icons/react";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton } from "./ui/Skeletons";
 import { PERIOD_OPTIONS, scaleValue, brl, type Period, type SalesEntity } from "./SalesIndicatorsSection";
 
 interface SalesTeamPageProps {
@@ -11,6 +13,7 @@ interface SalesTeamPageProps {
 
 export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
   const [period, setPeriod] = useState<Period>('dia');
+  const loading = useMockLoading();
 
   const ranked = entities
     .map(e => ({ ...e, value: scaleValue(e.monthlySales, period) }))
@@ -35,7 +38,9 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
         />
       </Group>
 
-      <Paper withBorder radius="md" p={{ base: 'md', sm: 'lg' }}>
+      {/* Enquanto carrega, skeleton do ranking; título e período continuam visíveis */}
+      {loading ? <ListSkeleton rows={6} withAvatar={false} /> : (
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Stack gap="xs">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
@@ -60,6 +65,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
           )}
         </Stack>
       </Paper>
+      )}
     </Stack>
   );
 }
