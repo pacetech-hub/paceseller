@@ -17,6 +17,7 @@ import {
   ListMagnifyingGlassIcon,
   PackageIcon,
   ArrowRightIcon,
+  UsersIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
@@ -25,6 +26,7 @@ import { formatCurrency, products, type Client, type Product } from "../data/moc
 import type { View } from "./Sidebar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, KpiSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 
 interface ClientDetailPageProps {
   client: Client | null;
@@ -129,6 +131,12 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   );
   const filteredBuyProducts = stockFilter === 'todos' ? buyProducts : buyProducts.filter(p => p.stockStatus === stockFilter);
 
+  // pré-filtra as sugestões de venda por alto giro e rola até elas
+  const showHighTurnover = () => {
+    setStockFilter('alto-giro');
+    document.getElementById('sugestoes-de-venda')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const backButton = (
     <Box>
       <Button
@@ -147,13 +155,16 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
     return (
       <Stack gap="md" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
         {backButton}
-        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-          <Stack align="flex-start" gap="sm">
-            <Text fw={600}>Nenhum cliente selecionado</Text>
-            <Text c="dimmed" size="sm">Escolha um cliente na lista para ver dados cadastrais, desempenho e sugestões de venda.</Text>
-            <Button variant="default" onClick={() => onNavigate('clients')} rightSection={<ArrowRightIcon size={16} />}>Ver Lista de Clientes</Button>
-          </Stack>
-        </Paper>
+        <EmptyState
+          icon={UsersIcon}
+          title="Nenhum cliente selecionado"
+          description="Escolha um cliente na lista para ver dados cadastrais, desempenho e sugestões de venda."
+          action={{ label: 'Ver Lista de Clientes', onClick: () => onNavigate('clients') }}
+          suggestions={[
+            { label: 'Montar carrinho', description: 'Abra os carrinhos em andamento ou crie um novo', icon: ShoppingCartIcon, onClick: () => onNavigate('carts') },
+            { label: 'Ver catálogo', description: 'Confira lançamentos e mais vendidos da coleção', icon: PackageIcon, onClick: () => onNavigate('catalog') },
+          ]}
+        />
       </Stack>
     );
   }
@@ -248,7 +259,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <ClockIcon size={16} />
           </ThemeIcon>
-          <Text fw={600}>Último pedido</Text>
+          <Text c="dimmed" size="sm">Último pedido</Text>
           <Text className="mono" size="xl" fw={700} mt={2}>{formatOrderDate(client.lastOrder)}</Text>
         </Paper>
 
@@ -256,7 +267,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <ChartBarIcon size={16} />
           </ThemeIcon>
-          <Text fw={600}>Ticket médio por pedido</Text>
+          <Text c="dimmed" size="sm">Ticket médio por pedido</Text>
           <Text className="mono" size="xl" fw={700} mt={2}>{formatCurrency(avgTicket)}</Text>
         </Paper>
       </SimpleGrid>
@@ -331,16 +342,20 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               </Paper>
             ))}
             {stuckProducts.length === 0 && (
-              <Text c="dimmed" size="sm" ta="center" py="md">
-                Nenhum produto parado no estoque: todos estão girando bem. Veja as sugestões de venda abaixo.
-              </Text>
+              <EmptyState
+                withBorder={false}
+                icon={TrendUpIcon}
+                title="Nenhum produto parado no estoque"
+                description="Todos os produtos deste cliente estão girando bem. Aproveite para oferecer os de alto giro nas sugestões de venda."
+                action={{ label: 'Ver Produtos de Alto Giro', onClick: showHighTurnover, forward: false }}
+              />
             )}
           </Stack>
         </Paper>
       </Stack>
 
       {/* Sugestões de venda */}
-      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+      <Paper withBorder p={{ base: 'md', sm: 'lg' }} id="sugestoes-de-venda">
         <Title order={2} fw={600} mb="sm">Sugestões de venda</Title>
 
         <Group gap="sm" mb="md">
@@ -373,12 +388,13 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             ))}
           </SimpleGrid>
         ) : (
-          <Stack align="center" gap="sm" py="lg">
-            <Text c="dimmed" size="sm" ta="center">
-              Nenhum produto deste cliente está em “{stockFilter !== 'todos' ? STOCK_STATUS_CONFIG[stockFilter].label : 'Todos'}” agora.
-            </Text>
-            <Button variant="default" onClick={() => setStockFilter('todos')}>Ver Todos os Produtos</Button>
-          </Stack>
+          <EmptyState
+            withBorder={false}
+            icon={PackageIcon}
+            title={`Nenhum produto em “${stockFilter !== 'todos' ? STOCK_STATUS_CONFIG[stockFilter].label : 'Todos'}”`}
+            description="Nenhum produto deste cliente está nesse status agora. Limpe o filtro para ver todas as sugestões."
+            action={{ label: 'Ver Todos os Produtos', onClick: () => setStockFilter('todos'), forward: false }}
+          />
         )}
       </Paper>
     </Stack>

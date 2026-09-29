@@ -19,6 +19,7 @@ import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellList, CellCard, CellField } from "./ui/CellView";
+import { EmptyState } from "./ui/EmptyState";
 
 type Profile = 'rep' | 'lojista';
 
@@ -140,17 +141,15 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   );
 
   // Estado vazio: explica o motivo e oferece a ação (mesmo conteúdo na tabela e nos cartões)
-  const usersEmpty = (
-    <Stack gap="sm" align="center" py="lg">
-      <Text c="dimmed" ta="center">
-        Nenhum usuário vinculado à sua conta ainda. Convide alguém para que ele possa acessar com o perfil {subProfile}.
-      </Text>
-      {!showInvite && (
-        <Button onClick={() => setShowInvite(true)} variant="default" color="neutral" leftSection={<UserPlusIcon size={16} />}>
-          Convidar Usuário
-        </Button>
-      )}
-    </Stack>
+  const usersEmpty = (withBorder: boolean) => (
+    <EmptyState
+      icon={UsersIcon}
+      title="Nenhum usuário vinculado ainda"
+      description={`Convide alguém da sua equipe para acessar com o perfil ${subProfile}. Você pode trocar o perfil depois.`}
+      // Abre o formulário de convite aqui mesmo (ação no lugar, sem seta)
+      action={showInvite ? undefined : { label: 'Convidar Usuário', onClick: () => setShowInvite(true), forward: false }}
+      withBorder={withBorder}
+    />
   );
 
   const Icon = scope.icon;
@@ -237,7 +236,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               <Table.Th>Perfil de acesso</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Último acesso</Table.Th>
-              <Table.Th />
+              <Table.Th ta="right">Ações</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -268,12 +267,12 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 <Table.Td>
                   <Text c="dimmed" size="sm" className="mono">{lastLogin(u)}</Text>
                 </Table.Td>
-                <Table.Td>{removeButton(u)}</Table.Td>
+                <Table.Td ta="right">{removeButton(u)}</Table.Td>
               </Table.Tr>
             ))}
             {users.length === 0 && (
               <Table.Tr>
-                <Table.Td colSpan={5}>{usersEmpty}</Table.Td>
+                <Table.Td colSpan={5}>{usersEmpty(false)}</Table.Td>
               </Table.Tr>
             )}
           </Table.Tbody>
@@ -304,7 +303,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 </CellField>
               </CellCard>
             ))}
-            {users.length === 0 && usersEmpty}
+            {users.length === 0 && usersEmpty(true)}
           </CellList>
         </Box>
         </>

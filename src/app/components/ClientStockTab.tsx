@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Select, Paper, Group, Text, ThemeIcon, Box, Stack, type ComboboxItem, type OptionsFilter } from "@mantine/core";
 import { MagnifyingGlassIcon, StorefrontIcon, MapPinIcon } from "@phosphor-icons/react";
 import { clients as allClients, type Client } from "../data/mockData";
 import { generateClientStock, type StockItem } from "../data/stockData";
 import { StockTable } from "./StockTable";
+import { EmptyState } from "./ui/EmptyState";
 
 interface ClientStockTabProps {
   /** Rep só enxerga os dados, sem controles de edição. */
@@ -23,6 +24,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
   const pool = scopeClients ?? allClients;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [items, setItems] = useState<StockItem[]>([]);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => pool.find(c => c.id === selectedId) ?? null, [pool, selectedId]);
   const options = useMemo(() => pool.map(c => ({ value: c.id, label: c.name })), [pool]);
@@ -38,6 +40,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
   return (
     <Stack gap="md">
       <Select
+        ref={searchRef}
         maw={448}
         searchable
         clearable
@@ -59,12 +62,18 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
       />
 
       {!selected && (
-        <Paper withBorder py={64}>
-          <Stack align="center" gap="sm">
-            <StorefrontIcon size={40} opacity={0.3} />
-            <Text c="dimmed" ta="center" px="md">Nenhum cliente selecionado. Busque um cliente acima pelo nome ou código para ver o estoque reportado por ele.</Text>
-          </Stack>
-        </Paper>
+        <EmptyState
+          icon={StorefrontIcon}
+          title="Nenhum cliente selecionado"
+          description="Busque um cliente acima pelo nome ou código para ver o estoque reportado por ele."
+          action={{ label: 'Buscar Cliente', onClick: () => searchRef.current?.focus(), forward: false }}
+          suggestions={pool.slice(0, 3).map(c => ({
+            label: `Ver estoque de ${c.name}`,
+            description: `${c.city} · ${c.state}`,
+            icon: StorefrontIcon,
+            onClick: () => setSelectedId(c.id),
+          }))}
+        />
       )}
 
       {selected && (

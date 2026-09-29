@@ -135,6 +135,25 @@ export const mantineTheme = createTheme({
     DateInput: { defaultProps: inputDefaults, styles: inputStyles },
     DatePickerInput: { defaultProps: inputDefaults, styles: inputStyles },
     ColorInput: { defaultProps: inputDefaults, styles: inputStyles },
+    // Pop-ups: X grande (44px) com bastante área clicável; fecham também com clique fora e Esc.
+    Modal: {
+      defaultProps: {
+        closeOnClickOutside: true,
+        closeOnEscape: true,
+        closeButtonProps: { size: "xl", iconSize: 24, "aria-label": "Fechar" },
+      },
+    },
+    Drawer: {
+      defaultProps: {
+        closeOnClickOutside: true,
+        closeOnEscape: true,
+        closeButtonProps: { size: "xl", iconSize: 24, "aria-label": "Fechar" },
+      },
+    },
+    // Gráficos: o dado é o mais importante — linhas mais grossas (3px).
+    LineChart: { defaultProps: { strokeWidth: 3 } },
+    AreaChart: { defaultProps: { strokeWidth: 3 } },
+    CompositeChart: { defaultProps: { strokeWidth: 3 } },
     // Rótulos internos do Mantine que usariam peso 500
     Stepper: { styles: { stepLabel: { fontWeight: SEMIBOLD } } },
     Menu: { styles: { label: { fontWeight: SEMIBOLD } } },

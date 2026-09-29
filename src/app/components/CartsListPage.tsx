@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Badge, ThemeIcon, SimpleGrid,
+  Group, Box, Paper, Text, Title, Button, TextInput, Badge, ThemeIcon, SimpleGrid,
   SegmentedControl, Popover, UnstyledButton, Divider, Card,
 } from "@mantine/core";
 import {
@@ -21,6 +21,7 @@ import {
 import classes from "./interactive.module.css";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton } from "./ui/Skeletons";
+import { EmptyState, type EmptyStateSuggestion } from "./ui/EmptyState";
 import { clients, formatCurrency, type Client } from "../data/mockData";
 
 export type CartCreator = 'lojista' | 'rep';
@@ -92,6 +93,8 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
   const [newName, setNewName] = useState('');
   // Busca rápida de cliente quando nenhum está selecionado
   const [clientQuery, setClientQuery] = useState('');
+  // Resultados da busca fecham com clique fora ou Esc sem apagar o texto digitado
+  const [clientDropdownOpen, setClientDropdownOpen] = useState(true);
   const [showAll, setShowAll] = useState(!selectedClient);
 
   const scopedCarts = useMemo(() => {
@@ -170,11 +173,12 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             </Box>
           </Group>
           <Group gap="sm" align="stretch" wrap="wrap">
-            <Popover opened={!!clientQuery} width="target" position="bottom-start" offset={4} shadow="md">
+            <Popover opened={!!clientQuery && clientDropdownOpen} onClose={() => setClientDropdownOpen(false)} width="target" position="bottom-start" offset={4} shadow="md">
               <Popover.Target>
                 <TextInput
                   value={clientQuery}
-                  onChange={e => setClientQuery(e.currentTarget.value)}
+                  onChange={e => { setClientQuery(e.currentTarget.value); setClientDropdownOpen(true); }}
+                  onFocus={() => setClientDropdownOpen(true)}
                   placeholder="Buscar cliente por nome ou código (ex.: CLI-001)"
                   leftSection={<MagnifyingGlassIcon size={14} />}
                   flex={{ base: '1 1 100%', sm: 1 }}
@@ -348,39 +352,38 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
         })}
       </SimpleGrid>
 
-      {filtered.length === 0 && (
-        <Stack align="center" gap={8} py={64}>
-          <ShoppingCartIcon size={40} color="var(--mantine-color-dimmed)" opacity={0.3} />
-          <Text c="dimmed" ta="center">
-            {q
-              ? `Nenhum carrinho corresponde a "${q}". Limpe a busca ou tente outro nome.`
-              : selectedClient && !showAll
-              ? `Nenhum carrinho para ${selectedClient.name} ainda. Crie um novo ou veja carrinhos de outros clientes.`
-              : canCreate
-              ? 'Nenhum carrinho em construção. Crie um carrinho para começar um pedido.'
-              : 'Nenhum carrinho em construção. Selecione um cliente acima para criar um carrinho.'}
-          </Text>
-          {/* Ações para sair do estado vazio: secundária à esquerda, principal à direita */}
-          <Group gap="sm" justify="center" mt="sm">
-            {q ? (
-              <Button onClick={() => setQ('')} variant="default">Limpar Busca</Button>
-            ) : (
-              <>
-                {!lockClient && selectedClient && !showAll && (
-                  <Button onClick={() => setShowAll(true)} variant="default" leftSection={<ArrowsLeftRightIcon size={16} />}>
-                    Ver Todos os Clientes
-                  </Button>
-                )}
-                {canCreate && !newOpen && (
-                  <Button onClick={() => setNewOpen(true)} leftSection={<PlusIcon size={16} />}>
-                    Criar Carrinho
-                  </Button>
-                )}
-              </>
-            )}
-          </Group>
-        </Stack>
-      )}
+      {filtered.length === 0 && (() => {
+        // Busca sem resultado: limpar no lugar. Sem carrinhos: criar um ou escolher cliente.
+        if (q) {
+          return (
+            <EmptyState
+              icon={MagnifyingGlassIcon}
+              title="Nenhum carrinho encontrado"
+              description={`Nada corresponde a "${q}". Confira o nome do cliente ou do carrinho, ou limpe a busca.`}
+              action={{ label: 'Limpar Busca', onClick: () => setQ(''), forward: false }}
+            />
+          );
+        }
+        const clientScoped = !lockClient && selectedClient && !showAll;
+        const suggestions: EmptyStateSuggestion[] = [];
+        if (clientScoped && otherCarts.length > 0) {
+          suggestions.push({ label: 'Ver carrinhos de outros clientes', description: `${otherCarts.length} carrinho(s) em construção na sua carteira`, icon: ArrowsLeftRightIcon, onClick: () => setShowAll(true) });
+        }
+        if (!lockClient && onNavigateClients) {
+          suggestions.push({ label: 'Buscar cliente na carteira', description: 'Escolha outro cliente para montar o pedido', icon: UsersIcon, onClick: onNavigateClients });
+        }
+        return (
+          <EmptyState
+            icon={ShoppingCartIcon}
+            title={clientScoped ? `Nenhum carrinho para ${selectedClient!.name}` : 'Nenhum carrinho em construção'}
+            description={canCreate
+              ? 'Crie um carrinho para começar um pedido. Você pode manter mais de um por cliente.'
+              : 'Selecione um cliente acima para criar o primeiro carrinho.'}
+            action={canCreate && !newOpen ? { label: 'Criar Carrinho', onClick: () => setNewOpen(true), forward: false } : undefined}
+            suggestions={suggestions}
+          />
+        );
+      })()}
       </>
       )}
     </Box>

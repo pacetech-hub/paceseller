@@ -44,12 +44,14 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
       <>
       {/* Poucas colunas (módulo + perfis): tabela a partir de sm, cartões por módulo no celular */}
       <Box visibleFrom="sm">
-      <Table verticalSpacing="sm" fz="md">
+      {/* Sem células centralizadas: checkbox alinhado à esquerda, sob o rótulo do perfil
+          (horizontalSpacing="md" = mesmo recuo px="md" da área de clique) */}
+      <Table verticalSpacing="sm" horizontalSpacing="md" fz="md">
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Módulo</Table.Th>
             {perfis.map(p => (
-              <Table.Th key={p} ta="center">{p}</Table.Th>
+              <Table.Th key={p}>{p}</Table.Th>
             ))}
           </Table.Tr>
         </Table.Thead>
@@ -68,7 +70,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
                       mih={44}
                       px="md"
                       title={allowed ? 'Clique para revogar' : 'Clique para conceder'}
-                      style={{ alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      style={{ alignItems: 'center', justifyContent: 'flex-start', cursor: 'pointer' }}
                     >
                       <Checkbox
                         checked={allowed}

@@ -53,12 +53,13 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
   );
 }
 
-// Dado do perfil: rótulo acima do valor, alinhado à esquerda (uma coluna, leitura pela borda esquerda)
-function Field({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
+// Dado do perfil: rótulo acima do valor, alinhado à esquerda (uma coluna, leitura pela borda esquerda).
+// `strong` destaca o número-chave do bloco (limite, meta, comissão); o rótulo fica sempre discreto.
+function Field({ label, value, mono, strong }: { label: string; value: React.ReactNode; mono?: boolean; strong?: boolean }) {
   return (
     <Box>
       <Text c="dimmed" size="sm">{label}</Text>
-      <Text ff={mono ? 'monospace' : undefined} component="div">{value}</Text>
+      <Text ff={mono ? 'monospace' : undefined} fw={strong ? 600 : undefined} component="div">{value}</Text>
     </Box>
   );
 }
@@ -245,7 +246,7 @@ function LojistaProfile() {
       </Section>
 
       <Section icon={CreditCardIcon} title="Situação financeira" description="Sincronizado com o ERP">
-        <Field label="Limite de crédito" value="R$ 25.000,00" />
+        <Field label="Limite de crédito" value="R$ 25.000,00" strong />
         <Field label="Utilizado" value="R$ 8.420,00" />
         <Field label="Disponível" value={<Text c="teal" span fw={600}>R$ 16.580,00</Text>} />
         <Field label="Status" value={<StatusPill ok label="Adimplente" />} />
@@ -289,7 +290,7 @@ function RepProfile() {
       </Section>
 
       <Section icon={TargetIcon} title="Metas do período" description="Ciclo Verão 26 · jan–abr">
-        <Field label="Meta sell-in" value="R$ 480.000,00" />
+        <Field label="Meta sell-in" value="R$ 480.000,00" strong />
         <Field label="Realizado" value={<Text c="teal" span fw={600}>R$ 312.450,00 (65%)</Text>} />
         <Field label="Faltam" value="R$ 167.550,00" />
         <Progress value={65} color="teal" size="sm" aria-label="65% da meta realizada" />
@@ -315,7 +316,7 @@ function RepProfile() {
       </Section>
 
       <Section icon={TrendUpIcon} title="Indicadores e comissão">
-        <Field label="Comissão acumulada (ciclo)" value="R$ 9.373,50" />
+        <Field label="Comissão acumulada (ciclo)" value="R$ 9.373,50" strong />
         <Field label="Taxa média" value="3,0% sobre sell-in" />
         <Field label="Ticket médio" value="R$ 4.820,00" />
         <Field label="Mix de produtos" value="68% feminino · 32% masculino" />

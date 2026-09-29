@@ -1,0 +1,16 @@
+/* Tabelas longas e largas (dados financeiros, grades de numeração): rolagem permitida,
+   mas a primeira coluna (o rótulo de cada linha) fica sempre visível.
+   Uso: <Table className={sticky.firstCol} …> dentro de <Table.ScrollContainer>.
+   O cabeçalho fixo vem do tema (Table stickyHeader). */
+.firstCol th:first-child,
+.firstCol td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--mantine-color-body);
+  box-shadow: 1px 0 0 var(--mantine-color-default-border);
+}
+
+.firstCol thead th:first-child {
+  z-index: 3;
+}

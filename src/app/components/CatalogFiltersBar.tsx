@@ -17,6 +17,7 @@ import {
 import { products, formatCurrency } from "../data/mockData";
 import classes from "./CatalogFiltersBar.module.css";
 import interactive from "./interactive.module.css";
+import { EmptyState } from "./ui/EmptyState";
 
 export type CatalogFilters = {
   search: string;
@@ -147,7 +148,8 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             onSelect={l => onChange({ ...filters, line: l })}
             searchLabel="Buscar linha"
             placeholder="ex.: Flow"
-            emptyText="Nenhuma linha com esse nome. Apague parte da busca para ver todas."
+            emptyTitle="Nenhuma linha encontrada"
+            emptyText="Nenhuma linha com esse nome. Limpe a busca para ver todas."
           />
         </FilterPopover>
 
@@ -174,7 +176,13 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             mb="sm"
           />
           {visibleColors.length === 0 && (
-            <Text lh={1.5} c="dimmed" size="sm">Nenhuma cor com esse nome. Apague parte da busca para ver todas.</Text>
+            <EmptyState
+              withBorder={false}
+              icon={MagnifyingGlassIcon}
+              title="Nenhuma cor encontrada"
+              description="Nenhuma cor com esse nome. Limpe a busca para ver todas."
+              action={{ label: 'Limpar Busca', onClick: () => setColorQuery(''), forward: false }}
+            />
           )}
           <SimpleGrid cols={6} spacing={6} verticalSpacing={8} className={classes.swatchGrid}>
             {visibleColors.map(c => {
@@ -270,9 +278,9 @@ function ChoiceChips({ options, value, onSelect }: { options: string[]; value: s
 }
 
 // Chips com caixa de busca no topo — para listas com 7+ opções
-function SearchableChips({ options, value, onSelect, searchLabel, placeholder, emptyText }: {
+function SearchableChips({ options, value, onSelect, searchLabel, placeholder, emptyTitle, emptyText }: {
   options: string[]; value: string; onSelect: (v: string) => void;
-  searchLabel: string; placeholder: string; emptyText: string;
+  searchLabel: string; placeholder: string; emptyTitle: string; emptyText: string;
 }) {
   const [query, setQuery] = useState('');
   const q = normalize(query.trim());
@@ -289,7 +297,13 @@ function SearchableChips({ options, value, onSelect, searchLabel, placeholder, e
         onChange={e => setQuery(e.currentTarget.value)}
       />
       {q && matches.length === 0 && (
-        <Text lh={1.5} c="dimmed" size="sm">{emptyText}</Text>
+        <EmptyState
+          withBorder={false}
+          icon={MagnifyingGlassIcon}
+          title={emptyTitle}
+          description={emptyText}
+          action={{ label: 'Limpar Busca', onClick: () => setQuery(''), forward: false }}
+        />
       )}
       <ChoiceChips options={visible} value={value} onSelect={onSelect} />
     </Stack>

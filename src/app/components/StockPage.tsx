@@ -13,13 +13,12 @@ import {
 import { products } from "../data/mockData";
 import type { StockItem } from "../data/stockData";
 import {
-  StockKpis, StockToolbar, StockTableHeader, StockProductCell, StockStatusBadge, StockEmptyRow,
-  EditActions, EditButton, filterStock, type StockFilter,
-  StockCellCard, StockEmptyCard, StockTableSkeleton,
+  StockKpis, StockToolbar, StockTableHeader, StockProductCell, StockStatusBadge, StockEmptyFilterRow,
+  EditActions, EditButton, filterStock, type StockFilter, StockTableSkeleton,
 } from "./StockTable";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
-import { CellList } from "./ui/CellView";
+import sticky from "./ui/stickyTable.module.css";
 import interactive from "./interactive.module.css";
 import { toast } from "../lib/toast";
 
@@ -176,37 +175,38 @@ export function StockPage() {
         />
 
         {loading ? <StockTableSkeleton cols={HEADERS.length} /> : (
-        <>
-        {/* Tabela a partir de sm; no celular, cartões com as mesmas ações (sem rolagem lateral) */}
-        <Card withBorder padding={0} visibleFrom="sm">
-          <Table.ScrollContainer minWidth={900}>
-            <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+        // Tabela densa (8 colunas): mantida também no celular, com rolagem lateral,
+        // cabeçalho fixo e a coluna Produto sempre visível.
+        <Card withBorder padding={0}>
+          <Table.ScrollContainer minWidth={900} maxHeight={560}>
+            <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
+              highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
               <StockTableHeader labels={HEADERS} />
               <Table.Tbody>
                 {filtered.map(it => {
                   const isEditing = editing === it.sku;
                   return (
                     <Table.Tr key={it.sku}>
-                      <Table.Td><StockProductCell item={it} /></Table.Td>
+                      <Table.Td maw={280}><StockProductCell item={it} /></Table.Td>
                       <Table.Td><Text c="dimmed" size="sm" className="mono">{it.sku}</Text></Table.Td>
                       <Table.Td><Text>{it.line}</Text></Table.Td>
-                      <Table.Td>
+                      <Table.Td ta="right">
                         {isEditing ? (
-                          <NumberInput w={110} aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
+                          <NumberInput w={110} ml="auto" aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
                         ) : (
                           <Text fw={600} className="mono">{it.stock}</Text>
                         )}
                       </Table.Td>
-                      <Table.Td>
+                      <Table.Td ta="right">
                         {isEditing ? (
-                          <NumberInput w={110} aria-label="Limiar mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
+                          <NumberInput w={110} ml="auto" aria-label="Limiar mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
                         ) : (
                           <Text c="dimmed" className="mono">{it.min}</Text>
                         )}
                       </Table.Td>
                       <Table.Td><StockStatusBadge item={it} /></Table.Td>
                       <Table.Td><Text c="dimmed" size="sm">{it.updatedAt}</Text></Table.Td>
-                      <Table.Td>
+                      <Table.Td ta="right">
                         {mode === 'manual' ? (
                           isEditing
                             ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
@@ -218,38 +218,11 @@ export function StockPage() {
                     </Table.Tr>
                   );
                 })}
-                {filtered.length === 0 && <StockEmptyRow colSpan={HEADERS.length} onClear={clearFilters} />}
+                {filtered.length === 0 && <StockEmptyFilterRow colSpan={HEADERS.length} onClear={clearFilters} noItems={items.length === 0} />}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>
         </Card>
-
-        <CellList>
-          {filtered.map(it => {
-            const isEditing = editing === it.sku;
-            return (
-              <StockCellCard
-                key={it.sku}
-                item={it}
-                stockSlot={isEditing ? (
-                  <NumberInput mt={4} aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
-                ) : undefined}
-                minSlot={isEditing ? (
-                  <NumberInput mt={4} aria-label="Limiar mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
-                ) : undefined}
-                actions={mode === 'manual' ? (
-                  isEditing
-                    ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
-                    : <EditButton onClick={() => startEdit(it)} />
-                ) : (
-                  <Text c="dimmed" size="sm">Atualizado via ERP</Text>
-                )}
-              />
-            );
-          })}
-          {filtered.length === 0 && <StockEmptyCard onClear={clearFilters} />}
-        </CellList>
-        </>
         )}
       </Stack>
     </Container>
