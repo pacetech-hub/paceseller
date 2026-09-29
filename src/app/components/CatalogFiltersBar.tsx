@@ -1,5 +1,6 @@
+import { useState } from "react";
 import {
-  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Select, SimpleGrid, Slider, Stack, Text,
+  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Slider, Stack, Text, TextInput,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -10,10 +11,12 @@ import {
   XIcon,
   CaretDownIcon,
   CheckIcon,
+  MagnifyingGlassIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency } from "../data/mockData";
 import classes from "./CatalogFiltersBar.module.css";
+import interactive from "./interactive.module.css";
 
 export type CatalogFilters = {
   search: string;
@@ -66,6 +69,8 @@ interface Props {
 
 // Barra de filtros no topo do catálogo: tabela de preço + filtros em popovers.
 export function CatalogFiltersBar({ filters, onChange }: Props) {
+  const [colorQuery, setColorQuery] = useState('');
+  const visibleColors = allColors.filter(c => normalize(c).includes(normalize(colorQuery.trim())));
   const toggleColor = (c: string) => {
     const next = filters.colors.includes(c)
       ? filters.colors.filter(x => x !== c)
@@ -80,6 +85,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
     priceTable: filters.priceTable,
   });
 
+  const currentTable = priceTables.find(t => t.id === filters.priceTable);
   const priceActive = filters.priceRange[0] !== priceMin || filters.priceRange[1] !== priceMax;
   const activeCount =
     (filters.line !== 'Todos' ? 1 : 0) +
@@ -87,46 +93,37 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
     filters.colors.length +
     (priceActive ? 1 : 0);
 
-  const renderChips = (options: string[], value: string, onSelect: (v: string) => void) => (
-    <Chip.Group multiple={false} value={value} onChange={onSelect}>
-      <Group gap="sm">
-        {options.map(o => (
-          <Chip
-            key={o}
-            value={o}
-            variant="filled"
-            icon={null}
-            styles={{ iconWrapper: { display: 'none' } }}
-          >
-            {o}
-          </Chip>
-        ))}
-      </Group>
-    </Chip.Group>
-  );
-
   return (
     <Paper withBorder p="sm">
       <Group gap="sm" wrap="wrap" align="center">
-        {/* Tabela de Preço — 4 opções fixas, cada uma com descrição */}
-        <Select
-          w={{ base: '100%', sm: 260 }}
-          aria-label="Tabela de preço"
-          leftSection={<CurrencyDollarIcon size={18} />}
-          allowDeselect={false}
-          value={filters.priceTable}
-          onChange={v => v && onChange({ ...filters, priceTable: v })}
-          data={priceTables.map(t => ({ value: t.id, label: t.label }))}
-          renderOption={({ option }) => {
-            const t = priceTables.find(x => x.id === option.value);
-            return (
-              <Box>
-                <Text lh={1.5} fw={600} size="sm">{option.label}</Text>
-                <Text lh={1.5} c="dimmed" size="xs">{t?.desc}</Text>
-              </Box>
-            );
-          }}
-        />
+        {/* Tabela de Preço — 4 opções fixas com descrição: cartões de opção (radio) em vez de lista suspensa */}
+        <FilterPopover
+          icon={CurrencyDollarIcon}
+          label={currentTable?.label ?? 'Tabela de preço'}
+          active={false}
+          ariaLabel={`Tabela de preço: ${currentTable?.label ?? ''}`}
+        >
+          <Radio.Group
+            value={filters.priceTable}
+            onChange={v => onChange({ ...filters, priceTable: v })}
+            name="catalog-price-table"
+            label="Tabela de preço"
+          >
+            <Stack gap="sm" mt={4}>
+              {priceTables.map(t => (
+                <Radio.Card key={t.id} value={t.id} p="sm" className={interactive.choiceCard}>
+                  <Group align="flex-start" gap="sm" wrap="nowrap">
+                    <Radio.Indicator color="neutral" mt={2} />
+                    <Box flex={1} miw={0}>
+                      <Text lh={1.5} fw={600}>{t.label}</Text>
+                      <Text lh={1.5} c="dimmed" size="sm">{t.desc}</Text>
+                    </Box>
+                  </Group>
+                </Radio.Card>
+              ))}
+            </Stack>
+          </Radio.Group>
+        </FilterPopover>
 
         <Group gap={8} wrap="nowrap" ml={{ sm: 'xs' }}>
           <FunnelIcon size={18} />
@@ -143,7 +140,15 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           label={filters.line !== 'Todos' ? `Linha: ${filters.line}` : 'Modelo / Linha'}
           active={filters.line !== 'Todos'}
         >
-          {renderChips(lines, filters.line, l => onChange({ ...filters, line: l }))}
+          {/* 11 linhas: caixa de busca no topo filtra enquanto digita */}
+          <SearchableChips
+            options={lines}
+            value={filters.line}
+            onSelect={l => onChange({ ...filters, line: l })}
+            searchLabel="Buscar linha"
+            placeholder="ex.: Flow"
+            emptyText="Nenhuma linha com esse nome. Apague parte da busca para ver todas."
+          />
         </FilterPopover>
 
         <FilterPopover
@@ -151,7 +156,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           label={filters.category !== 'Todos' ? `Categoria: ${filters.category}` : 'Categoria'}
           active={filters.category !== 'Todos'}
         >
-          {renderChips(categories, filters.category, c => onChange({ ...filters, category: c }))}
+          <ChoiceChips options={categories} value={filters.category} onSelect={c => onChange({ ...filters, category: c })} />
         </FilterPopover>
 
         <FilterPopover
@@ -159,8 +164,20 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           label={filters.colors.length > 0 ? `Cores (${filters.colors.length})` : 'Cores'}
           active={filters.colors.length > 0}
         >
+          {/* Muitas cores: caixa de busca no topo filtra as amostras pelo nome */}
+          <TextInput
+            aria-label="Buscar cor"
+            placeholder="Buscar cor (ex.: Preto)"
+            leftSection={<MagnifyingGlassIcon size={18} />}
+            value={colorQuery}
+            onChange={e => setColorQuery(e.currentTarget.value)}
+            mb="sm"
+          />
+          {visibleColors.length === 0 && (
+            <Text lh={1.5} c="dimmed" size="sm">Nenhuma cor com esse nome. Apague parte da busca para ver todas.</Text>
+          )}
           <SimpleGrid cols={6} spacing={6} verticalSpacing={8} className={classes.swatchGrid}>
-            {allColors.map(c => {
+            {visibleColors.map(c => {
               const active = filters.colors.includes(c);
               const bg = colorSwatch[c] || '#94a3b8';
               return (
@@ -228,15 +245,68 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
   );
 }
 
+// busca sem diferenciar maiúsculas nem acentos
+const normalize = (v: string) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// Chips de escolha única (poucas opções)
+function ChoiceChips({ options, value, onSelect }: { options: string[]; value: string; onSelect: (v: string) => void }) {
+  return (
+    <Chip.Group multiple={false} value={value} onChange={onSelect}>
+      <Group gap="sm">
+        {options.map(o => (
+          <Chip
+            key={o}
+            value={o}
+            variant="filled"
+            icon={null}
+            styles={{ iconWrapper: { display: 'none' } }}
+          >
+            {o}
+          </Chip>
+        ))}
+      </Group>
+    </Chip.Group>
+  );
+}
+
+// Chips com caixa de busca no topo — para listas com 7+ opções
+function SearchableChips({ options, value, onSelect, searchLabel, placeholder, emptyText }: {
+  options: string[]; value: string; onSelect: (v: string) => void;
+  searchLabel: string; placeholder: string; emptyText: string;
+}) {
+  const [query, setQuery] = useState('');
+  const q = normalize(query.trim());
+  // "Todos" e a opção marcada continuam visíveis para a pessoa poder voltar atrás
+  const visible = options.filter(o => !q || o === 'Todos' || o === value || normalize(o).includes(q));
+  const matches = options.filter(o => o !== 'Todos' && normalize(o).includes(q));
+  return (
+    <Stack gap="sm">
+      <TextInput
+        aria-label={searchLabel}
+        placeholder={placeholder}
+        leftSection={<MagnifyingGlassIcon size={18} />}
+        value={query}
+        onChange={e => setQuery(e.currentTarget.value)}
+      />
+      {q && matches.length === 0 && (
+        <Text lh={1.5} c="dimmed" size="sm">{emptyText}</Text>
+      )}
+      <ChoiceChips options={visible} value={value} onSelect={onSelect} />
+    </Stack>
+  );
+}
+
 function FilterPopover({
   icon: SectionIcon,
   label,
   active,
+  ariaLabel,
   children,
 }: {
   icon: Icon;
   label: string;
   active: boolean;
+  ariaLabel?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -247,6 +317,7 @@ function FilterPopover({
           color="neutral"
           leftSection={<SectionIcon size={16} />}
           rightSection={<CaretDownIcon size={14} />}
+          aria-label={ariaLabel}
         >
           {label}
         </Button>
