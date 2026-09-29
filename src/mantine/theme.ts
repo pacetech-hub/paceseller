@@ -26,8 +26,10 @@ const SEMIBOLD = 600;
 
 // Campos de formulário: retângulo com borda visível e o rótulo próximo do próprio campo
 // (o espaço entre campos vem do Stack do formulário, sempre maior que este).
+// Peso óptico em três níveis: o dado digitado é o mais forte (16px, cor do texto),
+// depois o rótulo (14px semibold, cinza escuro) e por último o placeholder (cinza claro).
 const inputStyles = {
-  label: { fontWeight: SEMIBOLD, marginBottom: 6 },
+  label: { fontWeight: SEMIBOLD, marginBottom: 6, fontSize: "var(--mantine-font-size-sm)", color: "var(--mantine-color-gray-8)" },
   description: { marginBottom: 6 },
   error: { marginTop: 6 },
 };
@@ -111,11 +113,23 @@ export const mantineTheme = createTheme({
     InputWrapper: { defaultProps: { withAsterisk: false }, styles: inputStyles },
     Input: { defaultProps: { radius: "md", variant: "default", size: CONTROL_SIZE } },
     TextInput: { defaultProps: inputDefaults, styles: inputStyles },
-    PasswordInput: { defaultProps: inputDefaults, styles: inputStyles },
+    // Sempre com o botão de mostrar/ocultar a senha, com nome acessível.
+    PasswordInput: {
+      defaultProps: { ...inputDefaults, visibilityToggleButtonProps: { "aria-label": "Mostrar ou ocultar senha" } },
+      styles: inputStyles,
+    },
     NumberInput: { defaultProps: inputDefaults, styles: inputStyles },
     Textarea: { defaultProps: inputDefaults, styles: inputStyles },
-    Select: { defaultProps: inputDefaults, styles: inputStyles },
-    MultiSelect: { defaultProps: inputDefaults, styles: inputStyles },
+    // Listas longas: caixa de filtro no topo (digite para encontrar). Listas de até 5 opções
+    // não usam Select (viram SegmentedControl/Radio), então todo Select é pesquisável.
+    Select: {
+      defaultProps: { ...inputDefaults, searchable: true, nothingFoundMessage: "Nenhuma opção encontrada — confira a grafia" },
+      styles: inputStyles,
+    },
+    MultiSelect: {
+      defaultProps: { ...inputDefaults, searchable: true, nothingFoundMessage: "Nenhuma opção encontrada — confira a grafia" },
+      styles: inputStyles,
+    },
     Autocomplete: { defaultProps: inputDefaults, styles: inputStyles },
     FileInput: { defaultProps: inputDefaults, styles: inputStyles },
     DateInput: { defaultProps: inputDefaults, styles: inputStyles },
