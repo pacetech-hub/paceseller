@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import {
   SimpleGrid, Paper, Group, Text, ThemeIcon, TextInput, SegmentedControl, Button,
   Table, Badge, NumberInput, Avatar, Box, Stack, Card,
@@ -22,8 +22,9 @@ import { formatCurrency } from "../data/mockData";
 import { toast } from "../lib/toast";
 import { statusOf, type StockItem, type StockStatusKey } from "../data/stockData";
 import { useMockLoading } from "../lib/useMockLoading";
-import { KpiSkeleton, ListSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellCard, CellField, CellList } from "./ui/CellView";
+import { KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
+import sticky from "./ui/stickyTable.module.css";
 
 export type StockFilter = 'todos' | StockStatusKey;
 
@@ -110,12 +111,17 @@ export function StockProductCell({ item }: { item: StockItem }) {
   );
 }
 
+/** Colunas numéricas (quantidades) alinhadas à direita no cabeçalho e nas células. */
+export const STOCK_NUMERIC_HEADERS = ['Estoque', 'Estoque atual', 'Limiar mín.'];
+
 export function StockTableHeader({ labels }: { labels: string[] }) {
   return (
-    <Table.Thead bg="var(--mantine-color-gray-0)">
+    <Table.Thead>
       <Table.Tr>
         {labels.map(h => (
-          <Table.Th key={h}>
+          // fundo em cada Th (não no Thead) para o cabeçalho fixo e a 1ª coluna fixa ficarem iguais
+          <Table.Th key={h} bg="var(--mantine-color-gray-0)"
+            ta={STOCK_NUMERIC_HEADERS.includes(h) || h === 'Ações' ? 'right' : undefined}>
             <Text c="dimmed" size="sm" fw={600} tt="uppercase">{h}</Text>
           </Table.Th>
         ))}
@@ -124,66 +130,35 @@ export function StockTableHeader({ labels }: { labels: string[] }) {
   );
 }
 
-function StockEmptyState({ onClear }: { onClear?: () => void }) {
-  return (
-    <Stack align="center" gap="sm">
-      <FunnelIcon size={24} color="var(--mantine-color-dimmed)" opacity={0.6} />
-      <Text c="dimmed" ta="center" px="md">Nenhum SKU corresponde à busca ou ao filtro de status aplicado.</Text>
-      {onClear && (
-        <Button variant="default" onClick={onClear}>Limpar Busca e Filtro</Button>
-      )}
-    </Stack>
-  );
-}
-
-export function StockEmptyRow({ colSpan, onClear }: { colSpan: number; onClear?: () => void }) {
+/** Estado vazio causado por busca/filtro, numa linha de largura total da tabela. */
+export function StockEmptyFilterRow({ colSpan, onClear, noItems = false }: { colSpan: number; onClear: () => void; noItems?: boolean }) {
   return (
     <Table.Tr>
-      <Table.Td colSpan={colSpan} py="xl">
-        <StockEmptyState onClear={onClear} />
+      <Table.Td colSpan={colSpan} px="md">
+        {noItems ? (
+          <EmptyState
+            withBorder={false}
+            icon={PackageIcon}
+            title="Nenhum SKU cadastrado"
+            description="Os saldos aparecem aqui assim que os produtos forem cadastrados ou sincronizados com o ERP."
+          />
+        ) : (
+        <EmptyState
+          withBorder={false}
+          icon={FunnelIcon}
+          title="Nenhum SKU encontrado"
+          description="Nenhum SKU corresponde à busca ou ao filtro de status aplicado. Limpe os filtros para ver todo o estoque."
+          action={{ label: 'Limpar Filtros', onClick: onClear, forward: false }}
+        />
+        )}
       </Table.Td>
     </Table.Tr>
   );
 }
 
-/** Estado vazio da lista de cartões (mobile). */
-export function StockEmptyCard({ onClear }: { onClear?: () => void }) {
-  return (
-    <Paper withBorder py="xl">
-      <StockEmptyState onClear={onClear} />
-    </Paper>
-  );
-}
-
-/** Skeleton da área de dados: tabela a partir de sm, cartões empilhados no celular. */
+/** Skeleton da área de dados: a tabela é mantida em todas as larguras (tabela densa, 7+ colunas). */
 export function StockTableSkeleton({ cols }: { cols: number }) {
-  return (
-    <>
-      <Box visibleFrom="sm"><TableSkeleton rows={8} cols={cols} /></Box>
-      <Box hiddenFrom="sm"><ListSkeleton rows={5} /></Box>
-    </>
-  );
-}
-
-/**
- * Cartão de SKU para o celular (cell view): mesmo conteúdo e ações da linha da tabela.
- * `stockSlot`/`minSlot` substituem o valor pelo campo de edição quando a linha está em edição.
- */
-export function StockCellCard({ item, stockSlot, minSlot, actions }: {
-  item: StockItem;
-  stockSlot?: ReactNode;
-  minSlot?: ReactNode;
-  actions?: ReactNode;
-}) {
-  return (
-    <CellCard title={item.name} aside={<StockStatusBadge item={item} />} actions={actions}>
-      <CellField label="SKU"><Text className="mono">{item.sku}</Text></CellField>
-      <CellField label="Linha">{item.line} · {item.category} · {formatCurrency(item.price)}</CellField>
-      <CellField label="Estoque atual">{stockSlot ?? <Text fw={600} className="mono">{item.stock}</Text>}</CellField>
-      <CellField label="Limiar mín.">{minSlot ?? <Text className="mono">{item.min}</Text>}</CellField>
-      <CellField label="Atualizado">{item.updatedAt}</CellField>
-    </CellCard>
-  );
+  return <TableSkeleton rows={8} cols={cols} />;
 }
 
 interface StockToolbarProps {
@@ -230,7 +205,7 @@ export function StockToolbar({ query, onQueryChange, filter, onFilterChange, sho
 // Linha de tabela densa: botões size="sm" (36px) com ícone + texto; cancelar à esquerda, salvar (principal) à direita
 export function EditActions({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
   return (
-    <Group gap="sm" wrap="nowrap">
+    <Group gap="sm" wrap="nowrap" justify="flex-end">
       <Button variant="default" size="sm" onClick={onCancel} leftSection={<XIcon size={16} />} aria-label="Cancelar Edição">
         Cancelar
       </Button>
@@ -296,24 +271,26 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
       />
 
       {loading ? <StockTableSkeleton cols={headers.length} /> : (
-      <>
-      {/* Tabela a partir de sm; no celular, cartões (sem rolagem lateral) */}
-      <Card withBorder padding={0} visibleFrom="sm">
-        <Table.ScrollContainer minWidth={900}>
-          <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+      // Tabela densa (7+ colunas): mantida também no celular, com rolagem lateral,
+      // cabeçalho fixo e a coluna Produto sempre visível.
+      <Card withBorder padding={0}>
+        <Table.ScrollContainer minWidth={900} maxHeight={560}>
+          <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
+            highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
             <StockTableHeader labels={headers} />
             <Table.Tbody>
               {filtered.map(it => {
                 const isEditing = editing === it.sku;
                 return (
                   <Table.Tr key={it.sku}>
-                    <Table.Td><StockProductCell item={it} /></Table.Td>
+                    <Table.Td maw={280}><StockProductCell item={it} /></Table.Td>
                     <Table.Td><Text c="dimmed" size="sm" className="mono">{it.sku}</Text></Table.Td>
                     <Table.Td><Text>{it.line}</Text></Table.Td>
-                    <Table.Td>
+                    <Table.Td ta="right">
                       {isEditing ? (
                         <NumberInput
                           w={110}
+                          ml="auto"
                           aria-label="Estoque atual"
                           placeholder="0"
                           min={0}
@@ -324,11 +301,11 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
                         <Text fw={600} className="mono">{it.stock}</Text>
                       )}
                     </Table.Td>
-                    <Table.Td><Text c="dimmed" className="mono">{it.min}</Text></Table.Td>
+                    <Table.Td ta="right"><Text c="dimmed" className="mono">{it.min}</Text></Table.Td>
                     <Table.Td><StockStatusBadge item={it} /></Table.Td>
                     <Table.Td><Text c="dimmed" size="sm">{it.updatedAt}</Text></Table.Td>
                     {!readOnly && (
-                      <Table.Td>
+                      <Table.Td ta="right">
                         {isEditing
                           ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
                           : <EditButton onClick={() => startEdit(it)} />}
@@ -337,31 +314,11 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
                   </Table.Tr>
                 );
               })}
-              {filtered.length === 0 && <StockEmptyRow colSpan={headers.length} onClear={clearFilters} />}
+              {filtered.length === 0 && <StockEmptyFilterRow colSpan={headers.length} onClear={clearFilters} noItems={items.length === 0} />}
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>
       </Card>
-
-      <CellList>
-        {filtered.map(it => {
-          const isEditing = editing === it.sku;
-          return (
-            <StockCellCard
-              key={it.sku}
-              item={it}
-              stockSlot={isEditing ? (
-                <NumberInput mt={4} aria-label="Estoque atual" placeholder="0" min={0} value={draft} onChange={v => setDraft(Number(v) || 0)} />
-              ) : undefined}
-              actions={readOnly ? undefined : isEditing
-                ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
-                : <EditButton onClick={() => startEdit(it)} />}
-            />
-          );
-        })}
-        {filtered.length === 0 && <StockEmptyCard onClear={clearFilters} />}
-      </CellList>
-      </>
       )}
     </Stack>
   );

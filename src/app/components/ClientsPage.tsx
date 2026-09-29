@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
-  Stack, Chip, Table, Avatar, Badge, ThemeIcon, Box, Card, Radio,
+  Stack, Chip, Table, Avatar, Badge, Box, Card, Radio,
 } from "@mantine/core";
 import interactive from "./interactive.module.css";
 import {
@@ -16,6 +16,7 @@ import { clients, Client } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton, ListSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellCard, CellField, CellList } from "./ui/CellView";
+import { EmptyState } from "./ui/EmptyState";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
 
@@ -219,20 +220,12 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Box hiddenFrom="sm"><ListSkeleton rows={6} withAvatar={false} /></Box>
           </>
         ) : filtered.length === 0 ? (
-          <Paper withBorder>
-            <Stack align="center" py="xl" gap={4}>
-              <ThemeIcon variant="light" color="neutral" size={48}>
-                <UsersIcon size={24} />
-              </ThemeIcon>
-              <Text fw={600}>Nenhum cliente encontrado</Text>
-              <Text c="dimmed" size="sm" ta="center" px="md">
-                Nenhum cliente corresponde à busca ou aos filtros aplicados. Limpe-os para ver a carteira completa.
-              </Text>
-              <Button variant="default" mt="sm" onClick={() => { setSearch(''); clearFilters(); }}>
-                Limpar Busca e Filtros
-              </Button>
-            </Stack>
-          </Paper>
+          <EmptyState
+            icon={UsersIcon}
+            title="Nenhum cliente encontrado"
+            description="Nenhum cliente corresponde à busca ou aos filtros aplicados. Limpe-os para ver a carteira completa."
+            action={{ label: 'Limpar Busca e Filtros', onClick: () => { setSearch(''); clearFilters(); }, forward: false }}
+          />
         ) : (
           <>
             <Card withBorder padding={0} visibleFrom="sm">

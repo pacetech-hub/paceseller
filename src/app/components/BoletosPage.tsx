@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code,
-  SimpleGrid, ThemeIcon, UnstyledButton, Collapse, List, Card, Divider,
+  SimpleGrid, UnstyledButton, Collapse, List, Card, Divider,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import classes from "./interactive.module.css";
@@ -22,6 +22,7 @@ import {
 import { formatCurrency, formatDate } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -273,7 +274,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   ];
 
   const summary = (
-    <Group gap="md" wrap="wrap" p="md">
+    <Group gap="md" wrap="nowrap" p="md">
       <Box miw={0} flex={1}>
         {/* line 1: status + due/payment date */}
         <Group gap={8} mb={4}>
@@ -461,7 +462,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
             p="md"
             bd={stat.tone === 'danger' ? '1px solid var(--mantine-color-red-3)' : undefined}
           >
-            <Text c="dimmed" size="sm" fw={600} mb={4}>{stat.label}</Text>
+            <Text c="dimmed" size="sm" mb={4}>{stat.label}</Text>
             <Text
               className="mono"
               c={stat.tone === 'danger' ? 'red.6' : undefined}
@@ -506,20 +507,20 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
         ))}
 
         {filtered.length === 0 && (
-          <Paper withBorder py={64}>
-            <Stack align="center" gap={4}>
-              <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
-                <ReceiptIcon size={24} />
-              </ThemeIcon>
-              <Text fw={600}>Nenhum boleto encontrado</Text>
-              <Text c="dimmed" size="sm" ta="center" px="md">
-                Nenhum boleto corresponde à busca ou ao status selecionado. Limpe-os para ver todos os seus boletos.
-              </Text>
-              <Button variant="default" mt="sm" onClick={() => { setSearch(''); setStatusFilter('todos'); }}>
-                Limpar Busca e Filtros
-              </Button>
-            </Stack>
-          </Paper>
+          basePayments.length === 0 ? (
+            <EmptyState
+              icon={ReceiptIcon}
+              title="Nenhum boleto por aqui ainda"
+              description="Os boletos e códigos Pix de cada parcela aparecem aqui assim que um pedido faturado for emitido."
+            />
+          ) : (
+            <EmptyState
+              icon={ReceiptIcon}
+              title="Nenhum boleto encontrado"
+              description="Nenhum boleto corresponde à busca ou ao status selecionado. Limpe-os para ver todos os seus boletos."
+              action={{ label: 'Limpar Busca e Filtros', onClick: () => { setSearch(''); setStatusFilter('todos'); }, forward: false }}
+            />
+          )
         )}
       </Stack>
       )}
