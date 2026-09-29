@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, ThemeIcon, SimpleGrid,
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, SimpleGrid,
   ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, Skeleton, type BoxProps, type ImageProps,
 } from "@mantine/core";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellList, CellCard, CellField } from "./ui/CellView";
+import { EmptyState } from "./ui/EmptyState";
 import { useSmallerThan } from "../lib/responsive";
 import { toast } from "../lib/toast";
 import classes from "./FichaTecnicaPage.module.css";
@@ -19,7 +20,6 @@ import {
   PackageIcon,
   CheckCircleIcon,
   ArrowsClockwiseIcon,
-  XIcon,
 } from "@phosphor-icons/react";
 import { products, type Product } from "../data/mockData";
 
@@ -363,23 +363,16 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           ))}
         </SimpleGrid>
       ) : (
-        <Paper withBorder py={64} px="md">
-          <Stack align="center" gap={4} ta="center">
-            <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
-              <PackageIcon size={24} />
-            </ThemeIcon>
-            <Text fw={600}>Nenhum produto encontrado</Text>
-            <Text c="dimmed">Nenhum produto combina com a busca, a linha e a categoria escolhidas.</Text>
-            <Button
-              mt="md"
-              variant="default"
-              leftSection={<XIcon size={16} />}
-              onClick={() => { setSearch(''); setLine('Todos'); setCategory('Todos'); }}
-            >
-              Limpar Busca e Filtros
-            </Button>
-          </Stack>
-        </Paper>
+        <EmptyState
+          icon={PackageIcon}
+          title="Nenhum produto encontrado"
+          description="Nenhum produto combina com a busca, a linha e a categoria escolhidas. Limpe a busca e os filtros para ver todos os produtos."
+          action={{
+            label: 'Limpar Busca e Filtros',
+            onClick: () => { setSearch(''); setLine('Todos'); setCategory('Todos'); },
+            forward: false,
+          }}
+        />
       )}
     </Stack>
   );
@@ -577,8 +570,8 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             <Table.Thead>
               <Table.Tr c="dimmed" fz="sm">
                 <Table.Th fw={400} pl={0}>Tamanho</Table.Th>
-                <Table.Th fw={400}>Estoque fábrica</Table.Th>
-                {profile === 'lojista' && <Table.Th fw={400}>Estoque loja</Table.Th>}
+                <Table.Th fw={400} ta="right">Estoque fábrica</Table.Th>
+                {profile === 'lojista' && <Table.Th fw={400} ta="right">Estoque loja</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -589,13 +582,13 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                 return (
                   <Table.Tr key={s}>
                     <Table.Td pl={0} fw={600} className={classes.nowrap}>Nº {s}</Table.Td>
-                    <Table.Td>
+                    <Table.Td ta="right">
                       <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
                     </Table.Td>
                     {profile === 'lojista' && (
-                      <Table.Td>
-                        <Group gap="sm" wrap="nowrap">
-                          <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
+                      <Table.Td ta="right">
+                        {/* número na borda direita (alinhado aos demais); reposição à esquerda dele */}
+                        <Group gap="sm" wrap="nowrap" justify="flex-end">
                           {storeLow && (
                             <Button
                               onClick={() => requestRestock(s)}
@@ -607,6 +600,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                               Solicitar Reposição
                             </Button>
                           )}
+                          <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
                         </Group>
                       </Table.Td>
                     )}
@@ -688,6 +682,13 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             imageProps={{ fit: 'contain' }}
           />
         </AspectRatio>
+        {/* Rodapé: Fechar à esquerda, baixar a foto em exibição à direita */}
+        <Group justify="flex-end" gap="sm" mt="md">
+          <Button variant="default" onClick={() => setZoomOpen(false)}>Fechar</Button>
+          <Button onClick={() => downloadPhoto(GALLERY_LABELS[activeImage])} leftSection={<DownloadSimpleIcon size={18} />}>
+            Baixar Foto
+          </Button>
+        </Group>
       </Modal>
     </Stack>
   );

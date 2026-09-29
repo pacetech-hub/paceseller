@@ -2,8 +2,8 @@ import { useState, type ReactNode } from "react";
 import { toast } from "../lib/toast";
 import { useSmallerThan } from "../lib/responsive";
 import {
-  ActionIcon, Badge, Box, Button, Card, Chip, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
-  Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Skeleton, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
+  Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, ThemeIcon, Title, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
 import {
@@ -29,9 +29,11 @@ import interactive from "./interactive.module.css";
 import classes from "./CatalogPage.module.css";
 
 import type { CartContext, CartCreator } from "./CartsListPage";
-import { CatalogFiltersBar } from "./CatalogFiltersBar";
+import { CatalogFiltersBar, defaultFilters } from "./CatalogFiltersBar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
+import sticky from "./ui/stickyTable.module.css";
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 const BORDER = `1px solid ${BORDER_COLOR}`;
@@ -163,9 +165,7 @@ function GradeHeader({ onClose }: { onClose?: () => void }) {
         Compra rápida — grade
       </Text>
       {onClose && (
-        <ActionIcon onClick={onClose} variant="subtle" color="gray" aria-label="Fechar compra rápida">
-          <XIcon size={18} />
-        </ActionIcon>
+        <CloseButton onClick={onClose} aria-label="Fechar compra rápida" />
       )}
     </Group>
   );
@@ -221,12 +221,14 @@ function GradeCompact({ product, onAdd, onClose }: {
 }
 
 // larguras da grade: rótulo · uma coluna por numeração (cabe o stepper de 36px) · total
-const GRADE_LABEL_W = 110;
+const GRADE_LABEL_W = 120;
 const GRADE_COL_W = 164;
-const GRADE_TOTAL_W = 70;
+const GRADE_TOTAL_W = 80;
 
-function GradeInline({ product, onAdd, onClose }: {
+function GradeInline({ product, onAdd, onClose, onCancel }: {
   product: Product; onAdd: (qtys: Record<string, number>) => void; onClose?: () => void;
+  /** Botão "Fechar" no rodapé (à esquerda da ação principal) — usado no modal de detalhes. */
+  onCancel?: () => void;
 }) {
   const sizes = Object.keys(product.grades);
   const [qtys, setQtys] = useState<Record<string, number>>(
@@ -236,8 +238,9 @@ function GradeInline({ product, onAdd, onClose }: {
   const subtotal = total * product.price;
   const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
 
+  // Rótulo da linha: menor e esmaecido, em peso regular — o destaque fica nos números
   const rowLabel = (text: string) => (
-    <Text lh={1.5} w={GRADE_LABEL_W} flex="none" px={8} py={8} c="dimmed" size="sm" fw={600}>{text}</Text>
+    <Table.Th w={GRADE_LABEL_W} miw={GRADE_LABEL_W} fz="sm" fw={400} c="dimmed">{text}</Table.Th>
   );
 
   return (
@@ -246,52 +249,63 @@ function GradeInline({ product, onAdd, onClose }: {
       <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
         <GradeHeader onClose={onClose} />
 
-        {/* A grade rola na horizontal quando não cabe, em vez de espremer os steppers */}
-        <ScrollArea type="auto" offsetScrollbars="x">
-        <Card withBorder padding={0} miw={GRADE_LABEL_W + GRADE_TOTAL_W + sizes.length * GRADE_COL_W}>
-          <Group gap={0} wrap="nowrap" bg="var(--mantine-color-default-hover)">
-            {rowLabel('Numeração')}
-            {sizes.map(s => (
-              <Text lh={1.5} key={s} flex={1} miw={GRADE_COL_W} px={4} py={8} ta="center" fw={600}>Nº {s}</Text>
-            ))}
-            <Text lh={1.5} w={GRADE_TOTAL_W} flex="none" px={4} py={8} ta="center" c="dimmed" size="sm" fw={600}>Total</Text>
-          </Group>
-          <Divider color={BORDER_COLOR} />
+        {/* Grade larga (uma coluna por numeração): rola na horizontal, mas a coluna de rótulos
+            (Numeração / Estoque / Quantidade) fica fixa à esquerda. Números alinhados à direita. */}
+        <Paper withBorder>
+          <Table.ScrollContainer minWidth={GRADE_LABEL_W + GRADE_TOTAL_W + sizes.length * GRADE_COL_W} type="native">
+            <Table className={sticky.firstCol} verticalSpacing={8} horizontalSpacing="sm" withRowBorders>
+              <Table.Thead>
+                <Table.Tr>
+                  {rowLabel('Numeração')}
+                  {sizes.map(s => (
+                    <Table.Th key={s} miw={GRADE_COL_W} ta="right" fw={600}>Nº {s}</Table.Th>
+                  ))}
+                  <Table.Th w={GRADE_TOTAL_W} ta="right" fz="sm" fw={400} c="dimmed">Total</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                <Table.Tr>
+                  {rowLabel('Estoque')}
+                  {sizes.map(s => (
+                    <Table.Td key={s} ta="right" className="mono" c="teal.6">{product.grades[s]}</Table.Td>
+                  ))}
+                  <Table.Td ta="right" className="mono" c="dimmed">
+                    {Object.values(product.grades).reduce((a, b) => a + b, 0)}
+                  </Table.Td>
+                </Table.Tr>
+                <Table.Tr>
+                  {rowLabel('Quantidade')}
+                  {sizes.map(s => (
+                    <Table.Td key={s} ta="right">
+                      <Group justify="flex-end" wrap="nowrap">
+                        <QtyStepper value={qtys[s]} onChange={v => set(s, v)} />
+                      </Group>
+                    </Table.Td>
+                  ))}
+                  <Table.Td ta="right" className="mono" fw={700}>{total}</Table.Td>
+                </Table.Tr>
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        </Paper>
 
-          <Group gap={0} wrap="nowrap">
-            {rowLabel('Estoque')}
-            {sizes.map(s => (
-              <Text lh={1.5} key={s} flex={1} miw={GRADE_COL_W} px={4} py={8} ta="center" c="teal.6" fw={600}>{product.grades[s]}</Text>
-            ))}
-            <Text lh={1.5} w={GRADE_TOTAL_W} flex="none" px={4} py={8} ta="center" c="dimmed">
-              {Object.values(product.grades).reduce((a, b) => a + b, 0)}
-            </Text>
-          </Group>
-          <Divider color={BORDER_COLOR} />
-
-          <Group gap={0} wrap="nowrap">
-            {rowLabel('Quantidade')}
-            {sizes.map(s => (
-              <Group key={s} flex={1} miw={GRADE_COL_W} px={4} py={8} justify="center" wrap="nowrap">
-                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} />
-              </Group>
-            ))}
-            <Text lh={1.5} w={GRADE_TOTAL_W} flex="none" px={4} py={8} ta="center" className="mono" fw={700}>{total}</Text>
-          </Group>
-        </Card>
-        </ScrollArea>
-
+        {/* Fechar à esquerda, ação principal à direita */}
         <Group justify="flex-end" gap="sm" mt={8} mb={4}>
-          <Text lh={1.5} c="dimmed" size="sm">
+          <Text lh={1.5} c="dimmed" size="sm" mr="auto">
             {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" fw={700}>{formatCurrency(subtotal)}</Text>
           </Text>
-          <Button
-            onClick={() => onAdd(qtys)}
-            disabled={total === 0}
-            leftSection={<ShoppingCartIcon size={18} />}
-          >
-            Adicionar ao Carrinho
-          </Button>
+          <Group gap="sm">
+            {onCancel && (
+              <Button variant="default" onClick={onCancel}>Fechar</Button>
+            )}
+            <Button
+              onClick={() => onAdd(qtys)}
+              disabled={total === 0}
+              leftSection={<ShoppingCartIcon size={18} />}
+            >
+              Adicionar ao Carrinho
+            </Button>
+          </Group>
         </Group>
       </Box>
     </>
@@ -569,7 +583,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                   <Box className={classes.thumb}>
                     <ProductImage src={img.src} alt="" />
                   </Box>
-                  <Text lh={1.5} ta="center" size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
+                  <Text lh={1.5} size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
                     {img.label}
                   </Text>
                 </UnstyledButton>
@@ -625,7 +639,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
         </SimpleGrid>
       </Box>
       <Box flex="none">
-        <GradeInline product={product} onAdd={onAddGrade} />
+        <GradeInline product={product} onAdd={onAddGrade} onCancel={onClose} />
       </Box>
     </Modal>
   );
@@ -709,9 +723,13 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
     />
   ) : null;
   const cartFilterEmpty = showCartFilter && cartQ && visibleCarts.length === 0 ? (
-    <Text lh={1.5} c="dimmed" py="sm">
-      Nenhum carrinho com "{cartQuery.trim()}". Confira o nome ou apague a busca para ver todos.
-    </Text>
+    <EmptyState
+      withBorder={false}
+      icon={MagnifyingGlassIcon}
+      title="Nenhum carrinho encontrado"
+      description={`Nenhum carrinho com "${cartQuery.trim()}". Confira o nome ou limpe a busca para ver todos.`}
+      action={{ label: 'Limpar Busca', onClick: () => setCartQuery(''), forward: false }}
+    />
   ) : null;
 
   const commitAdd = (p: Product, qtys: Record<string, number>, cartName?: string) => {
@@ -790,7 +808,15 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
 
   const hasActiveFilters = selectedLine !== 'Todos' || selectedCategory !== 'Todos' || selectedCollection !== 'Todas';
   const clearInternalFilters = () => { setSelectedLine('Todos'); setSelectedCategory('Todos'); setSelectedCollection('Todas'); };
-  const canClearFromEmpty = !!search || (!usingExternal && hasActiveFilters);
+  // Estado vazio: limpa busca e filtros (os da barra do topo também); a tabela de preço continua
+  const clearSearchAndFilters = () => {
+    if (usingExternal && onExternalFiltersChange) {
+      onExternalFiltersChange({ ...defaultFilters, priceTable: externalFilters!.priceTable });
+    } else {
+      setInternalSearch('');
+      clearInternalFilters();
+    }
+  };
 
   const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void) => (
     <Box>
@@ -970,27 +996,28 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           ? <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} imageRatio={1.25} />
           : <ListSkeleton rows={5} withAvatar />
       ) : sorted.length === 0 ? (
-        <Stack align="center" justify="center" gap={0} py={80} ta="center">
-          <Box mb={16} lh={0}>
-            <PackageIcon size={48} color={DIMMED} opacity={0.3} />
-          </Box>
-          <Text lh={1.5} fw={600}>Nenhum produto encontrado</Text>
-          <Text lh={1.5} c="dimmed" mt={4}>
-            {usingExternal
-              ? 'Nenhum produto combina com a busca e os filtros. Mude a busca ou ajuste os filtros no topo da página.'
-              : 'Nenhum produto combina com a busca e os filtros atuais.'}
-          </Text>
-          {canClearFromEmpty && (
-            <Button
-              mt="md"
-              variant="default"
-              leftSection={<XIcon size={16} />}
-              onClick={() => { setSearch(''); if (!usingExternal) clearInternalFilters(); }}
-            >
-              {!usingExternal && hasActiveFilters ? 'Limpar Busca e Filtros' : 'Limpar Busca'}
-            </Button>
-          )}
-        </Stack>
+        <EmptyState
+          icon={PackageIcon}
+          title="Nenhum produto encontrado"
+          description={usingExternal
+            ? 'Nenhum produto combina com a busca e os filtros do topo da página. Limpe a busca e os filtros para ver o catálogo inteiro.'
+            : 'Nenhum produto combina com a busca e os filtros atuais. Limpe a busca e os filtros para ver o catálogo inteiro.'}
+          action={{ label: 'Limpar Busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
+          suggestions={[
+            {
+              label: 'Ver mais vendidos',
+              description: 'Catálogo inteiro, dos modelos que mais vendem para os que menos vendem',
+              icon: LightningIcon,
+              onClick: () => { clearSearchAndFilters(); setSortBy('mais vendidos'); },
+            },
+            {
+              label: 'Ver mais bem avaliados',
+              description: 'Catálogo inteiro, ordenado pela avaliação dos lojistas',
+              icon: StarIcon,
+              onClick: () => { clearSearchAndFilters(); setSortBy('avaliação'); },
+            },
+          ]}
+        />
       ) : viewMode === 'grid' ? (
         <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={{ base: 'sm', sm: 'md' }} className={classes.grid}>
           {sorted.map(product => renderProductCard(product, 'grid'))}
@@ -1023,12 +1050,16 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
       >
         {confirmAdd && (
           <>
-            <Box px="lg" py="md">
-              <Title order={3}>Adicionar ao carrinho</Title>
-              <Text lh={1.5} c="dimmed" mt={4} size="sm">
-                {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>. Escolha o carrinho de destino.
-              </Text>
-            </Box>
+            {/* Cabeçalho próprio: título à esquerda, X grande (44px) no canto superior direito */}
+            <Group justify="space-between" align="flex-start" pl="lg" pr="sm" py="sm" gap="sm" wrap="nowrap">
+              <Box miw={0} pt={8}>
+                <Title order={3}>Adicionar ao carrinho</Title>
+                <Text lh={1.5} c="dimmed" mt={4} size="sm">
+                  {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>. Escolha o carrinho de destino.
+                </Text>
+              </Box>
+              <CloseButton onClick={() => setConfirmAdd(null)} aria-label="Fechar" flex="none" />
+            </Group>
             <Divider color={BORDER_COLOR} />
             <ScrollArea.Autosize mah="40vh" type="auto">
               <Stack gap="sm" px="lg" py="md">
@@ -1043,27 +1074,35 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   />
                 ))}
                 {(clientCarts ?? []).length === 0 && (
-                  <Text lh={1.5} c="dimmed" ta="center" py="sm">
-                    Este cliente ainda não tem carrinhos. Use "Criar Novo Carrinho" abaixo.
-                  </Text>
+                  <EmptyState
+                    withBorder={false}
+                    icon={ShoppingCartIcon}
+                    title="Este cliente ainda não tem carrinhos"
+                    description="Crie um carrinho para adicionar os pares."
+                  />
                 )}
+                {/* Criar outro carrinho fica na lista; o rodapé tem só Cancelar e a ação principal */}
+                <Button
+                  onClick={() => {
+                    setConfirmAdd(null);
+                    setPendingAdd({ product: confirmAdd.product, qtys: confirmAdd.qtys });
+                    setCreatingMode(true);
+                    setCreatingNewName('');
+                  }}
+                  variant="default"
+                  bd={DASHED_BORDER}
+                  fullWidth
+                  leftSection={<PlusIcon size={16} />}
+                >
+                  Criar Novo Carrinho
+                </Button>
               </Stack>
             </ScrollArea.Autosize>
             <Divider color={BORDER_COLOR} />
-            {/* Secundária à esquerda, principal à direita */}
-            <Group px="lg" py="md" gap="sm" grow>
-              <Button
-                onClick={() => {
-                  setConfirmAdd(null);
-                  setPendingAdd({ product: confirmAdd.product, qtys: confirmAdd.qtys });
-                  setCreatingMode(true);
-                  setCreatingNewName('');
-                }}
-                variant="default"
-                bd={DASHED_BORDER}
-                leftSection={<PlusIcon size={16} />}
-              >
-                Criar Novo Carrinho
+            {/* Cancelar à esquerda, principal à direita */}
+            <Group px="lg" py="md" gap="sm" justify="flex-end">
+              <Button variant="default" onClick={() => setConfirmAdd(null)}>
+                Cancelar
               </Button>
               <Button
                 onClick={() => {
@@ -1093,16 +1132,15 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
       >
         {pendingAdd && (
           <>
-            <Group justify="space-between" px="lg" py="sm" wrap="nowrap">
-              <Box miw={0}>
+            {/* Cabeçalho próprio: título à esquerda, X grande (44px) no canto superior direito */}
+            <Group justify="space-between" align="flex-start" pl="lg" pr="sm" py="sm" gap="sm" wrap="nowrap">
+              <Box miw={0} pt={8}>
                 <Title order={3}>Adicionar a qual carrinho?</Title>
                 <Text lh={1.5} c="dimmed" truncate size="sm">
                   {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
                 </Text>
               </Box>
-              <ActionIcon onClick={() => setPendingAdd(null)} variant="subtle" color="gray" aria-label="Fechar seleção de carrinho">
-                <XIcon size={18} />
-              </ActionIcon>
+              <CloseButton onClick={() => setPendingAdd(null)} aria-label="Fechar" flex="none" />
             </Group>
             <Divider color={BORDER_COLOR} />
             <ScrollArea.Autosize mah="50vh" type="auto">
@@ -1122,9 +1160,12 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   />
                 ))}
                 {(clientCarts ?? []).length === 0 && !creatingMode && (
-                  <Text lh={1.5} c="dimmed" ta="center" py="sm">
-                    Este cliente ainda não tem carrinhos. Crie um abaixo para adicionar os pares.
-                  </Text>
+                  <EmptyState
+                    withBorder={false}
+                    icon={ShoppingCartIcon}
+                    title="Este cliente ainda não tem carrinhos"
+                    description="Crie um carrinho abaixo para adicionar os pares."
+                  />
                 )}
                 {creatingMode ? (
                   <Paper
@@ -1176,6 +1217,13 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                 )}
               </Stack>
             </ScrollArea.Autosize>
+            <Divider color={BORDER_COLOR} />
+            {/* Rodapé: fechar sem adicionar (escolher um carrinho da lista já adiciona) */}
+            <Group px="lg" py="md" gap="sm">
+              <Button variant="default" onClick={() => setPendingAdd(null)}>
+                Cancelar
+              </Button>
+            </Group>
           </>
         )}
       </Modal>
