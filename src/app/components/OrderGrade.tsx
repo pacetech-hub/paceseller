@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Textarea, Badge, Anchor, ThemeIcon,
-  SimpleGrid, Stepper, Table, NumberInput, ActionIcon, Alert, Image, ScrollArea, Divider,
+  Stepper, Table, NumberInput, ActionIcon, Alert, Image, ScrollArea, Divider, Skeleton,
+  type OptionsFilter, type ComboboxItem,
 } from "@mantine/core";
 import {
   CaretLeftIcon,
-  CaretRightIcon,
+  ArrowRightIcon,
+  PackageIcon,
   PlusIcon,
   MinusIcon,
   LightningIcon,
@@ -17,6 +19,8 @@ import {
 } from "@phosphor-icons/react";
 import { products, clients, commercialPolicies, Product, Client, formatCurrency } from "../data/mockData";
 import classes from "./interactive.module.css";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton } from "./ui/Skeletons";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
@@ -37,17 +41,61 @@ const stockColor = (stock: number) => (stock === 0 ? 'red.6' : stock < 5 ? 'yell
 // fundo levemente tingido usado nos blocos de destaque (política, subtotal, total)
 const highlightBg = 'var(--mantine-color-neutral-0)';
 
-function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
+// Par rótulo/valor em uma coluna: rótulo discreto acima, valor abaixo, alinhados à esquerda
+function InfoField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <Paper p="sm" bg="var(--mantine-color-default-hover)">
+    <Box>
       <Text c="dimmed" size="sm">{label}</Text>
-      <Text fw={600}>{value}</Text>
-    </Paper>
+      <Text fw={600}>{children}</Text>
+    </Box>
+  );
+}
+
+// Busca de cliente por nome ou código (o rótulo mostra só o nome)
+const clientFilter: OptionsFilter = ({ options, search }) => {
+  const t = search.trim().toLowerCase();
+  if (!t) return options;
+  return (options as ComboboxItem[]).filter(o =>
+    o.label.toLowerCase().includes(t) || o.value.toLowerCase().includes(t)
+  );
+};
+
+/** Miniatura do produto: skeleton até a imagem carregar; ícone neutro se a imagem falhar. */
+function ProductThumb({ src, alt, size = 40 }: { src: string; alt: string; size?: number }) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  return (
+    <Box
+      w={size}
+      h={size}
+      pos="relative"
+      flex="none"
+      bg="var(--mantine-color-default-hover)"
+      style={{ overflow: 'hidden', borderRadius: 'var(--mantine-radius-default)' }}
+    >
+      {status === 'loading' && <Skeleton h="100%" style={{ position: 'absolute', inset: 0 }} />}
+      {status === 'error' ? (
+        <Box h="100%" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <PackageIcon size={16} color="var(--mantine-color-dimmed)" />
+        </Box>
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          w="100%"
+          h="100%"
+          fit="cover"
+          onLoad={() => setStatus('loaded')}
+          onError={() => setStatus('error')}
+          style={{ opacity: status === 'loaded' ? 1 : 0 }}
+        />
+      )}
+    </Box>
   );
 }
 
 function ProductSelector({ selected, onSelect }: { selected: Product | null; onSelect: (p: Product) => void }) {
   const [search, setSearch] = useState('');
+  const loading = useMockLoading();
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.reference.toLowerCase().includes(search.toLowerCase())
@@ -56,11 +104,19 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
   return (
     <Box>
       <TextInput
-        placeholder="Buscar por nome ou referência (ex.: 2502-19)"
+        label="Buscar produto"
+        placeholder="Nome ou referência (ex.: 2502-19)"
         value={search}
         onChange={e => setSearch(e.currentTarget.value)}
         mb={8}
       />
+      {loading ? (
+        <ListSkeleton rows={3} />
+      ) : filtered.length === 0 ? (
+        <Text c="dimmed" size="sm" py="sm">
+          Nenhum produto encontrado para "{search}". Confira o nome ou a referência, ou limpe a busca.
+        </Text>
+      ) : (
       <ScrollArea.Autosize mah={192}>
         <Stack gap={4}>
           {filtered.map(p => {
@@ -77,16 +133,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
                 bg={isSelected ? highlightBg : undefined}
               >
                 <Group gap="sm" wrap="nowrap">
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    w={40}
-                    h={40}
-                    fit="cover"
-                    bg="var(--mantine-color-default-hover)"
-                    flex="none"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
+                  <ProductThumb src={p.image} alt={p.name} />
                   <Box miw={0} flex={1}>
                     <Text fw={600} truncate>{p.name}</Text>
                     <Text c="dimmed" size="sm">{p.reference} · {formatCurrency(p.price)}</Text>
@@ -98,6 +145,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
           })}
         </Stack>
       </ScrollArea.Autosize>
+      )}
     </Box>
   );
 }
@@ -202,7 +250,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             <Button onClick={() => { setCompleted(false); setStep(1); setGrades({}); }} variant="default">
               Criar Novo Pedido
             </Button>
-            <Button onClick={() => onNavigate('history')}>
+            <Button onClick={() => onNavigate('history')} rightSection={<ArrowRightIcon size={16} />}>
               Acompanhar no Histórico
             </Button>
           </Group>
@@ -246,7 +294,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           ))}
         </Stepper>
         {/* No mobile os rótulos do stepper ficam ocultos: mostra a etapa atual por extenso */}
-        <Text hiddenFrom="sm" ta="center" mt="sm" aria-live="polite">
+        <Text hiddenFrom="sm" mt="sm" aria-live="polite">
           <Text span c="dimmed" inherit>Etapa {step} de {steps.length} · </Text>
           <Text span fw={600} inherit>{currentStepLabel}</Text>
         </Text>
@@ -265,6 +313,9 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               data={clients.map(c => ({ value: c.id, label: c.name }))}
               allowDeselect={false}
               searchable
+              filter={clientFilter}
+              placeholder="Buscar por nome ou código (ex.: CLI-001)"
+              nothingFoundMessage="Nenhum cliente encontrado. Confira o nome ou o código."
             />
             <Select
               label="Condição de pagamento"
@@ -285,22 +336,16 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   {clientPolicy.name}
                 </Badge>
               </Group>
-              <SimpleGrid cols={{ base: 1, xs: 3 }} spacing={8}>
+              <Stack gap="md">
                 <Box>
                   <Text c="dimmed" size="sm">Desconto</Text>
                   <Text fw={600} c={clientPolicy.discount > 0 ? 'teal.6' : undefined}>
                     {clientPolicy.discount > 0 ? `${clientPolicy.discount}%` : 'sem desconto'}
                   </Text>
                 </Box>
-                <Box>
-                  <Text c="dimmed" size="sm">Pagamento padrão</Text>
-                  <Text fw={600}>{clientPolicy.paymentCondition}</Text>
-                </Box>
-                <Box>
-                  <Text c="dimmed" size="sm">Pedido mínimo</Text>
-                  <Text fw={600}>{formatCurrency(clientPolicy.minOrderValue)}</Text>
-                </Box>
-              </SimpleGrid>
+                <InfoField label="Pagamento padrão">{clientPolicy.paymentCondition}</InfoField>
+                <InfoField label="Pedido mínimo">{formatCurrency(clientPolicy.minOrderValue)}</InfoField>
+              </Stack>
             </Paper>
           </Stack>
         )}
@@ -385,7 +430,6 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                                 input: {
                                   textAlign: 'center',
                                   paddingInline: 4,
-                                  fontWeight: 600,
                                   borderColor: over ? undefined : qty > 0 ? 'var(--mantine-color-neutral-5)' : undefined,
                                 },
                               }}
@@ -440,10 +484,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           <Stack gap="lg">
             <Title order={3} fw={600}>Revisão do pedido</Title>
 
-            <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
-              <InfoTile label="Cliente" value={selectedClientObj.name} />
-              <InfoTile label="Pagamento" value={paymentCond} />
-            </SimpleGrid>
+            <Stack gap="md">
+              <InfoField label="Cliente">{selectedClientObj.name}</InfoField>
+              <InfoField label="Pagamento">{paymentCond}</InfoField>
+            </Stack>
 
             {allGrades.length === 0 ? (
               <Alert variant="light" color="yellow" icon={<WarningCircleIcon size={16} />}>
@@ -542,7 +586,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             <Button
               onClick={() => setStep(s => Math.min(4, s + 1))}
               disabled={step === 3 && totalPairs === 0}
-              rightSection={<CaretRightIcon size={16} />}
+              rightSection={<ArrowRightIcon size={16} />}
             >
               {step === 3 ? 'Revisar Pedido' : `Ir para ${stepLabel(step + 1)}`}
             </Button>

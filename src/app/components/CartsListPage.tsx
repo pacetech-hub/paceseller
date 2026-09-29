@@ -13,12 +13,14 @@ import {
   UserIcon,
   UsersIcon,
   ArrowsLeftRightIcon,
-  ShoppingBagIcon,
+  ArrowRightIcon,
   EyeIcon,
   UserCheckIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
+import { useMockLoading } from "../lib/useMockLoading";
+import { CardGridSkeleton } from "./ui/Skeletons";
 import { clients, formatCurrency, type Client } from "../data/mockData";
 
 export type CartCreator = 'lojista' | 'rep';
@@ -85,6 +87,7 @@ interface CartsListPageProps {
 
 export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, selectedClient, onSelectClient, onGoToCatalog, viewerRole = 'rep', lockClient = false }: CartsListPageProps) {
   const [q, setQ] = useState('');
+  const loading = useMockLoading();
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState('');
   // Busca rápida de cliente quando nenhum está selecionado
@@ -274,6 +277,11 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
         mb="lg"
       />
 
+      {/* Enquanto carrega: cartões no mesmo formato (faixa curta no lugar do ícone) */}
+      {loading ? (
+        <CardGridSkeleton count={6} cols={{ base: 1, sm: 2, lg: 3 }} imageRatio={6} />
+      ) : (
+      <>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
         {filtered.map(c => {
           const isOther = selectedClient && c.clientId !== selectedClient.id;
@@ -330,7 +338,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   Abrir Carrinho
                 </Button>
                 {onGoToCatalog && (
-                  <Button onClick={() => onGoToCatalog(ctx)} leftSection={<ShoppingBagIcon size={14} />}>
+                  <Button onClick={() => onGoToCatalog(ctx)} rightSection={<ArrowRightIcon size={16} />}>
                     Adicionar Produtos
                   </Button>
                 )}
@@ -372,6 +380,8 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             )}
           </Group>
         </Stack>
+      )}
+      </>
       )}
     </Box>
   );

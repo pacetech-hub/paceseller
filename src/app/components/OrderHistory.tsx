@@ -9,9 +9,13 @@ import {
   XCircleIcon,
   SealCheckIcon,
   CheckSquareIcon,
+  ArrowRightIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellList, CellCard, CellField } from "./ui/CellView";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
@@ -93,10 +97,35 @@ export function statusSupportText(order: Order): string {
 }
 
 // shared column template so the legend row and every card line up exactly
-// (a partir do breakpoint md; abaixo dele o card vira uma lista empilhada)
+// (a partir do breakpoint md; abaixo dele cada pedido vira um cartão em "cell view")
 // Larguras fixas das colunas; a coluna do pedido ocupa o espaço restante.
 // Cliente só aparece para admin/rep e representante só para admin/lojista.
 const COL = { client: 160, rep: 150, qty: 100, total: 130, caret: 20 } as const;
+
+/** Mesmo pedido no celular: cartão com rótulo acima do valor, sem rolagem lateral. */
+function OrderCellCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
+  const productName = orderProductNames[order.id] ?? order.collection;
+  const client = clients.find(c => c.id === order.clientId);
+  return (
+    <CellCard
+      title={<Text span inherit className="mono">{order.id}</Text>}
+      aside={<OrderStatusBadge status={order.status} />}
+      onClick={onOpen}
+    >
+      <Text c="dimmed" size="sm">{statusSupportText(order)}</Text>
+      <CellField label="Produto">{productName}</CellField>
+      {profile !== 'lojista' && (
+        <CellField label="Cliente">
+          {client?.name ?? order.client}
+          {client && <Text c="dimmed" size="sm">{client.city} / {client.state}</Text>}
+        </CellField>
+      )}
+      {profile !== 'rep' && <CellField label="Representante">{order.rep}</CellField>}
+      <CellField label="Quantidade">{order.items} pares</CellField>
+      <CellField label="Total"><Text className="mono" fw={700}>{formatCurrency(order.total)}</Text></CellField>
+    </CellCard>
+  );
+}
 
 function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
   const support = statusSupportText(order);
@@ -121,22 +150,11 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
             <Text fw={600} truncate>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
             </Text>
-            {/* Resumo compacto das colunas abaixo do breakpoint md */}
-            <Group hiddenFrom="md" justify="space-between" gap="xs" mt={6} wrap="nowrap">
-              <Text c="dimmed" size="sm" truncate>
-                {[
-                  profile !== 'lojista' ? client?.name ?? order.client : null,
-                  profile !== 'rep' ? order.rep : null,
-                  `${order.items} pares`,
-                ].filter(Boolean).join(' · ')}
-              </Text>
-              <Text className="mono" fw={700} flex="none">{formatCurrency(order.total)}</Text>
-            </Group>
           </Box>
 
           {/* column 2: cliente (admin/rep only) */}
           {profile !== 'lojista' && (
-            <Box w={COL.client} flex="none" visibleFrom="md">
+            <Box w={COL.client} flex="none">
               <Text fw={600} truncate>{client?.name ?? order.client}</Text>
               <Text c="dimmed" size="sm" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
             </Box>
@@ -144,18 +162,18 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
 
           {/* column 3: representante (hidden for rep, viewing their own orders) */}
           {profile !== 'rep' && (
-            <Box w={COL.rep} flex="none" visibleFrom="md">
+            <Box w={COL.rep} flex="none">
               <Text truncate>{order.rep}</Text>
             </Box>
           )}
 
           {/* column 4: quantidade */}
-          <Box w={COL.qty} flex="none" visibleFrom="md">
+          <Box w={COL.qty} flex="none">
             <Text truncate>{order.items} pares</Text>
           </Box>
 
           {/* column 5: total */}
-          <Box w={COL.total} flex="none" ta="right" visibleFrom="md">
+          <Box w={COL.total} flex="none" ta="right">
             <Text className="mono" fw={700} truncate>{formatCurrency(order.total)}</Text>
           </Box>
 
@@ -171,6 +189,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
 export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', initialSearch = '', initialStatusFilter = 'todos' }: OrderHistoryProps) {
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
+  const loading = useMockLoading();
 
   const statuses = ['todos', 'em análise', 'aprovado', 'faturado', 'entregue', 'cancelado'];
   const statusPriority: Record<string, number> = { 'em análise': 0, 'aprovado': 1, 'faturado': 2, 'entregue': 3, 'cancelado': 4 };
@@ -214,7 +233,13 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         </Chip.Group>
       </Group>
 
-      {/* Orders */}
+      {/* Orders — enquanto carrega, skeleton no formato da lista (colunas no desktop, cartões no celular) */}
+      {loading ? (
+        <>
+          <Box visibleFrom="md"><TableSkeleton rows={6} cols={profile === 'admin' ? 5 : 4} /></Box>
+          <Box hiddenFrom="md"><ListSkeleton rows={4} withAvatar={false} /></Box>
+        </>
+      ) : (
       <Stack gap="sm">
         {filtered.length > 0 && (
           <Paper
@@ -240,14 +265,31 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           </Paper>
         )}
 
-        {filtered.map(order => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            profile={profile}
-            onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
-          />
-        ))}
+        {filtered.length > 0 && (
+          <Stack gap="sm" visibleFrom="md">
+            {filtered.map(order => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                profile={profile}
+                onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
+              />
+            ))}
+          </Stack>
+        )}
+
+        {filtered.length > 0 && (
+          <CellList hiddenFrom="md">
+            {filtered.map(order => (
+              <OrderCellCard
+                key={order.id}
+                order={order}
+                profile={profile}
+                onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
+              />
+            ))}
+          </CellList>
+        )}
 
         {filtered.length === 0 && (
           <Paper withBorder py={64}>
@@ -266,7 +308,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
               ) : (
                 <>
                   <Text c="dimmed" ta="center">Os pedidos enviados aparecem aqui. Monte um carrinho a partir do catálogo para criar o primeiro.</Text>
-                  <Button onClick={() => onNavigate('catalog')} mt="md">
+                  <Button onClick={() => onNavigate('catalog')} mt="md" rightSection={<ArrowRightIcon size={16} />}>
                     Ir ao Catálogo
                   </Button>
                 </>
@@ -275,6 +317,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           </Paper>
         )}
       </Stack>
+      )}
     </Stack>
   );
 }

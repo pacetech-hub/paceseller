@@ -1,6 +1,8 @@
-import { Stack, Group, Box, Paper, Text, Title, Button, Anchor, Badge, Image, ThemeIcon, Grid } from "@mantine/core";
+import { useState } from "react";
+import { Stack, Group, Box, Paper, Text, Title, Button, Anchor, Badge, Image, ThemeIcon, Skeleton } from "@mantine/core";
 import { toast } from "../lib/toast";
-import classes from "./OrderDetailPage.module.css";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton } from "./ui/Skeletons";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
 import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
 import { OrderStatusBadge, statusSupportText, orderProductNames } from "./OrderHistory";
@@ -30,6 +32,66 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Par rótulo/valor: rótulo discreto acima, valor abaixo, alinhados à esquerda (uma coluna)
+function DetailField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <Box>
+      <Text c="dimmed" size="sm">{label}</Text>
+      <Box mt={2}>{children}</Box>
+    </Box>
+  );
+}
+
+/** Miniatura do produto: skeleton até a imagem carregar; ícone neutro se a imagem falhar. */
+function ProductThumb({ src, alt, size = 48 }: { src: string; alt: string; size?: number }) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  return (
+    <Box
+      w={size}
+      h={size}
+      pos="relative"
+      flex="none"
+      bd="1px solid var(--mantine-color-default-border)"
+      style={{ overflow: 'hidden', borderRadius: 'var(--mantine-radius-default)' }}
+    >
+      {status === 'loading' && <Skeleton h="100%" style={{ position: 'absolute', inset: 0 }} />}
+      {status === 'error' ? (
+        <Box h="100%" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <PackageIcon size={20} color="var(--mantine-color-dimmed)" />
+        </Box>
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          w="100%"
+          h="100%"
+          fit="cover"
+          onLoad={() => setStatus('loaded')}
+          onError={() => setStatus('error')}
+          style={{ opacity: status === 'loaded' ? 1 : 0 }}
+        />
+      )}
+    </Box>
+  );
+}
+
+/** Skeleton do bloco "Detalhes do pedido": título + campos empilhados. */
+function DetailsSkeleton({ fields = 5 }: { fields?: number }) {
+  return (
+    <Paper withBorder p="md" aria-busy="true" aria-label="Carregando detalhes do pedido">
+      <Skeleton height={20} width="35%" mb="md" />
+      <Stack gap="md">
+        {Array.from({ length: fields }).map((_, i) => (
+          <Box key={i}>
+            <Skeleton height={12} width="25%" mb={8} />
+            <Skeleton height={16} width="55%" />
+          </Box>
+        ))}
+      </Stack>
+    </Paper>
+  );
+}
+
 // deterministic line-item breakdown per order — quantities sum to order.items
 const orderLineItems: Record<string, Array<{ productId: string; quantity: number }>> = {
   '4790-1': [{ productId: 'P009', quantity: 48 }],
@@ -55,6 +117,7 @@ function getOrderLineItems(order: Order): Array<{ product: Product; quantity: nu
 }
 
 export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageProps) {
+  const loading = useMockLoading();
   if (!order) {
     return (
       <Box p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
@@ -97,6 +160,14 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
         </Button>
       </Box>
 
+      {loading ? (
+        <>
+          {profile !== 'lojista' && <DetailsSkeleton fields={2} />}
+          <ListSkeleton rows={Math.max(1, lineItems.length)} />
+          <DetailsSkeleton />
+        </>
+      ) : (
+      <>
       {/* Cliente — admin/rep only */}
       {profile !== 'lojista' && client && (
         <Paper withBorder p="md">
@@ -122,15 +193,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           {lineItems.length > 0 ? (
             lineItems.map(({ product, quantity }) => (
               <Group key={product.id} gap="sm" wrap="nowrap">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  w={48}
-                  h={48}
-                  fit="cover"
-                  bd="1px solid var(--mantine-color-default-border)"
-                  flex="none"
-                />
+                <ProductThumb src={product.image} alt={product.name} />
                 <Box miw={0} flex={1}>
                   <Text fw={600} truncate>{product.name}</Text>
                   <Text c="dimmed" size="sm">Ref. {product.reference}</Text>
@@ -156,24 +219,25 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
       {/* Detalhes do pedido */}
       <Paper withBorder p="md">
         <SectionTitle>Detalhes do pedido</SectionTitle>
-        {/* colunas na proporção 1.6 / 1 / 1 (8/5/5 de 18) */}
-        <Grid columns={18} gutter={{ base: 'md', sm: 'xl' }}>
-          {/* column 1: status + order id/name */}
-          <Grid.Col span={{ base: 18, sm: 8 }} miw={0}>
-            <Group gap={8} mb={4}>
+        {/* Uma coluna, rótulo acima do valor: leitura rápida pela borda esquerda */}
+        <Stack gap="md">
+          <DetailField label="Status">
+            <Group gap={8}>
               <OrderStatusBadge status={order.status} />
               <Text c="dimmed" size="sm">{support}</Text>
             </Group>
+          </DetailField>
+          <DetailField label="Pedido">
             <Text fw={600}>
               <Text span inherit className="mono">{order.id}</Text> — {productName}
             </Text>
-            <Text c="dimmed" size="sm" mt={2}>Representante: {order.rep}</Text>
-          </Grid.Col>
-
-          {/* column 2: value + payment + link to Pagamentos e Boletos */}
-          <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
+          </DetailField>
+          <DetailField label="Representante">
+            <Text>{order.rep}</Text>
+          </DetailField>
+          <DetailField label="Valor total">
             <Text className="mono" size="xl" fw={700}>{formatCurrency(order.total)}</Text>
-            <Text c="dimmed" size="sm" mb={6}>{order.paymentCondition}</Text>
+            <Text c="dimmed" size="sm">{order.paymentCondition}</Text>
             {profile !== 'rep' && (
               // Navegação para outra página: link, não botão
               <Anchor
@@ -181,19 +245,15 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 type="button"
                 onClick={() => onNavigate('boletos')}
                 display="inline-flex"
+                mt={6}
                 style={{ alignItems: 'center', gap: 4 }}
               >
                 Abrir Pagamentos e Boletos
                 <ArrowRightIcon size={16} />
               </Anchor>
             )}
-          </Grid.Col>
-
-          {/* column 3: NF de compra */}
-          <Grid.Col span={{ base: 18, sm: 5 }} miw={0} className={classes.divided}>
-            <Text c="dimmed" size="sm" fw={600} mb={6}>
-              NF de compra
-            </Text>
+          </DetailField>
+          <DetailField label="NF de compra">
             {order.status === 'faturado' || order.status === 'entregue' ? (
               <Button
                 onClick={() => toast.success('Download da nota fiscal iniciado', 'O PDF vai para a pasta de downloads do navegador')}
@@ -205,9 +265,11 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             ) : (
               <Text c="dimmed" size="sm">A nota fiscal fica disponível aqui quando o pedido for faturado.</Text>
             )}
-          </Grid.Col>
-        </Grid>
+          </DetailField>
+        </Stack>
       </Paper>
+      </>
+      )}
     </Stack>
   );
 }
