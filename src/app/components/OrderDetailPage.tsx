@@ -3,6 +3,7 @@ import { Stack, Group, Box, Paper, Text, Title, Button, Anchor, Badge, Image, Th
 import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
 import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
 import { OrderStatusBadge, statusSupportText, orderProductNames } from "./OrderHistory";
@@ -121,22 +122,12 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
   if (!order) {
     return (
       <Box p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
-        <Paper withBorder py={64}>
-          <Stack align="center" gap={4}>
-            <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
-              <PackageIcon size={24} />
-            </ThemeIcon>
-            <Text fw={600}>Nenhum pedido selecionado</Text>
-            <Text c="dimmed" ta="center">Escolha um pedido no histórico para ver produtos, pagamento e nota fiscal.</Text>
-            <Button
-              onClick={() => onNavigate('history')}
-              mt="md"
-              leftSection={<CaretLeftIcon size={16} />}
-            >
-              Voltar para Pedidos
-            </Button>
-          </Stack>
-        </Paper>
+        <EmptyState
+          icon={PackageIcon}
+          title="Nenhum pedido selecionado"
+          description="Escolha um pedido no histórico para ver produtos, pagamento e nota fiscal."
+          action={{ label: 'Ver Histórico de Pedidos', onClick: () => onNavigate('history') }}
+        />
       </Box>
     );
   }
@@ -198,7 +189,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                   <Text fw={600} truncate>{product.name}</Text>
                   <Text c="dimmed" size="sm">Ref. {product.reference}</Text>
                 </Box>
-                <Text fw={600} flex="none">{quantity} pares</Text>
+                <Text className="mono" fw={600} flex="none" ta="right">{quantity} pares</Text>
               </Group>
             ))
           ) : (
@@ -210,7 +201,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 <Text fw={600} truncate>{productName}</Text>
                 <Text c="dimmed" size="sm">{order.collection}</Text>
               </Box>
-              <Text fw={600} flex="none">{order.items} pares</Text>
+              <Text className="mono" fw={600} flex="none" ta="right">{order.items} pares</Text>
             </Group>
           )}
         </Stack>

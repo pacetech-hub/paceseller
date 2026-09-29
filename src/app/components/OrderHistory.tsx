@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Box, Center, Paper, Text, TextInput, Button, Chip, Badge, ThemeIcon, UnstyledButton, Card } from "@mantine/core";
+import { Stack, Group, Box, Center, Paper, Text, TextInput, Chip, Badge, UnstyledButton, Card } from "@mantine/core";
 import historyClasses from "./OrderHistory.module.css";
 import {
   MagnifyingGlassIcon,
@@ -9,13 +9,16 @@ import {
   XCircleIcon,
   SealCheckIcon,
   CheckSquareIcon,
-  ArrowRightIcon,
+  SquaresFourIcon,
+  UsersIcon,
+  ShoppingBagIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellList, CellCard, CellField } from "./ui/CellView";
+import { EmptyState } from "./ui/EmptyState";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
@@ -121,8 +124,8 @@ function OrderCellCard({ order, profile, onOpen }: { order: Order; profile: Prof
         </CellField>
       )}
       {profile !== 'rep' && <CellField label="Representante">{order.rep}</CellField>}
-      <CellField label="Quantidade">{order.items} pares</CellField>
-      <CellField label="Total"><Text className="mono" fw={700}>{formatCurrency(order.total)}</Text></CellField>
+      <CellField label="Quantidade"><Text className="mono" fw={600}>{order.items} pares</Text></CellField>
+      <CellField label="Total"><Text className="mono" fw={600}>{formatCurrency(order.total)}</Text></CellField>
     </CellCard>
   );
 }
@@ -168,8 +171,8 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
           )}
 
           {/* column 4: quantidade */}
-          <Box w={COL.qty} flex="none">
-            <Text truncate>{order.items} pares</Text>
+          <Box w={COL.qty} flex="none" ta="right">
+            <Text className="mono" truncate>{order.items} pares</Text>
           </Box>
 
           {/* column 5: total */}
@@ -258,7 +261,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
               <Box flex={1} miw={0}>Pedido</Box>
               {profile !== 'lojista' && <Box w={COL.client} flex="none">Cliente</Box>}
               {profile !== 'rep' && <Box w={COL.rep} flex="none">Representante</Box>}
-              <Box w={COL.qty} flex="none">Quantidade</Box>
+              <Box w={COL.qty} flex="none" ta="right">Quantidade</Box>
               <Box w={COL.total} flex="none" ta="right">Total</Box>
               <Box w={COL.caret} flex="none" />
             </Group>
@@ -291,31 +294,27 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           </CellList>
         )}
 
-        {filtered.length === 0 && (
-          <Paper withBorder py={64}>
-            <Stack align="center" gap={4}>
-              <ThemeIcon variant="light" color="neutral" size={48} mb={8}>
-                <ClockIcon size={24} />
-              </ThemeIcon>
-              <Text fw={600}>Nenhum pedido encontrado</Text>
-              {hasFilters ? (
-                <>
-                  <Text c="dimmed" ta="center">Nenhum pedido corresponde à busca ou ao status selecionado.</Text>
-                  <Button onClick={() => { setSearch(''); setStatusFilter('todos'); }} variant="default" mt="md">
-                    Limpar Filtros
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Text c="dimmed" ta="center">Os pedidos enviados aparecem aqui. Monte um carrinho a partir do catálogo para criar o primeiro.</Text>
-                  <Button onClick={() => onNavigate('catalog')} mt="md" rightSection={<ArrowRightIcon size={16} />}>
-                    Ir ao Catálogo
-                  </Button>
-                </>
-              )}
-            </Stack>
-          </Paper>
-        )}
+        {filtered.length === 0 && (hasFilters ? (
+          <EmptyState
+            icon={MagnifyingGlassIcon}
+            title="Nenhum pedido encontrado"
+            description="Nenhum pedido corresponde à busca ou ao status selecionado. Limpe os filtros para ver todos os pedidos."
+            action={{ label: 'Limpar Filtros', onClick: () => { setSearch(''); setStatusFilter('todos'); }, forward: false }}
+          />
+        ) : (
+          <EmptyState
+            icon={ShoppingBagIcon}
+            title="Você ainda não tem pedidos"
+            description="Os pedidos enviados aparecem aqui com status, quantidade e total. Monte um carrinho a partir do catálogo para criar o primeiro."
+            action={{ label: 'Ir para o Catálogo', onClick: () => onNavigate('catalog') }}
+            suggestions={[
+              { label: 'Montar pedido por grade', description: 'Informe as quantidades por numeração de cada produto', icon: SquaresFourIcon, onClick: () => onNavigate('order-grade') },
+              ...(profile !== 'lojista'
+                ? [{ label: 'Escolher cliente na carteira', description: 'Comece o pedido a partir de um cliente', icon: UsersIcon, onClick: () => onNavigate('clients') }]
+                : []),
+            ]}
+          />
+        ))}
       </Stack>
       )}
     </Stack>

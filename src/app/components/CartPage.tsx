@@ -22,6 +22,8 @@ import {
   UserCheckIcon,
   ArrowRightIcon,
   PackageIcon,
+  SquaresFourIcon,
+  ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./CatalogFiltersBar";
@@ -29,6 +31,7 @@ import type { CartContext, CartCreator } from "./CartsListPage";
 import classes from "./interactive.module.css";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -362,12 +365,18 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
       </Group>
 
       {cart.length === 0 ? (
-        <Stack align="center" gap={4} py={80} ta="center">
-          <ShoppingCartIcon size={48} color="var(--mantine-color-dimmed)" opacity={0.3} />
-          <Text fw={600} mt="sm">Carrinho vazio</Text>
-          <Text c="dimmed">Adicione produtos do catálogo para criar um pedido.</Text>
-          <Button onClick={() => onNavigate('catalog')} mt="md" rightSection={<ArrowRightIcon size={16} />}>Ir ao Catálogo</Button>
-        </Stack>
+        <EmptyState
+          icon={ShoppingCartIcon}
+          title="Seu carrinho está vazio"
+          description="Adicione produtos do catálogo para montar o pedido. Os itens aparecem aqui com as quantidades por numeração."
+          action={{ label: 'Ir para o Catálogo', onClick: () => onNavigate('catalog') }}
+          suggestions={[
+            { label: 'Montar pedido por grade', description: 'Informe as quantidades por numeração de cada produto', icon: SquaresFourIcon, onClick: () => onNavigate('order-grade') },
+            multiCart
+              ? { label: 'Abrir outro carrinho', description: 'Continue um carrinho já em construção', icon: ListBulletsIcon, onClick: () => onNavigate('carts') }
+              : { label: 'Consultar pedidos anteriores', description: 'Veja o que o cliente já comprou no histórico', icon: ClockCounterClockwiseIcon, onClick: () => onNavigate('history') },
+          ]}
+        />
       ) : (
         <Grid gutter="lg">
           {/* Items */}
@@ -406,7 +415,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                               <ActionIcon onClick={() => updateQty(item.product.id, size, -1)} variant="subtle" color="gray" size="input-sm" aria-label={`Diminuir Nº ${size}`}>
                                 <MinusIcon size={16} />
                               </ActionIcon>
-                              <Text className="mono" fw={600} miw={24} ta="center">{qty}</Text>
+                              <Text className="mono" fw={600} miw={24} ta="right">{qty}</Text>
                               <ActionIcon onClick={() => updateQty(item.product.id, size, 1)} variant="subtle" color="gray" size="input-sm" aria-label={`Aumentar Nº ${size}`}>
                                 <PlusIcon size={16} />
                               </ActionIcon>

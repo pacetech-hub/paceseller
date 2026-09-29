@@ -14,6 +14,7 @@ import {
   CheckIcon,
   WarningCircleIcon,
   ShoppingCartIcon,
+  MagnifyingGlassIcon,
   TagIcon,
   StorefrontIcon,
 } from "@phosphor-icons/react";
@@ -21,6 +22,8 @@ import { products, clients, commercialPolicies, Product, Client, formatCurrency 
 import classes from "./interactive.module.css";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
+import sticky from "./ui/stickyTable.module.css";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
@@ -113,9 +116,13 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
       {loading ? (
         <ListSkeleton rows={3} />
       ) : filtered.length === 0 ? (
-        <Text c="dimmed" size="sm" py="sm">
-          Nenhum produto encontrado para "{search}". Confira o nome ou a referência, ou limpe a busca.
-        </Text>
+        <EmptyState
+          icon={MagnifyingGlassIcon}
+          title="Nenhum produto encontrado"
+          description={`Nada corresponde a "${search}". Confira o nome ou a referência (ex.: 2502-19), ou limpe a busca para ver todos.`}
+          action={{ label: 'Limpar Busca', onClick: () => setSearch(''), forward: false }}
+          withBorder={false}
+        />
       ) : (
       <ScrollArea.Autosize mah={192}>
         <Stack gap={4}>
@@ -377,14 +384,15 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               </Alert>
             )}
 
-            {/* Grade Table */}
+            {/* Grade de numeração (13 colunas): rola na horizontal com o rótulo da linha
+                e o cabeçalho sempre visíveis; números alinhados à direita */}
             <Table.ScrollContainer minWidth={1600}>
-              <Table withRowBorders horizontalSpacing={4}>
+              <Table withRowBorders horizontalSpacing={4} className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}>
                 <Table.Thead>
                   <Table.Tr bd="none">
                     <Table.Th c="dimmed" fw={600} fz="sm">Numeração</Table.Th>
                     {SIZES.map(sz => (
-                      <Table.Th key={sz} c="dimmed" fw={600} ta="center" fz="sm">Nº {sz}</Table.Th>
+                      <Table.Th key={sz} c="dimmed" fw={600} ta="right" fz="sm">Nº {sz}</Table.Th>
                     ))}
                     <Table.Th c="dimmed" fw={600} ta="right" fz="sm">Total</Table.Th>
                   </Table.Tr>
@@ -395,7 +403,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                     {SIZES.map(sz => {
                       const stock = selectedProduct.grades[sz] || 0;
                       return (
-                        <Table.Td key={sz} ta="center">
+                        <Table.Td key={sz} ta="right">
                           <Text span className="mono" size="sm" c={stockColor(stock)}>{stock}</Text>
                         </Table.Td>
                       );
@@ -409,8 +417,8 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                       const stock = selectedProduct.grades[sz] || 0;
                       const over = qty > stock;
                       return (
-                        <Table.Td key={sz} ta="center" py="sm">
-                          <Group gap={4} justify="center" wrap="nowrap">
+                        <Table.Td key={sz} ta="right" py="sm">
+                          <Group gap={4} justify="flex-end" wrap="nowrap">
                             <ActionIcon onClick={() => setQty(sz, qty - 1)} disabled={qty === 0} variant="light" color="gray" size="input-sm" aria-label={`Diminuir Nº ${sz}`}>
                               <MinusIcon size={16} />
                             </ActionIcon>
@@ -426,9 +434,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                               w={56}
                               error={over}
                               aria-label={`Quantidade Nº ${sz}`}
+                              classNames={{ input: 'mono' }}
                               styles={{
                                 input: {
-                                  textAlign: 'center',
+                                  textAlign: 'right',
                                   paddingInline: 4,
                                   borderColor: over ? undefined : qty > 0 ? 'var(--mantine-color-neutral-5)' : undefined,
                                 },
@@ -490,9 +499,13 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             </Stack>
 
             {allGrades.length === 0 ? (
-              <Alert variant="light" color="yellow" icon={<WarningCircleIcon size={16} />}>
-                <Text c="yellow.8">Nenhum produto com quantidade adicionado. Volte para a grade e informe as quantidades por numeração.</Text>
-              </Alert>
+              <EmptyState
+                icon={PackageIcon}
+                title="Nenhum produto no pedido"
+                description="Escolha um produto e informe as quantidades por numeração para revisar o pedido."
+                action={{ label: 'Escolher Produto', onClick: () => { setSelectedProduct(null); setStep(2); } }}
+                secondaryAction={selectedProduct ? { label: 'Voltar para a Grade', onClick: () => setStep(3), forward: false } : undefined}
+              />
             ) : (
               <Stack gap="sm">
                 {allGrades.map(({ product, sizes, pairs, value }) => (
