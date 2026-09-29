@@ -5,6 +5,8 @@
   min-height: 100vh;
   min-height: 100dvh;
   max-width: 450px;
+  /* Painel de altura total encostado na borda: sem cantos arredondados */
+  border-radius: 0;
   border-right: 1px solid var(--mantine-color-default-border);
 
   /* Abaixo do breakpoint sm o formulário ocupa a tela toda */

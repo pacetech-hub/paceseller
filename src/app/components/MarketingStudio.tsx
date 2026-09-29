@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
-  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image,
+  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image, Skeleton,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
+import { useMockLoading } from "../lib/useMockLoading";
+import { CardGridSkeleton } from "./ui/Skeletons";
 import {
   SparkleIcon,
   CheckIcon,
-  CaretRightIcon,
+  ArrowRightIcon,
+  MagnifyingGlassIcon,
   CaretLeftIcon,
   InstagramLogoIcon,
   ChatCircleIcon,
@@ -148,6 +151,48 @@ function EmptyState({ title, subtitle, action, iconSize = 32, withCard = false, 
   return withCard ? <Paper withBorder>{content}</Paper> : content;
 }
 
+// Imagem com skeleton no lugar até carregar; em caso de erro mantém o fallback (fundo do quadro)
+function LoadingImage({ src, alt, onErrorHide = false }: { src: string; alt: string; onErrorHide?: boolean }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  return (
+    <>
+      {!loaded && !failed && <Skeleton pos="absolute" inset={0} height="100%" />}
+      {!(failed && onErrorHide) && (
+        <Image
+          src={src}
+          alt={alt}
+          h="100%"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          style={loaded ? undefined : { opacity: 0 }}
+        />
+      )}
+    </>
+  );
+}
+
+// Skeleton das peças geradas: mesmo formato dos cartões do resultado (imagem quadrada + título + texto + botão)
+function PiecesSkeleton({ count, cols }: { count: number; cols: React.ComponentProps<typeof SimpleGrid>['cols'] }) {
+  return (
+    <SimpleGrid cols={cols} spacing="md" aria-busy="true" aria-label="Gerando peças">
+      {Array.from({ length: count }).map((_, i) => (
+        <Card key={i} withBorder padding={0}>
+          <AspectRatio ratio={1}>
+            <Skeleton />
+          </AspectRatio>
+          <Box p="sm">
+            <Skeleton height={16} width="60%" mb={8} />
+            <Skeleton height={12} width="90%" mb={6} />
+            <Skeleton height={12} width="70%" mb={8} />
+            <Skeleton height={42} />
+          </Box>
+        </Card>
+      ))}
+    </SimpleGrid>
+  );
+}
+
 function BackLink({ onClick }: { onClick: () => void }) {
   return (
     <Group>
@@ -182,6 +227,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
 }
 
 function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
+  const loading = useMockLoading();
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Header */}
@@ -217,13 +263,15 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
       {/* Histórico */}
       <Box>
         <Title order={2} mb="sm">Histórico de peças</Title>
-        {history.length > 0 ? (
+        {loading ? (
+          <PiecesSkeleton count={4} cols={{ base: 2, sm: 3, lg: 4 }} />
+        ) : history.length > 0 ? (
           <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
             {history.map(item => (
               <Card key={item.id} withBorder padding={0}>
                 <AspectRatio ratio={1}>
                   <Box pos="relative" bg="var(--mantine-color-default-hover)">
-                    <Image src={item.image} alt={item.formatLabel} h="100%" />
+                    <LoadingImage src={item.image} alt={item.formatLabel} />
                     <Button
                       onClick={() => onDelete(item.id)}
                       aria-label={`Excluir Peça ${item.formatLabel} do Histórico`}
@@ -251,7 +299,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             title="Nenhuma peça no histórico ainda"
             subtitle="As peças que você salvar ao final do assistente aparecem aqui"
             action={
-              <Button onClick={onCreate} variant="default" leftSection={<SparkleIcon size={16} />}>
+              <Button onClick={onCreate} variant="default" leftSection={<SparkleIcon size={16} />} rightSection={<ArrowRightIcon size={16} />}>
                 Criar Campanha
               </Button>
             }
@@ -277,6 +325,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
   const [newDescription, setNewDescription] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Campaign | null>(null);
+  const loading = useMockLoading();
 
   const selected = campaigns.find(c => c.id === selectedId) ?? null;
 
@@ -329,7 +378,12 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         {/* Left panel: campaign list */}
         <Paper withBorder p={8} w={{ base: '100%', sm: 220, md: 256 }} flex="none">
           <Stack gap={2}>
-            {campaigns.map(c => {
+            {loading && Array.from({ length: 3 }).map((_, i) => (
+              <Box key={i} px="sm" py={12} aria-hidden>
+                <Skeleton height={16} width={`${70 - i * 12}%`} />
+              </Box>
+            ))}
+            {!loading && campaigns.map(c => {
               const active = selectedId === c.id;
               return (
                 <Group
@@ -363,7 +417,18 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
 
         {/* Main content: selected campaign detail */}
         <Stack gap="md" flex={1} miw={0}>
-          {selected ? (
+          {loading ? (
+            <Stack gap="md" aria-busy="true" aria-label="Carregando campanha">
+              <Paper withBorder p="md">
+                <Skeleton height={20} width="35%" mb={10} />
+                <Skeleton height={14} width="70%" />
+              </Paper>
+              <Paper withBorder p="md">
+                <Skeleton height={16} width="30%" mb="sm" />
+                <CardGridSkeleton count={4} cols={{ base: 2, sm: 4 }} />
+              </Paper>
+            </Stack>
+          ) : selected ? (
             <>
               <Paper withBorder p="md">
                 <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
@@ -398,7 +463,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                     {selected.photos.map((photo, idx) => (
                       <AspectRatio key={idx} ratio={1}>
                         <Card bd={`1px solid ${BORDER_COLOR}`} padding={0} pos="relative" bg="var(--mantine-color-default-hover)">
-                          <Image src={photo} alt={`${selected.name} — cenário ${idx + 1}`} h="100%" />
+                          <LoadingImage src={photo} alt={`${selected.name} — cenário ${idx + 1}`} />
                           <Button
                             onClick={() => onDeletePhoto(selected.id, idx)}
                             aria-label={`Excluir Cenário ${idx + 1}`}
@@ -536,8 +601,13 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [prompt, setPrompt] = useState(AI_PROMPTS[0]);
   const [generating, setGenerating] = useState(false);
+  const [productQuery, setProductQuery] = useState('');
 
   const sortedProducts = sortProductsForProfile(profile);
+  const q = productQuery.trim().toLowerCase();
+  const filteredProducts = q
+    ? sortedProducts.filter(p => p.name.toLowerCase().includes(q) || p.reference.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))
+    : sortedProducts;
   const selectedFormatList = FORMATS.filter(f => selectedFormats.has(f.id));
   const selectedCampaign = campaigns.find(c => c.id === campaignId) ?? null;
 
@@ -596,7 +666,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
     null;
 
   const manageCampaignsButton = (
-    <Button onClick={onManageCampaigns} variant="default" leftSection={<PencilSimpleIcon size={16} />}>
+    <Button onClick={onManageCampaigns} variant="default" leftSection={<PencilSimpleIcon size={16} />} rightSection={<ArrowRightIcon size={16} />}>
       Gerenciar Campanhas
     </Button>
   );
@@ -615,7 +685,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               <Group key={s.n} gap={0} wrap="nowrap" flex={1}>
                 <Group gap={8} wrap="nowrap">
                   <ActionIcon
-                    onClick={() => s.n <= step && setStep(s.n)}
+                    onClick={() => !generating && s.n <= step && setStep(s.n)}
                     size="input-sm"
                     variant={done || current ? 'filled' : 'light'}
                     color={done || current ? 'neutral' : 'gray'}
@@ -760,8 +830,23 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
                 </Text>
               }
             />
+            <TextInput
+              label="Buscar produto"
+              placeholder="Buscar por nome ou código"
+              leftSection={<MagnifyingGlassIcon size={16} />}
+              value={productQuery}
+              onChange={e => setProductQuery(e.currentTarget.value)}
+              mb="md"
+            />
+            {filteredProducts.length === 0 && (
+              <EmptyState
+                title={`Nenhum produto encontrado para "${productQuery.trim()}"`}
+                subtitle="Confira a grafia ou busque pela referência do produto"
+                action={<Button variant="default" onClick={() => setProductQuery('')}>Limpar Busca</Button>}
+              />
+            )}
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-              {sortedProducts.map(p => {
+              {filteredProducts.map(p => {
                 const isSelected = selectedProducts.has(p.id);
                 const meta = productMeta[p.id];
                 return (
@@ -777,7 +862,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
                     bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
                   >
                     <Card padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
-                      <Image src={p.image} alt={p.name} h="100%" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <LoadingImage src={p.image} alt={p.name} onErrorHide />
                       {isSelected && (
                         <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
                           <CheckIcon size={24} color="#fff" />
@@ -847,8 +932,19 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
           </Box>
         )}
 
+        {/* Enquanto gera: skeleton com o formato das peças do resultado (uma por formato) */}
+        {step === 5 && generating && (
+          <Box aria-live="polite">
+            <StepHeader
+              title="Gerando peças…"
+              subtitle={`Criando ${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça' : 'peças'} com os produtos e o texto escolhidos`}
+            />
+            <PiecesSkeleton count={selectedFormatList.length} cols={{ base: 2, sm: 3 }} />
+          </Box>
+        )}
+
         {/* Step 5: Texto */}
-        {step === 5 && (
+        {step === 5 && !generating && (
           <Box>
             <StepHeader title="Texto assistido por IA" subtitle="Descreva o tom da campanha ou use uma sugestão" />
             <Textarea
@@ -912,8 +1008,8 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               {selectedFormatList.map(f => (
                 <Card key={f.id} withBorder padding={0}>
                   <AspectRatio ratio={1}>
-                    <Box bg="var(--mantine-color-default-hover)">
-                      <Image src={campaignPreviewMock} alt={f.label} h="100%" />
+                    <Box pos="relative" bg="var(--mantine-color-default-hover)">
+                      <LoadingImage src={campaignPreviewMock} alt={f.label} />
                     </Box>
                   </AspectRatio>
                   <PieceInfo label={f.label} copy={prompt} />
@@ -935,6 +1031,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
           {step > 1 && (
             <Button
               onClick={() => setStep(s => Math.max(1, s - 1))}
+              disabled={generating}
               variant="default"
               leftSection={<CaretLeftIcon size={16} />}
             >
@@ -946,7 +1043,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
             <Button
               onClick={() => setStep(s => s + 1)}
               disabled={blockedReason !== null}
-              rightSection={<CaretRightIcon size={16} />}
+              rightSection={<ArrowRightIcon size={16} />}
             >
               Avançar para {WIZARD_STEPS[step].label}
             </Button>
@@ -956,7 +1053,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               disabled={generating || blockedReason !== null}
               leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
             >
-              {generating ? 'Gerando Peças...' : 'Gerar Peças'}
+              {generating ? 'Gerando Peças…' : 'Gerar Peças'}
             </Button>
           ) : (
             <Button onClick={handleFinish} leftSection={<CheckIcon size={16} />}>

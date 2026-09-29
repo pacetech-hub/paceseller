@@ -33,7 +33,8 @@ const demoAccounts: Record<string, Profile> = {
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [password, setPassword] = useState("••••••••");
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [keepLoggedIn, setKeepLoggedIn] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -42,6 +43,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     const normalized = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
       setEmailError("Informe um e-mail válido, ex.: nome@loja.com.br");
+      return;
+    }
+    if (!password) {
+      setPasswordError("Digite sua senha para entrar (nas contas de demonstração, qualquer senha funciona)");
       return;
     }
     const profile = demoAccounts[normalized];
@@ -58,7 +63,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <Box mih="100dvh" bg={`var(--mantine-color-dark-7) url(${loginBanner})`} bgsz="cover" bgp="30% center">
-      <Paper className={classes.form} radius={0} px={{ base: 'lg', xs: 30 }} pb={30} pt={{ base: 48, sm: 80 }}>
+      <Paper className={classes.form} px={{ base: 'lg', xs: 30 }} pb={30} pt={{ base: 48, sm: 80 }}>
         <Box mb={{ base: 32, sm: 50 }}>
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
         </Box>
@@ -87,7 +92,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             label="Senha"
             placeholder="Sua senha"
             value={password}
-            onChange={(e) => setPassword(e.currentTarget.value)}
+            autoComplete="current-password"
+            onChange={(e) => {
+              setPassword(e.currentTarget.value);
+              setPasswordError(null);
+            }}
+            error={passwordError}
             mt="md"
           />
 
@@ -114,7 +124,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </Box>
 
         <Box mt="auto" pt="xl">
-          <Text ta="center" c="dimmed" size="sm">
+          <Text c="dimmed" size="sm">
             Pace Seller desenvolvido por Pace Tech
           </Text>
         </Box>
