@@ -14,6 +14,9 @@ import {
   CheckIcon,
 } from "@phosphor-icons/react";
 import { toast } from "../lib/toast";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ChartSkeleton, KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellCard, CellField, CellList } from "./ui/CellView";
 import { selloutData, regionData, formatCurrency } from "../data/mockData";
 
 const encalheAlerts = [
@@ -82,6 +85,7 @@ function downloadSelloutCsv(): string {
 export function SelloutDashboard() {
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [handled, setHandled] = useState<string[]>([]);
+  const loading = useMockLoading();
 
   const exportChartData = () => {
     try {
@@ -101,6 +105,38 @@ export function SelloutDashboard() {
 
   // marca só nesta tela que a ação sugerida foi feita (não envia nada a outro sistema)
   const markHandled = (sku: string) => setHandled(prev => [...prev, sku]);
+
+  // ação da linha: botão enquanto pendente, confirmação depois de marcada
+  const renderAlertAction = (alert: typeof encalheAlerts[number]) => (
+    handled.includes(alert.sku) ? (
+      <Group gap={6} c="teal.7" wrap="nowrap" mih={36}>
+        <CheckIcon size={16} />
+        <Text size="sm" fw={600} c="inherit">Ação marcada como feita</Text>
+      </Group>
+    ) : (
+      <Button variant="default" size="sm" leftSection={<LightningIcon size={16} />} onClick={() => markHandled(alert.sku)}>
+        {alert.action}
+      </Button>
+    )
+  );
+
+  if (loading) {
+    // skeleton no formato do painel: KPIs, gráficos e tabela de alertas
+    return (
+      <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+        <KpiSkeleton count={4} />
+        <Grid gutter="md">
+          <Grid.Col span={{ base: 12, lg: 8 }}><ChartSkeleton height={200} /></Grid.Col>
+          <Grid.Col span={{ base: 12, lg: 4 }}><ChartSkeleton height={200} /></Grid.Col>
+        </Grid>
+        <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+          <ChartSkeleton height={200} />
+          <ChartSkeleton height={200} />
+        </SimpleGrid>
+        <TableSkeleton rows={4} cols={6} />
+      </Stack>
+    );
+  }
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
@@ -260,7 +296,7 @@ export function SelloutDashboard() {
             Atualizar Alertas
           </Button>
         </Group>
-        <Table.ScrollContainer minWidth={720}>
+        <Table.ScrollContainer minWidth={720} visibleFrom="sm">
           <Table highlightOnHover verticalSpacing="sm" horizontalSpacing={0}>
             <Table.Thead>
               <Table.Tr>
@@ -279,23 +315,25 @@ export function SelloutDashboard() {
                     <Text className="mono" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque}d</Text>
                   </Table.Td>
                   <Table.Td pr="md"><Text c="dimmed">{alert.region}</Text></Table.Td>
-                  <Table.Td>
-                    {handled.includes(alert.sku) ? (
-                      <Group gap={6} c="teal.7" wrap="nowrap" mih={36}>
-                        <CheckIcon size={16} />
-                        <Text size="sm" fw={600} c="inherit">Ação marcada como feita</Text>
-                      </Group>
-                    ) : (
-                      <Button variant="default" size="sm" leftSection={<LightningIcon size={16} />} onClick={() => markHandled(alert.sku)}>
-                        {alert.action}
-                      </Button>
-                    )}
-                  </Table.Td>
+                  <Table.Td>{renderAlertAction(alert)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>
+        {/* celular: cada alerta vira um cartão, sem rolagem lateral */}
+        <CellList>
+          {encalheAlerts.map(alert => (
+            <CellCard key={alert.sku} title={alert.product} actions={renderAlertAction(alert)}>
+              <CellField label="SKU"><Text className="mono" c="dimmed">{alert.sku}</Text></CellField>
+              <CellField label="Estoque (pares)"><Text className="mono" fw={600}>{alert.stock}</Text></CellField>
+              <CellField label="Dias parado">
+                <Text className="mono" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque}d</Text>
+              </CellField>
+              <CellField label="Região">{alert.region}</CellField>
+            </CellCard>
+          ))}
+        </CellList>
       </Paper>
     </Stack>
   );

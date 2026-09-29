@@ -15,6 +15,8 @@ import {
   ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { selloutData, formatCurrency } from "../data/mockData";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
@@ -57,6 +59,7 @@ const formatK = (v: number) => `${(v / 1000).toFixed(0)}k`;
 
 export function LojistaHistoryDashboard({ onNavigate }: Props) {
   const [period, setPeriod] = useState<'30d' | '90d' | '6m'>('90d');
+  const loading = useMockLoading();
 
   const lines = linesByPeriod[period];
   const maxRev = Math.max(...lines.map(l => l.revenue));
@@ -121,6 +124,17 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
           </Group>
         </Group>
 
+        {loading ? (
+          // skeleton no formato do conteúdo: KPIs, gráfico mensal, gráfico de linhas + ranking
+          <Stack gap="lg">
+            <KpiSkeleton count={4} />
+            <ChartSkeleton height={260} />
+            <Grid gutter="lg">
+              <Grid.Col span={{ base: 12, lg: 8 }}><ChartSkeleton height={260} /></Grid.Col>
+              <Grid.Col span={{ base: 12, lg: 4 }}><ListSkeleton rows={5} withAvatar={false} /></Grid.Col>
+            </Grid>
+          </Stack>
+        ) : (<>
         {/* KPIs */}
         <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
           {kpis.map(k => {
@@ -244,6 +258,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             </Paper>
           </Grid.Col>
         </Grid>
+        </>)}
       </Stack>
     </Container>
   );

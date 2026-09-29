@@ -3,7 +3,9 @@ import {
   Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, Button, NavLink, ColorSwatch, Box, Anchor,
 } from "@mantine/core";
 import { CompositeChart } from "@mantine/charts";
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 import { clients as allClients, type Client } from "../data/mockData";
 
 export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
@@ -169,6 +171,7 @@ export function SalesIndicatorsSection({
   scope, entities, totalMonthlyBase, avgTicket, repName, onNavigateClients, onOpenClient, onOpenSalesTeam, onOpenStatus,
 }: SalesIndicatorsSectionProps) {
   const [period, setPeriod] = useState<Period>('dia');
+  const loading = useMockLoading();
 
   const periodValue = scaleValue(totalMonthlyBase, period);
   const periodOrders = Math.max(1, Math.round(periodValue / avgTicket));
@@ -196,6 +199,18 @@ export function SalesIndicatorsSection({
         />
       </Group>
 
+      {loading ? (
+        // skeleton com o mesmo formato: 2 KPIs, gráfico + status, ranking e prioridades
+        <Stack gap="md">
+          <KpiSkeleton count={2} cols={{ base: 1, xs: 2 }} />
+          <Grid gutter="md">
+            <Grid.Col span={{ base: 12, lg: 8 }}><ChartSkeleton height={240} /></Grid.Col>
+            <Grid.Col span={{ base: 12, lg: 4 }}><ListSkeleton rows={5} withAvatar={false} /></Grid.Col>
+          </Grid>
+          <ListSkeleton rows={5} withAvatar={false} />
+          <ListSkeleton rows={5} withAvatar={false} />
+        </Stack>
+      ) : (<>
       {/* A + B */}
       <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="md">
         <KpiCard label="Pedidos no período" value={periodOrders.toLocaleString('pt-BR')} delta={ordersDelta} />
@@ -250,7 +265,7 @@ export function SalesIndicatorsSection({
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
           <CardTitle title="Vendas por representante" />
-          <SeeMoreLink onClick={onOpenSalesTeam} label="Ver todos os vendedores" />
+          <SeeMoreLink onClick={onOpenSalesTeam} label="Ver Todos os Vendedores" />
         </Group>
         <Stack gap="xs">
           {ranked.map((e, i) => (
@@ -280,7 +295,7 @@ export function SalesIndicatorsSection({
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="xs" wrap="nowrap">
           <CardTitle title="Prioridade de contato" />
-          <SeeMoreLink onClick={onNavigateClients} label="Ver todos os clientes" />
+          <SeeMoreLink onClick={onNavigateClients} label="Ver Todos os Clientes" />
         </Group>
         <Stack gap={2}>
           {priorityClients.map(c => (
@@ -297,11 +312,12 @@ export function SalesIndicatorsSection({
           {priorityClients.length === 0 && (
             <Stack align="center" gap="xs" py="lg">
               <Text c="dimmed" ta="center">Nenhum cliente precisa de contato agora — a carteira ainda não tem clientes vinculados.</Text>
-              <Button variant="default" onClick={onNavigateClients}>Abrir Clientes</Button>
+              <Button variant="default" rightSection={<ArrowRightIcon size={16} />} onClick={onNavigateClients}>Abrir Clientes</Button>
             </Stack>
           )}
         </Stack>
       </Paper>
+      </>)}
     </Stack>
   );
 }
@@ -325,11 +341,12 @@ function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   );
 }
 
-// navegação para a lista completa: é um link (texto azul sublinhado), não uma ação
+// navegação para a lista completa: é um link (texto azul sublinhado), não uma ação;
+// a seta indica que leva adiante, para a lista onde se age sobre a informação
 function SeeMoreLink({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <Anchor component="button" type="button" onClick={onClick} flex="none">
-      {label}
+      {label} <ArrowRightIcon size={16} style={{ verticalAlign: 'text-bottom' }} />
     </Anchor>
   );
 }
