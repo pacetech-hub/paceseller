@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box,
 } from "@mantine/core";
 import {
   CrosshairIcon, TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
-  RocketLaunchIcon, UsersThreeIcon,
+  RocketLaunchIcon, UsersThreeIcon, StorefrontIcon,
   type Icon,
 } from "@phosphor-icons/react";
 
@@ -246,20 +247,19 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
           {visible.map(a => <ActionCard key={a.id} action={a} />)}
         </SimpleGrid>
       ) : (
-        <Paper withBorder p="xl">
-          <Stack align="center" gap="xs" py="lg">
-            <ThemeIcon size={48} variant="light" color="teal">
-              <CheckCircleIcon size={24} />
-            </ThemeIcon>
-            <Text fw={600}>Nenhuma ação sugerida para este período</Text>
-            <Text size="sm" c="dimmed" ta="center" maw={420}>
-              Quando houver reposições, oportunidades ou alertas, eles aparecem aqui. Enquanto isso, confira as novidades do catálogo.
-            </Text>
-            <Button variant="default" mt="sm" rightSection={<ArrowRightIcon size={16} />} onClick={() => onOpenCatalog({})}>
-              Ir para o Catálogo
-            </Button>
-          </Stack>
-        </Paper>
+        <EmptyState
+          icon={CheckCircleIcon}
+          title="Nenhuma ação sugerida para este período"
+          description="Quando houver reposições, oportunidades ou alertas, eles aparecem aqui. Enquanto isso, confira as novidades do catálogo."
+          action={{ label: 'Ir para o Catálogo', onClick: () => onOpenCatalog({}) }}
+          suggestions={[
+            { label: 'Ver mais vendidos', description: 'Produtos com maior giro para repor agora', icon: TrendUpIcon, onClick: () => onOpenCatalog({ sortBy: 'mais vendidos' }) },
+            { label: 'Ver lançamentos da linha Fusion', description: 'Ainda fora do seu mix — lojas parecidas já compram', icon: RocketLaunchIcon, onClick: () => onOpenCatalog({ line: 'Fusion' }) },
+            ...(period !== 'hoje'
+              ? [{ label: 'Ver ações de hoje', description: 'Reposições e alertas que pedem atenção agora', icon: CrosshairIcon, onClick: () => setPeriod('hoje') }]
+              : []),
+          ]}
+        />
       )}
     </Stack>
   );
@@ -273,17 +273,15 @@ export function RadarPage({ profile, ...rest }: RadarPageProps) {
       {profile === 'lojista' ? (
         <LojistaRadar {...rest} />
       ) : (
-        <Paper withBorder p="xl">
-          <Stack align="center" gap="xs" py="xl">
-            <ThemeIcon size={48} variant="light">
-              <CrosshairIcon size={24} />
-            </ThemeIcon>
-            <Text fw={600}>Radar</Text>
-            <Text size="sm" c="dimmed" ta="center" maw={420}>
-              Em breve: ações recomendadas para reposição de produtos e cobertura de estoque.
-            </Text>
-          </Stack>
-        </Paper>
+        <EmptyState
+          icon={CrosshairIcon}
+          title="Radar em breve para o seu perfil"
+          description="Em breve: ações recomendadas para reposição de produtos e cobertura de estoque. Enquanto isso, acompanhe o catálogo."
+          action={{ label: 'Ir para o Catálogo', onClick: () => rest.onOpenCatalog({}) }}
+          suggestions={[
+            { label: 'Ver mais vendidos', description: 'Produtos com maior giro na rede', icon: StorefrontIcon, onClick: () => rest.onOpenCatalog({ sortBy: 'mais vendidos' }) },
+          ]}
+        />
       )}
     </Box>
   );

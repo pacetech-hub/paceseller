@@ -16,6 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import { selloutData, formatCurrency } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
+import { barDomain, lineDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -179,7 +180,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             withLegend
             legendProps={{ verticalAlign: 'top', height: 40 }}
             valueFormatter={formatCurrency}
-            yAxisProps={{ tickFormatter: formatK }}
+            yAxisProps={{ tickFormatter: formatK, domain: lineDomain }}
           />
         </Paper>
 
@@ -204,7 +205,8 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                 gridAxis="x"
                 tickLine="none"
                 valueFormatter={formatCurrency}
-                xAxisProps={{ tickFormatter: formatK }}
+                // barras horizontais: o valor fica no eixo X, que começa em zero
+                xAxisProps={{ tickFormatter: formatK, domain: barDomain }}
                 yAxisProps={{ width: 110 }}
                 barProps={{ radius: [0, 6, 6, 0] }}
               />

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import {
-  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, Button, NavLink, ColorSwatch, Box, Anchor,
+  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, NavLink, ColorSwatch, Box, Anchor,
 } from "@mantine/core";
 import { CompositeChart } from "@mantine/charts";
-import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { AddressBookIcon, ArrowRightIcon, CaretRightIcon, ChartBarIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { useMockLoading } from "../lib/useMockLoading";
+import { barDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 import { clients as allClients, type Client } from "../data/mockData";
 
 export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
@@ -234,7 +236,8 @@ export function SalesIndicatorsSection({
               withLegend
               legendProps={{ verticalAlign: 'bottom' }}
               valueFormatter={brl}
-              yAxisProps={{ tickFormatter: formatAxisValue }}
+              // tem colunas: o eixo começa em zero (barras cortadas enganam) e termina logo acima do maior valor
+              yAxisProps={{ tickFormatter: formatAxisValue, domain: barDomain }}
               barProps={{ radius: [4, 4, 0, 0] }}
               maxBarWidth={48}
             />
@@ -281,12 +284,19 @@ export function SalesIndicatorsSection({
             </Group>
           ))}
           {ranked.length === 0 && (
-            <Stack align="center" gap="xs" py="lg">
-              <Text c="dimmed" ta="center">Nenhum vendedor registrou vendas neste período.</Text>
-              {period !== 'mes' && (
-                <Button variant="default" onClick={() => setPeriod('mes')}>Ver Vendas do Mês</Button>
-              )}
-            </Stack>
+            <EmptyState
+              withBorder={false}
+              icon={ChartBarIcon}
+              title="Nenhuma venda registrada neste período"
+              description="Os vendedores aparecem aqui assim que houver pedidos no período escolhido."
+              action={period !== 'mes'
+                ? { label: 'Ver Vendas do Mês', onClick: () => setPeriod('mes'), forward: false }
+                : { label: 'Ver Todos os Vendedores', onClick: onOpenSalesTeam }}
+              suggestions={[
+                { label: 'Ver todos os vendedores', description: 'Representantes e prepostos da equipe', icon: UsersThreeIcon, onClick: onOpenSalesTeam },
+                { label: 'Abrir carteira de clientes', description: 'Encontre clientes para um novo pedido', icon: AddressBookIcon, onClick: onNavigateClients },
+              ]}
+            />
           )}
         </Stack>
       </Paper>
@@ -310,10 +320,13 @@ export function SalesIndicatorsSection({
             />
           ))}
           {priorityClients.length === 0 && (
-            <Stack align="center" gap="xs" py="lg">
-              <Text c="dimmed" ta="center">Nenhum cliente precisa de contato agora — a carteira ainda não tem clientes vinculados.</Text>
-              <Button variant="default" rightSection={<ArrowRightIcon size={16} />} onClick={onNavigateClients}>Abrir Clientes</Button>
-            </Stack>
+            <EmptyState
+              withBorder={false}
+              icon={AddressBookIcon}
+              title="Nenhum cliente para contatar agora"
+              description="A carteira ainda não tem clientes vinculados. Vincule clientes para ver aqui quem precisa de contato."
+              action={{ label: 'Abrir Clientes', onClick: onNavigateClients }}
+            />
           )}
         </Stack>
       </Paper>
@@ -325,7 +338,7 @@ export function SalesIndicatorsSection({
 function KpiCard({ label, value, delta }: { label: string; value: string; delta: string }) {
   return (
     <Paper withBorder p="md">
-      <Text c="dimmed" size="sm" fw={600}>{label}</Text>
+      <Text c="dimmed" size="sm">{label}</Text>
       <Text size="xl" fw={700} mt={4} className="mono">{value}</Text>
       <Text c="teal.7" size="sm" fw={600} mt={4}>{delta} vs. período anterior</Text>
     </Paper>

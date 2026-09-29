@@ -5,6 +5,7 @@ import {
 import { LineChart } from "@mantine/charts";
 import { ArrowRightIcon, CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
 import { useMockLoading } from "../lib/useMockLoading";
+import { lineDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellCard, CellField, CellList } from "./ui/CellView";
 
@@ -113,14 +114,15 @@ function Rank({ rows }: { rows: { n: string; v: number }[] }) {
   );
 }
 
-// tabela só a partir de `sm`; no celular cada tabela vira uma lista de cartões (CellList)
-function SimpleTable({ head, children }: { head: string[]; children: React.ReactNode }) {
+// tabela só a partir de `sm`; no celular cada tabela vira uma lista de cartões (CellList).
+// `numeric`: colunas numéricas, alinhadas à direita (cabeçalho e células)
+function SimpleTable({ head, numeric = [], children }: { head: string[]; numeric?: string[]; children: React.ReactNode }) {
   return (
     <Table.ScrollContainer minWidth={480} visibleFrom="sm">
       <Table verticalSpacing={8} horizontalSpacing={8}>
         <Table.Thead>
           <Table.Tr>
-            {head.map(h => <Table.Th key={h} fw={600} c="dimmed">{h}</Table.Th>)}
+            {head.map(h => <Table.Th key={h} fw={600} c="dimmed" ta={numeric.includes(h) ? 'right' : undefined}>{h}</Table.Th>)}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{children}</Table.Tbody>
@@ -217,7 +219,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               gridAxis="y"
               tickLine="none"
               valueFormatter={v => `R$ ${v} mil`}
-              yAxisProps={{ tickFormatter: (v: number) => `${v}k` }}
+              yAxisProps={{ tickFormatter: (v: number) => `${v}k`, domain: lineDomain }}
             />
             <Group gap={4} c={POS} mt="xs" wrap="nowrap">
               <TrendUpIcon size={14} />
@@ -251,12 +253,12 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Card>
 
           <Card title="Compra recorrente" hint="Itens comprados com regularidade · frequência por SKU" span={7}>
-            <SimpleTable head={['Produto', 'Cadência', 'Compras', 'Última', 'Próxima']}>
+            <SimpleTable head={['Produto', 'Cadência', 'Compras', 'Última', 'Próxima']} numeric={['Compras']}>
               {recurringRows.map(r => (
                 <Table.Tr key={r.product}>
                   <Table.Td>{r.product}</Table.Td>
                   <Table.Td c="dimmed">{r.cadence}</Table.Td>
-                  <Table.Td>{r.count}</Table.Td>
+                  <Table.Td ta="right" className="mono">{r.count}</Table.Td>
                   <Table.Td c="dimmed">{r.last}</Table.Td>
                   <Table.Td c={r.soon ? WARN : undefined} fw={r.soon ? 600 : undefined}>{r.next}</Table.Td>
                 </Table.Tr>
@@ -290,15 +292,18 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Card>
 
           <Card title="Controle de estoque" hint="Situação por SKU · ruptura, baixo, OK e valor" span={9}>
-            <SimpleTable head={['Produto', 'Situação', 'Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}>
+            <SimpleTable
+              head={['Produto', 'Situação', 'Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}
+              numeric={['Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}
+            >
               {stockRows.map(r => (
                 <Table.Tr key={r.product}>
                   <Table.Td>{r.product}</Table.Td>
                   <Table.Td><Badge tone={r.tone}>{r.status}</Badge></Table.Td>
-                  <Table.Td>{r.stock}</Table.Td>
-                  <Table.Td c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Table.Td>
-                  <Table.Td c={r.turnover > 30 ? WARN : undefined} fw={r.turnover > 30 ? 600 : undefined}>{r.turnover}</Table.Td>
-                  <Table.Td>{r.value}</Table.Td>
+                  <Table.Td ta="right" className="mono">{r.stock}</Table.Td>
+                  <Table.Td ta="right" className="mono" c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Table.Td>
+                  <Table.Td ta="right" className="mono" c={r.turnover > 30 ? WARN : undefined} fw={r.turnover > 30 ? 600 : undefined}>{r.turnover}</Table.Td>
+                  <Table.Td ta="right" className="mono">{r.value}</Table.Td>
                 </Table.Tr>
               ))}
             </SimpleTable>

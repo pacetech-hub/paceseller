@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
+import { barDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellCard, CellField, CellList } from "./ui/CellView";
 import { selloutData, regionData, formatCurrency } from "../data/mockData";
@@ -186,7 +187,7 @@ export function SelloutDashboard() {
               tickLine="none"
               strokeDasharray="3 3"
               valueFormatter={formatCurrency}
-              yAxisProps={{ tickFormatter: formatK, width: 44 }}
+              yAxisProps={{ tickFormatter: formatK, width: 44, domain: barDomain }}
               barProps={{ radius: [3, 3, 0, 0] }}
               barChartProps={{ barGap: 4 }}
             />
@@ -270,7 +271,7 @@ export function SelloutDashboard() {
             tickLine="none"
             strokeDasharray="3 3"
             valueFormatter={formatCurrency}
-            xAxisProps={{ tickFormatter: formatK }}
+            xAxisProps={{ tickFormatter: formatK, domain: barDomain }}
             yAxisProps={{ width: 90 }}
             barProps={{ radius: [0, 3, 3, 0] }}
           />
@@ -300,8 +301,10 @@ export function SelloutDashboard() {
           <Table highlightOnHover verticalSpacing="sm" horizontalSpacing={0}>
             <Table.Thead>
               <Table.Tr>
-                {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ação sugerida'].map(col => (
-                  <Table.Th key={col} c="dimmed" fw={600} pr="md" fz="sm">{col}</Table.Th>
+                {/* números e ações à direita; texto, códigos e região à esquerda */}
+                {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ações'].map(col => (
+                  <Table.Th key={col} c="dimmed" fw={600} pr="md" fz="sm"
+                    ta={['Estoque (pares)', 'Dias parado', 'Ações'].includes(col) ? 'right' : undefined}>{col}</Table.Th>
                 ))}
               </Table.Tr>
             </Table.Thead>
@@ -310,12 +313,12 @@ export function SelloutDashboard() {
                 <Table.Tr key={i}>
                   <Table.Td pr="md"><Text fw={600}>{alert.product}</Text></Table.Td>
                   <Table.Td pr="md"><Text c="dimmed" className="mono" size="sm">{alert.sku}</Text></Table.Td>
-                  <Table.Td pr="md"><Text className="mono" fw={600}>{alert.stock}</Text></Table.Td>
-                  <Table.Td pr="md">
+                  <Table.Td pr="md" ta="right"><Text className="mono" fw={600}>{alert.stock}</Text></Table.Td>
+                  <Table.Td pr="md" ta="right">
                     <Text className="mono" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque}d</Text>
                   </Table.Td>
                   <Table.Td pr="md"><Text c="dimmed">{alert.region}</Text></Table.Td>
-                  <Table.Td>{renderAlertAction(alert)}</Table.Td>
+                  <Table.Td ta="right"><Group justify="flex-end">{renderAlertAction(alert)}</Group></Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
