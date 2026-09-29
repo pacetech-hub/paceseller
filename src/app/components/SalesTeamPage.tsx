@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Stack, Group, Button, SegmentedControl, Paper, Text, Title } from "@mantine/core";
-import { CaretLeftIcon } from "@phosphor-icons/react";
+import { CaretLeftIcon, UsersIcon } from "@phosphor-icons/react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 import { PERIOD_OPTIONS, scaleValue, brl, type Period, type SalesEntity } from "./SalesIndicatorsSection";
 
 interface SalesTeamPageProps {
@@ -39,7 +40,15 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
       </Group>
 
       {/* Enquanto carrega, skeleton do ranking; título e período continuam visíveis */}
-      {loading ? <ListSkeleton rows={6} withAvatar={false} /> : (
+      {loading ? <ListSkeleton rows={6} withAvatar={false} /> : ranked.length === 0 ? (
+        // Estado vazio: explica o motivo e oferece a saída (título e período continuam visíveis)
+        <EmptyState
+          icon={UsersIcon}
+          title="Nenhum vendedor com vendas registradas"
+          description="Ainda não há representantes ou prepostos com vendas neste período. Escolha outro período acima ou volte para os indicadores."
+          action={{ label: 'Voltar para Indicadores', onClick: onBack, forward: false }}
+        />
+      ) : (
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Stack gap="xs">
           {ranked.map((e, i) => (
@@ -54,15 +63,6 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
               <Text fw={700} flex="none" className="mono">{brl(e.value)}</Text>
             </Group>
           ))}
-          {ranked.length === 0 && (
-            // Estado vazio: explica o motivo e oferece a saída
-            <Stack gap="sm" align="center" py="lg">
-              <Text c="dimmed" ta="center">
-                Nenhum vendedor com vendas registradas neste período. Escolha outro período acima ou volte para os indicadores.
-              </Text>
-              <Button onClick={onBack} variant="default" color="neutral">Voltar para Indicadores</Button>
-            </Stack>
-          )}
         </Stack>
       </Paper>
       )}

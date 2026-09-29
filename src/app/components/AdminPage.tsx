@@ -34,6 +34,7 @@ import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellList, CellCard, CellField } from "./ui/CellView";
+import { EmptyState } from "./ui/EmptyState";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 import classes from "./interactive.module.css";
@@ -72,7 +73,8 @@ function InfoField({ label, value, mono, highlight }: { label: string; value: st
   return (
     <Box>
       <Text c="dimmed" size="sm">{label}</Text>
-      <Text className={mono ? 'mono' : undefined} fw={highlight ? 700 : 600}>{value}</Text>
+      {/* Dado em evidência só quando é o número-chave; os demais em peso regular */}
+      <Text className={mono ? 'mono' : undefined} fw={highlight ? 600 : 400}>{value}</Text>
     </Box>
   );
 }
@@ -127,7 +129,8 @@ function SettingRow({ label, desc, children }: { label: string; desc: string; ch
     <Paper withBorder p="md" bg="var(--mantine-color-default-hover)">
       <Stack gap="sm" align="flex-start">
         <Box>
-          <Text fw={600}>{label}</Text>
+          {/* Rótulo em peso regular: a ênfase fica no valor */}
+          <Text>{label}</Text>
           <Text c="dimmed" size="sm">{desc}</Text>
         </Box>
         {children}
@@ -136,10 +139,11 @@ function SettingRow({ label, desc, children }: { label: string; desc: string; ch
   );
 }
 
-// Ações da linha de usuário; size="sm" só por estar dentro de linha de tabela/cartão
-function UserActions({ user, onDelete }: { user: AdminUser; onDelete: (u: AdminUser) => void }) {
+// Ações da linha de usuário; size="sm" só por estar dentro de linha de tabela/cartão.
+// Na tabela, a coluna de ações fica alinhada à direita (inTable); no cartão, à esquerda.
+function UserActions({ user, onDelete, inTable }: { user: AdminUser; onDelete: (u: AdminUser) => void; inTable?: boolean }) {
   return (
-    <Group gap="sm" wrap="nowrap">
+    <Group gap="sm" wrap="nowrap" justify={inTable ? 'flex-end' : undefined}>
       <Button variant="subtle" color="gray" size="sm" leftSection={<PencilSimpleLineIcon size={16} />} aria-label={`Editar usuário ${user.name}`}>
         Editar
       </Button>
@@ -266,19 +270,22 @@ export function AdminPage() {
   );
 
   // Estado vazio: explica o motivo e oferece a ação (mesmo conteúdo na tabela e nos cartões)
-  const usersEmpty = (
-    <Stack gap="sm" align="center" py="lg">
-      <Text c="dimmed" ta="center">
-        {search
-          ? `Nenhum usuário encontrado para "${search}". Confira a grafia ou limpe a busca.`
-          : 'Nenhum usuário cadastrado. Adicione o primeiro para liberar o acesso.'}
-      </Text>
-      {search ? (
-        <Button onClick={() => setSearch('')} variant="default">Limpar Busca</Button>
-      ) : (
-        <Button onClick={() => setShowAddUser(true)} variant="default" leftSection={<PlusIcon size={16} />}>Adicionar Usuário</Button>
-      )}
-    </Stack>
+  const usersEmpty = (withBorder: boolean) => search ? (
+    <EmptyState
+      icon={MagnifyingGlassIcon}
+      title="Nenhum usuário encontrado"
+      description={`Nenhum nome ou e-mail corresponde a "${search}". Confira a grafia ou limpe a busca para ver todos.`}
+      action={{ label: 'Limpar Busca', onClick: () => setSearch(''), forward: false }}
+      withBorder={withBorder}
+    />
+  ) : (
+    <EmptyState
+      icon={UsersIcon}
+      title="Nenhum usuário cadastrado"
+      description="Adicione o primeiro usuário para liberar o acesso ao PaceSeller."
+      action={showAddUser ? undefined : { label: 'Adicionar Usuário', onClick: () => setShowAddUser(true), forward: false }}
+      withBorder={withBorder}
+    />
   );
 
   return (
@@ -347,7 +354,7 @@ export function AdminPage() {
                 {/* Resumo em coluna única: rótulo acima do valor, leitura pela borda esquerda */}
                 <Stack gap="md" mb="md">
                   <InfoField label="Desconto" value={policy.discount} highlight />
-                  <InfoField label="Pedido mínimo" value={policy.minOrder} mono />
+                  <InfoField label="Pedido mínimo" value={policy.minOrder} mono highlight />
                   <InfoField label="Pagamento" value={policy.payment} />
                 </Stack>
                 <Text c="dimmed" size="sm">
@@ -392,7 +399,7 @@ export function AdminPage() {
               {/* Dados da política em coluna única, rótulo acima do valor */}
               <Stack gap="md">
                 <InfoField label="Desconto" value={policy.discount} highlight />
-                <InfoField label="Pedido mínimo" value={policy.minOrder} mono />
+                <InfoField label="Pedido mínimo" value={policy.minOrder} mono highlight />
                 <InfoField label="Pagamento" value={policy.payment} />
                 <InfoField label="Clientes cobertos" value={String(policy.clients)} />
               </Stack>
@@ -494,7 +501,7 @@ export function AdminPage() {
                 { label: 'Desconto máximo por rep', desc: 'Desconto máximo que um representante pode conceder', value: '15%' },
               ].map(setting => (
                 <SettingRow key={setting.label} label={setting.label} desc={setting.desc}>
-                  <Text className="mono" fw={700}>{setting.value}</Text>
+                  <Text className="mono" fw={600}>{setting.value}</Text>
                 </SettingRow>
               ))}
             </Stack>
@@ -598,7 +605,7 @@ export function AdminPage() {
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
                     {['Nome', 'E-mail', 'Perfil', 'Região', 'Status', 'Último acesso', 'Ações'].map(col => (
-                      <Table.Th key={col} c="dimmed" fz="sm" fw={600}>{col}</Table.Th>
+                      <Table.Th key={col} c="dimmed" fz="sm" fw={600} ta={col === 'Ações' ? 'right' : undefined}>{col}</Table.Th>
                     ))}
                   </Table.Tr>
                 </Table.Thead>
@@ -615,14 +622,14 @@ export function AdminPage() {
                         <Badge variant="light" color="teal">{user.status}</Badge>
                       </Table.Td>
                       <Table.Td c="dimmed" className="mono" fz="sm">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
-                      <Table.Td>
-                        <UserActions user={user} onDelete={deleteUser} />
+                      <Table.Td ta="right">
+                        <UserActions user={user} onDelete={deleteUser} inTable />
                       </Table.Td>
                     </Table.Tr>
                   ))}
                   {filteredUsers.length === 0 && (
                     <Table.Tr>
-                      <Table.Td colSpan={7}>{usersEmpty}</Table.Td>
+                      <Table.Td colSpan={7}>{usersEmpty(false)}</Table.Td>
                     </Table.Tr>
                   )}
                 </Table.Tbody>
@@ -645,7 +652,7 @@ export function AdminPage() {
                   </CellField>
                 </CellCard>
               ))}
-              {filteredUsers.length === 0 && <Paper withBorder p="md">{usersEmpty}</Paper>}
+              {filteredUsers.length === 0 && usersEmpty(true)}
             </CellList>
             </DataGate>
           </Paper>

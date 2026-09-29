@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Group, Button, ActionIcon, Affix, Indicator, Menu, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger,
+  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger, CloseButton,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -30,6 +30,7 @@ import {
   ReceiptIcon,
   FileTextIcon,
   CrosshairIcon,
+  XIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -112,20 +113,22 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
 
   const visibleItems = getVisibleItems();
 
-  // No drawer mobile o menu sempre aparece expandido
-  const renderContent = (isCollapsed: boolean) => (
+  // No drawer mobile o menu sempre aparece expandido e ganha o X e o botão "Fechar Menu"
+  const renderContent = (isCollapsed: boolean, inDrawer = false) => (
     <Stack gap={0} h="100%">
       {/* Logo */}
-      {/* 55px + divisória de 1px = 56px, alinhado ao cabeçalho */}
+      {/* 55px + divisória de 1px = 56px, alinhado ao cabeçalho.
+          No drawer, 60px para o X de 44px ter 8px de folga em volta */}
       <Group
-        h={55}
+        h={inDrawer ? 60 : 55}
         px="md"
         gap="sm"
         wrap="nowrap"
-        justify={isCollapsed ? 'center' : 'flex-start'}
+        justify={isCollapsed ? 'center' : inDrawer ? 'space-between' : 'flex-start'}
         flex="none"
       >
         <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
+        {inDrawer && <CloseButton onClick={() => setMobileOpen(false)} aria-label="Fechar" />}
       </Group>
       <Divider color={BORDER_COLOR} />
 
@@ -142,7 +145,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       {/* Selected client chip — rep only */}
       {!isCollapsed && profile === 'rep' && selectedClient && (
         <Paper withBorder mx="sm" mt={8} px="sm" py={8}>
-          <Text c="dimmed" size="sm" fw={600}>Pedindo para</Text>
+          <Text c="dimmed" size="sm">Pedindo para</Text>
           <Text fw={600} truncate mt={2}>{selectedClient.name}</Text>
         </Paper>
       )}
@@ -228,6 +231,20 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
           >
             Recolher Menu
           </Button>
+          {/* No drawer, fechar fica no mesmo lugar do "Recolher Menu" (além do X e do clique fora) */}
+          {inDrawer && (
+            <Button
+              onClick={() => setMobileOpen(false)}
+              variant="subtle"
+              color="gray"
+              fullWidth
+              justify="flex-start"
+              px="sm"
+              leftSection={<XIcon size={16} />}
+            >
+              Fechar Menu
+            </Button>
+          )}
           <Group gap={8} px="sm" py={8} wrap="nowrap">
             <Avatar size={32} color="neutral" variant="light">
               TF
@@ -272,10 +289,11 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
         hiddenFrom="lg"
         size={256}
         padding={0}
+        // Cabeçalho próprio (logo + X); fecha também com clique fora e Esc (padrão do tema)
         withCloseButton={false}
         styles={{ body: { height: '100%' } }}
       >
-        {renderContent(false)}
+        {renderContent(false, true)}
       </Drawer>
 
       <Box
@@ -547,6 +565,11 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
               />
             );
           })}
+          {/* Terceira forma de fechar, além do X e do clique fora */}
+          <Divider color={BORDER_COLOR} my="sm" />
+          <Button onClick={closeNav} variant="subtle" color="gray" fullWidth justify="flex-start" px="sm" leftSection={<XIcon size={16} />}>
+            Fechar Menu
+          </Button>
         </Stack>
       </Drawer>
     </Box>
