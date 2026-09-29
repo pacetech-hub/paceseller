@@ -6,6 +6,7 @@ import {
 import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton } from "./ui/Skeletons";
+import { EmptyState } from "./ui/EmptyState";
 import {
   SparkleIcon,
   CheckIcon,
@@ -25,6 +26,7 @@ import {
   DeviceMobileIcon,
   TrashIcon,
   UploadSimpleIcon,
+  FolderSimplePlusIcon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency, type Product } from "../data/mockData";
 import interactive from "./interactive.module.css";
@@ -131,26 +133,6 @@ type Mode = 'home' | 'wizard' | 'campaigns';
 const DIMMED = 'var(--mantine-color-dimmed)';
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
-function EmptyState({ title, subtitle, action, iconSize = 32, withCard = false, py = 40, strongTitle = false }: {
-  title: string; subtitle?: string; action?: React.ReactNode; iconSize?: number; withCard?: boolean; py?: number; strongTitle?: boolean;
-}) {
-  const content = (
-    <Stack align="center" justify="center" gap={0} py={py} ta="center">
-      <Box mb={strongTitle ? 12 : 8} lh={0}>
-        <ImageIcon size={iconSize} color={DIMMED} opacity={0.3} />
-      </Box>
-      {strongTitle ? (
-        <Text fw={600}>{title}</Text>
-      ) : (
-        <Text c="dimmed">{title}</Text>
-      )}
-      {subtitle && <Text c="dimmed" size="sm" mt={4}>{subtitle}</Text>}
-      {action && <Box mt="md">{action}</Box>}
-    </Stack>
-  );
-  return withCard ? <Paper withBorder>{content}</Paper> : content;
-}
-
 // Imagem com skeleton no lugar até carregar; em caso de erro mantém o fallback (fundo do quadro)
 function LoadingImage({ src, alt, onErrorHide = false }: { src: string; alt: string; onErrorHide?: boolean }) {
   const [loaded, setLoaded] = useState(false);
@@ -226,7 +208,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
   );
 }
 
-function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: () => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
+function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: (formatId?: string) => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
   const loading = useMockLoading();
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
@@ -251,7 +233,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
               Gerenciar Campanhas
             </Button>
             <Button
-              onClick={onCreate}
+              onClick={() => onCreate()}
               leftSection={<SparkleIcon size={16} />}
             >
               Criar Campanha
@@ -291,18 +273,17 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             ))}
           </SimpleGrid>
         ) : (
+          // Primeiro uso: sugere as peças mais comuns já com o formato marcado no assistente
           <EmptyState
-            withCard
-            strongTitle
-            iconSize={40}
-            py={64}
-            title="Nenhuma peça no histórico ainda"
-            subtitle="As peças que você salvar ao final do assistente aparecem aqui"
-            action={
-              <Button onClick={onCreate} variant="default" leftSection={<SparkleIcon size={16} />} rightSection={<ArrowRightIcon size={16} />}>
-                Criar Campanha
-              </Button>
-            }
+            icon={ImageIcon}
+            title="Você ainda não criou peças"
+            description="As peças que você salvar ao final do assistente aparecem aqui para baixar de novo quando quiser."
+            action={{ label: 'Criar Campanha', onClick: () => onCreate() }}
+            suggestions={[
+              { label: 'Criar peça para Instagram', description: 'Feed 4:5, pronta para publicar', icon: InstagramLogoIcon, onClick: () => onCreate('instagram-feed') },
+              { label: 'Criar cartaz A4', description: 'PDF para parede e balcão da loja', icon: PrinterIcon, onClick: () => onCreate('impressao-a4') },
+              { label: 'Criar peça para WhatsApp', description: 'Status e disparo para a lista de clientes', icon: ChatCircleIcon, onClick: () => onCreate('whatsapp') },
+            ]}
           />
         )}
       </Box>
@@ -481,27 +462,26 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                     ))}
                   </SimpleGrid>
                 ) : (
+                  // O envio usa FileButton (abre o seletor de arquivos), por isso vai como conteúdo e não como action
                   <EmptyState
-                    title="Nenhum cenário enviado ainda"
-                    subtitle="Envie fotos de ambiente para usar como fundo das peças desta campanha"
-                    action={uploadButton}
-                  />
+                    withBorder={false}
+                    icon={ImageIcon}
+                    title="Esta campanha ainda não tem cenários"
+                    description="Envie fotos de ambiente para usar como fundo das peças desta campanha."
+                  >
+                    {uploadButton}
+                  </EmptyState>
                 )}
               </Paper>
             </>
           ) : (
             <EmptyState
-              withCard
-              strongTitle
-              iconSize={40}
-              py={64}
-              title="Nenhuma campanha selecionada"
-              subtitle="Selecione uma campanha na lista ou crie uma nova para enviar cenários"
-              action={
-                <Button onClick={() => setCreating(true)} variant="default" leftSection={<PlusIcon size={16} />}>
-                  Nova Campanha
-                </Button>
-              }
+              icon={FolderSimplePlusIcon}
+              title={campaigns.length > 0 ? 'Nenhuma campanha selecionada' : 'Você ainda não tem campanhas'}
+              description={campaigns.length > 0
+                ? 'Selecione uma campanha na lista ou crie uma nova para enviar cenários.'
+                : 'Crie uma campanha e envie os cenários fotográficos que serão o fundo das peças.'}
+              action={{ label: 'Nova Campanha', onClick: () => setCreating(true), forward: false }}
             />
           )}
         </Stack>
@@ -556,10 +536,9 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
         onClose={() => setDeleteTarget(null)}
         size="sm"
         centered
-        withCloseButton={false}
+        title={<Text fw={600} size="lg">Excluir campanha</Text>}
       >
-        <Text fw={600} size="lg">Excluir campanha</Text>
-        <Text c="dimmed" mt={6}>
+        <Text c="dimmed">
           Tem certeza que deseja excluir "{deleteTarget?.name}"? Os cenários fotográficos associados também serão removidos. Esta ação não pode ser desfeita.
         </Text>
         <Group justify="flex-end" gap="sm" mt="lg">
@@ -593,10 +572,11 @@ function StepHeader({ title, subtitle, right, mb = 'md' }: { title: string; subt
   );
 }
 
-function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinish }: { profile: Profile; campaigns: Campaign[]; onBack: () => void; onManageCampaigns: () => void; onFinish: (items: HistoryItem[]) => void }) {
+function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', onBack, onManageCampaigns, onFinish }: { profile: Profile; campaigns: Campaign[]; initialFormat?: string; onBack: () => void; onManageCampaigns: () => void; onFinish: (items: HistoryItem[]) => void }) {
   const [step, setStep] = useState(1);
   const [campaignId, setCampaignId] = useState(campaigns[0]?.id ?? '');
-  const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set(['instagram-feed']));
+  // Formato já marcado quando o assistente é aberto por uma sugestão (ex.: "Criar cartaz A4")
+  const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set([initialFormat]));
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set([products[0].id]));
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [prompt, setPrompt] = useState(AI_PROMPTS[0]);
@@ -664,12 +644,6 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
     step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0) ? 'Adicione um cenário à campanha para continuar' :
     step === 5 && !prompt.trim() ? 'Escreva o texto da campanha ou escolha uma sugestão' :
     null;
-
-  const manageCampaignsButton = (
-    <Button onClick={onManageCampaigns} variant="default" leftSection={<PencilSimpleIcon size={16} />} rightSection={<ArrowRightIcon size={16} />}>
-      Gerenciar Campanhas
-    </Button>
-  );
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
@@ -763,9 +737,11 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               </SimpleGrid>
             ) : (
               <EmptyState
-                title="Nenhuma campanha cadastrada"
-                subtitle="A peça precisa de uma campanha com cenários fotográficos. Crie uma para continuar."
-                action={manageCampaignsButton}
+                withBorder={false}
+                icon={FolderSimplePlusIcon}
+                title="Você ainda não tem campanhas"
+                description="A peça precisa de uma campanha com cenários fotográficos. Crie uma para continuar."
+                action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
               />
             )}
           </Box>
@@ -782,7 +758,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
             <Stack gap="lg">
               {FORMAT_GROUPS.map(group => (
                 <Box key={group}>
-                  <Text c="dimmed" size="sm" fw={600} mb={8} tt="uppercase">
+                  <Text fw={600} mb={8}>
                     {group}
                   </Text>
                   <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
@@ -840,9 +816,11 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
             />
             {filteredProducts.length === 0 && (
               <EmptyState
+                withBorder={false}
+                icon={MagnifyingGlassIcon}
                 title={`Nenhum produto encontrado para "${productQuery.trim()}"`}
-                subtitle="Confira a grafia ou busque pela referência do produto"
-                action={<Button variant="default" onClick={() => setProductQuery('')}>Limpar Busca</Button>}
+                description="Confira a grafia ou busque pela referência do produto."
+                action={{ label: 'Limpar Busca', onClick: () => setProductQuery(''), forward: false }}
               />
             )}
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
@@ -924,9 +902,12 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               </SimpleGrid>
             ) : (
               <EmptyState
+                withBorder={false}
+                icon={ImageIcon}
                 title="Esta campanha ainda não tem cenários"
-                subtitle='Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" para usar como fundo da peça'
-                action={manageCampaignsButton}
+                description='Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" ou escolha outra campanha para usar como fundo da peça.'
+                action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
+                secondaryAction={{ label: 'Escolher Outra Campanha', onClick: () => setStep(1) }}
               />
             )}
           </Box>
@@ -958,7 +939,7 @@ function CampaignWizard({ profile, campaigns, onBack, onManageCampaigns, onFinis
               aria-label="Texto da campanha"
             />
             <Box mb="md">
-              <Text c="dimmed" size="sm" fw={600} mb={8}>Sugestões da IA:</Text>
+              <Text c="dimmed" size="sm" mb={8}>Sugestões da IA</Text>
               <Stack gap="sm">
                 {AI_PROMPTS.map((sugg, i) => (
                   <Paper
@@ -1071,6 +1052,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
   const [history, setHistory] = useState<HistoryItem[]>(initialHistory);
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(initialCampaigns[0]?.id ?? null);
+  const [wizardFormat, setWizardFormat] = useState<string | undefined>(undefined);
 
   const handleDeleteCampaign = (id: string) => {
     const idx = campaigns.findIndex(c => c.id === id);
@@ -1113,6 +1095,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       <CampaignWizard
         profile={profile}
         campaigns={campaigns}
+        initialFormat={wizardFormat}
         onBack={() => setMode('home')}
         onManageCampaigns={() => setMode('campaigns')}
         onFinish={items => setHistory(prev => [...items, ...prev])}
@@ -1123,7 +1106,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
   return (
     <MarketingHome
       history={history}
-      onCreate={() => setMode('wizard')}
+      onCreate={formatId => { setWizardFormat(formatId); setMode('wizard'); }}
       onManageCampaigns={() => setMode('campaigns')}
       onDelete={id => {
         setHistory(prev => prev.filter(item => item.id !== id));
