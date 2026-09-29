@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   SimpleGrid, Paper, Group, Text, ThemeIcon, TextInput, SegmentedControl, Button,
   Table, Badge, NumberInput, Avatar, Box, Stack, Card,
@@ -21,6 +21,9 @@ import {
 import { formatCurrency } from "../data/mockData";
 import { toast } from "../lib/toast";
 import { statusOf, type StockItem, type StockStatusKey } from "../data/stockData";
+import { useMockLoading } from "../lib/useMockLoading";
+import { KpiSkeleton, ListSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellCard, CellField, CellList } from "./ui/CellView";
 
 export type StockFilter = 'todos' | StockStatusKey;
 
@@ -121,19 +124,65 @@ export function StockTableHeader({ labels }: { labels: string[] }) {
   );
 }
 
+function StockEmptyState({ onClear }: { onClear?: () => void }) {
+  return (
+    <Stack align="center" gap="sm">
+      <FunnelIcon size={24} color="var(--mantine-color-dimmed)" opacity={0.6} />
+      <Text c="dimmed" ta="center" px="md">Nenhum SKU corresponde à busca ou ao filtro de status aplicado.</Text>
+      {onClear && (
+        <Button variant="default" onClick={onClear}>Limpar Busca e Filtro</Button>
+      )}
+    </Stack>
+  );
+}
+
 export function StockEmptyRow({ colSpan, onClear }: { colSpan: number; onClear?: () => void }) {
   return (
     <Table.Tr>
       <Table.Td colSpan={colSpan} py="xl">
-        <Stack align="center" gap="sm">
-          <FunnelIcon size={24} color="var(--mantine-color-dimmed)" opacity={0.6} />
-          <Text c="dimmed" ta="center">Nenhum SKU corresponde à busca ou ao filtro de status aplicado.</Text>
-          {onClear && (
-            <Button variant="default" onClick={onClear}>Limpar Busca e Filtro</Button>
-          )}
-        </Stack>
+        <StockEmptyState onClear={onClear} />
       </Table.Td>
     </Table.Tr>
+  );
+}
+
+/** Estado vazio da lista de cartões (mobile). */
+export function StockEmptyCard({ onClear }: { onClear?: () => void }) {
+  return (
+    <Paper withBorder py="xl">
+      <StockEmptyState onClear={onClear} />
+    </Paper>
+  );
+}
+
+/** Skeleton da área de dados: tabela a partir de sm, cartões empilhados no celular. */
+export function StockTableSkeleton({ cols }: { cols: number }) {
+  return (
+    <>
+      <Box visibleFrom="sm"><TableSkeleton rows={8} cols={cols} /></Box>
+      <Box hiddenFrom="sm"><ListSkeleton rows={5} /></Box>
+    </>
+  );
+}
+
+/**
+ * Cartão de SKU para o celular (cell view): mesmo conteúdo e ações da linha da tabela.
+ * `stockSlot`/`minSlot` substituem o valor pelo campo de edição quando a linha está em edição.
+ */
+export function StockCellCard({ item, stockSlot, minSlot, actions }: {
+  item: StockItem;
+  stockSlot?: ReactNode;
+  minSlot?: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <CellCard title={item.name} aside={<StockStatusBadge item={item} />} actions={actions}>
+      <CellField label="SKU"><Text className="mono">{item.sku}</Text></CellField>
+      <CellField label="Linha">{item.line} · {item.category} · {formatCurrency(item.price)}</CellField>
+      <CellField label="Estoque atual">{stockSlot ?? <Text fw={600} className="mono">{item.stock}</Text>}</CellField>
+      <CellField label="Limiar mín.">{minSlot ?? <Text className="mono">{item.min}</Text>}</CellField>
+      <CellField label="Atualizado">{item.updatedAt}</CellField>
+    </CellCard>
   );
 }
 
@@ -213,6 +262,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
   const [filter, setFilter] = useState<StockFilter>('todos');
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState(0);
+  const loading = useMockLoading();
 
   const filtered = useMemo(() => filterStock(items, query, filter), [items, query, filter]);
 
@@ -235,7 +285,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
 
   return (
     <Stack gap="md">
-      <StockKpis items={items} />
+      {loading ? <KpiSkeleton count={4} cols={{ base: 2, lg: 4 }} /> : <StockKpis items={items} />}
 
       <StockToolbar
         query={query}
@@ -245,7 +295,10 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
         showBulkActions={showBulkActions && !readOnly}
       />
 
-      <Card withBorder padding={0}>
+      {loading ? <StockTableSkeleton cols={headers.length} /> : (
+      <>
+      {/* Tabela a partir de sm; no celular, cartões (sem rolagem lateral) */}
+      <Card withBorder padding={0} visibleFrom="sm">
         <Table.ScrollContainer minWidth={900}>
           <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
             <StockTableHeader labels={headers} />
@@ -289,6 +342,27 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
           </Table>
         </Table.ScrollContainer>
       </Card>
+
+      <CellList>
+        {filtered.map(it => {
+          const isEditing = editing === it.sku;
+          return (
+            <StockCellCard
+              key={it.sku}
+              item={it}
+              stockSlot={isEditing ? (
+                <NumberInput mt={4} aria-label="Estoque atual" placeholder="0" min={0} value={draft} onChange={v => setDraft(Number(v) || 0)} />
+              ) : undefined}
+              actions={readOnly ? undefined : isEditing
+                ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
+                : <EditButton onClick={() => startEdit(it)} />}
+            />
+          );
+        })}
+        {filtered.length === 0 && <StockEmptyCard onClear={clearFilters} />}
+      </CellList>
+      </>
+      )}
     </Stack>
   );
 }

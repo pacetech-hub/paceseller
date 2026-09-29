@@ -1,6 +1,9 @@
 import { Group, Stack, Box, Text, Badge, Table, Checkbox, Card, Divider, Button } from "@mantine/core";
 import { profileDescriptions } from "../data/permissions";
 import { toast } from "../lib/toast";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellList, CellCard } from "./ui/CellView";
 
 interface PermissionMatrixTableProps {
   matrix: Record<string, Record<string, boolean>>;
@@ -11,6 +14,7 @@ interface PermissionMatrixTableProps {
 export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionMatrixTableProps) {
   const perfis = Object.keys(matrix);
   const modulos = Object.keys(matrix[perfis[0]]);
+  const loading = useMockLoading();
 
   return (
     <Card withBorder padding={0}>
@@ -30,7 +34,16 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
       </Stack>
       <Divider color="var(--mantine-color-default-border)" />
 
-      <Table.ScrollContainer minWidth={120 + perfis.length * 110}>
+      {loading ? (
+        // Skeleton só da região da matriz; legenda e ação de restaurar continuam visíveis
+        <Box p={{ base: 'md', sm: 'lg' }}>
+          <Box visibleFrom="sm"><TableSkeleton rows={modulos.length} cols={perfis.length + 1} /></Box>
+          <Box hiddenFrom="sm"><ListSkeleton rows={4} withAvatar={false} /></Box>
+        </Box>
+      ) : (
+      <>
+      {/* Poucas colunas (módulo + perfis): tabela a partir de sm, cartões por módulo no celular */}
+      <Box visibleFrom="sm">
       <Table verticalSpacing="sm" fz="md">
         <Table.Thead>
           <Table.Tr>
@@ -72,11 +85,33 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
           ))}
         </Table.Tbody>
       </Table>
-      </Table.ScrollContainer>
+      </Box>
+      <Box hiddenFrom="sm" p="md">
+        <CellList>
+          {modulos.map(modulo => (
+            <CellCard key={modulo} title={modulo}>
+              <Stack gap="sm">
+                {perfis.map(perfil => (
+                  <Checkbox
+                    key={perfil}
+                    label={perfil}
+                    checked={matrix[perfil][modulo]}
+                    onChange={() => onToggle(perfil, modulo)}
+                    color="neutral"
+                    aria-label={`${modulo} · ${perfil}`}
+                  />
+                ))}
+              </Stack>
+            </CellCard>
+          ))}
+        </CellList>
+      </Box>
+      </>
+      )}
 
       <Divider color="var(--mantine-color-default-border)" />
       <Group justify="space-between" gap="sm" p={{ base: 'md', sm: 'lg' }}>
-        <Text c="dimmed" size="sm">Clique em qualquer célula para alternar a permissão</Text>
+        <Text c="dimmed" size="sm">Marque ou desmarque para conceder ou revogar a permissão</Text>
         {/* Ação de baixa ênfase: não compete com as demais ações da página */}
         <Button
           onClick={() => {

@@ -22,8 +22,11 @@ import {
   XCircleIcon,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
-import { SimpleGrid, Grid, Paper, Group, Stack, Box, Text, ThemeIcon, Checkbox, Badge, Button, Progress } from "@mantine/core";
+import { useState } from "react";
+import { SimpleGrid, Paper, Group, Stack, Box, Text, ThemeIcon, Checkbox, Badge, Button, Progress, Modal, PasswordInput, Skeleton } from "@mantine/core";
 import { toast } from "../lib/toast";
+import { useMockLoading } from "../lib/useMockLoading";
+import { NewPasswordInput, isStrongPassword } from "./ui/NewPasswordInput";
 import interactive from "./interactive.module.css";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -45,22 +48,134 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
           {description && <Text c="dimmed" size="sm" mt={2}>{description}</Text>}
         </Box>
       </Group>
-      <Stack gap={0}>{children}</Stack>
+      <Stack gap="md">{children}</Stack>
     </Paper>
   );
 }
 
+// Dado do perfil: rótulo acima do valor, alinhado à esquerda (uma coluna, leitura pela borda esquerda)
 function Field({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
-    <Grid gutter="sm" align="flex-start" py={6} className={interactive.rowDivider}>
-      {/* Rótulo acima do valor no celular; lado a lado a partir de xs */}
-      <Grid.Col span={{ base: 12, xs: 4 }}>
-        <Text c="dimmed" size="sm">{label}</Text>
-      </Grid.Col>
-      <Grid.Col span={{ base: 12, xs: 8 }}>
-        <Text ff={mono ? 'monospace' : undefined}>{value}</Text>
-      </Grid.Col>
-    </Grid>
+    <Box>
+      <Text c="dimmed" size="sm">{label}</Text>
+      <Text ff={mono ? 'monospace' : undefined} component="div">{value}</Text>
+    </Box>
+  );
+}
+
+// Lista de preferências: as linhas ficam coladas, separadas por divisória
+function PreferenceList({ children }: { children: React.ReactNode }) {
+  return <Stack gap={0}>{children}</Stack>;
+}
+
+// Modal único de troca de senha, reaproveitado pelos três perfis
+function ChangePasswordModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const mismatch = confirm.length > 0 && confirm !== next;
+  // Motivo pelo qual o botão principal está bloqueado, mostrado acima dos botões
+  const blockedReason =
+    !current ? 'Digite sua senha atual para continuar' :
+    !isStrongPassword(next) ? 'A nova senha ainda não atende a todos os requisitos' :
+    confirm !== next ? 'Confirme a nova senha digitando-a novamente' :
+    next === current ? 'A nova senha precisa ser diferente da atual' :
+    null;
+
+  const reset = () => { setCurrent(''); setNext(''); setConfirm(''); setSaving(false); };
+  const close = () => { reset(); onClose(); };
+
+  const handleSave = () => {
+    if (blockedReason) return;
+    setSaving(true);
+    setTimeout(() => {
+      toast.success('Senha alterada', 'Use a nova senha no seu próximo acesso');
+      close();
+    }, 800);
+  };
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={close}
+      size="md"
+      centered
+      title={<Text fw={600} size="lg">Alterar senha</Text>}
+    >
+      <Box component="form" onSubmit={(e: React.FormEvent) => { e.preventDefault(); handleSave(); }}>
+        <Stack gap="md">
+          <PasswordInput
+            data-autofocus
+            label="Senha atual"
+            placeholder="Sua senha atual"
+            autoComplete="current-password"
+            value={current}
+            onChange={e => setCurrent(e.currentTarget.value)}
+          />
+          <NewPasswordInput
+            label="Nova senha"
+            placeholder="Crie uma nova senha"
+            value={next}
+            onChange={setNext}
+          />
+          <PasswordInput
+            label="Confirmar nova senha"
+            placeholder="Digite a nova senha novamente"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={e => setConfirm(e.currentTarget.value)}
+            error={mismatch ? 'As senhas não coincidem — digite a mesma senha nos dois campos' : null}
+          />
+        </Stack>
+        {blockedReason && (
+          <Text c="dimmed" size="sm" mt="lg" aria-live="polite">{blockedReason}</Text>
+        )}
+        <Group justify="flex-end" gap="sm" mt={blockedReason ? 'sm' : 'lg'}>
+          <Button variant="default" onClick={close}>Cancelar</Button>
+          <Button type="submit" disabled={blockedReason !== null} loading={saving}>
+            Salvar Nova Senha
+          </Button>
+        </Group>
+      </Box>
+    </Modal>
+  );
+}
+
+function ChangePasswordButton() {
+  const [opened, setOpened] = useState(false);
+  return (
+    <>
+      <Button variant="default" color="neutral" mr="auto" leftSection={<LockIcon size={16} />} onClick={() => setOpened(true)}>
+        Alterar Senha
+      </Button>
+      <ChangePasswordModal opened={opened} onClose={() => setOpened(false)} />
+    </>
+  );
+}
+
+// Skeleton com o mesmo formato dos blocos do perfil (ícone + título + dados em uma coluna)
+function ProfileSkeleton() {
+  return (
+    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md" aria-busy="true" aria-label="Carregando perfil">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Paper key={i} withBorder p={{ base: 'md', sm: 'lg' }}>
+          <Group gap="sm" mb="md" wrap="nowrap">
+            <Skeleton height={36} width={36} />
+            <Skeleton height={20} width="40%" />
+          </Group>
+          <Stack gap="md">
+            {Array.from({ length: 4 }).map((_, j) => (
+              <Box key={j}>
+                <Skeleton height={12} width="30%" mb={8} />
+                <Skeleton height={16} width="60%" />
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
+      ))}
+    </SimpleGrid>
   );
 }
 
@@ -144,18 +259,18 @@ function LojistaProfile() {
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
-        <PreferenceRow label="Novidades e lançamentos" description="Avise quando novas coleções estiverem disponíveis" defaultChecked />
-        <PreferenceRow label="Confirmação de pedido" description="Receba um e-mail a cada pedido confirmado" defaultChecked />
-        <PreferenceRow label="Status de faturamento" description="Atualizações sobre boletos e notas fiscais" defaultChecked />
-        <PreferenceRow label="Campanhas e ofertas" description="Promoções pontuais da indústria" />
+        <PreferenceList>
+          <PreferenceRow label="Novidades e lançamentos" description="Avise quando novas coleções estiverem disponíveis" defaultChecked />
+          <PreferenceRow label="Confirmação de pedido" description="Receba um e-mail a cada pedido confirmado" defaultChecked />
+          <PreferenceRow label="Status de faturamento" description="Atualizações sobre boletos e notas fiscais" defaultChecked />
+          <PreferenceRow label="Campanhas e ofertas" description="Promoções pontuais da indústria" />
+        </PreferenceList>
       </Section>
 
       <Section icon={LockIcon} title="Senha e acesso">
         <Field label="E-mail de acesso" value="compras@bellamoda.com.br" />
         <Field label="Última alteração de senha" value="há 3 meses" />
-        <Button variant="default" color="neutral" mt="sm" mr="auto">
-          Alterar Senha
-        </Button>
+        <ChangePasswordButton />
       </Section>
     </SimpleGrid>
   );
@@ -177,20 +292,20 @@ function RepProfile() {
         <Field label="Meta sell-in" value="R$ 480.000,00" />
         <Field label="Realizado" value={<Text c="teal" span fw={600}>R$ 312.450,00 (65%)</Text>} />
         <Field label="Faltam" value="R$ 167.550,00" />
-        <Progress value={65} color="teal" size="sm" mt="sm" />
+        <Progress value={65} color="teal" size="sm" aria-label="65% da meta realizada" />
       </Section>
 
       <Section icon={StorefrontIcon} title="Carteira de lojas" description="32 lojas vinculadas">
-        <SimpleGrid cols={3} spacing="xs" mb="xs">
-          <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+        <SimpleGrid cols={3} spacing="xs">
+          <Paper withBorder p="xs" bg="var(--mantine-color-neutral-0)">
             <Text c="teal" fw={700} size="xl">24</Text>
             <Text c="dimmed" size="sm">Ativas</Text>
           </Paper>
-          <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder p="xs" bg="var(--mantine-color-neutral-0)">
             <Text c="yellow.8" fw={700} size="xl">5</Text>
             <Text c="dimmed" size="sm">Inativas</Text>
           </Paper>
-          <Paper withBorder p="xs" ta="center" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder p="xs" bg="var(--mantine-color-neutral-0)">
             <Text c="red" fw={700} size="xl">3</Text>
             <Text c="dimmed" size="sm">Bloqueadas</Text>
           </Paper>
@@ -207,19 +322,19 @@ function RepProfile() {
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
-        <PreferenceRow label="Novos pedidos da carteira" description="Quando uma loja sua finalizar pedido" defaultChecked />
-        <PreferenceRow label="Alertas de meta" description="Avisos semanais sobre avanço de meta" defaultChecked />
-        <PreferenceRow label="Clientes inativos" description="Quando uma loja ficar 30d sem pedido" defaultChecked />
-        <PreferenceRow label="Novidades de catálogo" description="Lançamentos e reposições" />
+        <PreferenceList>
+          <PreferenceRow label="Novos pedidos da carteira" description="Quando uma loja sua finalizar pedido" defaultChecked />
+          <PreferenceRow label="Alertas de meta" description="Avisos semanais sobre avanço de meta" defaultChecked />
+          <PreferenceRow label="Clientes inativos" description="Quando uma loja ficar 30d sem pedido" defaultChecked />
+          <PreferenceRow label="Novidades de catálogo" description="Lançamentos e reposições" />
+        </PreferenceList>
       </Section>
 
       <Section icon={LockIcon} title="Senha e acesso">
         <Field label="Usuário" value="marina.costa" />
         <Field label="Última alteração de senha" value="há 1 mês" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Ativa" />} />
-        <Button variant="default" color="neutral" mt="sm" mr="auto">
-          Alterar Senha
-        </Button>
+        <ChangePasswordButton />
       </Section>
     </SimpleGrid>
   );
@@ -244,7 +359,7 @@ function AdminProfile() {
       </Section>
 
       <Section icon={UsersIcon} title="Usuários cadastrados">
-        <SimpleGrid cols={2} spacing="xs" mb="xs">
+        <SimpleGrid cols={2} spacing="xs">
           <Paper withBorder p="sm">
             <Text fw={700} size="xl">18</Text>
             <Text c="dimmed" size="sm">Representantes</Text>
@@ -290,20 +405,20 @@ function AdminProfile() {
         <Field label="Última alteração de senha" value="há 14 dias" />
         <Field label="Autenticação em 2 fatores" value={<StatusPill ok label="Obrigatória" />} />
         <Field label="Sessões ativas" value="2 dispositivos" />
-        <Button variant="default" color="neutral" mt="sm" mr="auto">
-          Alterar Senha
-        </Button>
+        <ChangePasswordButton />
       </Section>
     </SimpleGrid>
   );
 }
 
 export function ProfilePage({ profile }: ProfilePageProps) {
+  const loading = useMockLoading();
   return (
     <Box maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
-      {profile === 'lojista' && <LojistaProfile />}
-      {profile === 'rep' && <RepProfile />}
-      {profile === 'admin' && <AdminProfile />}
+      {loading && <ProfileSkeleton />}
+      {!loading && profile === 'lojista' && <LojistaProfile />}
+      {!loading && profile === 'rep' && <RepProfile />}
+      {!loading && profile === 'admin' && <AdminProfile />}
     </Box>
   );
 }

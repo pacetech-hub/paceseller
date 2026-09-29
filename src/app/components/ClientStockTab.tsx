@@ -84,7 +84,9 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
             </Group>
           </Paper>
 
+          {/* key: ao trocar de cliente a tabela remonta e mostra o skeleton enquanto "carrega" */}
           <StockTable
+            key={selected.id}
             items={items}
             onUpdateStock={readOnly ? undefined : updateStock}
             readOnly={readOnly}

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "../lib/toast";
 import { useSmallerThan } from "../lib/responsive";
 import {
   ActionIcon, Badge, Box, Button, Card, Chip, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
-  Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Skeleton, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  type ImageProps,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
@@ -29,12 +30,36 @@ import classes from "./CatalogPage.module.css";
 
 import type { CartContext, CartCreator } from "./CartsListPage";
 import { CatalogFiltersBar } from "./CatalogFiltersBar";
+import { useMockLoading } from "../lib/useMockLoading";
+import { CardGridSkeleton, ListSkeleton } from "./ui/Skeletons";
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 const BORDER = `1px solid ${BORDER_COLOR}`;
 const PRIMARY_TEXT = 'var(--mantine-primary-color-filled)';
 const DIMMED = 'var(--mantine-color-dimmed)';
 const DASHED_BORDER = `1px dashed ${BORDER_COLOR}`;
+
+// Foto remota do produto: skeleton no lugar até a imagem carregar; se falhar, mostra o fallback
+function ProductImage({ src, alt, fallback, imageProps }: {
+  src: string; alt: string; fallback?: ReactNode; imageProps?: ImageProps;
+}) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  if (status === 'error') return <>{fallback ?? null}</>;
+  return (
+    <Box pos="relative" w="100%" h="100%">
+      {status === 'loading' && <Skeleton pos="absolute" inset={0} aria-label="Carregando foto" />}
+      <Image
+        src={src}
+        alt={alt}
+        h="100%"
+        onLoad={() => setStatus('loaded')}
+        onError={() => setStatus('error')}
+        style={{ opacity: status === 'loaded' ? 1 : 0, transition: 'opacity 150ms ease' }}
+        {...imageProps}
+      />
+    </Box>
+  );
+}
 
 function CartCreatorTag({ createdBy }: { createdBy?: CartCreator }) {
   if (!createdBy) return null;
@@ -120,8 +145,9 @@ function QtyStepper({ value, onChange }: { value: number; onChange: (v: number) 
         hideControls
         placeholder="0"
         w={56}
+        size="sm"
         aria-label="Quantidade"
-        styles={{ input: { textAlign: 'center', fontWeight: 600, height: 36, minHeight: 36, paddingInline: 4 } }}
+        styles={{ input: { textAlign: 'center', paddingInline: 4 } }}
       />
       <ActionIcon size="input-sm" variant="default" onClick={() => onChange(value + 1)} aria-label="Aumentar quantidade">
         <PlusIcon size={16} />
@@ -289,7 +315,6 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
   onAddGrade: (qtys: Record<string, number>) => void;
   onCloseGrade: () => void;
 }) {
-  const [imgError, setImgError] = useState(false);
   const availBadgeColor = availColor[product.availability];
 
   if (viewMode === 'list') {
@@ -299,13 +324,15 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
         <Flex p={{ base: 'sm', sm: 'md' }} gap={{ base: 'sm', sm: 'md' }} wrap={{ base: 'wrap', sm: 'nowrap' }} align="center">
           <UnstyledButton onClick={onOpenDetail} w={{ base: 64, sm: 80 }} h={{ base: 64, sm: 80 }} flex="none">
             <Paper bg="white" h="100%">
-              {!imgError ? (
-                <Image src={product.image} alt={product.name} h="100%" onError={() => setImgError(true)} />
-              ) : (
-                <Group w="100%" h="100%" justify="center">
-                  <PackageIcon size={24} color={DIMMED} opacity={0.4} />
-                </Group>
-              )}
+              <ProductImage
+                src={product.image}
+                alt={product.name}
+                fallback={
+                  <Group w="100%" h="100%" justify="center">
+                    <PackageIcon size={24} color={DIMMED} opacity={0.4} />
+                  </Group>
+                }
+              />
             </Paper>
           </UnstyledButton>
           <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
@@ -378,24 +405,18 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
           bg="white"
           aria-label={`Ver detalhes de ${product.name}`}
         >
-          {!imgError ? (
-            <Image
+          <Box pos="absolute" inset={0}>
+            <ProductImage
               src={product.image}
               alt={product.name}
-              fit="contain"
-              pos="absolute"
-              inset={0}
-              h="100%"
-              pt={8}
-              px={8}
-              className={classes.cardImage}
-              onError={() => setImgError(true)}
+              imageProps={{ fit: 'contain', pt: 8, px: 8, className: classes.cardImage }}
+              fallback={
+                <Group h="100%" justify="center">
+                  <PackageIcon size={40} color={DIMMED} opacity={0.3} />
+                </Group>
+              }
             />
-          ) : (
-            <Group pos="absolute" inset={0} justify="center">
-              <PackageIcon size={40} color={DIMMED} opacity={0.3} />
-            </Group>
-          )}
+          </Box>
         </UnstyledButton>
         {/* Favoritar com ícone + texto, compacto para caber no card estreito */}
         <Button
@@ -521,7 +542,19 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
           <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
             <Paper pos="relative" w="100%" pt="90%" bg="white">
-              <Image src={images[activeImg].src} alt={`${product.name} — vista ${images[activeImg].label.toLowerCase()}`} fit="contain" pos="absolute" inset={0} h="100%" p={16} />
+              <Box pos="absolute" inset={0} p={16}>
+                <ProductImage
+                  key={images[activeImg].src}
+                  src={images[activeImg].src}
+                  alt={`${product.name} — vista ${images[activeImg].label.toLowerCase()}`}
+                  imageProps={{ fit: 'contain' }}
+                  fallback={
+                    <Group h="100%" justify="center">
+                      <PackageIcon size={48} color={DIMMED} opacity={0.3} />
+                    </Group>
+                  }
+                />
+              </Box>
             </Paper>
             <Group gap={8} role="tablist" aria-label="Vistas do produto">
               {images.map((img, i) => (
@@ -534,7 +567,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                   aria-selected={activeImg === i}
                 >
                   <Box className={classes.thumb}>
-                    <Image src={img.src} alt="" h="100%" />
+                    <ProductImage src={img.src} alt="" />
                   </Box>
                   <Text lh={1.5} ta="center" size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
                     {img.label}
@@ -569,7 +602,8 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
               <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
             </Group>
             <Text lh={1.6}>{product.description}</Text>
-            <SimpleGrid cols={2} spacing="sm">
+            {/* Especificações em uma coluna: rótulo acima do valor, leitura pela borda esquerda */}
+            <Stack gap="md">
               <Box>
                 <Text lh={1.5} c="dimmed" size="sm">Material</Text>
                 <Text lh={1.5} mt={2} fw={600}>{product.material}</Text>
@@ -578,7 +612,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                 <Text lh={1.5} c="dimmed" size="sm">Coleção</Text>
                 <Text lh={1.5} mt={2} fw={600}>{product.collection}</Text>
               </Box>
-            </SimpleGrid>
+            </Stack>
             <Box>
               <Text lh={1.5} c="dimmed" mb={6} size="sm">Cores</Text>
               <Group gap={6}>
@@ -655,6 +689,30 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   const [confirmAdd, setConfirmAdd] = useState<{ product: Product; qtys: Record<string, number>; selectedCartId: string } | null>(null);
   const [creatingNewName, setCreatingNewName] = useState('');
   const [creatingMode, setCreatingMode] = useState(false);
+  // Simula a busca dos produtos: skeleton da grade/lista enquanto carrega
+  const loading = useMockLoading();
+  // Filtro da lista de carrinhos (aparece com 7+ carrinhos)
+  const [cartQuery, setCartQuery] = useState('');
+  const allCarts = clientCarts ?? [];
+  const showCartFilter = allCarts.length >= 7;
+  const cartQ = cartQuery.trim().toLowerCase();
+  const visibleCarts = showCartFilter && cartQ
+    ? allCarts.filter(c => c.cartName.toLowerCase().includes(cartQ) || c.clientName.toLowerCase().includes(cartQ) || c.id.toLowerCase().includes(cartQ))
+    : allCarts;
+  const cartFilter = showCartFilter ? (
+    <TextInput
+      aria-label="Buscar carrinho"
+      placeholder="Buscar por nome ou código"
+      leftSection={<MagnifyingGlassIcon size={18} />}
+      value={cartQuery}
+      onChange={e => setCartQuery(e.currentTarget.value)}
+    />
+  ) : null;
+  const cartFilterEmpty = showCartFilter && cartQ && visibleCarts.length === 0 ? (
+    <Text lh={1.5} c="dimmed" py="sm">
+      Nenhum carrinho com "{cartQuery.trim()}". Confira o nome ou apague a busca para ver todos.
+    </Text>
+  ) : null;
 
   const commitAdd = (p: Product, qtys: Record<string, number>, cartName?: string) => {
     const total = Object.values(qtys).reduce((a, b) => a + b, 0);
@@ -667,6 +725,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   const addGrade = (p: Product, qtys: Record<string, number>) => {
     const total = Object.values(qtys).reduce((a, b) => a + b, 0);
     if (total === 0) return;
+    setCartQuery('');
     if (multiCartEnabled) {
       // Se já tem carrinho ativo, confirma antes de adicionar
       if (activeCartId) {
@@ -905,8 +964,12 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         </Group>
       )}
 
-      {/* Products Grid/List */}
-      {sorted.length === 0 ? (
+      {/* Products Grid/List — skeleton com o mesmo formato enquanto carrega */}
+      {loading ? (
+        viewMode === 'grid'
+          ? <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} imageRatio={1.25} />
+          : <ListSkeleton rows={5} withAvatar />
+      ) : sorted.length === 0 ? (
         <Stack align="center" justify="center" gap={0} py={80} ta="center">
           <Box mb={16} lh={0}>
             <PackageIcon size={48} color={DIMMED} opacity={0.3} />
@@ -961,7 +1024,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         {confirmAdd && (
           <>
             <Box px="lg" py="md">
-              <Text lh={1.5} fw={700} size="lg">Adicionar ao carrinho</Text>
+              <Title order={3}>Adicionar ao carrinho</Title>
               <Text lh={1.5} c="dimmed" mt={4} size="sm">
                 {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>. Escolha o carrinho de destino.
               </Text>
@@ -969,7 +1032,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             <Divider color={BORDER_COLOR} />
             <ScrollArea.Autosize mah="40vh" type="auto">
               <Stack gap="sm" px="lg" py="md">
-                {(clientCarts ?? []).map(c => (
+                {cartFilter}
+                {cartFilterEmpty}
+                {visibleCarts.map(c => (
                   <CartOption
                     key={c.id}
                     cart={c}
@@ -1030,7 +1095,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           <>
             <Group justify="space-between" px="lg" py="sm" wrap="nowrap">
               <Box miw={0}>
-                <Text lh={1.5} fw={700} size="lg">Adicionar a qual carrinho?</Text>
+                <Title order={3}>Adicionar a qual carrinho?</Title>
                 <Text lh={1.5} c="dimmed" truncate size="sm">
                   {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
                 </Text>
@@ -1042,7 +1107,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             <Divider color={BORDER_COLOR} />
             <ScrollArea.Autosize mah="50vh" type="auto">
               <Stack gap="sm" p="md">
-                {(clientCarts ?? []).map(c => (
+                {cartFilter}
+                {cartFilterEmpty}
+                {visibleCarts.map(c => (
                   <CartOption
                     key={c.id}
                     cart={c}

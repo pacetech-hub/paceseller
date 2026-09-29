@@ -3,7 +3,10 @@ import {
   ColorSwatch, SimpleGrid, Table, Box, Anchor,
 } from "@mantine/core";
 import { LineChart } from "@mantine/charts";
-import { CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ChartSkeleton, KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellCard, CellField, CellList } from "./ui/CellView";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
 
@@ -51,7 +54,7 @@ function Badge({ children, tone = 'ok', icon }: { children: React.ReactNode; ton
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <Text c="dimmed" size="sm" fw={600} tt="uppercase">{children}</Text>;
+  return <Text c="dimmed" size="sm" fw={600}>{children}</Text>;
 }
 
 function ListItem({ title, meta, right }: { title: string; meta: string; right?: React.ReactNode }) {
@@ -110,9 +113,10 @@ function Rank({ rows }: { rows: { n: string; v: number }[] }) {
   );
 }
 
+// tabela só a partir de `sm`; no celular cada tabela vira uma lista de cartões (CellList)
 function SimpleTable({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
-    <Table.ScrollContainer minWidth={480}>
+    <Table.ScrollContainer minWidth={480} visibleFrom="sm">
       <Table verticalSpacing={8} horizontalSpacing={8}>
         <Table.Thead>
           <Table.Tr>
@@ -125,12 +129,29 @@ function SimpleTable({ head, children }: { head: string[]; children: React.React
   );
 }
 
+type StockTone = 'ok' | 'warn' | 'risk';
+
+const recurringRows = [
+  { product: 'Tênis Runner X', cadence: 'a cada 21 dias', count: '6', last: 'há 12 dias', next: 'em ~9 dias', soon: false },
+  { product: 'Sandália Verão', cadence: 'a cada 30 dias', count: '4', last: 'há 18 dias', next: 'em ~12 dias', soon: false },
+  { product: 'Sapatilha Flex', cadence: 'a cada 45 dias', count: '3', last: 'há 40 dias', next: 'em ~5 dias', soon: true },
+];
+
+const stockRows: { product: string; tone: StockTone; status: string; stock: number; ruptureDays: number | string; turnover: number; value: string }[] = [
+  { product: 'Tênis Runner X', tone: 'risk', status: 'Ruptura', stock: 0, ruptureDays: 6, turnover: 12, value: '—' },
+  { product: 'Sandália Verão', tone: 'warn', status: 'Baixo', stock: 14, ruptureDays: '—', turnover: 15, value: brl(1190) },
+  { product: 'Chinelo Soft', tone: 'warn', status: 'Baixo', stock: 9, ruptureDays: '—', turnover: 18, value: brl(405) },
+  { product: 'Sapatilha Flex', tone: 'ok', status: 'OK', stock: 42, ruptureDays: '—', turnover: 22, value: brl(3360) },
+  { product: 'Bota Couro', tone: 'ok', status: 'OK', stock: 28, ruptureDays: '—', turnover: 35, value: brl(4480) },
+];
+
 const histData = [
   { m: 'Fev', v: 9 }, { m: 'Mar', v: 12 }, { m: 'Abr', v: 10 },
   { m: 'Mai', v: 14 }, { m: 'Jun', v: 12 }, { m: 'Jul', v: 13 },
 ];
 
 export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
+  const loading = useMockLoading();
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="lg">
@@ -146,6 +167,18 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Group>
         </Group>
 
+        {loading ? (
+          // skeleton no formato do painel: resumo/status, gráfico e tabelas
+          <Stack gap="lg">
+            <KpiSkeleton count={4} />
+            <Grid gutter="md">
+              <Grid.Col span={{ base: 12, lg: 7 }}><ChartSkeleton height={190} /></Grid.Col>
+              <Grid.Col span={{ base: 12, lg: 5 }}><TableSkeleton rows={3} cols={2} /></Grid.Col>
+            </Grid>
+            <TableSkeleton rows={5} cols={5} />
+            <TableSkeleton rows={5} cols={6} />
+          </Stack>
+        ) : (<>
         {/* MEUS PEDIDOS */}
         <SectionLabel>Meus pedidos</SectionLabel>
         <Grid gutter="md">
@@ -219,20 +252,28 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
 
           <Card title="Compra recorrente" hint="Itens comprados com regularidade · frequência por SKU" span={7}>
             <SimpleTable head={['Produto', 'Cadência', 'Compras', 'Última', 'Próxima']}>
-              {[
-                ['Tênis Runner X', 'a cada 21 dias', '6', 'há 12 dias', 'em ~9 dias', false],
-                ['Sandália Verão', 'a cada 30 dias', '4', 'há 18 dias', 'em ~12 dias', false],
-                ['Sapatilha Flex', 'a cada 45 dias', '3', 'há 40 dias', 'em ~5 dias', true],
-              ].map((r: any) => (
-                <Table.Tr key={r[0]}>
-                  <Table.Td>{r[0]}</Table.Td>
-                  <Table.Td c="dimmed">{r[1]}</Table.Td>
-                  <Table.Td>{r[2]}</Table.Td>
-                  <Table.Td c="dimmed">{r[3]}</Table.Td>
-                  <Table.Td c={r[5] ? WARN : undefined} fw={r[5] ? 600 : undefined}>{r[4]}</Table.Td>
+              {recurringRows.map(r => (
+                <Table.Tr key={r.product}>
+                  <Table.Td>{r.product}</Table.Td>
+                  <Table.Td c="dimmed">{r.cadence}</Table.Td>
+                  <Table.Td>{r.count}</Table.Td>
+                  <Table.Td c="dimmed">{r.last}</Table.Td>
+                  <Table.Td c={r.soon ? WARN : undefined} fw={r.soon ? 600 : undefined}>{r.next}</Table.Td>
                 </Table.Tr>
               ))}
             </SimpleTable>
+            <CellList>
+              {recurringRows.map(r => (
+                <CellCard key={r.product} title={r.product}>
+                  <CellField label="Cadência">{r.cadence}</CellField>
+                  <CellField label="Compras">{r.count}</CellField>
+                  <CellField label="Última">{r.last}</CellField>
+                  <CellField label="Próxima">
+                    <Text c={r.soon ? WARN : undefined} fw={r.soon ? 600 : undefined}>{r.next}</Text>
+                  </CellField>
+                </CellCard>
+              ))}
+            </CellList>
           </Card>
         </Grid>
 
@@ -250,23 +291,31 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
 
           <Card title="Controle de estoque" hint="Situação por SKU · ruptura, baixo, OK e valor" span={9}>
             <SimpleTable head={['Produto', 'Situação', 'Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}>
-              {[
-                ['Tênis Runner X', 'risk', 'Ruptura', 0, 6, 12, '—'],
-                ['Sandália Verão', 'warn', 'Baixo', 14, '—', 15, brl(1190)],
-                ['Chinelo Soft', 'warn', 'Baixo', 9, '—', 18, brl(405)],
-                ['Sapatilha Flex', 'ok', 'OK', 42, '—', 22, brl(3360)],
-                ['Bota Couro', 'ok', 'OK', 28, '—', 35, brl(4480)],
-              ].map((r: any) => (
-                <Table.Tr key={r[0]}>
-                  <Table.Td>{r[0]}</Table.Td>
-                  <Table.Td><Badge tone={r[1]}>{r[2]}</Badge></Table.Td>
-                  <Table.Td>{r[3]}</Table.Td>
-                  <Table.Td c={typeof r[4] === 'number' ? WARN : 'dimmed'} fw={typeof r[4] === 'number' ? 600 : undefined}>{r[4]}</Table.Td>
-                  <Table.Td c={r[5] > 30 ? WARN : undefined} fw={r[5] > 30 ? 600 : undefined}>{r[5]}</Table.Td>
-                  <Table.Td>{r[6]}</Table.Td>
+              {stockRows.map(r => (
+                <Table.Tr key={r.product}>
+                  <Table.Td>{r.product}</Table.Td>
+                  <Table.Td><Badge tone={r.tone}>{r.status}</Badge></Table.Td>
+                  <Table.Td>{r.stock}</Table.Td>
+                  <Table.Td c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Table.Td>
+                  <Table.Td c={r.turnover > 30 ? WARN : undefined} fw={r.turnover > 30 ? 600 : undefined}>{r.turnover}</Table.Td>
+                  <Table.Td>{r.value}</Table.Td>
                 </Table.Tr>
               ))}
             </SimpleTable>
+            <CellList>
+              {stockRows.map(r => (
+                <CellCard key={r.product} title={r.product} aside={<Badge tone={r.tone}>{r.status}</Badge>}>
+                  <CellField label="Estoque (pares)">{r.stock}</CellField>
+                  <CellField label="Dias ruptura">
+                    <Text c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Text>
+                  </CellField>
+                  <CellField label="Giro (dias)">
+                    <Text c={r.turnover > 30 ? WARN : undefined} fw={r.turnover > 30 ? 600 : undefined}>{r.turnover}</Text>
+                  </CellField>
+                  <CellField label="Valor">{r.value}</CellField>
+                </CellCard>
+              ))}
+            </CellList>
           </Card>
         </Grid>
 
@@ -284,7 +333,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </Stack>
             <Box mt="sm">
               <Anchor component="button" type="button" onClick={() => onNavigate('catalog')}>
-                Ir para o catálogo
+                Ir para o Catálogo <ArrowRightIcon size={16} style={{ verticalAlign: 'text-bottom' }} />
               </Anchor>
             </Box>
           </Card>
@@ -298,6 +347,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </Stack>
           </Card>
         </Grid>
+        </>)}
       </Stack>
     </Container>
   );

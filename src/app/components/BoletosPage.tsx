@@ -20,6 +20,8 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import { formatCurrency, formatDate } from "../data/mockData";
+import { useMockLoading } from "../lib/useMockLoading";
+import { KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -404,6 +406,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
 export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'todos' | PaymentStatus>('todos');
+  const loading = useMockLoading();
 
   const isLojista = profile === 'lojista';
   const isRep = profile === 'rep';
@@ -449,6 +452,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Financial summary */}
+      {loading ? <KpiSkeleton count={3} cols={{ base: 1, sm: 3 }} /> : (
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
         {stats.map(stat => (
           <Paper
@@ -471,6 +475,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           </Paper>
         ))}
       </SimpleGrid>
+      )}
 
       {/* Filters */}
       <Group gap="sm" wrap="wrap">
@@ -494,6 +499,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
       </Group>
 
       {/* Payment cards */}
+      {loading ? <ListSkeleton rows={6} withAvatar={false} /> : (
       <Stack gap="sm">
         {filtered.map(payment => (
           <PaymentCard key={payment.id} payment={payment} profile={profile} />
@@ -516,6 +522,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           </Paper>
         )}
       </Stack>
+      )}
     </Stack>
   );
 }

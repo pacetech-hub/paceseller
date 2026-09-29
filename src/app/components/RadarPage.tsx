@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useMockLoading } from "../lib/useMockLoading";
+import { KpiSkeleton } from "./ui/Skeletons";
 import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box,
 } from "@mantine/core";
@@ -44,8 +46,9 @@ const TONES: Record<Tone, { color: string; icon: Icon }> = {
   opportunity: { color: 'teal.7', icon: TrendUpIcon },
   stock: { color: 'yellow.8', icon: PackageIcon },
   alert: { color: 'red.7', icon: WarningIcon },
-  launch: { color: 'blue.7', icon: RocketLaunchIcon },
-  benchmark: { color: 'violet.7', icon: UsersThreeIcon },
+  // lançamento e benchmark são informativos: neutros (azul fica só para links)
+  launch: { color: 'neutral.9', icon: RocketLaunchIcon },
+  benchmark: { color: 'gray.7', icon: UsersThreeIcon },
   lowTurnover: { color: 'gray.7', icon: TrendDownIcon },
 };
 
@@ -68,7 +71,7 @@ function ActionCard({ action }: { action: RadarAction }) {
           </ThemeIcon>
           <Text size="sm" fw={600} c={tone.color}>{action.eyebrow}</Text>
         </Group>
-        <Text fz={32} fw={700} lh={1.1} c={tone.color} className="mono">{action.metric}</Text>
+        <Text fz="xl" fw={700} lh={1.1} c={tone.color} className="mono">{action.metric}</Text>
         <Box>
           <Text fw={600}>{action.title}</Text>
           <Text size="sm" c="dimmed" mt={2}>{action.description}</Text>
@@ -97,6 +100,7 @@ function ActionCard({ action }: { action: RadarAction }) {
 
 function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenCatalog }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Period>('hoje');
+  const loading = useMockLoading();
 
   const actions: RadarAction[] = [
     {
@@ -107,7 +111,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: '+34%',
       title: 'Tênis Tesla Fusion Black Red',
       description: 'Vendas na sua região neste mês',
-      ctaLabel: 'Ver produto',
+      ctaLabel: 'Ver Produto',
       onAction: () => onOpenProduct('P009'),
     },
     {
@@ -119,7 +123,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       title: 'Linha Coil',
       description: 'Vendendo mais rápido que a reposição atual',
       suggestion: 'Sugestão: repor 32 unidades',
-      ctaLabel: 'Repor agora',
+      ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P002', 32),
     },
     {
@@ -142,7 +146,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       title: 'Tênis Tesla TG II Black Reflect',
       description: 'Sugestão de reposição antes de faltar',
       suggestion: 'Sugestão: repor 60 unidades',
-      ctaLabel: 'Repor agora',
+      ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P010', 60),
     },
     {
@@ -153,7 +157,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: '6 lojas',
       title: 'Linha Fusion',
       description: 'Ainda não chegou no seu mix — lojas parecidas já compram',
-      ctaLabel: 'Ver coleção',
+      ctaLabel: 'Ver Coleção',
       onAction: () => onOpenCatalog({ line: 'Fusion' }),
     },
     {
@@ -164,7 +168,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: 'Giro baixo',
       title: 'Tênis Tesla TG II Black Reflect',
       description: 'Ainda com giro abaixo do esperado desde o lançamento',
-      ctaLabel: 'Ver produto',
+      ctaLabel: 'Ver Produto',
       onAction: () => onOpenProduct('P010'),
     },
     {
@@ -186,7 +190,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: 'Sem giro',
       title: 'Tênis Tesla Flow XL Black',
       description: 'Sem giro nos últimos 30 dias — bom candidato pra impulsionar com campanha',
-      ctaLabel: 'Ver produto',
+      ctaLabel: 'Ver Produto',
       onAction: () => onOpenProduct('P008'),
     },
     {
@@ -197,7 +201,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: '6 SKUs',
       title: 'Vendendo acima da média',
       description: 'Coil Black White, Denim, Hertz All Black Furta Cor e mais 3',
-      ctaLabel: 'Ver todos',
+      ctaLabel: 'Ver Todos',
       onAction: () => onOpenCatalog({ sortBy: 'mais vendidos' }),
     },
   ];
@@ -235,20 +239,25 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
         </Tabs.List>
       </Tabs>
 
-      {visible.length > 0 ? (
+      {loading ? (
+        <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />
+      ) : visible.length > 0 ? (
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
           {visible.map(a => <ActionCard key={a.id} action={a} />)}
         </SimpleGrid>
       ) : (
         <Paper withBorder p="xl">
           <Stack align="center" gap="xs" py="lg">
-            <ThemeIcon size={48} radius="xl" variant="light" color="teal">
+            <ThemeIcon size={48} variant="light" color="teal">
               <CheckCircleIcon size={24} />
             </ThemeIcon>
             <Text fw={600}>Nenhuma ação sugerida para este período</Text>
             <Text size="sm" c="dimmed" ta="center" maw={420}>
-              Quando houver reposições, oportunidades ou alertas, eles aparecem aqui.
+              Quando houver reposições, oportunidades ou alertas, eles aparecem aqui. Enquanto isso, confira as novidades do catálogo.
             </Text>
+            <Button variant="default" mt="sm" rightSection={<ArrowRightIcon size={16} />} onClick={() => onOpenCatalog({})}>
+              Ir para o Catálogo
+            </Button>
           </Stack>
         </Paper>
       )}
@@ -264,9 +273,9 @@ export function RadarPage({ profile, ...rest }: RadarPageProps) {
       {profile === 'lojista' ? (
         <LojistaRadar {...rest} />
       ) : (
-        <Paper withBorder radius="md" p="xl">
+        <Paper withBorder p="xl">
           <Stack align="center" gap="xs" py="xl">
-            <ThemeIcon size={48} radius="xl" variant="light">
+            <ThemeIcon size={48} variant="light">
               <CrosshairIcon size={24} />
             </ThemeIcon>
             <Text fw={600}>Radar</Text>

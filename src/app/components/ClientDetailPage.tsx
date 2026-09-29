@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, Badge, ThemeIcon, SimpleGrid, Avatar, Collapse,
-  Divider, Progress, AspectRatio, Image, Center, ColorSwatch, Card,
+  Divider, Progress, AspectRatio, Image, Center, ColorSwatch, Card, Skeleton,
 } from "@mantine/core";
 import {
   CaretLeftIcon,
@@ -16,12 +16,15 @@ import {
   HourglassLowIcon,
   ListMagnifyingGlassIcon,
   PackageIcon,
+  ArrowRightIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
 import detail from "./ClientDetailPage.module.css";
 import { formatCurrency, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
+import { useMockLoading } from "../lib/useMockLoading";
+import { CardGridSkeleton, KpiSkeleton } from "./ui/Skeletons";
 
 interface ClientDetailPageProps {
   client: Client | null;
@@ -118,6 +121,7 @@ function typeRanking(clientId: string): RankItem[] {
 export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetailPageProps) {
   const [expanded, setExpanded] = useState(false);
   const [stockFilter, setStockFilter] = useState<StockStatusKey | 'todos'>('todos');
+  const loading = useMockLoading();
 
   const buyProducts = useMemo(
     () => products.map(p => ({ ...p, stockStatus: stockStatusOf(p) })),
@@ -147,9 +151,31 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <Stack align="flex-start" gap="sm">
             <Text fw={600}>Nenhum cliente selecionado</Text>
             <Text c="dimmed" size="sm">Escolha um cliente na lista para ver dados cadastrais, desempenho e sugestões de venda.</Text>
-            <Button variant="default" onClick={() => onNavigate('clients')}>Ver Lista de Clientes</Button>
+            <Button variant="default" onClick={() => onNavigate('clients')} rightSection={<ArrowRightIcon size={16} />}>Ver Lista de Clientes</Button>
           </Stack>
         </Paper>
+      </Stack>
+    );
+  }
+
+  // Skeleton com o formato da página: cabeçalho, indicadores, rankings e grade de sugestões
+  if (loading) {
+    return (
+      <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" aria-busy="true" aria-label="Carregando cliente">
+        {backButton}
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+          <Group gap="md" wrap="nowrap">
+            <Skeleton height={56} width={56} circle />
+            <Stack gap={8} flex={1}>
+              <Skeleton height={16} width={120} />
+              <Skeleton height={28} width="50%" />
+              <Skeleton height={12} width={160} />
+            </Stack>
+          </Group>
+        </Paper>
+        <KpiSkeleton count={4} cols={{ base: 1, sm: 2 }} />
+        <KpiSkeleton count={3} cols={{ base: 1, lg: 3 }} />
+        <CardGridSkeleton count={8} cols={{ base: 2, sm: 3, lg: 4 }} />
       </Stack>
     );
   }
@@ -200,18 +226,19 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
 
         <Collapse in={expanded}>
           <Divider mt="sm" />
-          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" pt="sm">
+          {/* Uma coluna, rótulo acima do valor, alinhado à esquerda */}
+          <Stack gap="md" pt="sm">
             {[
               { label: 'Endereço', value: client.address },
               { label: 'CNPJ', value: client.cnpj },
               { label: 'Representante', value: client.rep },
             ].map(info => (
               <Box key={info.label}>
-                <Text c="dimmed" size="sm" fw={600}>{info.label}</Text>
-                <Text fw={600}>{info.value}</Text>
+                <Text c="dimmed" size="sm">{info.label}</Text>
+                <Text>{info.value}</Text>
               </Box>
             ))}
-          </SimpleGrid>
+          </Stack>
         </Collapse>
       </Paper>
 
@@ -379,15 +406,20 @@ function RankCard({ title, items, renderLabel }: { title: string; items: RankIte
 
 function ProductThumb({ src, alt, size }: { src: string; alt: string; size?: number }) {
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   // com size: miniatura quadrada com borda; sem size: preenche o container (cartão)
   const cardProps = size
     ? { w: size, h: size, bd: '1px solid var(--mantine-color-default-border)', flex: 'none' }
     : { w: '100%', h: '100%', radius: 0 };
 
   return (
-    <Card padding={0} bg="white" {...cardProps}>
+    <Card padding={0} bg="white" pos="relative" {...cardProps}>
       {!imgError ? (
-        <Image src={src} alt={alt} w="100%" h="100%" fit="cover" onError={() => setImgError(true)} />
+        <>
+          {/* Skeleton no lugar da imagem até ela terminar de carregar */}
+          {!imgLoaded && <Skeleton pos="absolute" inset={0} h="100%" />}
+          <Image src={src} alt={alt} w="100%" h="100%" fit="cover" onLoad={() => setImgLoaded(true)} onError={() => setImgError(true)} />
+        </>
       ) : (
         <Center h="100%">
           <PackageIcon size={size ? 16 : 32} color="var(--mantine-color-dimmed)" opacity={0.3} />
@@ -424,7 +456,7 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
         <Divider mt={8} color="var(--mantine-color-default-border)" />
         {/* preço acima e ação principal no rodapé do cartão, em largura total (cabe nos cartões estreitos do mobile) */}
         <Text className="mono" size="lg" fw={700} pt={8}>{formatCurrency(product.price)}</Text>
-        <Button onClick={onBuy} fullWidth mt="sm">Montar Pedido</Button>
+        <Button onClick={onBuy} fullWidth mt="sm" rightSection={<ArrowRightIcon size={16} />}>Montar Pedido</Button>
       </Stack>
     </Card>
   );

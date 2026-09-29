@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Textarea, Anchor, Badge, ThemeIcon,
-  SimpleGrid, Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider, Card,
+  Grid, ActionIcon, Alert, Image, Modal, Radio, Checkbox, Divider, Skeleton,
 } from "@mantine/core";
 import {
   ShoppingCartIcon,
@@ -20,11 +20,15 @@ import {
   FolderPlusIcon,
   ListBulletsIcon,
   UserCheckIcon,
+  ArrowRightIcon,
+  PackageIcon,
 } from "@phosphor-icons/react";
 import { products, formatCurrency } from "../data/mockData";
 import { priceTables } from "./CatalogFiltersBar";
 import type { CartContext, CartCreator } from "./CartsListPage";
 import classes from "./interactive.module.css";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton } from "./ui/Skeletons";
 
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
@@ -110,8 +114,42 @@ const campaignsByTable: Record<string, { id: string; name: string; description: 
   ],
 };
 
+/** Miniatura do produto: skeleton até a imagem carregar; ícone neutro se a imagem falhar. */
+function ProductThumb({ src, alt, size = 64 }: { src: string; alt: string; size?: number }) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  return (
+    <Box
+      w={size}
+      h={size}
+      pos="relative"
+      flex="none"
+      bg="var(--mantine-color-default-hover)"
+      style={{ overflow: 'hidden', borderRadius: 'var(--mantine-radius-default)' }}
+    >
+      {status === 'loading' && <Skeleton h="100%" style={{ position: 'absolute', inset: 0 }} />}
+      {status === 'error' ? (
+        <Box h="100%" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <PackageIcon size={20} color="var(--mantine-color-dimmed)" />
+        </Box>
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          w="100%"
+          h="100%"
+          fit="cover"
+          onLoad={() => setStatus('loaded')}
+          onError={() => setStatus('error')}
+          style={{ opacity: status === 'loaded' ? 1 : 0 }}
+        />
+      )}
+    </Box>
+  );
+}
+
 export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, onCartCountChange, selectedPriceTable, viewerRole = 'rep' }: CartPageProps) {
   const [cart, setCart] = useState<CartItem[]>(initialCart);
+  const loading = useMockLoading();
   useEffect(() => { onCartCountChange?.(cart.length); }, [cart.length]);
   const [tableId, setTableId] = useState<string>(selectedPriceTable ?? 'padrao');
   const policy = useMemo(() => priceTables.find(p => p.id === tableId) ?? priceTables[0], [tableId]);
@@ -196,7 +234,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           </Text>
           <Group gap="sm" mt="xl" justify="center">
             <Button onClick={() => onNavigate('catalog')} variant="default">Voltar ao Catálogo</Button>
-            <Button onClick={() => onNavigate('history')}>Acompanhar no Histórico</Button>
+            <Button onClick={() => onNavigate('history')} rightSection={<ArrowRightIcon size={16} />}>Acompanhar no Histórico</Button>
           </Group>
         </Stack>
       </Stack>
@@ -328,22 +366,22 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           <ShoppingCartIcon size={48} color="var(--mantine-color-dimmed)" opacity={0.3} />
           <Text fw={600} mt="sm">Carrinho vazio</Text>
           <Text c="dimmed">Adicione produtos do catálogo para criar um pedido.</Text>
-          <Button onClick={() => onNavigate('catalog')} mt="md">Ir ao Catálogo</Button>
+          <Button onClick={() => onNavigate('catalog')} mt="md" rightSection={<ArrowRightIcon size={16} />}>Ir ao Catálogo</Button>
         </Stack>
       ) : (
         <Grid gutter="lg">
           {/* Items */}
           <Grid.Col span={{ base: 12, lg: 8 }}>
-            {step === 'cart' ? (
+            {step === 'cart' && loading ? (
+              <ListSkeleton rows={cart.length} />
+            ) : step === 'cart' ? (
               <Stack gap="sm">
                 {cart.map(item => {
                   const { pairs, value } = getItemTotal(item);
                   return (
                     <Paper key={item.product.id} withBorder p={{ base: 'sm', sm: 'md' }}>
                       <Group align="flex-start" gap="sm" mb="sm" wrap="nowrap">
-                        <Card w={64} h={64} padding={0} flex="none" bg="var(--mantine-color-default-hover)">
-                          <Image src={item.product.image} alt={item.product.name} w="100%" h="100%" fit="cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        </Card>
+                        <ProductThumb src={item.product.image} alt={item.product.name} />
                         <Box miw={0} flex={1}>
                           <Text fw={600}>{item.product.name}</Text>
                           <Text c="dimmed" size="sm">{item.product.reference} · {formatCurrency(item.product.price)}/par</Text>
@@ -406,7 +444,8 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                       ))}
                     </Stack>
                   </Radio.Group>
-                  <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="sm">
+                  {/* Uma coluna, rótulo acima do valor: leitura pela borda esquerda */}
+                  <Stack gap="md">
                     <Box>
                       <Text c="dimmed" size="sm">Desconto da tabela</Text>
                       <Text className="mono" fw={600} mt={2}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
@@ -419,7 +458,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                       <Text c="dimmed" size="sm">Pedido mínimo</Text>
                       <Text className="mono" fw={600} mt={2}>{formatCurrency(policyDetails.minOrderValue)}</Text>
                     </Box>
-                  </SimpleGrid>
+                  </Stack>
                 </Paper>
 
                 {/* Condições de pagamento disponíveis */}
@@ -558,7 +597,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     <Text className="mono" size="xl" fw={700}>{formatCurrency(finalTotal * (1 + IVA_RATE))}</Text>
                   </Group>
                   {step === 'checkout' && selectedPayment && (
-                    <Text c="dimmed" size="sm" ta="center" pt={4}>
+                    <Text c="dimmed" size="sm" pt={4}>
                       Condição: {selectedPayment.label}
                     </Text>
                   )}
@@ -570,19 +609,22 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 </Stack>
               </Paper>
 
-              {step === 'cart' ? (
-                <Button onClick={() => setStep('checkout')} fullWidth rightSection={<CaretRightIcon size={16} />}>
-                  Ir para Checkout
+              {/* Coluna estreita (lg+) e celular: botões em largura total, principal por último.
+                  Entre sm e lg o resumo ocupa a largura toda: largura natural, alinhados à direita. */}
+              <Group gap="sm" justify="flex-end">
+                <Button onClick={() => onNavigate('catalog')} variant="default" w={{ base: '100%', sm: 'auto', lg: '100%' }}>
+                  Voltar ao Catálogo
                 </Button>
-              ) : (
-                <Button onClick={() => setStep('done')} fullWidth leftSection={<CheckIcon size={16} />}>
-                  Enviar para Aprovação
-                </Button>
-              )}
-
-              <Button onClick={() => onNavigate('catalog')} variant="default" fullWidth>
-                Voltar ao Catálogo
-              </Button>
+                {step === 'cart' ? (
+                  <Button onClick={() => setStep('checkout')} w={{ base: '100%', sm: 'auto', lg: '100%' }} rightSection={<ArrowRightIcon size={16} />}>
+                    Ir para Checkout
+                  </Button>
+                ) : (
+                  <Button onClick={() => setStep('done')} w={{ base: '100%', sm: 'auto', lg: '100%' }} leftSection={<CheckIcon size={16} />}>
+                    Enviar para Aprovação
+                  </Button>
+                )}
+              </Group>
             </Stack>
           </Grid.Col>
         </Grid>

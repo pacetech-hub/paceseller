@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, ThemeIcon, SimpleGrid,
-  ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, type BoxProps,
+  ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, Skeleton, type BoxProps, type ImageProps,
 } from "@mantine/core";
+import { useMockLoading } from "../lib/useMockLoading";
+import { CardGridSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellList, CellCard, CellField } from "./ui/CellView";
 import { useSmallerThan } from "../lib/responsive";
 import { toast } from "../lib/toast";
 import classes from "./FichaTecnicaPage.module.css";
@@ -199,6 +202,28 @@ function getStoreStock(product: Product): Record<string, number> {
 const lineOptions = ['Todos', ...Array.from(new Set(products.map(p => p.line)))];
 const categoryOptions = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
 
+// Foto remota do produto: skeleton no lugar até a imagem carregar; se falhar, mostra o fallback
+function ProductImage({ src, alt, fallback, imageProps }: {
+  src: string; alt: string; fallback?: ReactNode; imageProps?: ImageProps;
+}) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  if (status === 'error') return <>{fallback ?? null}</>;
+  return (
+    <Box pos="relative" w="100%" h="100%">
+      {status === 'loading' && <Skeleton pos="absolute" inset={0} aria-label="Carregando foto" />}
+      <Image
+        src={src}
+        alt={alt}
+        h="100%"
+        onLoad={() => setStatus('loaded')}
+        onError={() => setStatus('error')}
+        style={{ opacity: status === 'loaded' ? 1 : 0, transition: 'opacity 150ms ease' }}
+        {...imageProps}
+      />
+    </Box>
+  );
+}
+
 // título de seção da ficha (20px) — diferencia por hierarquia, não por caixa alta
 function SectionLabel({ children, mb = 8 }: { children: React.ReactNode; mb?: number }) {
   return (
@@ -234,13 +259,8 @@ function ProductCard({ product, onOpen, compact = false }: { product: Product; o
       {/* o Box mantém o quadrado mesmo se a imagem falhar e for escondida */}
       <AspectRatio ratio={1}>
         <Box bg="white" p={compact ? 8 : 12}>
-          <Image
-            src={product.image}
-            alt={product.name}
-            fit="contain"
-            h="100%"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
+          {/* se a foto falhar, o quadrado branco continua no lugar */}
+          <ProductImage src={product.image} alt={product.name} imageProps={{ fit: 'contain' }} />
         </Box>
       </AspectRatio>
       <Divider color="var(--mantine-color-default-border)" />
@@ -264,6 +284,8 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   const [line, setLine] = useState('Todos');
   const [category, setCategory] = useState('Todos');
   const [sortBy, setSortBy] = useState<'relevância' | 'nome' | 'referência'>('relevância');
+  // Simula a busca dos produtos: skeleton da grade enquanto carrega
+  const loading = useMockLoading();
 
   const filtered = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.reference.toLowerCase().includes(search.toLowerCase());
@@ -332,7 +354,9 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
         </Input.Wrapper>
       </Group>
 
-      {sorted.length > 0 ? (
+      {loading ? (
+        <CardGridSkeleton count={8} cols={{ base: 2, sm: 3, lg: 4 }} imageRatio={1} />
+      ) : sorted.length > 0 ? (
         <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
           {sorted.map(p => (
             <ProductCard key={p.id} product={p} onOpen={() => onOpen(p)} />
@@ -371,6 +395,12 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
   const sizes = Object.keys(product.grades);
   const storeStock = getStoreStock(product);
   const highlights = productHighlights[product.id];
+  // Simula a busca da ficha: cabeçalho e ações ficam visíveis, o conteúdo vira skeleton
+  const loading = useMockLoading();
+  const requestRestock = (s: string) => toast.success(
+    `Reposição do Nº ${s} solicitada`,
+    'O pedido de reposição segue para a fábrica, que confirma o envio',
+  );
 
   const openZoom = (idx: number) => {
     setActiveImage(idx);
@@ -391,7 +421,9 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
     const label = GALLERY_LABELS[idx];
     return (
       <Box key={idx} onClick={() => openZoom(idx)} className={classes.tile} {...size}>
-        <Image src={img} alt={`${product.name} — ${label}`} fit="cover" pos="absolute" inset={0} w="100%" h="100%" />
+        <Box pos="absolute" inset={0}>
+          <ProductImage src={img} alt={`${product.name} — ${label}`} imageProps={{ fit: 'cover', w: '100%' }} />
+        </Box>
         <Box className={classes.overlay}>
           <MagnifyingGlassPlusIcon size={20} className={classes.zoomIcon} />
         </Box>
@@ -457,6 +489,25 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </Button>
       </Group>
 
+      {loading ? (
+        <>
+          <AspectRatio ratio={4 / 3}>
+            <Skeleton aria-label="Carregando fotos" />
+          </AspectRatio>
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }} aria-busy="true" aria-label="Carregando informações">
+            <Stack gap="md">
+              <Skeleton height={14} width="20%" />
+              <Skeleton height={28} width="55%" />
+              <Skeleton height={20} width="25%" />
+              <Skeleton height={14} width="100%" />
+              <Skeleton height={14} width="90%" />
+              <Skeleton height={14} width="70%" />
+            </Stack>
+          </Paper>
+          <TableSkeleton rows={sizes.length} cols={profile === 'lojista' ? 3 : 2} />
+        </>
+      ) : (
+      <>
       {/* Bento grid — 6 imagens do produto */}
       <AspectRatio ratio={4 / 3}>
         <Group gap={BENTO_GAP} wrap="nowrap" align="stretch" className={classes.bento}>
@@ -520,13 +571,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         <SectionLabel>
           {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
         </SectionLabel>
-        <Table.ScrollContainer minWidth={320}>
+        {/* Até 3 colunas: tabela a partir de sm; no celular vira lista de cartões (sem rolagem lateral) */}
+        <Box visibleFrom="sm">
           <Table verticalSpacing={10} horizontalSpacing="md">
             <Table.Thead>
               <Table.Tr c="dimmed" fz="sm">
                 <Table.Th fw={400} pl={0}>Tamanho</Table.Th>
-                <Table.Th fw={400} ta="center">Estoque fábrica</Table.Th>
-                {profile === 'lojista' && <Table.Th fw={400} ta="center">Estoque loja</Table.Th>}
+                <Table.Th fw={400}>Estoque fábrica</Table.Th>
+                {profile === 'lojista' && <Table.Th fw={400}>Estoque loja</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -537,19 +589,16 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                 return (
                   <Table.Tr key={s}>
                     <Table.Td pl={0} fw={600} className={classes.nowrap}>Nº {s}</Table.Td>
-                    <Table.Td ta="center">
+                    <Table.Td>
                       <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
                     </Table.Td>
                     {profile === 'lojista' && (
                       <Table.Td>
-                        <Group gap="sm" justify="flex-end" wrap="nowrap">
+                        <Group gap="sm" wrap="nowrap">
                           <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
                           {storeLow && (
                             <Button
-                              onClick={() => toast.success(
-                                `Reposição do Nº ${s} solicitada`,
-                                'O pedido de reposição segue para a fábrica, que confirma o envio',
-                              )}
+                              onClick={() => requestRestock(s)}
                               size="sm"
                               variant="light"
                               leftSection={<ArrowsClockwiseIcon size={16} />}
@@ -566,7 +615,38 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
               })}
             </Table.Tbody>
           </Table>
-        </Table.ScrollContainer>
+        </Box>
+        <CellList>
+          {sizes.map(s => {
+            const factoryStock = product.grades[s] ?? 0;
+            const storeQty = storeStock[s] ?? 0;
+            const storeLow = profile === 'lojista' && storeQty < 3;
+            return (
+              <CellCard
+                key={s}
+                title={`Nº ${s}`}
+                actions={storeLow ? (
+                  <Button
+                    onClick={() => requestRestock(s)}
+                    variant="light"
+                    leftSection={<ArrowsClockwiseIcon size={16} />}
+                  >
+                    Solicitar Reposição
+                  </Button>
+                ) : undefined}
+              >
+                <CellField label="Estoque fábrica">
+                  <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
+                </CellField>
+                {profile === 'lojista' && (
+                  <CellField label="Estoque loja">
+                    <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
+                  </CellField>
+                )}
+              </CellCard>
+            );
+          })}
+        </CellList>
       </Paper>
 
       {/* Produtos relacionados */}
@@ -579,6 +659,8 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             ))}
           </SimpleGrid>
         </Box>
+      )}
+      </>
       )}
 
       {/* Zoom */}
@@ -598,7 +680,14 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             ))}
           </Tabs.List>
         </Tabs>
-        <Image src={gallery[activeImage]} alt={`${product.name} — ${GALLERY_LABELS[activeImage]}`} fit="contain" />
+        <AspectRatio ratio={1}>
+          <ProductImage
+            key={gallery[activeImage]}
+            src={gallery[activeImage]}
+            alt={`${product.name} — ${GALLERY_LABELS[activeImage]}`}
+            imageProps={{ fit: 'contain' }}
+          />
+        </AspectRatio>
       </Modal>
     </Stack>
   );
@@ -608,7 +697,8 @@ export function FichaTecnicaPage({ profile }: { profile: Profile }) {
   const [selected, setSelected] = useState<Product | null>(null);
 
   if (selected) {
-    return <ProductSpecSheet product={selected} profile={profile} onBack={() => setSelected(null)} onOpenRelated={setSelected} />;
+    // key: ao abrir outro produto (relacionados) a ficha recomeça, com skeleton e galeria na 1ª foto
+    return <ProductSpecSheet key={selected.id} product={selected} profile={profile} onBack={() => setSelected(null)} onOpenRelated={setSelected} />;
   }
 
   return <ProductGrid onOpen={setSelected} />;

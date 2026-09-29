@@ -15,7 +15,11 @@ import type { StockItem } from "../data/stockData";
 import {
   StockKpis, StockToolbar, StockTableHeader, StockProductCell, StockStatusBadge, StockEmptyRow,
   EditActions, EditButton, filterStock, type StockFilter,
+  StockCellCard, StockEmptyCard, StockTableSkeleton,
 } from "./StockTable";
+import { useMockLoading } from "../lib/useMockLoading";
+import { KpiSkeleton } from "./ui/Skeletons";
+import { CellList } from "./ui/CellView";
 import interactive from "./interactive.module.css";
 import { toast } from "../lib/toast";
 
@@ -50,6 +54,7 @@ export function StockPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ stock: number; min: number }>({ stock: 0, min: 0 });
   const [integrationConnected, setIntegrationConnected] = useState(false);
+  const loading = useMockLoading();
 
   const filtered = useMemo(() => filterStock(items, query, filter), [items, query, filter]);
 
@@ -109,7 +114,7 @@ export function StockPage() {
           </Group>
         </Paper>
 
-        <StockKpis items={items} />
+        {loading ? <KpiSkeleton count={4} cols={{ base: 2, lg: 4 }} /> : <StockKpis items={items} />}
 
         {/* Integration panel */}
         {mode === 'integration' && (
@@ -170,7 +175,10 @@ export function StockPage() {
           showBulkActions={mode === 'manual'}
         />
 
-        <Card withBorder padding={0}>
+        {loading ? <StockTableSkeleton cols={HEADERS.length} /> : (
+        <>
+        {/* Tabela a partir de sm; no celular, cartões com as mesmas ações (sem rolagem lateral) */}
+        <Card withBorder padding={0} visibleFrom="sm">
           <Table.ScrollContainer minWidth={900}>
             <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
               <StockTableHeader labels={HEADERS} />
@@ -215,6 +223,34 @@ export function StockPage() {
             </Table>
           </Table.ScrollContainer>
         </Card>
+
+        <CellList>
+          {filtered.map(it => {
+            const isEditing = editing === it.sku;
+            return (
+              <StockCellCard
+                key={it.sku}
+                item={it}
+                stockSlot={isEditing ? (
+                  <NumberInput mt={4} aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
+                ) : undefined}
+                minSlot={isEditing ? (
+                  <NumberInput mt={4} aria-label="Limiar mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
+                ) : undefined}
+                actions={mode === 'manual' ? (
+                  isEditing
+                    ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
+                    : <EditButton onClick={() => startEdit(it)} />
+                ) : (
+                  <Text c="dimmed" size="sm">Atualizado via ERP</Text>
+                )}
+              />
+            );
+          })}
+          {filtered.length === 0 && <StockEmptyCard onClear={clearFilters} />}
+        </CellList>
+        </>
+        )}
       </Stack>
     </Container>
   );

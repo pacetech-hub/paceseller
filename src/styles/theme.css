@@ -74,3 +74,13 @@ body {
 .mantine-Anchor-root:hover {
   text-decoration-thickness: 2px;
 }
+
+/* Campos: dado digitado forte (cor do texto), placeholder claro — níveis de peso óptico distintos */
+.mantine-Input-input {
+  color: var(--mantine-color-text);
+}
+
+.mantine-Input-input::placeholder {
+  color: var(--mantine-color-gray-5);
+  opacity: 1;
+}

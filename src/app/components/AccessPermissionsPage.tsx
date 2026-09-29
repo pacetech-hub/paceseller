@@ -16,6 +16,9 @@ import { linkedUsers as initialLinkedUsers, type LinkedUser } from "../data/link
 import { clients, formatDate } from "../data/mockData";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
 import { toast } from "../lib/toast";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellList, CellCard, CellField } from "./ui/CellView";
 
 type Profile = 'rep' | 'lojista';
 
@@ -70,6 +73,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteErrors, setInviteErrors] = useState<{ name?: string; email?: string }>({});
+  const loading = useMockLoading();
 
   const availableProfiles = Object.keys(permissionsState[scope.visao]);
   const subProfile = availableProfiles.find(p => p !== scope.ownerProfile) ?? availableProfiles[availableProfiles.length - 1];
@@ -119,6 +123,35 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
     setInviteEmail('');
     toast.success(`Convite enviado para ${newUser.email}`, `${newUser.name} já aparece na lista de usuários vinculados com o perfil ${subProfile}`);
   };
+
+  const lastLogin = (u: LinkedUser) => (u.lastLogin === '—' ? '—' : formatDate(u.lastLogin));
+
+  const removeButton = (u: LinkedUser) => (
+    <Button
+      onClick={() => removeUser(u)}
+      variant="subtle"
+      color="red"
+      size="sm"
+      leftSection={<TrashIcon size={16} />}
+      aria-label={`Remover vínculo de ${u.name}`}
+    >
+      Remover
+    </Button>
+  );
+
+  // Estado vazio: explica o motivo e oferece a ação (mesmo conteúdo na tabela e nos cartões)
+  const usersEmpty = (
+    <Stack gap="sm" align="center" py="lg">
+      <Text c="dimmed" ta="center">
+        Nenhum usuário vinculado à sua conta ainda. Convide alguém para que ele possa acessar com o perfil {subProfile}.
+      </Text>
+      {!showInvite && (
+        <Button onClick={() => setShowInvite(true)} variant="default" color="neutral" leftSection={<UserPlusIcon size={16} />}>
+          Convidar Usuário
+        </Button>
+      )}
+    </Stack>
+  );
 
   const Icon = scope.icon;
   const visaoInfo = visoes.find(v => v.id === scope.visao)!;
@@ -187,7 +220,16 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
           </>
         )}
 
-        <Table.ScrollContainer minWidth={640}>
+        {loading ? (
+          // Skeleton só da lista; título e botão de convite continuam visíveis
+          <Box p={{ base: 'md', sm: 'lg' }}>
+            <Box visibleFrom="sm"><TableSkeleton rows={3} cols={5} /></Box>
+            <Box hiddenFrom="sm"><ListSkeleton rows={3} /></Box>
+          </Box>
+        ) : (
+        <>
+        {/* 5 colunas: tabela a partir de sm, cartões no celular */}
+        <Box visibleFrom="sm">
         <Table verticalSpacing="sm" fz="md">
           <Table.Thead>
             <Table.Tr>
@@ -224,44 +266,49 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   <Badge color={u.status === 'ativo' ? 'teal' : 'gray'} variant="light">{u.status}</Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text c="dimmed" size="sm" className="mono">
-                    {u.lastLogin === '—' ? '—' : formatDate(u.lastLogin)}
-                  </Text>
+                  <Text c="dimmed" size="sm" className="mono">{lastLogin(u)}</Text>
                 </Table.Td>
-                <Table.Td>
-                  <Button
-                    onClick={() => removeUser(u)}
-                    variant="subtle"
-                    color="red"
-                    size="sm"
-                    leftSection={<TrashIcon size={16} />}
-                    aria-label={`Remover vínculo de ${u.name}`}
-                  >
-                    Remover
-                  </Button>
-                </Table.Td>
+                <Table.Td>{removeButton(u)}</Table.Td>
               </Table.Tr>
             ))}
             {users.length === 0 && (
               <Table.Tr>
-                <Table.Td colSpan={5}>
-                  {/* Estado vazio: explica o motivo e oferece a ação */}
-                  <Stack gap="sm" align="center" py="lg">
-                    <Text c="dimmed" ta="center">
-                      Nenhum usuário vinculado à sua conta ainda. Convide alguém para que ele possa acessar com o perfil {subProfile}.
-                    </Text>
-                    {!showInvite && (
-                      <Button onClick={() => setShowInvite(true)} variant="default" color="neutral" leftSection={<UserPlusIcon size={16} />}>
-                        Convidar Usuário
-                      </Button>
-                    )}
-                  </Stack>
-                </Table.Td>
+                <Table.Td colSpan={5}>{usersEmpty}</Table.Td>
               </Table.Tr>
             )}
           </Table.Tbody>
         </Table>
-        </Table.ScrollContainer>
+        </Box>
+        <Box hiddenFrom="sm" p="md">
+          <CellList>
+            {users.map(u => (
+              <CellCard
+                key={u.id}
+                title={u.name}
+                aside={<Badge color={u.status === 'ativo' ? 'teal' : 'gray'} variant="light">{u.status}</Badge>}
+                actions={removeButton(u)}
+              >
+                <CellField label="E-mail">{u.email}</CellField>
+                <CellField label="Perfil de acesso">
+                  <SegmentedControl
+                    value={u.profile}
+                    onChange={v => changeUserProfile(u.id, v)}
+                    data={availableProfiles}
+                    color="neutral"
+                    fullWidth
+                    aria-label={`Perfil de acesso de ${u.name}`}
+                  />
+                </CellField>
+                <CellField label="Último acesso">
+                  <Text span className="mono" inherit>{lastLogin(u)}</Text>
+                </CellField>
+              </CellCard>
+            ))}
+            {users.length === 0 && usersEmpty}
+          </CellList>
+        </Box>
+        </>
+        )}
       </Card>
 
       {/* O que cada perfil pode acessar */}

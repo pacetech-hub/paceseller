@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
+  Stack, Group, Box, Paper, Card, Text, Title, Button, TextInput, Select, Badge, ThemeIcon, SimpleGrid,
   Tabs, Table, Avatar, Collapse, Alert, Divider, Radio,
 } from "@mantine/core";
 import {
@@ -31,6 +31,9 @@ import { visoes, defaultPermissions, profileDescriptions, type VisaoKey, type Pe
 import { linkedUsers } from "../data/linkedUsers";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
 import { toast } from "../lib/toast";
+import { useMockLoading } from "../lib/useMockLoading";
+import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { CellList, CellCard, CellField } from "./ui/CellView";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 import classes from "./interactive.module.css";
@@ -46,6 +49,33 @@ const tabs = [
 ];
 
 const initials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2);
+
+// Enquanto os dados "carregam", mostra o skeleton no lugar só da região de dados
+// (título e barra de ferramentas continuam visíveis). Cada aba monta de novo ao ser aberta.
+function DataGate({ skeleton, children }: { skeleton: React.ReactNode; children: React.ReactNode }) {
+  const loading = useMockLoading();
+  return <>{loading ? skeleton : children}</>;
+}
+
+// Skeleton de tabela no desktop e de lista de cartões no celular (mesmo formato do conteúdo)
+function ResponsiveTableSkeleton({ rows = 5, cols }: { rows?: number; cols: number }) {
+  return (
+    <>
+      <Box visibleFrom="sm"><TableSkeleton rows={rows} cols={cols} /></Box>
+      <Box hiddenFrom="sm"><ListSkeleton rows={rows} /></Box>
+    </>
+  );
+}
+
+// Valor somente leitura: rótulo acima do valor, alinhado à esquerda
+function InfoField({ label, value, mono, highlight }: { label: string; value: string; mono?: boolean; highlight?: boolean }) {
+  return (
+    <Box>
+      <Text c="dimmed" size="sm">{label}</Text>
+      <Text className={mono ? 'mono' : undefined} fw={highlight ? 700 : 600}>{value}</Text>
+    </Box>
+  );
+}
 
 function ErpSyncNotice({ text }: { text: string }) {
   return (
@@ -91,26 +121,37 @@ function UserCell({ name }: { name: string }) {
   );
 }
 
-// linha de configuração somente leitura (rótulo + descrição à esquerda, valor à direita)
+// linha de configuração somente leitura: rótulo e descrição acima do valor, tudo alinhado à esquerda
 function SettingRow({ label, desc, children }: { label: string; desc: string; children: React.ReactNode }) {
   return (
     <Paper withBorder p="md" bg="var(--mantine-color-default-hover)">
-      {/* Valor abaixo do texto no celular; à direita a partir de xs */}
-      <Flex
-        direction={{ base: 'column', xs: 'row' }}
-        justify="space-between"
-        align={{ base: 'flex-start', xs: 'center' }}
-        gap={{ base: 'xs', xs: 'md' }}
-      >
+      <Stack gap="sm" align="flex-start">
         <Box>
           <Text fw={600}>{label}</Text>
           <Text c="dimmed" size="sm">{desc}</Text>
         </Box>
         {children}
-      </Flex>
+      </Stack>
     </Paper>
   );
 }
+
+// Ações da linha de usuário; size="sm" só por estar dentro de linha de tabela/cartão
+function UserActions({ user, onDelete }: { user: AdminUser; onDelete: (u: AdminUser) => void }) {
+  return (
+    <Group gap="sm" wrap="nowrap">
+      <Button variant="subtle" color="gray" size="sm" leftSection={<PencilSimpleLineIcon size={16} />} aria-label={`Editar usuário ${user.name}`}>
+        Editar
+      </Button>
+      <Button onClick={() => onDelete(user)} variant="subtle" color="red" size="sm" leftSection={<TrashIcon size={16} />} aria-label={`Excluir usuário ${user.name}`}>
+        Excluir
+      </Button>
+    </Group>
+  );
+}
+
+const linkLabel = (user: typeof linkedUsers[number]) =>
+  `${user.ownerType === 'representante' ? 'Rep · ' : 'Lojista · '}${user.ownerName}`;
 
 const mockUsers = [
   { id: 'U001', name: 'Marcos Andrade', email: 'marcos@tesla.com.br', role: 'Representante', region: 'Sudeste', status: 'ativo', lastLogin: '2026-06-11' },
@@ -224,6 +265,22 @@ export function AdminPage() {
     u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Estado vazio: explica o motivo e oferece a ação (mesmo conteúdo na tabela e nos cartões)
+  const usersEmpty = (
+    <Stack gap="sm" align="center" py="lg">
+      <Text c="dimmed" ta="center">
+        {search
+          ? `Nenhum usuário encontrado para "${search}". Confira a grafia ou limpe a busca.`
+          : 'Nenhum usuário cadastrado. Adicione o primeiro para liberar o acesso.'}
+      </Text>
+      {search ? (
+        <Button onClick={() => setSearch('')} variant="default">Limpar Busca</Button>
+      ) : (
+        <Button onClick={() => setShowAddUser(true)} variant="default" leftSection={<PlusIcon size={16} />}>Adicionar Usuário</Button>
+      )}
+    </Stack>
+  );
+
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Tab bar */}
@@ -271,6 +328,7 @@ export function AdminPage() {
         <Stack gap="md">
           <ErpSyncNotice text="Campanhas comerciais são somente leitura neste momento — os dados vêm diretamente das regras cadastradas no ERP da Tesla." />
           <Text c="dimmed">Políticas de preço ativas</Text>
+          <DataGate skeleton={<ListSkeleton rows={4} withAvatar={false} />}>
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             {pricePolicies.map(policy => (
               <Paper
@@ -286,26 +344,19 @@ export function AdminPage() {
                   <Title order={3}>{policy.name}</Title>
                   <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
                 </Group>
-                <SimpleGrid cols={3} spacing="sm" mb="sm">
-                  {[
-                    { label: 'Desconto', value: policy.discount, highlight: true },
-                    { label: 'Pedido mín.', value: policy.minOrder, mono: true },
-                    { label: 'Pagamento', value: policy.payment },
-                  ].map(detail => (
-                    <Box key={detail.label}>
-                      <Text c="dimmed" size="sm">{detail.label}</Text>
-                      <Text className={detail.mono ? 'mono' : undefined} fw={detail.highlight ? 700 : 600}>
-                        {detail.value}
-                      </Text>
-                    </Box>
-                  ))}
-                </SimpleGrid>
+                {/* Resumo em coluna única: rótulo acima do valor, leitura pela borda esquerda */}
+                <Stack gap="md" mb="md">
+                  <InfoField label="Desconto" value={policy.discount} highlight />
+                  <InfoField label="Pedido mínimo" value={policy.minOrder} mono />
+                  <InfoField label="Pagamento" value={policy.payment} />
+                </Stack>
                 <Text c="dimmed" size="sm">
                   <Text span fw={600} c="var(--mantine-color-text)" inherit>{policy.clients}</Text> clientes nesta política
                 </Text>
               </Paper>
             ))}
           </SimpleGrid>
+          </DataGate>
         </Stack>
       )}
 
@@ -330,25 +381,21 @@ export function AdminPage() {
 
             <ErpSyncNotice text="Esta política é somente leitura — a regra ativa vem do ERP da Tesla." />
 
+            <DataGate skeleton={<Stack gap="lg"><ListSkeleton rows={4} withAvatar={false} /><ResponsiveTableSkeleton rows={4} cols={3} /></Stack>}>
+            <Stack gap="lg">
             {/* Identidade */}
             <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
               <Box mb="md">
                 <Title order={1} mb={4}>{policy.name}</Title>
                 <Text c="dimmed" size="sm">Configuração da política comercial</Text>
               </Box>
-              <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-                {[
-                  { label: 'Desconto', value: policy.discount, highlight: true },
-                  { label: 'Pedido mínimo', value: policy.minOrder, mono: true },
-                  { label: 'Pagamento', value: policy.payment },
-                  { label: 'Clientes cobertos', value: String(policy.clients) },
-                ].map(d => (
-                  <Paper key={d.label} p="sm" bg="var(--mantine-color-default-hover)">
-                    <Text c="dimmed" size="sm" mb={4}>{d.label}</Text>
-                    <Text className={d.mono ? 'mono' : undefined} fw={d.highlight ? 700 : 600}>{d.value}</Text>
-                  </Paper>
-                ))}
-              </SimpleGrid>
+              {/* Dados da política em coluna única, rótulo acima do valor */}
+              <Stack gap="md">
+                <InfoField label="Desconto" value={policy.discount} highlight />
+                <InfoField label="Pedido mínimo" value={policy.minOrder} mono />
+                <InfoField label="Pagamento" value={policy.payment} />
+                <InfoField label="Clientes cobertos" value={String(policy.clients)} />
+              </Stack>
             </Paper>
 
             {/* Aviso precedência */}
@@ -395,7 +442,8 @@ export function AdminPage() {
                 </Text>
               </Box>
               <Divider color="var(--mantine-color-default-border)" />
-              <Table.ScrollContainer minWidth={520}>
+              {/* Até 6 colunas: tabela a partir de sm, cartões no celular */}
+              <Box visibleFrom="sm">
               <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md" fz="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
                   <Table.Tr>
@@ -414,8 +462,20 @@ export function AdminPage() {
                   ))}
                 </Table.Tbody>
               </Table>
-              </Table.ScrollContainer>
+              </Box>
+              <Box hiddenFrom="sm" p="md">
+                <CellList>
+                  {covered.map(c => (
+                    <CellCard key={c.name} title={c.name}>
+                      <CellField label="Cidade/UF">{c.city}</CellField>
+                      <CellField label="Representante">{c.rep}</CellField>
+                    </CellCard>
+                  ))}
+                </CellList>
+              </Box>
             </Card>
+            </Stack>
+            </DataGate>
           </Stack>
         );
       })()}
@@ -426,6 +486,7 @@ export function AdminPage() {
           <ErpSyncNotice text="Políticas são somente leitura neste momento — os valores exibidos refletem as regras vigentes no ERP da Tesla." />
           <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} mb="md">Configurações de aprovação</Title>
+            <DataGate skeleton={<ListSkeleton rows={3} withAvatar={false} />}>
             <Stack gap="md">
               {[
                 { label: 'Aprovação automática até', desc: 'Pedidos abaixo deste valor são aprovados automaticamente', value: 'R$ 5.000' },
@@ -433,20 +494,23 @@ export function AdminPage() {
                 { label: 'Desconto máximo por rep', desc: 'Desconto máximo que um representante pode conceder', value: '15%' },
               ].map(setting => (
                 <SettingRow key={setting.label} label={setting.label} desc={setting.desc}>
-                  <Text className="mono" fw={700} flex="none">{setting.value}</Text>
+                  <Text className="mono" fw={700}>{setting.value}</Text>
                 </SettingRow>
               ))}
             </Stack>
+            </DataGate>
           </Paper>
 
           <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} mb={4}>Inadimplência</Title>
             <Text c="dimmed" size="sm" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
+            <DataGate skeleton={<ListSkeleton rows={1} withAvatar={false} />}>
             <SettingRow label="Clientes inadimplentes" desc="Condição de pagamento aplicada automaticamente a clientes com débitos em aberto">
-              <Paper withBorder px="sm" py={8} flex="none">
+              <Paper withBorder px="sm" py={8}>
                 <Text fw={600}>Apenas pagamento à vista</Text>
               </Paper>
             </SettingRow>
+            </DataGate>
           </Paper>
         </Stack>
       )}
@@ -526,6 +590,9 @@ export function AdminPage() {
                 </Group>
               </Paper>
             </Collapse>
+            <DataGate skeleton={<ResponsiveTableSkeleton cols={6} />}>
+            {/* Tabela a partir de sm (Ações vão para o rodapé do cartão no celular) */}
+            <Box visibleFrom="sm">
             <Table.ScrollContainer minWidth={800}>
               <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md" fz="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
@@ -549,40 +616,38 @@ export function AdminPage() {
                       </Table.Td>
                       <Table.Td c="dimmed" className="mono" fz="sm">{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Table.Td>
                       <Table.Td>
-                        {/* Ícone + texto; size="sm" só por estar dentro de linha de tabela */}
-                        <Group gap="sm" wrap="nowrap">
-                          <Button variant="subtle" color="gray" size="sm" leftSection={<PencilSimpleLineIcon size={16} />} aria-label={`Editar usuário ${user.name}`}>
-                            Editar
-                          </Button>
-                          <Button onClick={() => deleteUser(user)} variant="subtle" color="red" size="sm" leftSection={<TrashIcon size={16} />} aria-label={`Excluir usuário ${user.name}`}>
-                            Excluir
-                          </Button>
-                        </Group>
+                        <UserActions user={user} onDelete={deleteUser} />
                       </Table.Td>
                     </Table.Tr>
                   ))}
                   {filteredUsers.length === 0 && (
                     <Table.Tr>
-                      <Table.Td colSpan={7}>
-                        {/* Estado vazio: explica o motivo e oferece a ação */}
-                        <Stack gap="sm" align="center" py="lg">
-                          <Text c="dimmed" ta="center">
-                            {search
-                              ? `Nenhum usuário encontrado para "${search}". Confira a grafia ou limpe a busca.`
-                              : 'Nenhum usuário cadastrado. Adicione o primeiro para liberar o acesso.'}
-                          </Text>
-                          {search ? (
-                            <Button onClick={() => setSearch('')} variant="default">Limpar Busca</Button>
-                          ) : (
-                            <Button onClick={() => setShowAddUser(true)} variant="default" leftSection={<PlusIcon size={16} />}>Adicionar Usuário</Button>
-                          )}
-                        </Stack>
-                      </Table.Td>
+                      <Table.Td colSpan={7}>{usersEmpty}</Table.Td>
                     </Table.Tr>
                   )}
                 </Table.Tbody>
               </Table>
             </Table.ScrollContainer>
+            </Box>
+            <CellList>
+              {filteredUsers.map(user => (
+                <CellCard
+                  key={user.id}
+                  title={user.name}
+                  aside={<Badge variant="light" color="teal">{user.status}</Badge>}
+                  actions={<UserActions user={user} onDelete={deleteUser} />}
+                >
+                  <CellField label="E-mail">{user.email}</CellField>
+                  <CellField label="Perfil"><Badge variant="light" color="neutral">{user.role}</Badge></CellField>
+                  <CellField label="Região">{user.region}</CellField>
+                  <CellField label="Último acesso">
+                    <Text span className="mono" inherit>{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Text>
+                  </CellField>
+                </CellCard>
+              ))}
+              {filteredUsers.length === 0 && <Paper withBorder p="md">{usersEmpty}</Paper>}
+            </CellList>
+            </DataGate>
           </Paper>
 
           {/* Usuários vinculados a representantes e lojistas */}
@@ -591,6 +656,9 @@ export function AdminPage() {
             <Text c="dimmed" size="sm" mt={4} mb="md">
               Contas registradas sob um representante ou lojista (ex.: prepostos e compradores). Cada um gerencia o perfil de acesso da própria equipe.
             </Text>
+            <DataGate skeleton={<ResponsiveTableSkeleton cols={6} />}>
+            {/* 6 colunas: tabela a partir de sm, cartões no celular */}
+            <Box visibleFrom="sm">
             <Table.ScrollContainer minWidth={800}>
               <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md" fz="md">
                 <Table.Thead bg="var(--mantine-color-default-hover)">
@@ -610,9 +678,7 @@ export function AdminPage() {
                       </Table.Td>
                       <Table.Td>
                         {/* Vínculo não é status: neutro */}
-                        <Badge variant="light" color="neutral">
-                          {user.ownerType === 'representante' ? 'Rep · ' : 'Lojista · '}{user.ownerName}
-                        </Badge>
+                        <Badge variant="light" color="neutral">{linkLabel(user)}</Badge>
                       </Table.Td>
                       <Table.Td>
                         <Badge variant="light" color={user.status === 'ativo' ? 'teal' : 'gray'}>{user.status}</Badge>
@@ -623,6 +689,24 @@ export function AdminPage() {
                 </Table.Tbody>
               </Table>
             </Table.ScrollContainer>
+            </Box>
+            <CellList>
+              {linkedUsers.map(user => (
+                <CellCard
+                  key={user.id}
+                  title={user.name}
+                  aside={<Badge variant="light" color={user.status === 'ativo' ? 'teal' : 'gray'}>{user.status}</Badge>}
+                >
+                  <CellField label="E-mail">{user.email}</CellField>
+                  <CellField label="Perfil"><Badge variant="light" color="neutral">{user.profile}</Badge></CellField>
+                  <CellField label="Vinculado a">{linkLabel(user)}</CellField>
+                  <CellField label="Último acesso">
+                    <Text span className="mono" inherit>{user.lastLogin === '—' ? '—' : formatDate(user.lastLogin)}</Text>
+                  </CellField>
+                </CellCard>
+              ))}
+            </CellList>
+            </DataGate>
           </Paper>
 
           <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
@@ -644,13 +728,15 @@ export function AdminPage() {
                 />
               ))}
             </Stack>
-            <Button
-              mt="lg"
-              fullWidth
-              onClick={() => toast.success('Dados da empresa salvos', 'Eles passam a aparecer nos próximos pedidos e boletos emitidos')}
-            >
-              Salvar Dados da Empresa
-            </Button>
+            {/* Painel largo: botão na largura natural, à direita (largura total só no celular) */}
+            <Group justify="flex-end" mt="lg">
+              <Button
+                w={{ base: '100%', sm: 'auto' }}
+                onClick={() => toast.success('Dados da empresa salvos', 'Eles passam a aparecer nos próximos pedidos e boletos emitidos')}
+              >
+                Salvar Dados da Empresa
+              </Button>
+            </Group>
           </Paper>
         </Stack>
       )}
