@@ -8,7 +8,7 @@ export interface StockItem {
   image: string;
   price: number;
   stock: number;
-  min: number; // limiar de ruptura
+  min: number; // estoque mínimo (abaixo dele o status vira "Estoque baixo")
   updatedAt: string;
 }
 
@@ -16,9 +16,9 @@ export type StockStatusKey = 'ruptura' | 'baixo' | 'ok';
 
 /** `color` é um nome de cor do tema Mantine, usado nos Badges de status. */
 export function statusOf(item: Pick<StockItem, 'stock' | 'min'>): { key: StockStatusKey; label: string; color: string } {
-  if (item.stock <= 0) return { key: 'ruptura', label: 'Ruptura', color: 'red' };
-  if (item.stock < item.min) return { key: 'baixo', label: 'Baixo', color: 'yellow' };
-  return { key: 'ok', label: 'OK', color: 'teal' };
+  if (item.stock <= 0) return { key: 'ruptura', label: 'Sem estoque', color: 'red' };
+  if (item.stock < item.min) return { key: 'baixo', label: 'Estoque baixo', color: 'yellow' };
+  return { key: 'ok', label: 'Estoque normal', color: 'teal' };
 }
 
 /** RNG determinístico por semente, para gerar estoque estável por cliente sem precisar cadastrar tudo à mão. */

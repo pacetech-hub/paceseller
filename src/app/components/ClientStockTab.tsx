@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Select, Paper, Group, Text, ThemeIcon, Box, Stack, type ComboboxItem, type OptionsFilter } from "@mantine/core";
+import { Select, Paper, Group, Text, ThemeIcon, Box, Stack, type ComboboxItem, type ComboboxParsedItem, type OptionsFilter } from "@mantine/core";
 import { MagnifyingGlassIcon, StorefrontIcon, MapPinIcon } from "@phosphor-icons/react";
 import { clients as allClients, type Client } from "../data/mockData";
 import { generateClientStock, type StockItem } from "../data/stockData";
@@ -13,12 +13,20 @@ interface ClientStockTabProps {
   scopeClients?: Client[];
 }
 
-// Busca tanto pelo nome (label) quanto pelo código do cliente (value).
+// Busca tanto pelo nome (label) quanto pelo código do cliente (value); preserva os grupos.
 const filterByNameOrId: OptionsFilter = ({ options, search }) => {
   const t = search.trim().toLowerCase();
   if (!t) return options;
-  return (options as ComboboxItem[]).filter(o => o.label.toLowerCase().includes(t) || o.value.toLowerCase().includes(t));
+  const match = (o: ComboboxItem) => o.label.toLowerCase().includes(t) || o.value.toLowerCase().includes(t);
+  return options.flatMap<ComboboxParsedItem>(o =>
+    'group' in o
+      ? (o.items.some(match) ? [{ ...o, items: o.items.filter(match) }] : [])
+      : (match(o) ? [o] : [])
+  );
 };
+
+// Quantos clientes aparecem em "Mais usados" (os que mais compraram)
+const POPULAR_COUNT = 3;
 
 export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTabProps) {
   const pool = scopeClients ?? allClients;
@@ -27,7 +35,20 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
   const searchRef = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => pool.find(c => c.id === selectedId) ?? null, [pool, selectedId]);
-  const options = useMemo(() => pool.map(c => ({ value: c.id, label: c.name })), [pool]);
+  // "Mais usados": clientes com maior volume de compras (derivado do mock totalPurchased)
+  const popularClients = useMemo(
+    () => [...pool].sort((a, b) => b.totalPurchased - a.totalPurchased).slice(0, POPULAR_COUNT),
+    [pool]
+  );
+  const options = useMemo(() => {
+    const popularIds = new Set(popularClients.map(c => c.id));
+    const toOption = (c: Client) => ({ value: c.id, label: c.name });
+    // cada cliente aparece uma única vez (Mantine rejeita valores duplicados)
+    return [
+      { group: 'Mais usados', items: popularClients.map(toOption) },
+      { group: 'Todos', items: pool.filter(c => !popularIds.has(c.id)).map(toOption) },
+    ];
+  }, [pool, popularClients]);
 
   useEffect(() => {
     if (selected) setItems(generateClientStock(selected));
@@ -67,7 +88,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
           title="Nenhum cliente selecionado"
           description="Busque um cliente acima pelo nome ou código para ver o estoque reportado por ele."
           action={{ label: 'Buscar Cliente', onClick: () => searchRef.current?.focus(), forward: false }}
-          suggestions={pool.slice(0, 3).map(c => ({
+          suggestions={popularClients.map(c => ({
             label: `Ver estoque de ${c.name}`,
             description: `${c.city} · ${c.state}`,
             icon: StorefrontIcon,

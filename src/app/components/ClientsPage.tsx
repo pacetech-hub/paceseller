@@ -9,7 +9,6 @@ import {
   MapPinIcon,
   UsersIcon,
   FunnelIcon,
-  ArrowsDownUpIcon,
   CaretRightIcon,
 } from "@phosphor-icons/react";
 import { clients, Client } from "../data/mockData";
@@ -34,7 +33,11 @@ const statusColor: Record<string, string> = {
 const formatOrderDate = (dateStr: string) =>
   new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-const REGIONS = ['Centro-Oeste', 'Norte', 'Nordeste', 'Sudeste', 'Sul'];
+// Regiões com mais clientes na carteira aparecem primeiro (derivado do mock)
+const REGIONS = ['Centro-Oeste', 'Norte', 'Nordeste', 'Sudeste', 'Sul']
+  .map((r, i) => ({ r, i, count: clients.filter(c => c.region === r).length }))
+  .sort((a, b) => b.count - a.count || a.i - b.i)
+  .map(x => x.r);
 
 type StatusFilterValue = 'ativo' | 'inativo' | 'inadimplente';
 const STATUS_OPTIONS: Array<{ value: StatusFilterValue; label: string }> = [
@@ -46,10 +49,10 @@ const STATUS_OPTIONS: Array<{ value: StatusFilterValue; label: string }> = [
 type SortOrder = 'az' | 'za' | 'ultimo-pedido' | 'ultimo-pedido-desc';
 const DEFAULT_SORT: SortOrder = 'ultimo-pedido';
 const SORT_OPTIONS: Array<{ value: SortOrder; label: string }> = [
-  { value: 'az', label: 'A a Z' },
-  { value: 'za', label: 'Z a A' },
-  { value: 'ultimo-pedido', label: 'Pedido mais antigo para mais recente' },
-  { value: 'ultimo-pedido-desc', label: 'Pedido mais recente para mais antigo' },
+  { value: 'az', label: 'Nome de A a Z' },
+  { value: 'za', label: 'Nome de Z a A' },
+  { value: 'ultimo-pedido', label: 'Pedidos mais antigos primeiro' },
+  { value: 'ultimo-pedido-desc', label: 'Pedidos mais recentes primeiro' },
 ];
 
 export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: ClientsPageProps) {
@@ -183,10 +186,8 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               <Button
                 variant={sortActive ? 'light' : 'default'}
                 color="neutral"
-                leftSection={<ArrowsDownUpIcon size={14} />}
-                rightSection={sortActive ? <Badge circle color="neutral">1</Badge> : undefined}
               >
-                Ordenar
+                Ordenar: {SORT_OPTIONS.find(o => o.value === sortOrder)?.label}
               </Button>
             </Popover.Target>
             <Popover.Dropdown w={280} maw="calc(100vw - 32px)">

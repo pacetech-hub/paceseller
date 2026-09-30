@@ -18,6 +18,8 @@ import {
   PackageIcon,
   ArrowRightIcon,
   UsersIcon,
+  CheckCircleIcon,
+  WarningCircleIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
@@ -47,6 +49,16 @@ function seededOrderCount(clientId: string): number {
   let h = 0;
   for (let i = 0; i < clientId.length; i++) h = (h * 31 + clientId.charCodeAt(i)) >>> 0;
   return 3 + (h % 8);
+}
+
+// mock: contatos do cliente (o cadastro ainda não traz e-mail/telefone); alguns ficam vazios de propósito
+function mockContacts(client: Client): { email: string; phone: string } {
+  const h = Math.round(seededScore(`${client.id}-contato`) * 1000);
+  const slug = client.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '').slice(0, 16);
+  return {
+    email: h % 3 === 0 ? '' : `compras@${slug}.com.br`,
+    phone: h % 4 === 1 ? '' : `(11) 9${String(1000 + (h % 9000)).padStart(4, '0')}-${String(1000 + ((h * 7) % 9000)).padStart(4, '0')}`,
+  };
 }
 
 type StockStatusKey = 'zerado' | 'alto-giro' | 'chegando-ao-fim' | 'parado';
@@ -196,6 +208,15 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   const colorRanks = colorRanking(client.id);
   const typeRanks = typeRanking(client.id);
   const stuckProducts = products.filter(p => stockStatusOf(p) === 'parado');
+  const contacts = mockContacts(client);
+  const registrationFields = [
+    { label: 'Endereço', value: client.address },
+    { label: 'CNPJ', value: client.cnpj },
+    { label: 'Representante', value: client.rep },
+    { label: 'E-mail', value: contacts.email },
+    { label: 'Telefone', value: contacts.phone },
+  ];
+  const missingFields = registrationFields.filter(f => !f.value.trim());
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
@@ -222,31 +243,51 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           </Box>
         </Group>
 
-        <Button
-          onClick={() => setExpanded(v => !v)}
-          variant="subtle"
-          color="neutral"
-          ml={-12}
-          mt="sm"
-          rightSection={
-            <CaretDownIcon size={14} className={detail.caret} data-expanded={expanded || undefined} />
-          }
-        >
-          {expanded ? 'Ocultar Dados Cadastrais' : 'Mostrar Dados Cadastrais'}
-        </Button>
+        {/* Cabeçalho do bloco mostra, mesmo fechado, se o cadastro está completo */}
+        <Group gap="sm" mt="sm" wrap="wrap">
+          <Button
+            onClick={() => setExpanded(v => !v)}
+            variant="subtle"
+            color="neutral"
+            ml={-12}
+            aria-expanded={expanded}
+            rightSection={
+              <CaretDownIcon size={14} className={detail.caret} data-expanded={expanded || undefined} />
+            }
+          >
+            {expanded ? 'Ocultar Dados Cadastrais' : 'Mostrar Dados Cadastrais'}
+          </Button>
+          {missingFields.length === 0 ? (
+            <Group gap={6} wrap="nowrap">
+              <CheckCircleIcon size={16} color="var(--mantine-color-teal-6)" />
+              <Text size="sm" c="teal.7">Completo</Text>
+            </Group>
+          ) : (
+            <Group gap={6} wrap="nowrap">
+              <WarningCircleIcon size={16} color="var(--mantine-color-red-6)" />
+              <Text size="sm" c="red.7">
+                {missingFields.length === 1 ? '1 campo precisa de atenção' : `${missingFields.length} campos precisam de atenção`}
+                {': '}{missingFields.map(f => f.label).join(', ')} não informado{missingFields.length > 1 ? 's' : ''}
+              </Text>
+            </Group>
+          )}
+        </Group>
 
         <Collapse in={expanded}>
           <Divider mt="sm" />
           {/* Uma coluna, rótulo acima do valor, alinhado à esquerda */}
           <Stack gap="md" pt="sm">
-            {[
-              { label: 'Endereço', value: client.address },
-              { label: 'CNPJ', value: client.cnpj },
-              { label: 'Representante', value: client.rep },
-            ].map(info => (
+            {registrationFields.map(info => (
               <Box key={info.label}>
                 <Text c="dimmed" size="sm">{info.label}</Text>
-                <Text>{info.value}</Text>
+                {info.value.trim() ? (
+                  <Text>{info.value}</Text>
+                ) : (
+                  <Group gap={6} wrap="nowrap">
+                    <WarningCircleIcon size={16} color="var(--mantine-color-red-6)" />
+                    <Text c="red.7">Não informado</Text>
+                  </Group>
+                )}
               </Box>
             ))}
           </Stack>
