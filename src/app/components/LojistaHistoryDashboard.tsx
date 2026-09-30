@@ -56,6 +56,9 @@ const periods = [
   { id: '6m', label: 'Últimos 6 meses' },
 ];
 
+// tooltip dos gráficos: valor completo em reais, sem centavos (ex.: "R$ 23.818")
+const formatChartCurrency = (v: number) => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+
 const formatK = (v: number) => `${(v / 1000).toFixed(0)}k`;
 
 export function LojistaHistoryDashboard({ onNavigate }: Props) {
@@ -179,7 +182,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             tickLine="none"
             withLegend
             legendProps={{ verticalAlign: 'top', height: 40 }}
-            valueFormatter={formatCurrency}
+            valueFormatter={formatChartCurrency}
             yAxisProps={{ tickFormatter: formatK, domain: lineDomain }}
           />
         </Paper>
@@ -204,7 +207,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                 getBarColor={v => (v === maxRev ? 'neutral.9' : 'neutral.4')}
                 gridAxis="x"
                 tickLine="none"
-                valueFormatter={formatCurrency}
+                valueFormatter={formatChartCurrency}
                 // barras horizontais: o valor fica no eixo X, que começa em zero
                 xAxisProps={{ tickFormatter: formatK, domain: barDomain }}
                 yAxisProps={{ width: 110 }}

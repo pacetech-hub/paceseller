@@ -41,6 +41,9 @@ const pieData = [
 const SELL_IN_COLOR = 'neutral.9';
 const SELL_OUT_COLOR = 'teal.6';
 
+// tooltip dos gráficos: valor completo em reais, sem centavos (ex.: "R$ 23.818")
+const formatChartCurrency = (v: number) => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+
 const formatK = (v: number) => `${(v / 1000).toFixed(0)}k`;
 
 // dias parado: acima de 60 crítico, acima de 45 atenção
@@ -186,7 +189,7 @@ export function SelloutDashboard() {
               gridAxis="y"
               tickLine="none"
               strokeDasharray="3 3"
-              valueFormatter={formatCurrency}
+              valueFormatter={formatChartCurrency}
               yAxisProps={{ tickFormatter: formatK, width: 44, domain: barDomain }}
               barProps={{ radius: [3, 3, 0, 0] }}
               barChartProps={{ barGap: 4 }}
@@ -270,7 +273,7 @@ export function SelloutDashboard() {
             gridAxis="x"
             tickLine="none"
             strokeDasharray="3 3"
-            valueFormatter={formatCurrency}
+            valueFormatter={formatChartCurrency}
             xAxisProps={{ tickFormatter: formatK, domain: barDomain }}
             yAxisProps={{ width: 90 }}
             barProps={{ radius: [0, 3, 3, 0] }}
