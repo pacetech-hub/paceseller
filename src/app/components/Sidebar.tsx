@@ -3,7 +3,7 @@ import {
   Group, Button, ActionIcon, Affix, Indicator, Text, Box, Stack, Paper, NavLink, Badge,
   Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger, CloseButton, Popover,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   SquaresFourIcon,
   PackageIcon,
@@ -328,6 +328,8 @@ interface TopBarProps {
 
 export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient }: TopBarProps) {
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
+  // Entre sm e md os itens do topo ficam só com ícone: aí o tooltip serve de rótulo
+  const headerLabelsVisible = useMediaQuery('(min-width: 62em)');
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
@@ -445,18 +447,18 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 const Icon = item.icon;
                 const active = currentView === item.view;
                 return (
-                  <Button
-                    key={item.label}
-                    onClick={() => onNavigate(item.view)}
-                    variant={active ? 'light' : 'subtle'}
-                    color="neutral"
-                    leftSection={<Icon size={16} />}
-                    title={item.label}
-                    aria-label={item.label}
-                    styles={{ label: { fontWeight: active ? 600 : 400 } }}
-                  >
-                    <Text span visibleFrom="md" inherit>{item.label}</Text>
-                  </Button>
+                  <Tooltip key={item.label} label={item.label} withArrow disabled={headerLabelsVisible}>
+                    <Button
+                      onClick={() => onNavigate(item.view)}
+                      variant={active ? 'light' : 'subtle'}
+                      color="neutral"
+                      leftSection={<Icon size={16} />}
+                      aria-label={item.label}
+                      styles={{ label: { fontWeight: active ? 600 : 400 } }}
+                    >
+                      <Text span visibleFrom="md" inherit>{item.label}</Text>
+                    </Button>
+                  </Tooltip>
                 );
               })}
             </Group>
@@ -510,10 +512,14 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
                 maw={{ sm: 180, lg: 260 }}
                 visibleFrom="sm"
                 leftSection={<StorefrontIcon size={16} />}
-                title="Ver histórico de pedidos deste cliente"
-                styles={{ label: { overflow: 'hidden', textOverflow: 'ellipsis' } }}
+                aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
+                styles={{ label: { overflow: 'hidden' } }}
               >
-                {selectedClient.name}
+                {/* O que o botão faz fica visível (antes estava só num title) */}
+                <Stack gap={0} miw={0} align="flex-start">
+                  <Text span size="sm" c="dimmed" lh={1.2}>Ver pedidos de</Text>
+                  <Text span fw={600} lh={1.2} truncate maw="100%">{selectedClient.name}</Text>
+                </Stack>
               </Button>
               <Tooltip label="Ver Histórico de Pedidos" withArrow>
                 <ActionIcon

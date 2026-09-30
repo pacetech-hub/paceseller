@@ -69,7 +69,6 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
                       display="flex"
                       mih={44}
                       px="md"
-                      title={allowed ? 'Clique para revogar' : 'Clique para conceder'}
                       style={{ alignItems: 'center', justifyContent: 'flex-start', cursor: 'pointer' }}
                     >
                       <Checkbox
