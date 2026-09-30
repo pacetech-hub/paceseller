@@ -18,7 +18,7 @@ import {
   TagIcon,
   StorefrontIcon,
 } from "@phosphor-icons/react";
-import { products, clients, commercialPolicies, Product, Client, formatCurrency } from "../data/mockData";
+import { products, clients, commercialPolicies, orders, Product, Client, formatCurrency } from "../data/mockData";
 import classes from "./interactive.module.css";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
@@ -37,6 +37,36 @@ const SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
 type GradeMap = Record<string, Record<string, number>>;
 
 const PAYMENT_OPTIONS = ['3x sem juros', '5x sem juros', '7x sem juros', 'À Vista', '30 DDL', '30/60 DDL', '30/60/90 DDL'];
+
+// "Mais usados": condições de pagamento mais frequentes nos pedidos (mock)
+const POPULAR_PAYMENTS = (() => {
+  const count: Record<string, number> = {};
+  orders.forEach(o => { count[o.paymentCondition] = (count[o.paymentCondition] || 0) + 1; });
+  return PAYMENT_OPTIONS.filter(p => count[p]).sort((a, b) => count[b] - count[a]).slice(0, 3);
+})();
+const PAYMENT_DATA = [
+  { group: 'Mais usados', items: POPULAR_PAYMENTS },
+  { group: 'Todos', items: PAYMENT_OPTIONS.filter(p => !POPULAR_PAYMENTS.includes(p)) },
+];
+
+// "Mais usados": clientes com mais pedidos no histórico, desempate pelo pedido mais recente (mock)
+const POPULAR_CLIENT_IDS = (() => {
+  const count: Record<string, number> = {};
+  orders.forEach(o => { count[o.clientId] = (count[o.clientId] || 0) + 1; });
+  return [...clients]
+    .filter(c => count[c.id])
+    .sort((a, b) => (count[b.id] - count[a.id]) || b.lastOrder.localeCompare(a.lastOrder))
+    .slice(0, 5)
+    .map(c => c.id);
+})();
+const toClientOption = (c: Client) => ({ value: c.id, label: c.name });
+const CLIENT_DATA = [
+  {
+    group: 'Mais usados',
+    items: POPULAR_CLIENT_IDS.map(id => clients.find(c => c.id === id)!).map(toClientOption),
+  },
+  { group: 'Todos', items: clients.filter(c => !POPULAR_CLIENT_IDS.includes(c.id)).map(toClientOption) },
+];
 
 // estoque do tamanho: zerado, baixo (< 5) ou ok
 const stockColor = (stock: number) => (stock === 0 ? 'red.6' : stock < 5 ? 'yellow.7' : 'teal.6');
@@ -224,10 +254,10 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
   const finalTotal = grandTotal - discountAmount;
 
   const steps = [
-    { n: 1, label: 'Cliente' },
-    { n: 2, label: 'Produtos' },
-    { n: 3, label: 'Grade' },
-    { n: 4, label: 'Revisão' },
+    { n: 1, label: 'Escolher cliente', description: 'Cliente e forma de pagamento' },
+    { n: 2, label: 'Escolher produtos', description: 'Busque por nome ou referência' },
+    { n: 3, label: 'Definir quantidades', description: 'Pares por numeração' },
+    { n: 4, label: 'Revisar e enviar', description: 'Confira e envie o pedido' },
   ];
 
   if (completed) {
@@ -269,6 +299,8 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
   const firstStep = selectedClient ? 2 : 1;
   const stepLabel = (n: number) => steps.find(st => st.n === n)?.label ?? '';
   const currentStepLabel = stepLabel(step);
+  // rótulo de botão em Title Case (ex.: "Escolher produtos" → "Escolher Produtos")
+  const stepButtonLabel = (n: number) => stepLabel(n).replace(/(^|\s)(\p{L})/gu, (_m, sp, ch) => sp + ch.toUpperCase()).replace(/ E /g, ' e ');
 
   return (
     <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
@@ -289,14 +321,21 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           active={step - 1}
           color="neutral"
           allowNextStepsSelect={false}
+          onStepClick={i => {
+            // só volta para etapas já concluídas (e nunca antes da primeira etapa disponível)
+            const target = i + 1;
+            if (target < step && target >= firstStep) setStep(target);
+          }}
           radius="md"
           completedIcon={<CheckIcon size={14} />}
         >
           {steps.map(st => (
             <Stepper.Step
               key={st.n}
+              aria-label={st.n < step && st.n >= firstStep ? `Voltar para a etapa ${st.n}: ${st.label}` : undefined}
+              allowStepSelect={st.n < step && st.n >= firstStep}
               label={<Text span visibleFrom="sm" inherit fw={step === st.n ? 600 : 400}>{st.label}</Text>}
-              allowStepSelect={false}
+              description={<Text span visibleFrom="sm" inherit>{st.description}</Text>}
             />
           ))}
         </Stepper>
@@ -317,7 +356,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               label="Cliente"
               value={selectedClientId}
               onChange={v => v && handleClientChange(v)}
-              data={clients.map(c => ({ value: c.id, label: c.name }))}
+              data={CLIENT_DATA}
               allowDeselect={false}
               searchable
               filter={clientFilter}
@@ -328,8 +367,9 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               label="Condição de pagamento"
               value={paymentCond}
               onChange={v => v && setPaymentCond(v)}
-              data={PAYMENT_OPTIONS}
+              data={PAYMENT_DATA}
               allowDeselect={false}
+              searchable
             />
 
             {/* Política comercial dinâmica */}
@@ -504,7 +544,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 title="Nenhum produto no pedido"
                 description="Escolha um produto e informe as quantidades por numeração para revisar o pedido."
                 action={{ label: 'Escolher Produto', onClick: () => { setSelectedProduct(null); setStep(2); } }}
-                secondaryAction={selectedProduct ? { label: 'Voltar para a Grade', onClick: () => setStep(3), forward: false } : undefined}
+                secondaryAction={selectedProduct ? { label: 'Voltar para Definir Quantidades', onClick: () => setStep(3), forward: false } : undefined}
               />
             ) : (
               <Stack gap="sm">
@@ -586,7 +626,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           variant="default"
           leftSection={<CaretLeftIcon size={16} />}
         >
-          {step > firstStep ? `Voltar para ${stepLabel(step - 1)}` : 'Voltar'}
+          {step > firstStep ? `Voltar para ${stepButtonLabel(step - 1)}` : 'Voltar'}
         </Button>
 
         <Group gap="sm">
@@ -601,7 +641,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
               disabled={step === 3 && totalPairs === 0}
               rightSection={<ArrowRightIcon size={16} />}
             >
-              {step === 3 ? 'Revisar Pedido' : `Ir para ${stepLabel(step + 1)}`}
+              {step === 3 ? 'Revisar Pedido' : stepButtonLabel(step + 1)}
             </Button>
           ) : (
             <Button
