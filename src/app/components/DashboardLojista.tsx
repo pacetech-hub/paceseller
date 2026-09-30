@@ -79,7 +79,7 @@ function StatusStack({ segs }: { segs: { n: string; q: number; color: string; ac
     <>
       <Progress.Root size={24}>
         {segs.map(s => (
-          <Tooltip key={s.n} label={`${s.n}: ${s.q}`} withArrow>
+          <Tooltip key={s.n} label={`${s.n}: ${s.q} ${s.q === 1 ? 'pedido' : 'pedidos'}`}>
             <Progress.Section value={(s.q / tot) * 100} color={s.color}>
               <Progress.Label fz="sm">{s.q / tot >= 0.1 ? s.q : ''}</Progress.Label>
             </Progress.Section>
@@ -218,7 +218,8 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               curveType="monotone"
               gridAxis="y"
               tickLine="none"
-              valueFormatter={v => `R$ ${v} mil`}
+              // tooltip com o valor completo em reais (os dados estão em R$ mil)
+              valueFormatter={v => brl(v * 1000)}
               yAxisProps={{ tickFormatter: (v: number) => `${v}k`, domain: lineDomain }}
             />
             <Group gap={4} c={POS} mt="xs" wrap="nowrap">
@@ -245,7 +246,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
         {/* RECOMPRA E PRODUTOS */}
         <SectionLabel>Recompra e produtos</SectionLabel>
         <Grid gutter="md">
-          <Card title="Produtos mais comprados" hint="Mix da loja · por pares · filtrável por linha/cor/tipo" span={5}>
+          <Card title="Produtos mais comprados" hint="Mix da loja · por pares" span={5}>
             <Rank rows={[
               { n: 'Tênis Runner X', v: 120 }, { n: 'Sandália Verão', v: 96 },
               { n: 'Sapatilha Flex', v: 60 }, { n: 'Bota Couro', v: 48 }, { n: 'Chinelo Soft', v: 36 },

@@ -43,7 +43,7 @@ const MODE_OPTIONS = [
 
 const INTEGRATIONS = ['Bling', 'Tiny ERP', 'Omie', 'API customizada'];
 
-const HEADERS = ['Produto', 'SKU', 'Linha', 'Estoque atual', 'Limiar mín.', 'Status', 'Atualizado', 'Ações'];
+const HEADERS = ['Produto', 'SKU', 'Linha', 'Estoque atual', 'Estoque mínimo', 'Status', 'Atualizado', 'Ações'];
 
 export function StockPage() {
   const [mode, setMode] = useState<Mode>('manual');
@@ -89,7 +89,7 @@ export function StockPage() {
               <Box flex={1} miw={0}>
                 <Title order={1} fw={700}>Meu Estoque · Tesla Footwear</Title>
                 <Text c="dimmed" size="sm">
-                  Mantenha seu estoque atualizado para que o catálogo mostre alertas de ruptura corretamente para seus clientes finais.
+                  Mantenha seu estoque atualizado para que o catálogo mostre alertas de falta de estoque corretamente para seus clientes finais.
                 </Text>
               </Box>
             </Group>
@@ -199,7 +199,7 @@ export function StockPage() {
                       </Table.Td>
                       <Table.Td ta="right">
                         {isEditing ? (
-                          <NumberInput w={110} ml="auto" aria-label="Limiar mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
+                          <NumberInput w={110} ml="auto" aria-label="Estoque mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
                         ) : (
                           <Text c="dimmed" className="mono">{it.min}</Text>
                         )}

@@ -30,10 +30,17 @@ export type StockFilter = 'todos' | StockStatusKey;
 
 export const STOCK_FILTER_OPTIONS: Array<{ value: StockFilter; label: string }> = [
   { value: 'todos', label: 'Todos' },
-  { value: 'ruptura', label: 'Ruptura' },
-  { value: 'baixo', label: 'Baixo' },
-  { value: 'ok', label: 'OK' },
+  { value: 'ruptura', label: 'Sem estoque' },
+  { value: 'baixo', label: 'Estoque baixo' },
+  { value: 'ok', label: 'Estoque normal' },
 ];
+
+// Rótulos em linguagem simples para o status (mesmos textos do filtro)
+const STATUS_PLAIN_LABEL: Record<StockStatusKey, string> = {
+  ruptura: 'Sem estoque',
+  baixo: 'Estoque baixo',
+  ok: 'Estoque normal',
+};
 
 export function filterStock(items: StockItem[], query: string, filter: StockFilter) {
   const q = query.toLowerCase();
@@ -55,9 +62,9 @@ export function StockKpis({ items }: { items: StockItem[] }) {
   }, [items]);
 
   const cards = [
-    { label: 'Em ruptura', value: String(kpis.ruptura), sub: `${kpis.total} SKUs cadastrados`, icon: EmptyIcon, color: 'red' },
-    { label: 'Estoque baixo', value: String(kpis.baixo), sub: 'abaixo do limiar', icon: TrendDownIcon, color: 'yellow' },
-    { label: 'Estoque OK', value: String(kpis.ok), sub: 'disponíveis para venda', icon: CheckSquareIcon, color: 'teal' },
+    { label: 'Sem estoque', value: String(kpis.ruptura), sub: `${kpis.total} SKUs cadastrados`, icon: EmptyIcon, color: 'red' },
+    { label: 'Estoque baixo', value: String(kpis.baixo), sub: 'abaixo do estoque mínimo', icon: TrendDownIcon, color: 'yellow' },
+    { label: 'Estoque normal', value: String(kpis.ok), sub: 'disponíveis para venda', icon: CheckSquareIcon, color: 'teal' },
     { label: 'Valor em estoque', value: formatCurrency(kpis.valor), sub: 'a preço de tabela', icon: WarehouseIcon, color: 'neutral' },
   ];
 
@@ -90,7 +97,7 @@ export function StockStatusBadge({ item }: { item: Pick<StockItem, 'stock' | 'mi
       color={st.color}
       leftSection={st.key !== 'ok' ? <WarningIcon size={14} /> : undefined}
     >
-      {st.label}
+      {STATUS_PLAIN_LABEL[st.key]}
     </Badge>
   );
 }
@@ -112,7 +119,7 @@ export function StockProductCell({ item }: { item: StockItem }) {
 }
 
 /** Colunas numéricas (quantidades) alinhadas à direita no cabeçalho e nas células. */
-export const STOCK_NUMERIC_HEADERS = ['Estoque', 'Estoque atual', 'Limiar mín.'];
+export const STOCK_NUMERIC_HEADERS = ['Estoque', 'Estoque atual', 'Estoque mínimo'];
 
 export function StockTableHeader({ labels }: { labels: string[] }) {
   return (
@@ -256,7 +263,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
     setFilter('todos');
   };
 
-  const headers = ['Produto', 'SKU', 'Linha', 'Estoque', 'Limiar mín.', 'Status', 'Atualizado', ...(readOnly ? [] : ['Ações'])];
+  const headers = ['Produto', 'SKU', 'Linha', 'Estoque', 'Estoque mínimo', 'Status', 'Atualizado', ...(readOnly ? [] : ['Ações'])];
 
   return (
     <Stack gap="md">

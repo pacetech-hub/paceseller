@@ -64,10 +64,10 @@ function CreatorBadge({ createdBy, viewerRole }: { createdBy?: CartCreator; view
   if (!createdBy) return null;
   const { icon: CreatorIcon, color } = creatorStyle[createdBy];
   const isViewer = createdBy === viewerRole;
-  const label = isViewer ? 'Você' : createdBy === 'lojista' ? 'Lojista' : 'Representante';
-  const title = createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante';
+  // quem criou fica escrito no selo (antes o detalhe estava só no title)
+  const label = isViewer ? 'Criado por você' : createdBy === 'lojista' ? 'Criado pelo lojista' : 'Criado pelo representante';
   return (
-    <Badge variant="light" color={color} leftSection={<CreatorIcon size={14} />} styles={badgeStyles} title={title}>
+    <Badge variant="light" color={color} leftSection={<CreatorIcon size={14} />} styles={badgeStyles}>
       {label}
     </Badge>
   );
@@ -148,15 +148,20 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
           </Text>
         </Box>
         {!newOpen && (
-          <Button
-            onClick={() => canCreate && setNewOpen(true)}
-            disabled={!canCreate}
-            title={canCreate ? 'Criar Novo Carrinho' : 'Selecione um cliente para criar um carrinho'}
-            leftSection={<PlusIcon size={16} />}
-            w={{ base: '100%', xs: 'auto' }}
-          >
-            Criar Carrinho
-          </Button>
+          <Box w={{ base: '100%', xs: 'auto' }}>
+            <Button
+              onClick={() => canCreate && setNewOpen(true)}
+              disabled={!canCreate}
+              leftSection={<PlusIcon size={16} />}
+              w={{ base: '100%', xs: 'auto' }}
+            >
+              Criar Carrinho
+            </Button>
+            {/* por que está desabilitado: texto visível em vez de title */}
+            {!canCreate && (
+              <Text c="dimmed" size="sm" mt={4}>Selecione um cliente para criar</Text>
+            )}
+          </Box>
         )}
       </Group>
 
@@ -320,17 +325,17 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   <CreatorBadge createdBy={c.createdBy} viewerRole={viewerRole} />
                 </Box>
                 <Divider mt="sm" />
-                <SimpleGrid cols={3} spacing={8} pt="sm">
-                  <Group gap={4} c="dimmed" wrap="nowrap" title="Itens">
+                <SimpleGrid cols={2} spacing={8} pt="sm">
+                  <Group gap={4} c="dimmed" wrap="nowrap">
                     <PackageIcon size={12} />
                     <Text size="sm" c="dimmed">{c.items} itens</Text>
                   </Group>
-                  <Text size="sm" c="dimmed" className="mono" title="Pares">{c.pairs} pares</Text>
-                  <Group gap={4} c="dimmed" wrap="nowrap" justify="flex-end" title="Atualizado">
-                    <CalendarBlankIcon size={12} />
-                    <Text size="sm" c="dimmed">{new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
-                  </Group>
+                  <Text size="sm" c="dimmed" className="mono" ta="right">{c.pairs} pares</Text>
                 </SimpleGrid>
+                <Group gap={4} mt={8} c="dimmed" wrap="nowrap">
+                  <CalendarBlankIcon size={12} />
+                  <Text size="sm" c="dimmed">Atualizado em {new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
+                </Group>
                 <Group gap={4} mt={8} pb="md" c="dimmed" wrap="nowrap">
                   <UserIcon size={12} />
                   <Text size="sm" c="dimmed" truncate>Rep: {c.rep}</Text>

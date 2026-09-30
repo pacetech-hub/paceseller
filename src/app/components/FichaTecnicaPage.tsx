@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, SimpleGrid,
   ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, Skeleton, type BoxProps, type ImageProps,
+  type ComboboxData,
 } from "@mantine/core";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, TableSkeleton } from "./ui/Skeletons";
@@ -199,8 +200,23 @@ function getStoreStock(product: Product): Record<string, number> {
   return result;
 }
 
-const lineOptions = ['Todos', ...Array.from(new Set(products.map(p => p.line)))];
-const categoryOptions = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
+// Opções do filtro: "Todos" primeiro; com 6+ opções, as mais vendidas (soma de soldUnits no mock)
+// ficam no grupo "Mais usados" e o resto em "Todos" — cada valor aparece uma vez só
+function filterOptions(key: 'line' | 'category', allLabel: string): ComboboxData {
+  const sales = new Map<string, number>();
+  products.forEach(p => sales.set(p[key], (sales.get(p[key]) ?? 0) + p.soldUnits));
+  const values = Array.from(sales.keys());
+  const all = { value: 'Todos', label: allLabel };
+  if (values.length < 6) return [all, ...values];
+  const popular = [...values].sort((a, b) => (sales.get(b) ?? 0) - (sales.get(a) ?? 0)).slice(0, 3);
+  return [
+    all,
+    { group: 'Mais usados', items: popular },
+    { group: 'Todos', items: values.filter(v => !popular.includes(v)).sort((a, b) => a.localeCompare(b)) },
+  ];
+}
+const lineOptions = filterOptions('line', 'Todas as linhas');
+const categoryOptions = filterOptions('category', 'Todas as categorias');
 
 // Foto remota do produto: skeleton no lugar até a imagem carregar; se falhar, mostra o fallback
 function ProductImage({ src, alt, fallback, imageProps }: {
@@ -322,6 +338,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           value={line}
           onChange={v => v && setLine(v)}
           data={lineOptions}
+          searchable
           allowDeselect={false}
           label="Linha"
           flex={{ base: 1, md: 'none' }}
@@ -332,6 +349,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           value={category}
           onChange={v => v && setCategory(v)}
           data={categoryOptions}
+          searchable
           allowDeselect={false}
           label="Categoria"
           flex={{ base: 1, md: 'none' }}
@@ -346,9 +364,9 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
             onChange={v => setSortBy(v as typeof sortBy)}
             aria-labelledby="ficha-sort-label"
             data={[
-              { value: 'relevância', label: 'Relevância' },
-              { value: 'nome', label: 'Nome (A-Z)' },
-              { value: 'referência', label: 'Referência' },
+              { value: 'relevância', label: 'Mais relevantes' },
+              { value: 'nome', label: 'Nome de A a Z' },
+              { value: 'referência', label: 'Referência de 0 a 9' },
             ]}
           />
         </Input.Wrapper>
@@ -422,7 +440,8 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </Box>
         {/* legenda visível dizendo qual foto é */}
         <Text component="span" className={classes.tileLabel} size="sm" fw={600}>{label}</Text>
-        {/* "Baixar" com texto onde o tile tem espaço; nos tiles pequenos do celular fica só o ícone (com tooltip) */}
+        {/* "Baixar" com texto onde o tile tem espaço; nos tiles pequenos do celular fica só o ícone
+            (o tooltip é só o rótulo desse botão de ícone, que também tem aria-label) */}
         <Button
           onClick={e => { e.stopPropagation(); downloadPhoto(label); }}
           aria-label={`Baixar foto ${label.toLowerCase()}`}

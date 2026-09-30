@@ -84,3 +84,41 @@ body {
   color: var(--mantine-color-gray-5);
   opacity: 1;
 }
+
+/*
+ * Tooltips dos gráficos (@mantine/charts 7.x): dado grande e com respiro.
+ * Classes geradas pelo ChartTooltip — revisar se o @mantine/charts mudar de versão.
+ */
+.m_e4d36c9b {
+  min-width: calc(15rem * var(--mantine-scale));
+}
+
+/* Título do tooltip (ex.: mês) */
+.m_7f4bcb19 {
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  font-weight: 600;
+}
+
+/* Corpo com as séries */
+.m_3de554dd {
+  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-sm);
+}
+
+/* Cada linha: nome à esquerda, valor à direita — valor em 16px e semibold */
+.m_3de8964e {
+  font-size: var(--mantine-font-size-md);
+  gap: var(--mantine-spacing-lg);
+  padding-block: 4px;
+}
+
+/* Nome da série: 16px regular */
+.m_501dadf9 {
+  font-size: var(--mantine-font-size-md);
+}
+
+/* Valor (o dado): 16px semibold, números tabulares */
+.m_50192318 {
+  font-size: var(--mantine-font-size-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

@@ -48,6 +48,12 @@ const FORMATS = [
   { id: 'impressao-a5', group: 'Impressão', label: 'Impressão A5', description: 'Panfleto de balcão e sacola', spec: '14,8 × 21 cm · PDF', icon: PrinterIcon },
 ];
 
+// Formatos mais usados ao criar peças (mock: ordem fixa até termos o histórico real de uso)
+const POPULAR_FORMAT_IDS = ['instagram-feed', 'whatsapp', 'story'];
+
+// Produtos mais vendidos aparecem primeiro na escolha de produtos (derivado de soldUnits)
+const POPULAR_PRODUCT_COUNT = 3;
+
 interface Campaign {
   id: string;
   name: string;
@@ -119,12 +125,12 @@ const initialHistory: HistoryItem[] = [
 ];
 
 const WIZARD_STEPS = [
-  { n: 1, label: 'Campanha' },
-  { n: 2, label: 'Formato' },
-  { n: 3, label: 'Produtos' },
-  { n: 4, label: 'Tema' },
-  { n: 5, label: 'Texto' },
-  { n: 6, label: 'Resultado' },
+  { n: 1, label: 'Escolher campanha', action: 'Escolher Campanha', description: 'Objetivo da peça' },
+  { n: 2, label: 'Escolher formatos', action: 'Escolher Formatos', description: 'Onde vai ser usada' },
+  { n: 3, label: 'Escolher produtos', action: 'Escolher Produtos', description: 'Até 3 produtos' },
+  { n: 4, label: 'Escolher cenário', action: 'Escolher Cenário', description: 'Foto de fundo' },
+  { n: 5, label: 'Escrever texto', action: 'Escrever Texto', description: 'Mensagem da peça' },
+  { n: 6, label: 'Ver resultado', action: 'Ver Resultado', description: 'Baixar e salvar' },
 ];
 
 type Mode = 'home' | 'wizard' | 'campaigns';
@@ -588,6 +594,19 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
   const filteredProducts = q
     ? sortedProducts.filter(p => p.name.toLowerCase().includes(q) || p.reference.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))
     : sortedProducts;
+  // Sem busca: mais vendidos primeiro, depois os demais na ordem do perfil (cada produto aparece uma vez)
+  const popularProducts = [...sortedProducts].sort((a, b) => b.soldUnits - a.soldUnits).slice(0, POPULAR_PRODUCT_COUNT);
+  const productSections: { title: string | null; items: Product[] }[] = q
+    ? [{ title: null, items: filteredProducts }]
+    : [
+        { title: 'Mais vendidos', items: popularProducts },
+        { title: 'Todos os produtos', items: sortedProducts.filter(p => !popularProducts.includes(p)) },
+      ];
+  // Formatos: mais usados primeiro, depois os demais por canal (grupos vazios somem)
+  const formatSections = [
+    { title: 'Mais usados', items: POPULAR_FORMAT_IDS.map(id => FORMATS.find(f => f.id === id)!).filter(Boolean) },
+    ...FORMAT_GROUPS.map(group => ({ title: group as string, items: FORMATS.filter(f => f.group === group && !POPULAR_FORMAT_IDS.includes(f.id)) })),
+  ].filter(section => section.items.length > 0);
   const selectedFormatList = FORMATS.filter(f => selectedFormats.has(f.id));
   const selectedCampaign = campaigns.find(c => c.id === campaignId) ?? null;
 
@@ -658,29 +677,51 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
             return (
               <Group key={s.n} gap={0} wrap="nowrap" flex={1}>
                 <Group gap={8} wrap="nowrap">
-                  <ActionIcon
-                    onClick={() => !generating && s.n <= step && setStep(s.n)}
-                    size="input-sm"
-                    variant={done || current ? 'filled' : 'light'}
-                    color={done || current ? 'neutral' : 'gray'}
-                    aria-label={`Etapa ${s.n}: ${s.label}`}
-                    flex="none"
-                    fz="md"
-                    fw={700}
-                    c={done || current ? undefined : 'dimmed'}
-                    className={classes.stepDot}
-                    data-current={current || undefined}
-                  >
-                    {done ? <CheckIcon size={16} /> : s.n}
-                  </ActionIcon>
-                  <Text
-                    visibleFrom="sm"
-                    size="sm"
-                    fw={current ? 600 : 400}
-                    c={step >= s.n ? undefined : 'dimmed'}
-                  >
-                    {s.label}
-                  </Text>
+                  {/* Só as etapas concluídas são botões (voltam para a etapa); a atual e as futuras não são clicáveis */}
+                  {done ? (
+                    <ActionIcon
+                      onClick={() => setStep(s.n)}
+                      disabled={generating}
+                      size="input-sm"
+                      variant="filled"
+                      color="neutral"
+                      aria-label={`Voltar para a etapa ${s.n}: ${s.label}`}
+                      flex="none"
+                    >
+                      <CheckIcon size={16} />
+                    </ActionIcon>
+                  ) : (
+                    <ThemeIcon
+                      size={36}
+                      variant={current ? 'filled' : 'light'}
+                      color={current ? 'neutral' : 'gray'}
+                      flex="none"
+                      fz="md"
+                      fw={700}
+                      c={current ? undefined : 'dimmed'}
+                      className={classes.stepDot}
+                      data-current={current || undefined}
+                      aria-current={current ? 'step' : undefined}
+                      aria-label={`Etapa ${s.n}: ${s.label}${current ? ' (atual)' : ''}`}
+                      role="img"
+                    >
+                      {s.n}
+                    </ThemeIcon>
+                  )}
+                  <Box visibleFrom="sm">
+                    <Text
+                      size="sm"
+                      lh={1.3}
+                      fw={current ? 600 : 400}
+                      c={step >= s.n ? undefined : 'dimmed'}
+                    >
+                      {s.label}
+                    </Text>
+                    {/* Descrição curta da etapa: só com espaço para as 6 etapas lado a lado */}
+                    <Text visibleFrom="lg" size="sm" lh={1.3} c="dimmed">
+                      {s.description}
+                    </Text>
+                  </Box>
                 </Group>
                 {i < WIZARD_STEPS.length - 1 && (
                   <Divider mx={8} flex={1} color={done ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR} />
@@ -697,10 +738,10 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
 
       {/* Step Content */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-        {/* Step 1: Campanha */}
+        {/* Step 1: Escolher campanha */}
         {step === 1 && (
           <Box>
-            <StepHeader title="Campanha" subtitle="Para qual campanha esta peça será criada?" />
+            <StepHeader title="Escolher campanha" subtitle="Para qual campanha esta peça será criada?" />
             {campaigns.length > 0 ? (
               <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
                 {campaigns.map(c => {
@@ -747,22 +788,22 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
           </Box>
         )}
 
-        {/* Step 2: Formato (multi-select) */}
+        {/* Step 2: Escolher formatos (multi-select); mais usados primeiro */}
         {step === 2 && (
           <Box>
             <Group justify="space-between" wrap="wrap" gap={8} mb={4}>
-              <Title order={2}>Formato da peça</Title>
+              <Title order={2}>Escolher formatos</Title>
               <Text c="dimmed" size="sm">{selectedFormats.size} selecionado(s)</Text>
             </Group>
             <Text c="dimmed" size="sm" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
             <Stack gap="lg">
-              {FORMAT_GROUPS.map(group => (
-                <Box key={group}>
+              {formatSections.map(section => (
+                <Box key={section.title}>
                   <Text fw={600} mb={8}>
-                    {group}
+                    {section.title}
                   </Text>
                   <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
-                    {FORMATS.filter(f => f.group === group).map(f => {
+                    {section.items.map(f => {
                       const Icon = f.icon;
                       const isSelected = selectedFormats.has(f.id);
                       return (
@@ -793,11 +834,11 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
           </Box>
         )}
 
-        {/* Step 3: Produtos */}
+        {/* Step 3: Escolher produtos (mais vendidos primeiro) */}
         {step === 3 && (
           <Box>
             <StepHeader
-              title="Selecionar produtos"
+              title="Escolher produtos"
               subtitle="Escolha até 3 produtos para a campanha"
               right={
                 <Text c="dimmed" size="sm">
@@ -823,54 +864,61 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                 action={{ label: 'Limpar Busca', onClick: () => setProductQuery(''), forward: false }}
               />
             )}
-            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-              {filteredProducts.map(p => {
-                const isSelected = selectedProducts.has(p.id);
-                const meta = productMeta[p.id];
-                return (
-                  <Paper
-                    key={p.id}
-                    component="button"
-                    type="button"
-                    withBorder
-                    p="sm"
-                    onClick={() => toggleProduct(p.id)}
-                    className={`${optionClass} ${classes.optionTinted}`}
-                    data-selected={isSelected || undefined}
-                    bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
-                  >
-                    <Card padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
-                      <LoadingImage src={p.image} alt={p.name} onErrorHide />
-                      {isSelected && (
-                        <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
-                          <CheckIcon size={24} color="#fff" />
-                        </Center>
-                      )}
-                    </Card>
-                    {meta && (
-                      <Badge
-                        variant="light"
-                        color={tagColors[meta.tag]}
-                        mb={4}
-                      >
-                        {meta.tag.charAt(0).toUpperCase() + meta.tag.slice(1)}
-                      </Badge>
-                    )}
-                    <Text fw={600} truncate>{p.name}</Text>
-                    <Text fw={600} className="mono">{formatCurrency(p.price)}</Text>
-                    {meta && <Text c="dimmed" size="sm">Estoque: {meta.stock} pares</Text>}
-                  </Paper>
-                );
-              })}
-            </SimpleGrid>
+            <Stack gap="lg">
+              {productSections.map(section => (
+                <Box key={section.title ?? 'todos'}>
+                  {section.title && <Text fw={600} mb={8}>{section.title}</Text>}
+                  <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+                    {section.items.map(p => {
+                      const isSelected = selectedProducts.has(p.id);
+                      const meta = productMeta[p.id];
+                      return (
+                        <Paper
+                          key={p.id}
+                          component="button"
+                          type="button"
+                          withBorder
+                          p="sm"
+                          onClick={() => toggleProduct(p.id)}
+                          className={`${optionClass} ${classes.optionTinted}`}
+                          data-selected={isSelected || undefined}
+                          bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
+                        >
+                          <Card padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
+                            <LoadingImage src={p.image} alt={p.name} onErrorHide />
+                            {isSelected && (
+                              <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
+                                <CheckIcon size={24} color="#fff" />
+                              </Center>
+                            )}
+                          </Card>
+                          {meta && (
+                            <Badge
+                              variant="light"
+                              color={tagColors[meta.tag]}
+                              mb={4}
+                            >
+                              {meta.tag.charAt(0).toUpperCase() + meta.tag.slice(1)}
+                            </Badge>
+                          )}
+                          <Text fw={600} truncate>{p.name}</Text>
+                          <Text fw={600} className="mono">{formatCurrency(p.price)}</Text>
+                          {meta && <Text c="dimmed" size="sm">Estoque: {meta.stock} pares</Text>}
+                        </Paper>
+                      );
+                    })}
+                  </SimpleGrid>
+                </Box>
+              ))}
+            </Stack>
           </Box>
         )}
 
-        {/* Step 4: Tema (cenário fotográfico da campanha escolhida na Etapa 1) */}
+        {/* Step 4: Escolher cenário (cenário fotográfico da campanha escolhida na Etapa 1) */}
         {step === 4 && (
           <Box>
             <StepHeader
-              title="Tema visual"
+              title="Escolher cenário"
               subtitle={`Escolha um cenário fotográfico de ${selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}`}
             />
             {selectedCampaign && selectedCampaign.photos.length > 0 ? (
@@ -924,10 +972,10 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
           </Box>
         )}
 
-        {/* Step 5: Texto */}
+        {/* Step 5: Escrever texto */}
         {step === 5 && !generating && (
           <Box>
-            <StepHeader title="Texto assistido por IA" subtitle="Descreva o tom da campanha ou use uma sugestão" />
+            <StepHeader title="Escrever texto" subtitle="Descreva o tom da campanha ou use uma sugestão" />
             <Textarea
               value={prompt}
               onChange={e => setPrompt(e.currentTarget.value)}
@@ -967,7 +1015,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
           </Box>
         )}
 
-        {/* Step 6: Resultado — cards like Histórico, one per selected format */}
+        {/* Step 6: Ver resultado — cards like Histórico, one per selected format */}
         {step === 6 && (
           <Box>
             <StepHeader
@@ -1016,7 +1064,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
               variant="default"
               leftSection={<CaretLeftIcon size={16} />}
             >
-              Voltar para {WIZARD_STEPS[step - 2].label}
+              Voltar para {WIZARD_STEPS[step - 2].action}
             </Button>
           )}
 
@@ -1026,7 +1074,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
               disabled={blockedReason !== null}
               rightSection={<ArrowRightIcon size={16} />}
             >
-              Avançar para {WIZARD_STEPS[step].label}
+              Avançar para {WIZARD_STEPS[step].action}
             </Button>
           ) : step === 5 ? (
             <Button
@@ -1079,7 +1127,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
         }}
         onAddPhotos={(campaignId, photos) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: [...photos, ...c.photos] } : c));
-          toast.success(photos.length > 1 ? `${photos.length} cenários adicionados` : 'Cenário adicionado', 'Ele já pode ser escolhido na etapa Tema ao criar uma peça');
+          toast.success(photos.length > 1 ? `${photos.length} cenários adicionados` : 'Cenário adicionado', 'Ele já pode ser escolhido na etapa "Escolher cenário" ao criar uma peça');
         }}
         onDeletePhoto={(campaignId, photoIndex) => {
           setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, photos: c.photos.filter((_, i) => i !== photoIndex) } : c));

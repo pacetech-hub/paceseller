@@ -69,6 +69,9 @@ const initialCart: CartItem[] = [
 
 export const initialCartCount = initialCart.length;
 
+// Nomes das etapas: dizem o que se faz em cada uma
+const STEP_NAMES = { cart: 'Conferir itens', checkout: 'Escolher pagamento' } as const;
+
 // Condições de pagamento disponíveis por tabela de preço
 const paymentOptionsByTable: Record<string, { id: string; label: string; surcharge: number; description?: string }[]> = {
   'padrao': [
@@ -268,9 +271,9 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     color={cartContext.createdBy === 'lojista' ? 'teal' : 'yellow'}
                     leftSection={cartContext.createdBy === 'lojista' ? <StorefrontIcon size={14} /> : <UserCheckIcon size={14} />}
                     styles={badgeStyles}
-                    title={cartContext.createdBy === 'lojista' ? 'Carrinho criado pelo lojista' : 'Carrinho criado pelo representante'}
                   >
-                    {cartContext.createdBy === viewerRole ? 'Você' : cartContext.createdBy === 'lojista' ? 'Lojista' : 'Representante'}
+                    {/* quem criou fica visível no próprio selo (antes estava só no title) */}
+                    {cartContext.createdBy === viewerRole ? 'Criado por você' : cartContext.createdBy === 'lojista' ? 'Criado pelo lojista' : 'Criado pelo representante'}
                   </Badge>
                 )}
               </Group>
@@ -288,7 +291,6 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 onClick={() => onNavigate('carts')}
                 variant="default"
                 leftSection={<ListBulletsIcon size={14} />}
-                title="Selecionar outro carrinho"
               >
                 Outros Carrinhos
               </Button>
@@ -298,7 +300,6 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                   setShowNewCartDialog(true);
                 }}
                 leftSection={<FolderPlusIcon size={14} />}
-                title="Criar outro carrinho para este cliente"
               >
                 Criar Carrinho
               </Button>
@@ -343,25 +344,46 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
         </Group>
       </Modal>
 
-      {/* Step indicator */}
+      {/* Etapas: a etapa concluída (itens) volta a ser clicável; a futura não é */}
       <Group gap="sm" mb="lg" wrap="nowrap">
-        <Button
-          onClick={() => setStep('cart')}
-          variant={step === 'cart' ? 'filled' : 'subtle'}
-          color={step === 'cart' ? 'neutral' : 'gray'}
-          leftSection={<ShoppingCartIcon size={14} />}
-        >
-          Carrinho ({cart.length})
-        </Button>
+        {step === 'checkout' ? (
+          <Button
+            onClick={() => setStep('cart')}
+            variant="subtle"
+            color="gray"
+            leftSection={<CheckIcon size={14} />}
+            aria-label={`Voltar para a etapa 1: ${STEP_NAMES.cart}`}
+          >
+            {STEP_NAMES.cart} ({cart.length})
+          </Button>
+        ) : (
+          <Button
+            variant="filled"
+            color="neutral"
+            leftSection={<ShoppingCartIcon size={14} />}
+            component="div"
+            aria-current="step"
+          >
+            {STEP_NAMES.cart} ({cart.length})
+          </Button>
+        )}
         <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
-        <Button
-          onClick={() => cart.length > 0 && setStep('checkout')}
-          variant={step === 'checkout' ? 'filled' : 'subtle'}
-          color={step === 'checkout' ? 'neutral' : 'gray'}
-          leftSection={<CreditCardIcon size={14} />}
-        >
-          Checkout
-        </Button>
+        {step === 'checkout' ? (
+          <Button
+            variant="filled"
+            color="neutral"
+            leftSection={<CreditCardIcon size={14} />}
+            component="div"
+            aria-current="step"
+          >
+            {STEP_NAMES.checkout}
+          </Button>
+        ) : (
+          <Group gap={6} wrap="nowrap" c="dimmed" px="sm">
+            <CreditCardIcon size={14} />
+            <Text c="dimmed" fw={600}>{STEP_NAMES.checkout}</Text>
+          </Group>
+        )}
       </Group>
 
       {cart.length === 0 ? (
@@ -626,7 +648,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 </Button>
                 {step === 'cart' ? (
                   <Button onClick={() => setStep('checkout')} w={{ base: '100%', sm: 'auto', lg: '100%' }} rightSection={<ArrowRightIcon size={16} />}>
-                    Ir para Checkout
+                    Escolher Pagamento
                   </Button>
                 ) : (
                   <Button onClick={() => setStep('done')} w={{ base: '100%', sm: 'auto', lg: '100%' }} leftSection={<CheckIcon size={16} />}>

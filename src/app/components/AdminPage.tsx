@@ -207,6 +207,15 @@ const roleOptions = ['Representante', 'Preposto', 'Lojista', 'Comprador', 'Admin
 
 const emptyNewUser = { name: '', email: '', role: 'Representante', region: 'Sudeste' };
 
+// Regiões mais usadas no topo da lista (mock: onde está a maior parte dos usuários e clientes)
+const POPULAR_REGIONS = ['Sudeste', 'Sul'];
+const ALL_REGIONS = ['Sudeste', 'Sul', 'Nordeste', 'Centro-Oeste', 'Norte', 'Nacional'];
+// Cada valor aparece uma única vez: os populares saem do grupo "Todos"
+const regionData = [
+  { group: 'Mais usados', items: POPULAR_REGIONS },
+  { group: 'Todos', items: ALL_REGIONS.filter(r => !POPULAR_REGIONS.includes(r)) },
+];
+
 export function AdminPage() {
   const [activeTab, setActiveTab] = useState('industry-stock');
   const [search, setSearch] = useState('');
@@ -585,7 +594,7 @@ export function AdminPage() {
                   </Radio.Group>
                   <Select
                     label="Região"
-                    data={['Sudeste', 'Sul', 'Nordeste', 'Centro-Oeste', 'Norte', 'Nacional']}
+                    data={regionData}
                     value={newUser.region}
                     onChange={v => v && setNewUser(p => ({ ...p, region: v }))}
                     allowDeselect={false}
@@ -724,7 +733,7 @@ export function AdminPage() {
                 { label: 'Nome da empresa', value: 'Tesla Footwear Indústria LTDA', placeholder: 'ex.: Tesla Footwear Indústria LTDA', maxLength: 120 },
                 { label: 'CNPJ', value: '12.345.678/0001-90', placeholder: '00.000.000/0000-00', maxLength: 18 },
                 { label: 'Website', value: 'teslafootwear.com.br', placeholder: 'ex.: suaempresa.com.br' },
-                { label: 'Suporte', value: 'suporte@tesla.com.br', placeholder: 'nome@empresa.com.br' },
+                { label: 'E-mail de suporte', value: 'suporte@tesla.com.br', placeholder: 'nome@empresa.com.br', description: 'Aparece nos pedidos e boletos como contato para dúvidas' },
               ].map(field => (
                 <TextInput
                   key={field.label}
@@ -732,6 +741,7 @@ export function AdminPage() {
                   defaultValue={field.value}
                   placeholder={field.placeholder}
                   maxLength={field.maxLength}
+                  description={field.description}
                 />
               ))}
             </Stack>

@@ -194,7 +194,12 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
   const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
   const loading = useMockLoading();
 
+  // ordem do fluxo do pedido (tem significado: não reordenar por popularidade)
   const statuses = ['todos', 'em análise', 'aprovado', 'faturado', 'entregue', 'cancelado'];
+  const statusLabels: Record<string, string> = {
+    'todos': 'Todos', 'em análise': 'Em análise', 'aprovado': 'Aprovado',
+    'faturado': 'Faturado', 'entregue': 'Entregue', 'cancelado': 'Cancelado',
+  };
   const statusPriority: Record<string, number> = { 'em análise': 0, 'aprovado': 1, 'faturado': 2, 'entregue': 3, 'cancelado': 4 };
 
   const baseOrders = profile === 'rep'
@@ -228,8 +233,8 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
           <Group gap="sm">
             {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral" styles={{ label: { textTransform: 'capitalize' } }}>
-                {s}
+              <Chip key={s} value={s} variant="filled" color="neutral">
+                {statusLabels[s]}
               </Chip>
             ))}
           </Group>
@@ -244,6 +249,10 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         </>
       ) : (
       <Stack gap="sm">
+        {/* ordem da lista em palavras simples */}
+        {filtered.length > 0 && (
+          <Text c="dimmed" size="sm">Em análise primeiro, depois aprovados, faturados, entregues e cancelados</Text>
+        )}
         {filtered.length > 0 && (
           <Paper
             withBorder

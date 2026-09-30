@@ -30,7 +30,8 @@ const SEMIBOLD = 600;
 // depois o rótulo (14px semibold, cinza escuro) e por último o placeholder (cinza claro).
 const inputStyles = {
   label: { fontWeight: SEMIBOLD, marginBottom: 6, fontSize: "var(--mantine-font-size-sm)", color: "var(--mantine-color-gray-8)" },
-  description: { marginBottom: 6 },
+  // Explicação do campo logo ABAIXO dele (ordem: rótulo, campo, explicação, erro).
+  description: { marginTop: 6, fontSize: "var(--mantine-font-size-sm)" },
   error: { marginTop: 6 },
 };
 
@@ -45,6 +46,7 @@ const inputDefaults = {
   radius: "md",
   variant: "default",
   size: CONTROL_SIZE,
+  inputWrapperOrder: ["label", "input", "description", "error"],
 } as const;
 
 export const mantineTheme = createTheme({
@@ -110,7 +112,15 @@ export const mantineTheme = createTheme({
     Pagination: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },
     // Etiquetas de status: texto de 14px, sem caixa alta, mesmo arredondamento dos botões.
     Badge: { defaultProps: { size: "lg", radius: "md", tt: "none" } },
-    InputWrapper: { defaultProps: { withAsterisk: false }, styles: inputStyles },
+    InputWrapper: {
+      defaultProps: { withAsterisk: false, inputWrapperOrder: ["label", "input", "description", "error"] },
+      styles: inputStyles,
+    },
+    // Tooltips legíveis: texto de 16px, bastante respiro, várias linhas com largura máxima.
+    Tooltip: {
+      defaultProps: { multiline: true, withArrow: true, arrowSize: 8, openDelay: 150, events: { hover: true, focus: true, touch: true } },
+      styles: { tooltip: { fontSize: "var(--mantine-font-size-md)", lineHeight: 1.5, padding: "10px 14px", maxWidth: 320 } },
+    },
     Input: { defaultProps: { radius: "md", variant: "default", size: CONTROL_SIZE } },
     TextInput: { defaultProps: inputDefaults, styles: inputStyles },
     // Sempre com o botão de mostrar/ocultar a senha, com nome acessível.
