@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { toast } from "../lib/toast";
 import { useSmallerThan } from "../lib/responsive";
 import {
-  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, ColorSwatch, Divider, Flex, Group, Modal, NumberInput,
+  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, Divider, Flex, Group, Modal, NumberInput,
   Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, ThemeIcon, Title, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
@@ -29,7 +29,7 @@ import interactive from "./interactive.module.css";
 import classes from "./CatalogPage.module.css";
 
 import type { CartContext, CartCreator } from "./CartsListPage";
-import { CatalogFiltersBar, defaultFilters } from "./CatalogFiltersBar";
+import { CatalogFiltersBar, ChoiceChips, defaultFilters, popularCategories } from "./CatalogFiltersBar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
@@ -109,12 +109,13 @@ interface CatalogPageProps {
 const lines = ['Todos', 'Premium', 'Urban', 'Sport'];
 const categories = ['Todos', 'Social', 'Casual', 'Esportivo', 'Sandália', 'Bota'];
 const collections = ['Todas', 'Inverno 2026', 'Primavera/Verão 2026'];
+// rótulos dizem a ordem resultante; os valores internos ficam estáveis ('mais vendidos' vem do Radar)
 const SORT_OPTIONS = [
-  { value: 'relevância', label: 'Relevância' },
-  { value: 'mais vendidos', label: 'Mais vendidos' },
-  { value: 'avaliação', label: 'Melhor avaliação' },
-  { value: 'menor preço', label: 'Menor preço' },
-  { value: 'maior preço', label: 'Maior preço' },
+  { value: 'relevância', label: 'Mais relevantes' },
+  { value: 'mais vendidos', label: 'Mais vendidos primeiro' },
+  { value: 'avaliação', label: 'Mais bem avaliados primeiro' },
+  { value: 'menor preço', label: 'Menor preço primeiro' },
+  { value: 'maior preço', label: 'Maior preço primeiro' },
 ];
 
 function StarRating({ rating }: { rating: number }) {
@@ -806,7 +807,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
     });
   };
 
-  const hasActiveFilters = selectedLine !== 'Todos' || selectedCategory !== 'Todos' || selectedCollection !== 'Todas';
+  const activeFilterCount = (selectedLine !== 'Todos' ? 1 : 0) + (selectedCategory !== 'Todos' ? 1 : 0) + (selectedCollection !== 'Todas' ? 1 : 0);
+  const hasActiveFilters = activeFilterCount > 0;
   const clearInternalFilters = () => { setSelectedLine('Todos'); setSelectedCategory('Todos'); setSelectedCollection('Todas'); };
   // Estado vazio: limpa busca e filtros (os da barra do topo também); a tabela de preço continua
   const clearSearchAndFilters = () => {
@@ -818,24 +820,11 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
     }
   };
 
-  const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void) => (
+  // popular: opções mais usadas primeiro (só onde a ordem não tem significado — coleções seguem a ordem das estações)
+  const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void, popular?: string[], restLabel?: string) => (
     <Box>
       <Text lh={1.5} mb={8} fw={600}>{label}</Text>
-      <Chip.Group multiple={false} value={value} onChange={onSelect}>
-        <Group gap="sm">
-          {options.map(o => (
-            <Chip
-              key={o}
-              value={o}
-              variant="filled"
-              icon={null}
-              styles={{ iconWrapper: { display: 'none' } }}
-            >
-              {o}
-            </Chip>
-          ))}
-        </Group>
-      </Chip.Group>
+      <ChoiceChips options={options} value={value} onSelect={onSelect} popular={popular} restLabel={restLabel} />
     </Box>
   );
 
@@ -889,8 +878,10 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
             onClick={() => setShowFilters(!showFilters)}
             variant="default"
             leftSection={<FunnelIcon size={18} />}
-            rightSection={hasActiveFilters ? (
-              <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} withShadow={false} />
+            rightSection={activeFilterCount > 0 ? (
+              <Badge variant="light" color="neutral">
+                {activeFilterCount} {activeFilterCount === 1 ? 'ativo' : 'ativos'}
+              </Badge>
             ) : undefined}
             aria-expanded={showFilters}
           >
@@ -934,7 +925,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         <Paper withBorder p="md">
           <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
             {renderChipFilter('Linha', lines, selectedLine, setSelectedLine)}
-            {renderChipFilter('Categoria', categories, selectedCategory, setSelectedCategory)}
+            {renderChipFilter('Categoria', categories, selectedCategory, setSelectedCategory, popularCategories, 'Outras categorias')}
             {renderChipFilter('Coleção', collections, selectedCollection, setSelectedCollection)}
           </SimpleGrid>
           {hasActiveFilters && (

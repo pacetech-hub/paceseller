@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Slider, Stack, Text, TextInput,
+  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Slider, Stack, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -42,6 +42,24 @@ const allColors = Array.from(
   new Set(products.flatMap(p => p.colors))
 ).sort();
 
+// "Mais usados": as opções com mais pares vendidos no mock (soma de soldUnits dos produtos)
+function topBySales(options: string[], valuesOf: (p: typeof products[number]) => string[], n = 3): string[] {
+  const sales = new Map<string, number>();
+  products.forEach(p => valuesOf(p).forEach(v => sales.set(v, (sales.get(v) ?? 0) + p.soldUnits)));
+  return options
+    .filter(o => (sales.get(o) ?? 0) > 0)
+    .sort((a, b) => (sales.get(b) ?? 0) - (sales.get(a) ?? 0))
+    .slice(0, n);
+}
+
+const popularLines = topBySales(lines, p => [p.line]);
+// as categorias do filtro não aparecem nos produtos do mock (todos são "Tênis"),
+// então as mais usadas vêm desta lista fixa — mock
+const POPULAR_CATEGORIES = ['Casual', 'Esportivo'];
+const soldCategories = topBySales(categories, p => [p.category]);
+export const popularCategories = soldCategories.length > 0 ? soldCategories : POPULAR_CATEGORIES;
+const popularColors = topBySales(allColors, p => p.colors, 4);
+
 const colorSwatch: Record<string, string> = {
   Preto: '#111', Branco: '#fff', Azul: '#2563eb', Navy: '#1e3a8a',
   Vermelho: '#dc2626', Marrom: '#7c4a2a', Denim: '#3b6ea5',
@@ -72,6 +90,8 @@ interface Props {
 export function CatalogFiltersBar({ filters, onChange }: Props) {
   const [colorQuery, setColorQuery] = useState('');
   const visibleColors = allColors.filter(c => normalize(c).includes(normalize(colorQuery.trim())));
+  const visiblePopularColors = popularColors.filter(c => visibleColors.includes(c));
+  const visibleOtherColors = visibleColors.filter(c => !popularColors.includes(c));
   const toggleColor = (c: string) => {
     const next = filters.colors.includes(c)
       ? filters.colors.filter(x => x !== c)
@@ -85,6 +105,36 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
     search: filters.search,
     priceTable: filters.priceTable,
   });
+
+  // Amostras de cor: botões só com a cor → o nome aparece em tooltip (rótulo extra; aria-label tem o nome)
+  const renderSwatches = (list: string[]) => (
+    <SimpleGrid cols={6} spacing={6} verticalSpacing={8} className={classes.swatchGrid}>
+      {list.map(c => {
+        const active = filters.colors.includes(c);
+        const bg = colorSwatch[c] || '#94a3b8';
+        return (
+          <Tooltip key={c} label={c}>
+            <ColorSwatch
+              component="button"
+              type="button"
+              onClick={() => toggleColor(c)}
+              aria-label={`Cor ${c}`}
+              aria-pressed={active}
+              color={bg}
+              size={32}
+              withShadow={false}
+              bd={`2px solid ${active ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR}`}
+              c={bg === '#fff' ? 'black' : 'white'}
+              className={classes.swatch}
+              data-active={active || undefined}
+            >
+              {active && <CheckIcon size={16} />}
+            </ColorSwatch>
+          </Tooltip>
+        );
+      })}
+    </SimpleGrid>
+  );
 
   const currentTable = priceTables.find(t => t.id === filters.priceTable);
   const priceActive = filters.priceRange[0] !== priceMin || filters.priceRange[1] !== priceMax;
@@ -144,6 +194,8 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           {/* 11 linhas: caixa de busca no topo filtra enquanto digita */}
           <SearchableChips
             options={lines}
+            popular={popularLines}
+            restLabel="Outras linhas"
             value={filters.line}
             onSelect={l => onChange({ ...filters, line: l })}
             searchLabel="Buscar linha"
@@ -158,7 +210,13 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           label={filters.category !== 'Todos' ? `Categoria: ${filters.category}` : 'Categoria'}
           active={filters.category !== 'Todos'}
         >
-          <ChoiceChips options={categories} value={filters.category} onSelect={c => onChange({ ...filters, category: c })} />
+          <ChoiceChips
+            options={categories}
+            popular={popularCategories}
+            restLabel="Outras categorias"
+            value={filters.category}
+            onSelect={c => onChange({ ...filters, category: c })}
+          />
         </FilterPopover>
 
         <FilterPopover
@@ -184,32 +242,23 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
               action={{ label: 'Limpar Busca', onClick: () => setColorQuery(''), forward: false }}
             />
           )}
-          <SimpleGrid cols={6} spacing={6} verticalSpacing={8} className={classes.swatchGrid}>
-            {visibleColors.map(c => {
-              const active = filters.colors.includes(c);
-              const bg = colorSwatch[c] || '#94a3b8';
-              return (
-                <ColorSwatch
-                  key={c}
-                  component="button"
-                  type="button"
-                  onClick={() => toggleColor(c)}
-                  title={c}
-                  aria-label={`Cor ${c}`}
-                  aria-pressed={active}
-                  color={bg}
-                  size={32}
-                  withShadow={false}
-                  bd={`2px solid ${active ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR}`}
-                  c={bg === '#fff' ? 'black' : 'white'}
-                  className={classes.swatch}
-                  data-active={active || undefined}
-                >
-                  {active && <CheckIcon size={16} />}
-                </ColorSwatch>
-              );
-            })}
-          </SimpleGrid>
+          {/* Cores mais vendidas primeiro; o resto em seguida, em ordem alfabética */}
+          <Stack gap="sm">
+            {visiblePopularColors.length > 0 && (
+              <Box>
+                <Text lh={1.5} c="dimmed" size="sm" mb={4}>Mais usados</Text>
+                {renderSwatches(visiblePopularColors)}
+              </Box>
+            )}
+            {visibleOtherColors.length > 0 && (
+              <Box>
+                {visiblePopularColors.length > 0 && (
+                  <Text lh={1.5} c="dimmed" size="sm" mb={4}>Outras cores</Text>
+                )}
+                {renderSwatches(visibleOtherColors)}
+              </Box>
+            )}
+          </Stack>
           {filters.colors.length > 0 && (
             <Text lh={1.5} mt={8} c="dimmed" size="sm">
               {filters.colors.join(', ')}
@@ -256,31 +305,58 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
 // busca sem diferenciar maiúsculas nem acentos
 const normalize = (v: string) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-// Chips de escolha única (poucas opções)
-function ChoiceChips({ options, value, onSelect }: { options: string[]; value: string; onSelect: (v: string) => void }) {
+// Chips de escolha única. Com `popular`: "Todos" primeiro, depois "Mais usados" e o resto
+// (cada opção aparece uma vez só). Exportado para reaproveitar no painel de filtros do catálogo.
+export function ChoiceChips({ options, value, onSelect, popular = [], restLabel = 'Outras opções' }: {
+  options: string[]; value: string; onSelect: (v: string) => void;
+  popular?: string[]; restLabel?: string;
+}) {
+  const chip = (o: string) => (
+    <Chip
+      key={o}
+      value={o}
+      variant="filled"
+      icon={null}
+      styles={{ iconWrapper: { display: 'none' } }}
+    >
+      {o}
+    </Chip>
+  );
+  const allOption: string[] = options.filter(o => o === 'Todos' || o === 'Todas');
+  const popularVisible = popular.filter(o => options.includes(o));
+  const rest = options.filter(o => !allOption.includes(o) && !popularVisible.includes(o));
+
+  if (popularVisible.length === 0) {
+    return (
+      <Chip.Group multiple={false} value={value} onChange={onSelect}>
+        <Group gap="sm">{options.map(chip)}</Group>
+      </Chip.Group>
+    );
+  }
   return (
     <Chip.Group multiple={false} value={value} onChange={onSelect}>
-      <Group gap="sm">
-        {options.map(o => (
-          <Chip
-            key={o}
-            value={o}
-            variant="filled"
-            icon={null}
-            styles={{ iconWrapper: { display: 'none' } }}
-          >
-            {o}
-          </Chip>
-        ))}
-      </Group>
+      <Stack gap="sm">
+        {allOption.length > 0 && <Group gap="sm">{allOption.map(chip)}</Group>}
+        <Box>
+          <Text lh={1.5} c="dimmed" size="sm" mb={4}>Mais usados</Text>
+          <Group gap="sm">{popularVisible.map(chip)}</Group>
+        </Box>
+        {rest.length > 0 && (
+          <Box>
+            <Text lh={1.5} c="dimmed" size="sm" mb={4}>{restLabel}</Text>
+            <Group gap="sm">{rest.map(chip)}</Group>
+          </Box>
+        )}
+      </Stack>
     </Chip.Group>
   );
 }
 
 // Chips com caixa de busca no topo — para listas com 7+ opções
-function SearchableChips({ options, value, onSelect, searchLabel, placeholder, emptyTitle, emptyText }: {
+function SearchableChips({ options, value, onSelect, searchLabel, placeholder, emptyTitle, emptyText, popular, restLabel }: {
   options: string[]; value: string; onSelect: (v: string) => void;
   searchLabel: string; placeholder: string; emptyTitle: string; emptyText: string;
+  popular?: string[]; restLabel?: string;
 }) {
   const [query, setQuery] = useState('');
   const q = normalize(query.trim());
@@ -305,7 +381,7 @@ function SearchableChips({ options, value, onSelect, searchLabel, placeholder, e
           action={{ label: 'Limpar Busca', onClick: () => setQuery(''), forward: false }}
         />
       )}
-      <ChoiceChips options={visible} value={value} onSelect={onSelect} />
+      <ChoiceChips options={visible} value={value} onSelect={onSelect} popular={popular} restLabel={restLabel} />
     </Stack>
   );
 }
