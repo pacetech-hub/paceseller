@@ -118,6 +118,7 @@ function ChangePasswordModal({ opened, onClose }: { opened: boolean; onClose: ()
           <NewPasswordInput
             label="Nova senha"
             placeholder="Crie uma nova senha"
+            description="Passa a valer no seu próximo acesso"
             value={next}
             onChange={setNext}
           />

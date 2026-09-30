@@ -81,6 +81,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             type="email"
             placeholder="nome@loja.com.br"
             data={Object.keys(demoAccounts)}
+            description="Para testar, escolha uma conta de demonstração na lista; qualquer senha funciona"
             value={email}
             onChange={(value) => {
               setEmail(value);
