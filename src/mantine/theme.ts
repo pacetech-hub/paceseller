@@ -7,17 +7,19 @@ import { createTheme, type MantineColorsTuple } from "@mantine/core";
 // - blue: somente links;
 // - teal: sucesso / disponível; yellow: atenção / baixo estoque; red: erro / esgotado / excluir.
 // Cores de produto (swatches de cor do calçado) são dados, não parte da paleta de interface.
+// Cinzas com um toque frio (azulado, matiz ~215°) em vez de cinza puro: fundos e superfícies
+// ficam menos "mortos" e combinam com o gray do Mantine usado nos fundos de cartões.
 const neutral: MantineColorsTuple = [
-  "#f5f5f5",
-  "#e7e7e7",
-  "#d1d1d1",
-  "#b0b0b0",
-  "#888888",
-  "#6e6e6e",
-  "#4a4a4a",
-  "#2e2e2e",
-  "#1a1a1a",
-  "#000000",
+  "#f4f6f8",
+  "#e6e9ed",
+  "#cfd4da",
+  "#adb4bc",
+  "#868e98",
+  "#6b737c",
+  "#484f57",
+  "#2d3238",
+  "#1a1d21",
+  "#0b0d0f",
 ];
 
 // Tipografia: apenas três pesos — regular (400), semibold (600) e bold (700).
@@ -65,6 +67,15 @@ export const mantineTheme = createTheme({
   // Um único arredondamento (8px) para botões, campos, cartões e modais: valores parecidos
   // mas diferentes (6/8/12/16px) quebram o "caminho previsível" do olhar.
   defaultRadius: "md",
+  // Espaçamento em degraus bem distintos: gaps maiores separam grupos grandes (seções),
+  // menores separam itens dentro de um grupo. xs 8 · sm 12 · md 16 · lg 24 · xl 32.
+  spacing: {
+    xs: "0.5rem",
+    sm: "0.75rem",
+    md: "1rem",
+    lg: "1.5rem",
+    xl: "2rem",
+  },
   radius: {
     xs: RADIUS,
     sm: RADIUS,
@@ -106,7 +117,10 @@ export const mantineTheme = createTheme({
     CloseButton: { defaultProps: { size: "xl", radius: "md" } },
     SegmentedControl: { defaultProps: { size: CONTROL_SIZE, radius: "md" }, styles: { label: { fontWeight: SEMIBOLD } } },
     Chip: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },
-    Checkbox: { defaultProps: { size: CONTROL_SIZE, radius: "sm" } },
+    // Checkbox é sempre uma CAIXA: cantos de 4px (bem menores que o raio geral de 8px),
+    // para não parecer um radio redondo.
+    Checkbox: { defaultProps: { size: CONTROL_SIZE, radius: 4 } },
+    CheckboxIndicator: { defaultProps: { radius: 4 } },
     Radio: { defaultProps: { size: CONTROL_SIZE } },
     Switch: { defaultProps: { size: CONTROL_SIZE } },
     Pagination: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },

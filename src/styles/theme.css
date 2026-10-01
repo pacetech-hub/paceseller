@@ -122,3 +122,53 @@ body {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+
+/*
+ * Hierarquia de botões: só a ação principal (filled) tem cor forte E sombra;
+ * as secundárias (default/light/subtle) ficam planas e visivelmente menos importantes.
+ */
+.mantine-Button-root[data-variant="filled"]:not(:disabled):not([data-disabled]) {
+  box-shadow: 0 1px 2px rgba(11, 13, 15, 0.12), 0 2px 6px rgba(11, 13, 15, 0.16);
+}
+
+.mantine-Button-root[data-variant="default"],
+.mantine-Button-root[data-variant="light"],
+.mantine-Button-root[data-variant="subtle"],
+.mantine-Button-root[data-variant="outline"] {
+  box-shadow: none;
+}
+
+/*
+ * Modo escuro (preparado no tema; o app ainda não tem um seletor de tema):
+ * camadas mais próximas do usuário ficam MAIS CLARAS para mostrar profundidade —
+ * fundo da página < cartões < pop-ups/menus/tooltips.
+ */
+[data-mantine-color-scheme="dark"] {
+  --mantine-color-body: var(--mantine-color-dark-8);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Paper-root,
+[data-mantine-color-scheme="dark"] .mantine-Card-root {
+  background-color: var(--mantine-color-dark-7);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Modal-content,
+[data-mantine-color-scheme="dark"] .mantine-Modal-header,
+[data-mantine-color-scheme="dark"] .mantine-Drawer-content,
+[data-mantine-color-scheme="dark"] .mantine-Drawer-header,
+[data-mantine-color-scheme="dark"] .mantine-Popover-dropdown,
+[data-mantine-color-scheme="dark"] .mantine-Menu-dropdown,
+[data-mantine-color-scheme="dark"] .mantine-Combobox-dropdown,
+[data-mantine-color-scheme="dark"] .mantine-Notification-root {
+  background-color: var(--mantine-color-dark-6);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Modal-content .mantine-Paper-root,
+[data-mantine-color-scheme="dark"] .mantine-Popover-dropdown .mantine-Paper-root {
+  background-color: var(--mantine-color-dark-5);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Tooltip-tooltip {
+  background-color: var(--mantine-color-dark-4);
+  color: var(--mantine-color-white);
+}
