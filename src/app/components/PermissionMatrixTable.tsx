@@ -18,13 +18,13 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
 
   return (
     <Card withBorder padding={0}>
-      <Stack gap={8} p={{ base: 'md', sm: 'lg' }}>
+      <Stack gap="xs" p={{ base: 'md', sm: 'lg' }}>
         <Group gap="sm">
           {perfis.map(perfil => (
             <Badge key={perfil} color="neutral" variant="light">{perfil}</Badge>
           ))}
         </Group>
-        <Stack gap={2}>
+        <Stack gap={4}>
           {perfis.map(perfil => (
             <Text key={perfil} c="dimmed" size="sm">
               <Text component="span" fw={600} c="var(--mantine-color-text)">{perfil}:</Text> {profileDescriptions[perfil]}

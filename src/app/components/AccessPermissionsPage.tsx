@@ -156,7 +156,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   const visaoInfo = visoes.find(v => v.id === scope.visao)!;
 
   return (
-    <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
+    <Stack gap="xl" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       <Group gap="sm" wrap="nowrap">
         <ThemeIcon size={40} variant="light" color="neutral">
           <Icon size={20} />
@@ -176,11 +176,12 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         <Group justify="space-between" p={{ base: 'md', sm: 'lg' }} wrap="wrap">
           <Box>
             <Title order={2}>Usuários vinculados</Title>
-            <Text c="dimmed" size="sm" mt={2}>{scope.usersHint}</Text>
+            <Text c="dimmed" size="sm" mt={4}>{scope.usersHint}</Text>
           </Box>
+          {/* Abre o formulário: ação secundária (a principal é "Enviar Convite", dentro dele) */}
           <Button
             onClick={() => setShowInvite(v => !v)}
-            color="neutral"
+            variant="default"
             leftSection={<UserPlusIcon size={16} />}
           >
             Convidar Usuário
@@ -211,7 +212,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               Será convidado com o perfil <Text component="span" fw={600} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
             </Text>
             <Group justify="flex-end" gap="sm">
-              <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default" color="neutral">Cancelar</Button>
+              <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default">Cancelar</Button>
               <Button onClick={inviteUser} color="neutral">Enviar Convite</Button>
             </Group>
           </Stack>

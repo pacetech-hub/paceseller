@@ -41,7 +41,7 @@ export function AppsGridMenu<V extends string>({ title, items, currentView, onSe
               onClick={() => onSelect(item.view)}
             >
               <ItemIcon size={28} />
-              <Text size="sm" mt={8} fw={active ? 600 : 400} lh={1.3}>
+              <Text size="sm" mt="xs" fw={active ? 600 : 400} lh={1.3}>
                 {item.label}
               </Text>
             </UnstyledButton>
