@@ -22,7 +22,7 @@
 }
 
 .campaignRow[data-active] {
-  background-color: var(--mantine-color-neutral-0);
+  background-color: light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5));
 }
 
 /* Cartão selecionável do assistente */
@@ -36,12 +36,13 @@
 }
 
 .option[data-selected] {
-  border-color: var(--mantine-color-neutral-9);
-  box-shadow: 0 0 0 1px var(--mantine-color-neutral-9);
+  border-color: light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-3));
+  box-shadow: 0 0 0 1px light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-3));
 }
 
+/* Fundo do selecionado: claro no tema claro, um degrau acima da superfície no escuro */
 .optionTinted[data-selected] {
-  background-color: var(--mantine-color-neutral-0);
+  background-color: light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5));
   box-shadow: none;
 }
 
@@ -58,8 +59,8 @@
 
 .suggestion[data-selected] {
   color: var(--mantine-color-text);
-  border-color: var(--mantine-color-neutral-9);
-  background-color: var(--mantine-color-neutral-0);
+  border-color: light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-3));
+  background-color: light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5));
 }
 
 /* Etapa atual do assistente: anel ao redor do número */
@@ -71,5 +72,5 @@
 .inlineIcon {
   display: inline;
   vertical-align: -2px;
-  margin-right: 6px;
+  margin-right: 4px;
 }

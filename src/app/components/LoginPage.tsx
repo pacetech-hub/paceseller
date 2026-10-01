@@ -63,15 +63,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <Box mih="100dvh" bg={`var(--mantine-color-dark-7) url(${loginBanner})`} bgsz="cover" bgp="30% center">
-      <Paper className={classes.form} px={{ base: 'lg', xs: 30 }} pb={30} pt={{ base: 48, sm: 80 }}>
-        <Box mb={{ base: 32, sm: 50 }}>
+      <Paper className={classes.form} px={{ base: 'lg', xs: 'xl' }} pb="xl" pt={{ base: 48, sm: 80 }}>
+        <Box mb={{ base: 'xl', sm: 48 }}>
           <Image src={teslaLogo} alt="Tesla Footwear" h={32} w="auto" fit="contain" />
         </Box>
 
         <Title order={1} mb={4}>
           Bem-vindo de volta!
         </Title>
-        <Text c="dimmed" size="sm" mb={{ base: 28, sm: 40 }}>
+        <Text c="dimmed" size="sm" mb={{ base: 'lg', sm: 'xl' }}>
           Catálogo digital, pedidos por grade, marketing com IA e sell-out em uma única plataforma.
         </Text>
 

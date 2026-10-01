@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Stack, Group, Flex, Box, Paper, Card, Text, Title, Button, ActionIcon, SimpleGrid, ThemeIcon, Badge, Divider,
-  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image, Skeleton,
+  Modal, TextInput, Textarea, FileButton, UnstyledButton, AspectRatio, Loader, Center, Image, Skeleton, Checkbox,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
@@ -118,10 +118,10 @@ interface HistoryItem {
 }
 
 const initialHistory: HistoryItem[] = [
-  { id: 'hist-1', image: campaignPreviewMock, formatLabel: 'Instagram Feed 4:5', copy: AI_PROMPTS[0], createdAt: '18 de jun' },
-  { id: 'hist-2', image: bannerLimitedEdition, formatLabel: 'WhatsApp', copy: AI_PROMPTS[1], createdAt: '12 de jun' },
-  { id: 'hist-3', image: campaignPreviewMock, formatLabel: 'Instagram Story 9:16', copy: AI_PROMPTS[2], createdAt: '05 de jun' },
-  { id: 'hist-4', image: bannerLimitedEdition, formatLabel: 'Impressão A4', copy: AI_PROMPTS[0], createdAt: '28 de mai' },
+  { id: 'hist-1', image: campaignPreviewMock, formatLabel: 'Instagram Feed 4:5', copy: AI_PROMPTS[0], createdAt: '18 de jun.' },
+  { id: 'hist-2', image: bannerLimitedEdition, formatLabel: 'WhatsApp', copy: AI_PROMPTS[1], createdAt: '12 de jun.' },
+  { id: 'hist-3', image: campaignPreviewMock, formatLabel: 'Instagram Story 9:16', copy: AI_PROMPTS[2], createdAt: '5 de jun.' },
+  { id: 'hist-4', image: bannerLimitedEdition, formatLabel: 'Impressão A4', copy: AI_PROMPTS[0], createdAt: '28 de mai.' },
 ];
 
 const WIZARD_STEPS = [
@@ -170,9 +170,9 @@ function PiecesSkeleton({ count, cols }: { count: number; cols: React.ComponentP
             <Skeleton />
           </AspectRatio>
           <Box p="sm">
-            <Skeleton height={16} width="60%" mb={8} />
-            <Skeleton height={12} width="90%" mb={6} />
-            <Skeleton height={12} width="70%" mb={8} />
+            <Skeleton height={16} width="60%" mb={4} />
+            <Skeleton height={12} width="90%" mb={4} />
+            <Skeleton height={12} width="70%" mb="xs" />
             <Skeleton height={42} />
           </Box>
         </Card>
@@ -201,7 +201,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
   return (
     <Box p="sm">
       <Text fw={600} truncate>{label}</Text>
-      <Text c="dimmed" size="sm" mb={8} lineClamp={2}>{copy}</Text>
+      <Text c="dimmed" size="sm" mb="xs" lineClamp={2}>{copy}</Text>
       <Button
         onClick={() => toast.success(`Download de "${label}" iniciado`, 'O arquivo vai para a pasta de downloads do navegador')}
         variant="default"
@@ -217,7 +217,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
 function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { history: HistoryItem[]; onCreate: (formatId?: string) => void; onManageCampaigns: () => void; onDelete: (id: string) => void }) {
   const loading = useMockLoading();
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Header */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
         <Group justify="space-between" wrap="wrap" gap="md">
@@ -352,21 +352,23 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
   );
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
-      <BackLink onClick={onBack} />
-
-      <Box>
-        <Title order={1}>Gerenciar campanhas</Title>
-        <Text c="dimmed" size="sm">Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
-      </Box>
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+      {/* Voltar + título formam um só bloco (espaço curto entre eles) */}
+      <Stack gap="xs">
+        <BackLink onClick={onBack} />
+        <Box>
+          <Title order={1}>Gerenciar campanhas</Title>
+          <Text c="dimmed" size="sm" mt={4}>Configure os objetivos de campanha e os cenários fotográficos usados como fundo das peças</Text>
+        </Box>
+      </Stack>
 
       {/* Lista à esquerda e detalhe à direita a partir de sm; empilhados abaixo disso */}
       <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'flex-start' }} gap="lg">
         {/* Left panel: campaign list */}
-        <Paper withBorder p={8} w={{ base: '100%', sm: 220, md: 256 }} flex="none">
-          <Stack gap={2}>
+        <Paper withBorder p="xs" w={{ base: '100%', sm: 220, md: 256 }} flex="none">
+          <Stack gap={4}>
             {loading && Array.from({ length: 3 }).map((_, i) => (
-              <Box key={i} px="sm" py={12} aria-hidden>
+              <Box key={i} px="sm" py="sm" aria-hidden>
                 <Skeleton height={16} width={`${70 - i * 12}%`} />
               </Box>
             ))}
@@ -380,7 +382,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
                   className={classes.campaignRow}
                   data-active={active || undefined}
                 >
-                  <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py={10} flex={1} miw={0}>
+                  <UnstyledButton onClick={() => onSelect(c.id)} px="sm" py="xs" flex={1} miw={0}>
                     <Text fw={active ? 600 : 400} truncate>
                       {c.name}
                     </Text>
@@ -407,7 +409,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
           {loading ? (
             <Stack gap="md" aria-busy="true" aria-label="Carregando campanha">
               <Paper withBorder p="md">
-                <Skeleton height={20} width="35%" mb={10} />
+                <Skeleton height={20} width="35%" mb="xs" />
                 <Skeleton height={14} width="70%" />
               </Paper>
               <Paper withBorder p="md">
@@ -665,431 +667,446 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
     null;
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
-      <BackLink onClick={onBack} />
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+      {/* Voltar + etapas formam o bloco de navegação do assistente */}
+      <Stack gap="xs">
+        <BackLink onClick={onBack} />
 
-      {/* Stepper */}
-      <Paper withBorder p="md">
-        <Group justify="space-between" wrap="nowrap" gap={0}>
-          {WIZARD_STEPS.map((s, i) => {
-            const done = step > s.n;
-            const current = step === s.n;
-            return (
-              <Group key={s.n} gap={0} wrap="nowrap" flex={1}>
-                <Group gap={8} wrap="nowrap">
-                  {/* Só as etapas concluídas são botões (voltam para a etapa); a atual e as futuras não são clicáveis */}
-                  {done ? (
-                    <ActionIcon
-                      onClick={() => setStep(s.n)}
-                      disabled={generating}
-                      size="input-sm"
-                      variant="filled"
-                      color="neutral"
-                      aria-label={`Voltar para a etapa ${s.n}: ${s.label}`}
-                      flex="none"
-                    >
-                      <CheckIcon size={16} />
-                    </ActionIcon>
-                  ) : (
-                    <ThemeIcon
-                      size={36}
-                      variant={current ? 'filled' : 'light'}
-                      color={current ? 'neutral' : 'gray'}
-                      flex="none"
-                      fz="md"
-                      fw={700}
-                      c={current ? undefined : 'dimmed'}
-                      className={classes.stepDot}
-                      data-current={current || undefined}
-                      aria-current={current ? 'step' : undefined}
-                      aria-label={`Etapa ${s.n}: ${s.label}${current ? ' (atual)' : ''}`}
-                      role="img"
-                    >
-                      {s.n}
-                    </ThemeIcon>
+        {/* Stepper */}
+        <Paper withBorder p="md">
+          <Group justify="space-between" wrap="nowrap" gap={0}>
+            {WIZARD_STEPS.map((s, i) => {
+              const done = step > s.n;
+              const current = step === s.n;
+              return (
+                <Group key={s.n} gap={0} wrap="nowrap" flex={1}>
+                  <Group gap="xs" wrap="nowrap">
+                    {/* Só as etapas concluídas são botões (voltam para a etapa); a atual e as futuras não são clicáveis */}
+                    {done ? (
+                      <ActionIcon
+                        onClick={() => setStep(s.n)}
+                        disabled={generating}
+                        size="input-sm"
+                        variant="light"
+                        color="neutral"
+                        aria-label={`Voltar para a etapa ${s.n}: ${s.label}`}
+                        flex="none"
+                      >
+                        <CheckIcon size={16} />
+                      </ActionIcon>
+                    ) : (
+                      <ThemeIcon
+                        size={36}
+                        variant={current ? 'filled' : 'light'}
+                        color={current ? 'neutral' : 'gray'}
+                        flex="none"
+                        fz="md"
+                        fw={700}
+                        c={current ? undefined : 'dimmed'}
+                        className={classes.stepDot}
+                        data-current={current || undefined}
+                        aria-current={current ? 'step' : undefined}
+                        aria-label={`Etapa ${s.n}: ${s.label}${current ? ' (atual)' : ''}`}
+                        role="img"
+                      >
+                        {s.n}
+                      </ThemeIcon>
+                    )}
+                    <Box visibleFrom="sm">
+                      <Text
+                        size="sm"
+                        lh={1.3}
+                        fw={current ? 600 : 400}
+                        c={step >= s.n ? undefined : 'dimmed'}
+                      >
+                        {s.label}
+                      </Text>
+                      {/* Descrição curta da etapa: só com espaço para as 6 etapas lado a lado */}
+                      <Text visibleFrom="lg" size="sm" lh={1.3} c="dimmed">
+                        {s.description}
+                      </Text>
+                    </Box>
+                  </Group>
+                  {i < WIZARD_STEPS.length - 1 && (
+                    <Divider mx="xs" flex={1} color={done ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR} />
                   )}
-                  <Box visibleFrom="sm">
-                    <Text
-                      size="sm"
-                      lh={1.3}
-                      fw={current ? 600 : 400}
-                      c={step >= s.n ? undefined : 'dimmed'}
-                    >
-                      {s.label}
-                    </Text>
-                    {/* Descrição curta da etapa: só com espaço para as 6 etapas lado a lado */}
-                    <Text visibleFrom="lg" size="sm" lh={1.3} c="dimmed">
-                      {s.description}
-                    </Text>
-                  </Box>
                 </Group>
-                {i < WIZARD_STEPS.length - 1 && (
-                  <Divider mx={8} flex={1} color={done ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR} />
-                )}
-              </Group>
-            );
-          })}
-        </Group>
-        {/* No celular os rótulos das etapas ficam ocultos: mostra a etapa atual por extenso */}
-        <Text hiddenFrom="sm" fw={600} mt="sm" aria-live="polite">
-          Etapa {step} de {WIZARD_STEPS.length} · {WIZARD_STEPS[step - 1].label}
-        </Text>
-      </Paper>
+              );
+            })}
+          </Group>
+          {/* No celular os rótulos das etapas ficam ocultos: mostra a etapa atual por extenso */}
+          <Text hiddenFrom="sm" fw={600} mt="sm" aria-live="polite">
+            Etapa {step} de {WIZARD_STEPS.length} · {WIZARD_STEPS[step - 1].label}
+          </Text>
+        </Paper>
+      </Stack>
 
-      {/* Step Content */}
-      <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-        {/* Step 1: Escolher campanha */}
-        {step === 1 && (
-          <Box>
-            <StepHeader title="Escolher campanha" subtitle="Para qual campanha esta peça será criada?" />
-            {campaigns.length > 0 ? (
-              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
-                {campaigns.map(c => {
-                  const isSelected = campaignId === c.id;
-                  return (
-                    <Paper
-                      key={c.id}
-                      component="button"
-                      type="button"
-                      withBorder
-                      onClick={() => setCampaignId(c.id)}
-                      className={optionClass}
-                      data-selected={isSelected || undefined}
-                    >
-                      <AspectRatio ratio={4 / 5}>
-                        <Center bg="var(--mantine-color-default-hover)">
-                          {c.photos.length > 0 ? (
-                            <Image src={c.photos[0]} alt={c.name} h="100%" flex={1} />
-                          ) : (
-                            <ImageIcon size={32} color={DIMMED} opacity={0.3} />
-                          )}
-                        </Center>
-                      </AspectRatio>
-                      <Group p="sm" justify="space-between" align="flex-start" gap={8} wrap="nowrap" bg="var(--mantine-color-default-hover)">
-                        <Box miw={0}>
-                          <Text fw={600} truncate>{c.name}</Text>
-                          <Text c="dimmed" size="sm" truncate>{c.description || 'Sem descrição'}</Text>
-                        </Box>
-                        {isSelected && <Box display="flex" mt={2}><CheckIcon size={16} /></Box>}
-                      </Group>
-                    </Paper>
-                  );
-                })}
-              </SimpleGrid>
-            ) : (
-              <EmptyState
-                withBorder={false}
-                icon={FolderSimplePlusIcon}
-                title="Você ainda não tem campanhas"
-                description="A peça precisa de uma campanha com cenários fotográficos. Crie uma para continuar."
-                action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
-              />
-            )}
-          </Box>
-        )}
-
-        {/* Step 2: Escolher formatos (multi-select); mais usados primeiro */}
-        {step === 2 && (
-          <Box>
-            <Group justify="space-between" wrap="wrap" gap={8} mb={4}>
-              <Title order={2}>Escolher formatos</Title>
-              <Text c="dimmed" size="sm">{selectedFormats.size} selecionado(s)</Text>
-            </Group>
-            <Text c="dimmed" size="sm" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
-            <Stack gap="lg">
-              {formatSections.map(section => (
-                <Box key={section.title}>
-                  <Text fw={600} mb={8}>
-                    {section.title}
-                  </Text>
-                  <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
-                    {section.items.map(f => {
-                      const Icon = f.icon;
-                      const isSelected = selectedFormats.has(f.id);
-                      return (
-                        <Paper
-                          key={f.id}
-                          component="button"
-                          type="button"
-                          withBorder
-                          p="md"
-                          onClick={() => toggleFormat(f.id)}
-                          className={`${optionClass} ${classes.optionTinted}`}
-                          data-selected={isSelected || undefined}
-                        >
-                          <ThemeIcon variant="light" color="neutral" size={36}>
-                            <Icon size={20} />
-                          </ThemeIcon>
-                          <Text fw={600} mt={8}>{f.label}</Text>
-                          <Text c="dimmed" size="sm">{f.description}</Text>
-                          <Text c="dimmed" size="sm" mt={2}>{f.spec}</Text>
-                          {isSelected && <Box mt={8}><CheckIcon size={16} /></Box>}
-                        </Paper>
-                      );
-                    })}
-                  </SimpleGrid>
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-        )}
-
-        {/* Step 3: Escolher produtos (mais vendidos primeiro) */}
-        {step === 3 && (
-          <Box>
-            <StepHeader
-              title="Escolher produtos"
-              subtitle="Escolha até 3 produtos para a campanha"
-              right={
-                <Text c="dimmed" size="sm">
-                  {selectedProducts.size}/3 selecionados
-                  {selectedProducts.size >= 3 && ' · desmarque um para trocar'}
-                </Text>
-              }
-            />
-            <TextInput
-              label="Buscar produto"
-              placeholder="Buscar por nome ou código"
-              leftSection={<MagnifyingGlassIcon size={16} />}
-              value={productQuery}
-              onChange={e => setProductQuery(e.currentTarget.value)}
-              mb="md"
-            />
-            {filteredProducts.length === 0 && (
-              <EmptyState
-                withBorder={false}
-                icon={MagnifyingGlassIcon}
-                title={`Nenhum produto encontrado para "${productQuery.trim()}"`}
-                description="Confira a grafia ou busque pela referência do produto."
-                action={{ label: 'Limpar Busca', onClick: () => setProductQuery(''), forward: false }}
-              />
-            )}
-            <Stack gap="lg">
-              {productSections.map(section => (
-                <Box key={section.title ?? 'todos'}>
-                  {section.title && <Text fw={600} mb={8}>{section.title}</Text>}
-                  <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-                    {section.items.map(p => {
-                      const isSelected = selectedProducts.has(p.id);
-                      const meta = productMeta[p.id];
-                      return (
-                        <Paper
-                          key={p.id}
-                          component="button"
-                          type="button"
-                          withBorder
-                          p="sm"
-                          onClick={() => toggleProduct(p.id)}
-                          className={`${optionClass} ${classes.optionTinted}`}
-                          data-selected={isSelected || undefined}
-                          bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
-                        >
-                          <Card padding={0} pos="relative" h={96} mb={8} bg="var(--mantine-color-gray-2)">
-                            <LoadingImage src={p.image} alt={p.name} onErrorHide />
-                            {isSelected && (
-                              <Center pos="absolute" inset={0} bg="rgba(0, 0, 0, 0.3)">
-                                <CheckIcon size={24} color="#fff" />
-                              </Center>
+      {/* Conteúdo da etapa + navegação formam um só bloco */}
+      <Stack gap="md">
+        {/* Step Content */}
+        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+          {/* Step 1: Escolher campanha */}
+          {step === 1 && (
+            <Box>
+              <StepHeader title="Escolher campanha" subtitle="Para qual campanha esta peça será criada?" />
+              {campaigns.length > 0 ? (
+                <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
+                  {campaigns.map(c => {
+                    const isSelected = campaignId === c.id;
+                    return (
+                      <Paper
+                        key={c.id}
+                        component="button"
+                        type="button"
+                        withBorder
+                        onClick={() => setCampaignId(c.id)}
+                        className={optionClass}
+                        data-selected={isSelected || undefined}
+                      >
+                        <AspectRatio ratio={4 / 5}>
+                          <Center bg="var(--mantine-color-default-hover)">
+                            {c.photos.length > 0 ? (
+                              <Image src={c.photos[0]} alt={c.name} h="100%" flex={1} />
+                            ) : (
+                              <ImageIcon size={32} color={DIMMED} opacity={0.3} />
                             )}
-                          </Card>
-                          {meta && (
-                            <Badge
-                              variant="light"
-                              color={tagColors[meta.tag]}
-                              mb={4}
-                            >
-                              {meta.tag.charAt(0).toUpperCase() + meta.tag.slice(1)}
-                            </Badge>
-                          )}
-                          <Text fw={600} truncate>{p.name}</Text>
-                          <Text fw={600} className="mono">{formatCurrency(p.price)}</Text>
-                          {meta && <Text c="dimmed" size="sm">Estoque: {meta.stock} pares</Text>}
-                        </Paper>
-                      );
-                    })}
-                  </SimpleGrid>
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-        )}
+                          </Center>
+                        </AspectRatio>
+                        <Group p="sm" justify="space-between" align="flex-start" gap="xs" wrap="nowrap" bg="var(--mantine-color-default-hover)">
+                          <Box miw={0}>
+                            <Text fw={600} truncate>{c.name}</Text>
+                            <Text c="dimmed" size="sm" truncate>{c.description || 'Sem descrição'}</Text>
+                          </Box>
+                          {isSelected && <Box display="flex" mt={4}><CheckIcon size={16} /></Box>}
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                </SimpleGrid>
+              ) : (
+                <EmptyState
+                  withBorder={false}
+                  icon={FolderSimplePlusIcon}
+                  title="Você ainda não tem campanhas"
+                  description="A peça precisa de uma campanha com cenários fotográficos. Crie uma para continuar."
+                  action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
+                />
+              )}
+            </Box>
+          )}
 
-        {/* Step 4: Escolher cenário (cenário fotográfico da campanha escolhida na Etapa 1) */}
-        {step === 4 && (
-          <Box>
-            <StepHeader
-              title="Escolher cenário"
-              subtitle={`Escolha um cenário fotográfico de ${selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}`}
-            />
-            {selectedCampaign && selectedCampaign.photos.length > 0 ? (
-              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
-                {selectedCampaign.photos.map((photo, idx) => {
-                  const isSelected = scenarioIndex === idx;
-                  return (
-                    <Paper
-                      key={idx}
-                      component="button"
-                      type="button"
-                      withBorder
-                      onClick={() => setScenarioIndex(idx)}
-                      className={optionClass}
-                      data-selected={isSelected || undefined}
-                    >
-                      <AspectRatio ratio={4 / 5}>
-                        <Box bg="var(--mantine-color-default-hover)">
-                          <Image src={photo} alt={`Cenário ${idx + 1}`} h="100%" />
-                        </Box>
-                      </AspectRatio>
-                      <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
-                        <Text fw={600}>Cenário {idx + 1}</Text>
-                        {isSelected && <CheckIcon size={16} />}
-                      </Group>
-                    </Paper>
-                  );
-                })}
-              </SimpleGrid>
-            ) : (
-              <EmptyState
-                withBorder={false}
-                icon={ImageIcon}
-                title="Esta campanha ainda não tem cenários"
-                description='Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" ou escolha outra campanha para usar como fundo da peça.'
-                action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
-                secondaryAction={{ label: 'Escolher Outra Campanha', onClick: () => setStep(1) }}
-              />
-            )}
-          </Box>
-        )}
-
-        {/* Enquanto gera: skeleton com o formato das peças do resultado (uma por formato) */}
-        {step === 5 && generating && (
-          <Box aria-live="polite">
-            <StepHeader
-              title="Gerando peças…"
-              subtitle={`Criando ${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça' : 'peças'} com os produtos e o texto escolhidos`}
-            />
-            <PiecesSkeleton count={selectedFormatList.length} cols={{ base: 2, sm: 3 }} />
-          </Box>
-        )}
-
-        {/* Step 5: Escrever texto */}
-        {step === 5 && !generating && (
-          <Box>
-            <StepHeader title="Escrever texto" subtitle="Descreva o tom da campanha ou use uma sugestão" />
-            <Textarea
-              value={prompt}
-              onChange={e => setPrompt(e.currentTarget.value)}
-              rows={4}
-              mb="sm"
-              maxLength={300}
-              description="Até 300 caracteres"
-              placeholder="ex.: Coleção Inverno com conforto e estilo para a sua vitrine"
-              aria-label="Texto da campanha"
-            />
-            <Box mb="md">
-              <Text c="dimmed" size="sm" mb={8}>Sugestões da IA</Text>
-              <Stack gap="sm">
-                {AI_PROMPTS.map((sugg, i) => (
-                  <Paper
-                    key={i}
-                    component="button"
-                    type="button"
-                    withBorder
-                    p="sm"
-                    onClick={() => setPrompt(sugg)}
-                    className={`${interactive.cardButton} ${classes.suggestion}`}
-                    data-selected={prompt === sugg || undefined}
-                    lh={1.5}
-                  >
-                    {sugg}
-                  </Paper>
+          {/* Step 2: Escolher formatos (multi-select); mais usados primeiro */}
+          {step === 2 && (
+            <Box>
+              <Group justify="space-between" wrap="wrap" gap="xs" mb={4}>
+                <Title order={2}>Escolher formatos</Title>
+                <Text c="dimmed" size="sm">{selectedFormats.size} selecionado(s)</Text>
+              </Group>
+              <Text c="dimmed" size="sm" mb="md">Onde esta campanha será usada? Selecione um ou mais formatos.</Text>
+              <Stack gap="lg">
+                {formatSections.map(section => (
+                  <Box key={section.title}>
+                    <Text fw={600} mb="xs">
+                      {section.title}
+                    </Text>
+                    <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+                      {section.items.map(f => {
+                        const Icon = f.icon;
+                        const isSelected = selectedFormats.has(f.id);
+                        return (
+                          <Paper
+                            key={f.id}
+                            component="button"
+                            type="button"
+                            withBorder
+                            p="md"
+                            onClick={() => toggleFormat(f.id)}
+                            className={`${optionClass} ${classes.optionTinted}`}
+                            data-selected={isSelected || undefined}
+                            aria-pressed={isSelected}
+                          >
+                            {/* Seleção múltipla: caixa de seleção (quadrada) no canto, sempre visível */}
+                            <Group justify="space-between" align="flex-start" wrap="nowrap" gap="xs">
+                              <ThemeIcon variant="light" color="neutral" size={36}>
+                                <Icon size={20} />
+                              </ThemeIcon>
+                              <Checkbox.Indicator checked={isSelected} color="neutral" aria-hidden />
+                            </Group>
+                            <Text fw={600} mt="xs">{f.label}</Text>
+                            <Text c="dimmed" size="sm">{f.description}</Text>
+                            <Text c="dimmed" size="sm">{f.spec}</Text>
+                          </Paper>
+                        );
+                      })}
+                    </SimpleGrid>
+                  </Box>
                 ))}
               </Stack>
             </Box>
-            <Paper p="sm" bg="var(--mantine-color-default-hover)">
-              <Text c="dimmed" size="sm">
-                <MagicWandIcon size={16} className={classes.inlineIcon} />
-                A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
-              </Text>
-            </Paper>
-          </Box>
-        )}
-
-        {/* Step 6: Ver resultado — cards like Histórico, one per selected format */}
-        {step === 6 && (
-          <Box>
-            <StepHeader
-              title="Resultado da campanha"
-              subtitle={`${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'} · baixe cada uma ou salve todas no histórico`}
-              right={
-                <Button
-                  onClick={() => setStep(5)}
-                  variant="subtle"
-                  color="gray"
-                  leftSection={<ArrowsClockwiseIcon size={16} />}
-                >
-                  Regenerar Peças
-                </Button>
-              }
-            />
-
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
-              {selectedFormatList.map(f => (
-                <Card key={f.id} withBorder padding={0}>
-                  <AspectRatio ratio={1}>
-                    <Box pos="relative" bg="var(--mantine-color-default-hover)">
-                      <LoadingImage src={campaignPreviewMock} alt={f.label} />
-                    </Box>
-                  </AspectRatio>
-                  <PieceInfo label={f.label} copy={prompt} />
-                </Card>
-              ))}
-            </SimpleGrid>
-          </Box>
-        )}
-      </Paper>
-
-      {/* Navegação: secundária à esquerda, principal à direita; no celular empilha com a principal por último (embaixo) */}
-      <Stack gap={8}>
-        {blockedReason && (
-          <Text c="dimmed" size="sm" ta={{ base: 'left', xs: 'right' }} aria-live="polite">
-            {blockedReason}
-          </Text>
-        )}
-        <Flex direction={{ base: 'column', xs: 'row' }} justify="flex-end" gap="sm">
-          {step > 1 && (
-            <Button
-              onClick={() => setStep(s => Math.max(1, s - 1))}
-              disabled={generating}
-              variant="default"
-              leftSection={<CaretLeftIcon size={16} />}
-            >
-              Voltar para {WIZARD_STEPS[step - 2].action}
-            </Button>
           )}
 
-          {step < 5 ? (
-            <Button
-              onClick={() => setStep(s => s + 1)}
-              disabled={blockedReason !== null}
-              rightSection={<ArrowRightIcon size={16} />}
-            >
-              Avançar para {WIZARD_STEPS[step].action}
-            </Button>
-          ) : step === 5 ? (
-            <Button
-              onClick={handleGenerate}
-              disabled={generating || blockedReason !== null}
-              leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
-            >
-              {generating ? 'Gerando Peças…' : 'Gerar Peças'}
-            </Button>
-          ) : (
-            <Button onClick={handleFinish} leftSection={<CheckIcon size={16} />}>
-              Salvar no Histórico
-            </Button>
+          {/* Step 3: Escolher produtos (mais vendidos primeiro) */}
+          {step === 3 && (
+            <Box>
+              <StepHeader
+                title="Escolher produtos"
+                subtitle="Escolha até 3 produtos para a campanha"
+                right={
+                  <Text c="dimmed" size="sm">
+                    {selectedProducts.size}/3 selecionados
+                    {selectedProducts.size >= 3 && ' · desmarque um para trocar'}
+                  </Text>
+                }
+              />
+              <TextInput
+                label="Buscar produto"
+                placeholder="Buscar por nome ou código"
+                leftSection={<MagnifyingGlassIcon size={16} />}
+                value={productQuery}
+                onChange={e => setProductQuery(e.currentTarget.value)}
+                mb="lg"
+              />
+              {filteredProducts.length === 0 && (
+                <EmptyState
+                  withBorder={false}
+                  icon={MagnifyingGlassIcon}
+                  title={`Nenhum produto encontrado para "${productQuery.trim()}"`}
+                  description="Confira a grafia ou busque pela referência do produto."
+                  action={{ label: 'Limpar Busca', onClick: () => setProductQuery(''), forward: false }}
+                />
+              )}
+              <Stack gap="lg">
+                {productSections.map(section => (
+                  <Box key={section.title ?? 'todos'}>
+                    {section.title && <Text fw={600} mb="xs">{section.title}</Text>}
+                    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+                      {section.items.map(p => {
+                        const isSelected = selectedProducts.has(p.id);
+                        const meta = productMeta[p.id];
+                        return (
+                          <Paper
+                            key={p.id}
+                            component="button"
+                            type="button"
+                            withBorder
+                            p="sm"
+                            onClick={() => toggleProduct(p.id)}
+                            className={`${optionClass} ${classes.optionTinted}`}
+                            data-selected={isSelected || undefined}
+                            aria-pressed={isSelected}
+                            bg={isSelected ? undefined : 'var(--mantine-color-default-hover)'}
+                          >
+                            <Card padding={0} pos="relative" h={96} mb="xs" bg="var(--mantine-color-gray-2)">
+                              <LoadingImage src={p.image} alt={p.name} onErrorHide />
+                              {/* Seleção múltipla (até 3): caixa de seleção quadrada sobre a foto */}
+                              <Checkbox.Indicator
+                                checked={isSelected}
+                                color="neutral"
+                                pos="absolute"
+                                top={8}
+                                right={8}
+                                aria-hidden
+                              />
+                            </Card>
+                            {meta && (
+                              <Badge
+                                variant="light"
+                                color={tagColors[meta.tag]}
+                                mb={4}
+                              >
+                                {meta.tag.charAt(0).toUpperCase() + meta.tag.slice(1)}
+                              </Badge>
+                            )}
+                            <Text fw={600} truncate>{p.name}</Text>
+                            <Text fw={600} className="mono">{formatCurrency(p.price)}</Text>
+                            {meta && <Text c="dimmed" size="sm">Estoque: {meta.stock} pares</Text>}
+                          </Paper>
+                        );
+                      })}
+                    </SimpleGrid>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
           )}
-        </Flex>
+
+          {/* Step 4: Escolher cenário (cenário fotográfico da campanha escolhida na Etapa 1) */}
+          {step === 4 && (
+            <Box>
+              <StepHeader
+                title="Escolher cenário"
+                subtitle={`Escolha um cenário fotográfico de ${selectedCampaign ? `"${selectedCampaign.name}"` : 'sua campanha'}`}
+              />
+              {selectedCampaign && selectedCampaign.photos.length > 0 ? (
+                <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
+                  {selectedCampaign.photos.map((photo, idx) => {
+                    const isSelected = scenarioIndex === idx;
+                    return (
+                      <Paper
+                        key={idx}
+                        component="button"
+                        type="button"
+                        withBorder
+                        onClick={() => setScenarioIndex(idx)}
+                        className={optionClass}
+                        data-selected={isSelected || undefined}
+                      >
+                        <AspectRatio ratio={4 / 5}>
+                          <Box bg="var(--mantine-color-default-hover)">
+                            <Image src={photo} alt={`Cenário ${idx + 1}`} h="100%" />
+                          </Box>
+                        </AspectRatio>
+                        <Group p="sm" justify="space-between" wrap="nowrap" bg="var(--mantine-color-default-hover)">
+                          <Text fw={600}>Cenário {idx + 1}</Text>
+                          {isSelected && <CheckIcon size={16} />}
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                </SimpleGrid>
+              ) : (
+                <EmptyState
+                  withBorder={false}
+                  icon={ImageIcon}
+                  title="Esta campanha ainda não tem cenários"
+                  description='Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" ou escolha outra campanha para usar como fundo da peça.'
+                  action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
+                  secondaryAction={{ label: 'Escolher Outra Campanha', onClick: () => setStep(1) }}
+                />
+              )}
+            </Box>
+          )}
+
+          {/* Enquanto gera: skeleton com o formato das peças do resultado (uma por formato) */}
+          {step === 5 && generating && (
+            <Box aria-live="polite">
+              <StepHeader
+                title="Gerando peças…"
+                subtitle={`Criando ${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça' : 'peças'} com os produtos e o texto escolhidos`}
+              />
+              <PiecesSkeleton count={selectedFormatList.length} cols={{ base: 2, sm: 3 }} />
+            </Box>
+          )}
+
+          {/* Step 5: Escrever texto */}
+          {step === 5 && !generating && (
+            <Box>
+              <StepHeader title="Escrever texto" subtitle="Descreva o tom da campanha ou use uma sugestão" />
+              <Textarea
+                value={prompt}
+                onChange={e => setPrompt(e.currentTarget.value)}
+                rows={4}
+                mb="md"
+                maxLength={300}
+                description="Até 300 caracteres"
+                placeholder="ex.: Coleção Inverno com conforto e estilo para a sua vitrine"
+                aria-label="Texto da campanha"
+              />
+              <Box mb="md">
+                <Text c="dimmed" size="sm" mb="xs">Sugestões da IA</Text>
+                <Stack gap="sm">
+                  {AI_PROMPTS.map((sugg, i) => (
+                    <Paper
+                      key={i}
+                      component="button"
+                      type="button"
+                      withBorder
+                      p="sm"
+                      onClick={() => setPrompt(sugg)}
+                      className={`${interactive.cardButton} ${classes.suggestion}`}
+                      data-selected={prompt === sugg || undefined}
+                      lh={1.5}
+                    >
+                      {sugg}
+                    </Paper>
+                  ))}
+                </Stack>
+              </Box>
+              <Paper p="sm" bg="var(--mantine-color-default-hover)">
+                <Text c="dimmed" size="sm">
+                  <MagicWandIcon size={16} className={classes.inlineIcon} />
+                  A IA irá gerar textos, adaptar o layout e compor a lâmina automaticamente usando os produtos selecionados.
+                </Text>
+              </Paper>
+            </Box>
+          )}
+
+          {/* Step 6: Ver resultado — cards like Histórico, one per selected format */}
+          {step === 6 && (
+            <Box>
+              <StepHeader
+                title="Resultado da campanha"
+                subtitle={`${selectedFormatList.length} ${selectedFormatList.length === 1 ? 'peça gerada' : 'peças geradas'} · baixe cada uma ou salve todas no histórico`}
+                right={
+                  <Button
+                    onClick={() => setStep(5)}
+                    variant="subtle"
+                    color="gray"
+                    leftSection={<ArrowsClockwiseIcon size={16} />}
+                  >
+                    Regenerar Peças
+                  </Button>
+                }
+              />
+
+              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
+                {selectedFormatList.map(f => (
+                  <Card key={f.id} withBorder padding={0}>
+                    <AspectRatio ratio={1}>
+                      <Box pos="relative" bg="var(--mantine-color-default-hover)">
+                        <LoadingImage src={campaignPreviewMock} alt={f.label} />
+                      </Box>
+                    </AspectRatio>
+                    <PieceInfo label={f.label} copy={prompt} />
+                  </Card>
+                ))}
+              </SimpleGrid>
+            </Box>
+          )}
+        </Paper>
+
+        {/* Navegação: secundária à esquerda, principal à direita; no celular empilha com a principal por último (embaixo) */}
+        <Stack gap="xs">
+          {blockedReason && (
+            <Text c="dimmed" size="sm" ta={{ base: 'left', xs: 'right' }} aria-live="polite">
+              {blockedReason}
+            </Text>
+          )}
+          <Flex direction={{ base: 'column', xs: 'row' }} justify="flex-end" gap="sm">
+            {step > 1 && (
+              <Button
+                onClick={() => setStep(s => Math.max(1, s - 1))}
+                disabled={generating}
+                variant="default"
+                leftSection={<CaretLeftIcon size={16} />}
+              >
+                Voltar para {WIZARD_STEPS[step - 2].action}
+              </Button>
+            )}
+
+            {step < 5 ? (
+              <Button
+                onClick={() => setStep(s => s + 1)}
+                disabled={blockedReason !== null}
+                rightSection={<ArrowRightIcon size={16} />}
+              >
+                Avançar para {WIZARD_STEPS[step].action}
+              </Button>
+            ) : step === 5 ? (
+              <Button
+                onClick={handleGenerate}
+                disabled={generating || blockedReason !== null}
+                leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
+              >
+                {generating ? 'Gerando Peças…' : 'Gerar Peças'}
+              </Button>
+            ) : (
+              <Button onClick={handleFinish} leftSection={<CheckIcon size={16} />}>
+                Salvar no Histórico
+              </Button>
+            )}
+          </Flex>
+        </Stack>
       </Stack>
     </Stack>
   );
