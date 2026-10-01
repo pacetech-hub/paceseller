@@ -3,8 +3,10 @@
   justify-items: start;
 }
 
-/* Amostra de cor clicável: cresce um pouco quando selecionada */
+/* Amostra de cor clicável (seleção múltipla): quadrada com canto de 4px, como uma caixa de seleção
+   — redondo fica só para escolha única; cresce um pouco quando selecionada */
 .swatch {
+  --cs-radius: 4px;
   cursor: pointer;
   transition: transform 150ms ease, border-color 150ms ease;
 }
