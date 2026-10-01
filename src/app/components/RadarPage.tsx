@@ -36,7 +36,6 @@ interface RadarAction {
   ctaLabel: string;
   onAction: () => void;
   // a ação mais importante do período: único botão cheio da grade
-  primary?: boolean;
 }
 
 const PERIODS: { value: Period; label: string }[] = [
@@ -94,23 +93,17 @@ function ActionCard({ action }: { action: RadarAction }) {
           </Paper>
         )}
         <Group mt="auto" pt="xs">
-          {action.primary ? (
-            // ação principal do período: único botão cheio da grade
-            <Button variant="filled" rightSection={<ArrowRightIcon size={16} />} onClick={action.onAction}>
-              {action.ctaLabel}
-            </Button>
-          ) : (
-            // demais cards: botão terciário alinhado ao texto do card (compensa o padding lateral)
-            <Button
-              variant="subtle"
-              color="neutral"
-              ml="calc(var(--button-padding-x) * -1)"
-              rightSection={<ArrowRightIcon size={16} />}
-              onClick={action.onAction}
-            >
-              {action.ctaLabel}
-            </Button>
-          )}
+          {/* Todas as ações do Radar são terciárias (subtle): o destaque fica com a cor do cartão,
+              e o botão alinha o texto ao conteúdo (compensa o padding lateral) */}
+          <Button
+            variant="subtle"
+            color="neutral"
+            ml="calc(var(--button-padding-x) * -1)"
+            rightSection={<ArrowRightIcon size={16} />}
+            onClick={action.onAction}
+          >
+            {action.ctaLabel}
+          </Button>
         </Group>
       </Stack>
     </Paper>
@@ -144,7 +137,6 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       suggestion: 'Sugestão: repor 32 pares',
       ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P002', 32),
-      primary: true,
     },
     {
       id: 'late-order-4790-1',
@@ -168,7 +160,6 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       suggestion: 'Sugestão: repor 60 pares',
       ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P010', 60),
-      primary: true,
     },
     {
       id: 'launch-fusion-mix',
@@ -224,7 +215,6 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       description: 'Coil Black White, Denim, Hertz All Black Furta Cor e mais 3',
       ctaLabel: 'Ver Produtos em Alta',
       onAction: () => onOpenCatalog({ sortBy: 'mais vendidos' }),
-      primary: true,
     },
   ];
 
