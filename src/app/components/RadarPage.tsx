@@ -45,14 +45,17 @@ const PERIODS: { value: Period; label: string }[] = [
   { value: '30d', label: 'Nos próximos 30 dias' },
 ];
 
-const TONES: Record<Tone, { color: string; icon: Icon }> = {
-  opportunity: { color: 'teal.7', icon: TrendUpIcon },
-  stock: { color: 'yellow.8', icon: PackageIcon },
-  alert: { color: 'red.7', icon: WarningIcon },
+// Cada tipo de ação tem uma cor de status; o cartão inteiro usa o fundo claro dessa cor
+// (variáveis "-light" do Mantine, que também se ajustam no modo escuro) e uma borda no mesmo tom,
+// para o tipo ser reconhecido de relance.
+const TONES: Record<Tone, { color: string; base: string; icon: Icon }> = {
+  opportunity: { color: 'teal.7', base: 'teal', icon: TrendUpIcon },
+  stock: { color: 'yellow.8', base: 'yellow', icon: PackageIcon },
+  alert: { color: 'red.7', base: 'red', icon: WarningIcon },
   // lançamento e benchmark são informativos: neutros (azul fica só para links)
-  launch: { color: 'neutral.9', icon: RocketLaunchIcon },
-  benchmark: { color: 'gray.7', icon: UsersThreeIcon },
-  lowTurnover: { color: 'gray.7', icon: TrendDownIcon },
+  launch: { color: 'neutral.9', base: 'neutral', icon: RocketLaunchIcon },
+  benchmark: { color: 'gray.7', base: 'gray', icon: UsersThreeIcon },
+  lowTurnover: { color: 'gray.7', base: 'gray', icon: TrendDownIcon },
 };
 
 export function getGreeting(date = new Date()): string {
@@ -66,7 +69,13 @@ function ActionCard({ action }: { action: RadarAction }) {
   const tone = TONES[action.tone];
   const ToneIcon = tone.icon;
   return (
-    <Paper withBorder p="lg" h="100%">
+    <Paper
+      withBorder
+      p="lg"
+      h="100%"
+      bg={`var(--mantine-color-${tone.base}-light)`}
+      style={{ borderColor: `var(--mantine-color-${tone.base}-light-hover)` }}
+    >
       <Stack gap="xs" h="100%">
         <Group gap="xs" wrap="nowrap">
           <ThemeIcon variant="light" color={tone.color} size="sm">
@@ -80,7 +89,7 @@ function ActionCard({ action }: { action: RadarAction }) {
           <Text size="sm" c="dimmed" mt={4}>{action.description}</Text>
         </Box>
         {action.suggestion && (
-          <Paper p="xs" bg="var(--mantine-color-gray-0)">
+          <Paper p="xs" bg="var(--mantine-color-body)">
             <Text size="sm">{action.suggestion}</Text>
           </Paper>
         )}
