@@ -40,8 +40,9 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
   return (
     <Paper withBorder p="sm" bg="var(--mantine-color-gray-0)">
       <Text c="dimmed" size="sm">{lab}</Text>
-      <Text c={color} size="lg" fw={700}>{val}</Text>
-      {sub && <Text c="dimmed" size="sm" mt={2}>{sub}</Text>}
+      {/* número-chave do bloco: tamanho xl */}
+      <Text c={color} size="xl" fw={700} className="mono">{val}</Text>
+      {sub && <Text c="dimmed" size="sm" mt={4}>{sub}</Text>}
     </Paper>
   );
 }
@@ -62,7 +63,7 @@ function ListItem({ title, meta, right }: { title: string; meta: string; right?:
   return (
     <Paper withBorder p="sm">
       <Group align="flex-start" gap="xs" wrap="nowrap">
-        <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} mt={6} withShadow={false} />
+        <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} mt="xs" withShadow={false} />
         <Box flex={1}>
           <Text fw={600}>{title}</Text>
           <Text c="dimmed" size="sm">{meta}</Text>
@@ -88,9 +89,10 @@ function StatusStack({ segs }: { segs: { n: string; q: number; color: string; ac
       </Progress.Root>
       <Group gap="sm" mt="sm">
         {segs.map(s => (
-          <Group key={s.n} gap={6} wrap="nowrap">
+          <Group key={s.n} gap="xs" wrap="nowrap">
             <ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} withShadow={false} />
-            <Text c="dimmed" size="sm">{s.n} · {s.q}</Text>
+            {/* legenda com valor e participação */}
+            <Text c="dimmed" size="sm">{s.n} · {s.q} ({Math.round((s.q / tot) * 100)}%)</Text>
             {s.action && <MantineBadge variant="light" color="yellow">ação</MantineBadge>}
           </Group>
         ))}
@@ -99,15 +101,17 @@ function StatusStack({ segs }: { segs: { n: string; q: number; color: string; ac
   );
 }
 
-function Rank({ rows }: { rows: { n: string; v: number }[] }) {
-  const max = Math.max(...rows.map(r => r.v));
+// ranking sempre do maior para o menor, com a unidade ao lado do número
+function Rank({ rows, unit }: { rows: { n: string; v: number }[]; unit: string }) {
+  const sorted = [...rows].sort((a, b) => b.v - a.v);
+  const max = Math.max(...sorted.map(r => r.v));
   return (
-    <Stack gap="xs">
-      {rows.map(r => (
+    <Stack gap="sm">
+      {sorted.map(r => (
         <Group key={r.n} gap="sm" wrap="nowrap">
           <Text truncate flex={1}>{r.n}</Text>
           <Progress value={(r.v / max) * 100} size={6} flex={1} />
-          <Text size="sm" fw={600} w={56} ta="right" className="mono">{fmt(r.v)}</Text>
+          <Text size="sm" fw={600} w={88} ta="right" className="mono">{fmt(r.v)} {unit}</Text>
         </Group>
       ))}
     </Stack>
@@ -139,6 +143,7 @@ const recurringRows = [
   { product: 'Sapatilha Flex', cadence: 'a cada 45 dias', count: '3', last: 'há 40 dias', next: 'em ~5 dias', soon: true },
 ];
 
+// ordem: o que pede ação primeiro (ruptura → baixo → OK)
 const stockRows: { product: string; tone: StockTone; status: string; stock: number; ruptureDays: number | string; turnover: number; value: string }[] = [
   { product: 'Tênis Runner X', tone: 'risk', status: 'Ruptura', stock: 0, ruptureDays: 6, turnover: 12, value: '—' },
   { product: 'Sandália Verão', tone: 'warn', status: 'Baixo', stock: 14, ruptureDays: '—', turnover: 15, value: brl(1190) },
@@ -156,7 +161,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
   const loading = useMockLoading();
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
-      <Stack gap="lg">
+      <Stack gap="xl">
         <Group justify="space-between" align="flex-start" gap="sm">
           <Box>
             <Title order={2}>Meus indicadores</Title>
@@ -171,7 +176,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
 
         {loading ? (
           // skeleton no formato do painel: resumo/status, gráfico e tabelas
-          <Stack gap="lg">
+          <Stack gap="xl">
             <KpiSkeleton count={4} />
             <Grid gutter="md">
               <Grid.Col span={{ base: 12, lg: 7 }}><ChartSkeleton height={190} /></Grid.Col>
@@ -182,14 +187,15 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Stack>
         ) : (<>
         {/* MEUS PEDIDOS */}
+        <Stack gap="sm">
         <SectionLabel>Meus pedidos</SectionLabel>
         <Grid gutter="md">
           <Card title="Resumo do período" hint="Recência e volume da loja" span={4}>
             <Stack gap="sm">
-              <Tile lab="Último pedido" val="há 11 dias" sub="06/07/2026 · dentro do esperado (limite 30d)" />
+              <Tile lab="Último pedido" val="há 11 dias" sub="6 de jul. · dentro do esperado (limite de 30 dias)" />
               <SimpleGrid cols={3} spacing="xs">
                 <Tile lab="Pedidos" val="7" />
-                <Tile lab="Pares" val="462" />
+                <Tile lab="Pares" val={fmt(462)} />
                 <Tile lab="Valor" val={brl(19250)} />
               </SimpleGrid>
             </Stack>
@@ -209,7 +215,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </SimpleGrid>
           </Card>
 
-          <Card title="Histórico de compras" hint="Últimos 6 meses (R$ mil) · com variação" span={7}>
+          <Card title="Histórico de compras" hint="Últimos 6 meses · em R$ mil" span={7}>
             <LineChart
               h={190}
               data={histData}
@@ -220,7 +226,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               tickLine="none"
               // tooltip com o valor completo em reais (os dados estão em R$ mil)
               valueFormatter={v => brl(v * 1000)}
-              yAxisProps={{ tickFormatter: (v: number) => `${v}k`, domain: lineDomain }}
+              yAxisProps={{ tickFormatter: (v: number) => `${v} mil`, domain: lineDomain }}
             />
             <Group gap={4} c={POS} mt="xs" wrap="nowrap">
               <TrendUpIcon size={14} />
@@ -229,25 +235,27 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Card>
 
           <Card title="Pedidos repetidos" hint="Contados pelo botão “repetir pedido” do histórico" span={5}>
-            <Text size="xl" fw={700}>4</Text>
-            <Group gap={4} c={POS} wrap="nowrap">
+            <Text size="xl" fw={700} className="mono">4 pedidos</Text>
+            <Group gap={4} c={POS} wrap="nowrap" mt={4}>
               <TrendUpIcon size={14} />
-              <Text c="inherit" size="sm" fw={600}>+2 vs período anterior</Text>
+              <Text c="inherit" size="sm" fw={600}>+2 pedidos vs. período anterior</Text>
             </Group>
             <Stack gap="xs" mt="sm">
               {[
-                { t: 'Pedido #2314 → repetido 2x', m: 'Tênis Runner X · grade completa' },
-                { t: 'Pedido #2201 → repetido 2x', m: 'Sandália Verão · meia grade' },
+                { t: 'Pedido #2314 → repetido 2 vezes', m: 'Tênis Runner X · grade completa' },
+                { t: 'Pedido #2201 → repetido 2 vezes', m: 'Sandália Verão · meia grade' },
               ].map(o => <ListItem key={o.t} title={o.t} meta={o.m} />)}
             </Stack>
           </Card>
         </Grid>
+        </Stack>
 
         {/* RECOMPRA E PRODUTOS */}
+        <Stack gap="sm">
         <SectionLabel>Recompra e produtos</SectionLabel>
         <Grid gutter="md">
           <Card title="Produtos mais comprados" hint="Mix da loja · por pares" span={5}>
-            <Rank rows={[
+            <Rank unit="pares" rows={[
               { n: 'Tênis Runner X', v: 120 }, { n: 'Sandália Verão', v: 96 },
               { n: 'Sapatilha Flex', v: 60 }, { n: 'Bota Couro', v: 48 }, { n: 'Chinelo Soft', v: 36 },
             ]} />
@@ -279,14 +287,16 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </CellList>
           </Card>
         </Grid>
+        </Stack>
 
         {/* ESTOQUE E SELL-OUT */}
+        <Stack gap="sm">
         <SectionLabel>Estoque e sell-out da loja</SectionLabel>
         <Grid gutter="md">
           <Card title="Sell-out" hint="Envio do dado de venda na ponta" span={3}>
             <Stack gap="sm" align="stretch">
               <Box><Badge tone="ok" icon={<CheckIcon size={12} />}>Loja participante</Badge></Box>
-              <Tile lab="Giro médio do estoque" val="20 dias" sub="alerta se > 30d" />
+              <Tile lab="Giro médio do estoque" val="20 dias" sub="alerta acima de 30 dias" />
               <Tile lab="Valor em estoque" val={brl(9435)} />
               <Tile lab="SKUs em ruptura" val="1" tone="neg" />
             </Stack>
@@ -301,7 +311,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
                 <Table.Tr key={r.product}>
                   <Table.Td>{r.product}</Table.Td>
                   <Table.Td><Badge tone={r.tone}>{r.status}</Badge></Table.Td>
-                  <Table.Td ta="right" className="mono">{r.stock}</Table.Td>
+                  <Table.Td ta="right" className="mono">{fmt(r.stock)}</Table.Td>
                   <Table.Td ta="right" className="mono" c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Table.Td>
                   <Table.Td ta="right" className="mono" c={r.turnover > 30 ? WARN : undefined} fw={r.turnover > 30 ? 600 : undefined}>{r.turnover}</Table.Td>
                   <Table.Td ta="right" className="mono">{r.value}</Table.Td>
@@ -324,8 +334,10 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </CellList>
           </Card>
         </Grid>
+        </Stack>
 
         {/* RECOMENDAÇÕES */}
+        <Stack gap="sm">
         <SectionLabel>Recomendações</SectionLabel>
         <Grid gutter="md">
           <Card title="Sugestões para a loja" hint="Top produto da empresa + top produto da região" span={6}>
@@ -353,6 +365,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
             </Stack>
           </Card>
         </Grid>
+        </Stack>
         </>)}
       </Stack>
     </Container>
