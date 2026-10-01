@@ -45,10 +45,11 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
         </ThemeIcon>
         <Box flex={1} miw={0}>
           <Text fw={600} size="lg">{title}</Text>
-          {description && <Text c="dimmed" size="sm" mt={2}>{description}</Text>}
+          {description && <Text c="dimmed" size="sm" mt={4}>{description}</Text>}
         </Box>
       </Group>
-      <Stack gap="md">{children}</Stack>
+      {/* Entre dados do bloco: sm (12); título → conteúdo: md (16); entre blocos: lg (24) */}
+      <Stack gap="sm">{children}</Stack>
     </Paper>
   );
 }
@@ -149,7 +150,7 @@ function ChangePasswordButton() {
   const [opened, setOpened] = useState(false);
   return (
     <>
-      <Button variant="default" color="neutral" mr="auto" leftSection={<LockIcon size={16} />} onClick={() => setOpened(true)}>
+      <Button variant="default" mr="auto" leftSection={<LockIcon size={16} />} onClick={() => setOpened(true)}>
         Alterar Senha
       </Button>
       <ChangePasswordModal opened={opened} onClose={() => setOpened(false)} />
@@ -160,17 +161,17 @@ function ChangePasswordButton() {
 // Skeleton com o mesmo formato dos blocos do perfil (ícone + título + dados em uma coluna)
 function ProfileSkeleton() {
   return (
-    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md" aria-busy="true" aria-label="Carregando perfil">
+    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" aria-busy="true" aria-label="Carregando perfil">
       {Array.from({ length: 6 }).map((_, i) => (
         <Paper key={i} withBorder p={{ base: 'md', sm: 'lg' }}>
           <Group gap="sm" mb="md" wrap="nowrap">
             <Skeleton height={36} width={36} />
             <Skeleton height={20} width="40%" />
           </Group>
-          <Stack gap="md">
+          <Stack gap="sm">
             {Array.from({ length: 4 }).map((_, j) => (
               <Box key={j}>
-                <Skeleton height={12} width="30%" mb={8} />
+                <Skeleton height={12} width="30%" mb={4} />
                 <Skeleton height={16} width="60%" />
               </Box>
             ))}
@@ -224,7 +225,7 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
 // ---------- Lojista ----------
 function LojistaProfile() {
   return (
-    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
       <Section icon={BuildingsIcon} title="Dados da empresa">
         <Field label="Razão social" value="Calçados Bella Moda LTDA" />
         <Field label="Nome fantasia" value="Bella Moda" />
@@ -256,8 +257,8 @@ function LojistaProfile() {
       <Section icon={UserCheckIcon} title="Representante responsável">
         <Field label="Nome" value="Marina Costa" />
         <Field label="Região" value="Sudeste — SP Capital" />
-        <Field label="E-mail" value={<Group gap={6} wrap="nowrap"><EnvelopeIcon size={14} color="var(--mantine-color-dimmed)" />marina.costa@tesla.com.br</Group>} />
-        <Field label="Telefone" value={<Group gap={6} wrap="nowrap"><PhoneIcon size={14} color="var(--mantine-color-dimmed)" />(11) 98765-4321</Group>} />
+        <Field label="E-mail" value={<Group gap="xs" wrap="nowrap"><EnvelopeIcon size={14} color="var(--mantine-color-dimmed)" />marina.costa@tesla.com.br</Group>} />
+        <Field label="Telefone" value={<Group gap="xs" wrap="nowrap"><PhoneIcon size={14} color="var(--mantine-color-dimmed)" />(11) 98765-4321</Group>} />
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
@@ -281,7 +282,7 @@ function LojistaProfile() {
 // ---------- Representante ----------
 function RepProfile() {
   return (
-    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
       <Section icon={UsersIcon} title="Dados pessoais">
         <Field label="Nome" value="Marina Costa" />
         <Field label="CPF" value="123.456.789-00" mono />
@@ -298,22 +299,22 @@ function RepProfile() {
       </Section>
 
       <Section icon={StorefrontIcon} title="Carteira de lojas" description="32 lojas vinculadas">
-        <SimpleGrid cols={3} spacing="xs">
-          <Paper withBorder p="xs" bg="var(--mantine-color-neutral-0)">
+        <SimpleGrid cols={3} spacing="sm">
+          <Paper withBorder p="sm" bg="var(--mantine-color-default-hover)">
             <Text c="teal" fw={700} size="xl">24</Text>
             <Text c="dimmed" size="sm">Ativas</Text>
           </Paper>
-          <Paper withBorder p="xs" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder p="sm" bg="var(--mantine-color-default-hover)">
             <Text c="yellow.8" fw={700} size="xl">5</Text>
             <Text c="dimmed" size="sm">Inativas</Text>
           </Paper>
-          <Paper withBorder p="xs" bg="var(--mantine-color-neutral-0)">
+          <Paper withBorder p="sm" bg="var(--mantine-color-default-hover)">
             <Text c="red" fw={700} size="xl">3</Text>
             <Text c="dimmed" size="sm">Bloqueadas</Text>
           </Paper>
         </SimpleGrid>
         <Field label="Top cliente" value="Bella Moda — R$ 42.180,00" />
-        <Field label="Cliente sem pedido há +60d" value="7 lojas" />
+        <Field label="Lojas sem pedido há mais de 60 dias" value="7 lojas" />
       </Section>
 
       <Section icon={TrendUpIcon} title="Indicadores e comissão">
@@ -327,7 +328,7 @@ function RepProfile() {
         <PreferenceList>
           <PreferenceRow label="Novos pedidos da carteira" description="Quando uma loja sua finalizar pedido" defaultChecked />
           <PreferenceRow label="Alertas de meta" description="Avisos semanais sobre avanço de meta" defaultChecked />
-          <PreferenceRow label="Clientes inativos" description="Quando uma loja ficar 30d sem pedido" defaultChecked />
+          <PreferenceRow label="Clientes inativos" description="Quando uma loja ficar 30 dias sem pedido" defaultChecked />
           <PreferenceRow label="Novidades de catálogo" description="Lançamentos e reposições" />
         </PreferenceList>
       </Section>
@@ -345,23 +346,23 @@ function RepProfile() {
 // ---------- Indústria ----------
 function AdminProfile() {
   return (
-    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
+    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
       <Section icon={BuildingsIcon} title="Dados da conta">
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
         <Field label="Plano" value={<Badge color="neutral" variant="light">Enterprise</Badge>} />
-        <Field label="Nível de acesso" value={<Group gap={6} wrap="nowrap"><ShieldCheckIcon size={14} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
+        <Field label="Nível de acesso" value={<Group gap="xs" wrap="nowrap"><ShieldCheckIcon size={14} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
       </Section>
 
       <Section icon={PackageIcon} title="Configurações de catálogo">
         <Field label="Linhas ativas" value="Feminino · Masculino · Infantil" />
         <Field label="SKUs publicados" value="1.284" />
         <Field label="Coleção corrente" value="Verão 26" />
-        <Field label="Tabelas vigentes" value={<Group gap={6} wrap="nowrap"><TagIcon size={14} color="var(--mantine-color-dimmed)" />A · B · C</Group>} />
+        <Field label="Tabelas vigentes" value={<Group gap="xs" wrap="nowrap"><TagIcon size={14} color="var(--mantine-color-dimmed)" />A · B · C</Group>} />
       </Section>
 
       <Section icon={UsersIcon} title="Usuários cadastrados">
-        <SimpleGrid cols={2} spacing="xs">
+        <SimpleGrid cols={2} spacing="sm">
           <Paper withBorder p="sm">
             <Text fw={700} size="xl">18</Text>
             <Text c="dimmed" size="sm">Representantes</Text>
@@ -384,17 +385,17 @@ function AdminProfile() {
       </Section>
 
       <Section icon={PulseIcon} title="Logs de atividade" description="Últimas ações no painel">
-        <Stack gap="xs">
+        <Stack gap={0}>
           {[
             { who: 'marina.costa', what: 'criou pedido #4821', when: '5 min atrás' },
             { who: 'admin@tesla', what: 'atualizou Tabela B', when: '2 h atrás' },
             { who: 'paulo.ramos', what: 'cadastrou novo lojista', when: 'hoje, 08:42' },
             { who: 'sistema', what: 'sincronização ERP concluída', when: 'hoje, 06:00' },
           ].map((l, i) => (
-            <Group key={i} justify="space-between" gap="sm" py={6} className={interactive.rowDivider} wrap="nowrap">
+            <Group key={i} justify="space-between" gap="sm" py="xs" className={interactive.rowDivider} wrap="nowrap">
               <Box miw={0}>
                 <Text component="span" fw={600}>{l.who}</Text>
-                <Text component="span" c="dimmed" ml={8}>{l.what}</Text>
+                <Text component="span" c="dimmed" ml="xs">{l.what}</Text>
               </Box>
               <Text c="dimmed" size="sm" flex="none">{l.when}</Text>
             </Group>

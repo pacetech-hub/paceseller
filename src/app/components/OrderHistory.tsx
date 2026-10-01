@@ -124,7 +124,7 @@ function OrderCellCard({ order, profile, onOpen }: { order: Order; profile: Prof
         </CellField>
       )}
       {profile !== 'rep' && <CellField label="Representante">{order.rep}</CellField>}
-      <CellField label="Quantidade"><Text className="mono" fw={600}>{order.items} pares</Text></CellField>
+      <CellField label="Quantidade"><Text className="mono" fw={600}>{order.items.toLocaleString('pt-BR')} pares</Text></CellField>
       <CellField label="Total"><Text className="mono" fw={600}>{formatCurrency(order.total)}</Text></CellField>
     </CellCard>
   );
@@ -146,7 +146,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
         <Group gap="md" wrap="nowrap">
           {/* column 1: order info */}
           <Box flex={1} miw={0}>
-            <Group gap={6} mb={4}>
+            <Group gap="xs" mb={4}>
               <OrderStatusBadge status={order.status} />
               <Text c="dimmed" size="sm">{support}</Text>
             </Group>
@@ -172,7 +172,7 @@ function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile;
 
           {/* column 4: quantidade */}
           <Box w={COL.qty} flex="none" ta="right">
-            <Text className="mono" truncate>{order.items} pares</Text>
+            <Text className="mono" truncate>{order.items.toLocaleString('pt-BR')} pares</Text>
           </Box>
 
           {/* column 5: total */}
@@ -219,7 +219,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
   const hasFilters = search.trim() !== '' || statusFilter !== 'todos';
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Filters */}
       <Group gap="sm" wrap="wrap">
         <TextInput
@@ -257,7 +257,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           <Paper
             withBorder
             px="md"
-            py={10}
+            py="sm"
             visibleFrom="md"
             pos="sticky"
             top={0}

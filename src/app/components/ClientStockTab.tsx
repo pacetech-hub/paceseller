@@ -106,7 +106,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
               </ThemeIcon>
               <Box miw={0}>
                 <Text fw={700} truncate>{selected.name}</Text>
-                <Group gap={6} c="dimmed" wrap="nowrap">
+                <Group gap="xs" c="dimmed" wrap="nowrap">
                   <MapPinIcon size={12} style={{ flexShrink: 0 }} />
                   <Text size="sm" c="dimmed" truncate>{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
                 </Group>

@@ -90,7 +90,7 @@ function ErpSyncNotice({ text }: { text: string }) {
 function PolicySection({ icon: SectionIcon, title, hint, children }: { icon: Icon; title: string; hint?: string; children: React.ReactNode }) {
   return (
     <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
-      <Group gap={8} mb={4}>
+      <Group gap="xs" mb={4}>
         <SectionIcon size={16} />
         <Title order={4}>{title}</Title>
       </Group>
@@ -102,7 +102,7 @@ function PolicySection({ icon: SectionIcon, title, hint, children }: { icon: Ico
 
 function CriteriaChips({ items }: { items: string[] }) {
   return (
-    <Group gap={6}>
+    <Group gap="xs">
       {/* Somente leitura: a única forma de mudar é pela regra no ERP */}
       {items.length === 0 && <Text c="dimmed" size="sm">Nenhum item nesta condição. Para incluir, ajuste a regra no ERP da Tesla.</Text>}
       {items.map(v => (
@@ -114,7 +114,7 @@ function CriteriaChips({ items }: { items: string[] }) {
 
 function UserCell({ name }: { name: string }) {
   return (
-    <Group gap={10} wrap="nowrap">
+    <Group gap="sm" wrap="nowrap">
       <Avatar size={32} color="neutral" variant="light">
         {initials(name)}
       </Avatar>
@@ -298,7 +298,7 @@ export function AdminPage() {
   );
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Tab bar */}
       <Paper withBorder p={4}>
         <Tabs value={activeTab} onChange={v => v && setActiveTab(v)} variant="pills" color="gray">
@@ -410,7 +410,7 @@ export function AdminPage() {
                 <InfoField label="Desconto" value={policy.discount} highlight />
                 <InfoField label="Pedido mínimo" value={policy.minOrder} mono highlight />
                 <InfoField label="Pagamento" value={policy.payment} />
-                <InfoField label="Clientes cobertos" value={String(policy.clients)} />
+                <InfoField label="Clientes cobertos" value={`${policy.clients} lojistas`} />
               </Stack>
             </Paper>
 
@@ -498,7 +498,7 @@ export function AdminPage() {
 
       {/* Policies Tab */}
       {activeTab === 'policies' && (
-        <Stack gap="md">
+        <Stack gap="lg">
           <ErpSyncNotice text="Políticas são somente leitura neste momento — os valores exibidos refletem as regras vigentes no ERP da Tesla." />
           <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Title order={3} mb="md">Configurações de aprovação</Title>
@@ -522,7 +522,7 @@ export function AdminPage() {
             <Text c="dimmed" size="sm" mb="md">Define o comportamento do sistema para clientes com pagamentos em atraso.</Text>
             <DataGate skeleton={<ListSkeleton rows={1} withAvatar={false} />}>
             <SettingRow label="Clientes inadimplentes" desc="Condição de pagamento aplicada automaticamente a clientes com débitos em aberto">
-              <Paper withBorder px="sm" py={8}>
+              <Paper withBorder px="sm" py="xs">
                 <Text fw={600}>Apenas pagamento à vista</Text>
               </Paper>
             </SettingRow>
@@ -533,7 +533,7 @@ export function AdminPage() {
 
       {/* Settings Tab */}
       {activeTab === 'settings' && (
-        <Stack gap="md">
+        <Stack gap="lg">
           {/* Usuários */}
           <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
             <Group justify="space-between" mb="md" gap="sm">
@@ -546,7 +546,8 @@ export function AdminPage() {
                   onChange={e => setSearch(e.currentTarget.value)}
                   aria-label="Buscar usuário"
                 />
-                <Button onClick={() => (showAddUser ? closeAddUser() : setShowAddUser(true))} leftSection={<PlusIcon size={16} />}>
+                {/* Abre o formulário: ação secundária (a principal é "Criar Usuário", dentro dele) */}
+                <Button onClick={() => (showAddUser ? closeAddUser() : setShowAddUser(true))} variant="default" leftSection={<PlusIcon size={16} />}>
                   Adicionar Usuário
                 </Button>
               </Group>
@@ -760,7 +761,7 @@ export function AdminPage() {
 
       {/* Permissions Tab */}
       {activeTab === 'permissions' && (
-        <Stack gap="md">
+        <Stack gap="lg">
           {/* Visão selector */}
           <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
             {visoes.map(v => {
@@ -775,8 +776,9 @@ export function AdminPage() {
                   withBorder
                   p="md"
                   className={`${classes.cardButton} ${active ? '' : classes.hoverable}`}
-                  bd={active ? '1px solid var(--mantine-color-neutral-9)' : undefined}
-                  bg={active ? 'var(--mantine-color-neutral-0)' : undefined}
+                  // Selecionado: borda forte e fundo tingido, ambos ajustados para o modo escuro
+                  bd={active ? '1px solid light-dark(var(--mantine-color-neutral-9), var(--mantine-color-dark-0))' : undefined}
+                  bg={active ? 'light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5))' : undefined}
                 >
                   <Group gap="sm" wrap="nowrap">
                     <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'neutral' : 'gray'} size={36}>

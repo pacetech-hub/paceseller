@@ -252,7 +252,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
   };
 
   const copyHint = (which: PaymentMethod) => copiedOnce === which && (
-    <Group gap={6} wrap="nowrap" role="status">
+    <Group gap="xs" wrap="nowrap" role="status">
       <CheckCircleIcon size={16} color="var(--mantine-color-teal-6)" style={{ flexShrink: 0 }} />
       <Text size="sm" c="dimmed">
         {which === 'boleto'
@@ -277,7 +277,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
     <Group gap="md" wrap="nowrap" p="md">
       <Box miw={0} flex={1}>
         {/* line 1: status + due/payment date */}
-        <Group gap={8} mb={4}>
+        <Group gap="xs" mb={4}>
           <Badge
             variant="light"
             color={statusColors[payment.status]}
@@ -291,7 +291,7 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
           </Text>
         </Group>
         {/* line 2: order title */}
-        <Text fw={600} truncate mb={2}>{payment.product}</Text>
+        <Text fw={600} truncate mb={4}>{payment.product}</Text>
         {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
         <Text c="dimmed" size="sm" truncate>{metaParts.join(' · ')}</Text>
       </Box>
@@ -329,8 +329,8 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
               mb="sm"
               aria-label="Forma de pagamento"
               data={[
-                { value: 'boleto', label: <Group gap={6} wrap="nowrap"><BarcodeIcon size={16} /> Boleto</Group> },
-                { value: 'pix', label: <Group gap={6} wrap="nowrap"><QrCodeIcon size={16} /> Pix</Group> },
+                { value: 'boleto', label: <Group gap="xs" wrap="nowrap"><BarcodeIcon size={16} /> Boleto</Group> },
+                { value: 'pix', label: <Group gap="xs" wrap="nowrap"><QrCodeIcon size={16} /> Pix</Group> },
               ]}
             />
 
@@ -444,14 +444,16 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   const totalDueSoon = dueSoonList.reduce((acc, p) => acc + p.amount, 0);
   const totalOverdue = overdueList.reduce((acc, p) => acc + p.amount, 0);
 
+  // KPI: cada valor com uma linha de contexto (quantidade de boletos e prazo)
+  const countLabel = (n: number) => (n === 1 ? '1 boleto' : `${n} boletos`);
   const stats = [
-    { label: 'Em aberto', value: formatCurrency(totalOpen), caption: undefined, tone: 'default' as const },
-    { label: 'A vencer', value: formatCurrency(totalDueSoon), caption: 'nos próximos 30 dias', tone: 'default' as const },
-    { label: 'Vencidos', value: formatCurrency(totalOverdue), caption: undefined, tone: 'danger' as const },
+    { label: 'Em aberto', value: formatCurrency(totalOpen), caption: countLabel(openList.length), tone: 'default' as const },
+    { label: 'A vencer', value: formatCurrency(totalDueSoon), caption: `${countLabel(dueSoonList.length)} nos próximos 30 dias`, tone: 'default' as const },
+    { label: 'Vencidos', value: formatCurrency(totalOverdue), caption: `${countLabel(overdueList.length)} após o vencimento`, tone: 'danger' as const },
   ];
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Financial summary */}
       {loading ? <KpiSkeleton count={3} cols={{ base: 1, sm: 3 }} /> : (
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">

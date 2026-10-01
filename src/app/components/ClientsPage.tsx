@@ -11,7 +11,7 @@ import {
   FunnelIcon,
   CaretRightIcon,
 } from "@phosphor-icons/react";
-import { clients, Client } from "../data/mockData";
+import { clients, Client, formatDate } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton, ListSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { CellCard, CellField, CellList } from "./ui/CellView";
@@ -30,8 +30,11 @@ const statusColor: Record<string, string> = {
   'inativo': 'red',
 };
 
-const formatOrderDate = (dateStr: string) =>
-  new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+// datas no formato pt-BR por extenso curto ("16 de jun. de 2026")
+const formatOrderDate = formatDate;
+
+const formatPct = (part: number, total: number) =>
+  `${(total ? (part / total) * 100 : 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 
 // Regiões com mais clientes na carteira aparecem primeiro (derivado do mock)
 const REGIONS = ['Centro-Oeste', 'Norte', 'Nordeste', 'Sudeste', 'Sul']
@@ -105,20 +108,22 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
   return (
     <Container size="xl" px={{ base: 'md', sm: 'lg' }} py={{ base: 'md', sm: 'lg' }} fluid>
-      <Stack gap="lg" maw={1400} mx="auto">
+      <Stack gap="xl" maw={1400} mx="auto">
         {/* Stats */}
         {loading ? <KpiSkeleton count={3} cols={3} /> : (
         <SimpleGrid cols={3} spacing={{ base: 'xs', sm: 'md' }}>
+          {/* KPI: rótulo, número grande e linha de comparação com unidade */}
           {[
-            { count: filtered.length, suffix: 'clientes no total' },
-            { count: activeCount, suffix: 'ativos' },
-            { count: inactiveCount, suffix: 'inativos' },
+            { label: 'Clientes', count: filtered.length, caption: 'na carteira filtrada' },
+            { label: 'Ativos', count: activeCount, caption: `${formatPct(activeCount, filtered.length)} dos clientes` },
+            { label: 'Inativos', count: inactiveCount, caption: `${formatPct(inactiveCount, filtered.length)} dos clientes` },
           ].map(stat => (
-            <Paper key={stat.suffix} withBorder p={{ base: 'sm', sm: 'md' }}>
-              <Group gap={6} align="baseline">
-                <Text fw={700} fz={{ base: 'lg', sm: 'xl' }} lh={1} className="mono">{stat.count}</Text>
-                <Text c="dimmed" size="sm">{stat.suffix}</Text>
-              </Group>
+            <Paper key={stat.label} withBorder p={{ base: 'sm', sm: 'md' }}>
+              <Stack gap={4}>
+                <Text c="dimmed" size="sm">{stat.label}</Text>
+                <Text fw={700} fz="xl" lh={1} className="mono">{stat.count.toLocaleString('pt-BR')}</Text>
+                <Text c="dimmed" size="sm">{stat.caption}</Text>
+              </Stack>
             </Paper>
           ))}
         </SimpleGrid>
@@ -151,7 +156,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Popover.Dropdown w={320} maw="calc(100vw - 32px)">
               <Stack gap="md">
                 <Box>
-                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={6}>Região</Text>
+                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb="xs">Região</Text>
                   <Group gap="sm">
                     {REGIONS.map(r => (
                       <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="neutral">
@@ -162,7 +167,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 </Box>
 
                 <Box>
-                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb={6}>Status</Text>
+                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb="xs">Status</Text>
                   <Group gap="sm">
                     {STATUS_OPTIONS.map(s => (
                       <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="neutral">
@@ -198,7 +203,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   value={sortOrder}
                   onChange={v => setSortOrder(v as SortOrder)}
                 >
-                  <Stack gap="sm" mt={6}>
+                  <Stack gap="sm" mt="xs">
                     {SORT_OPTIONS.map(opt => (
                       <Radio key={opt.value} value={opt.value} label={opt.label} color="neutral" />
                     ))}
@@ -253,7 +258,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                           <Group gap="sm" wrap="nowrap">
                             <Avatar size={36} color="neutral">{client.avatar}</Avatar>
                             <Box miw={0}>
-                              <Group gap={6} mb={2}>
+                              <Group gap="xs" mb={4}>
                                 <Badge color={statusColor[client.status]} variant="light">{client.status}</Badge>
                                 {client.inadimplente && <Badge color="yellow" variant="light">inadimplente</Badge>}
                                 {isSelected && <Badge color="neutral" variant="light">selecionado</Badge>}
@@ -288,7 +293,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                     key={client.id}
                     title={client.name}
                     aside={
-                      <Group gap={6}>
+                      <Group gap="xs">
                         <Badge color={statusColor[client.status]} variant="light">{client.status}</Badge>
                         {client.inadimplente && <Badge color="yellow" variant="light">inadimplente</Badge>}
                         {isSelected && <Badge color="neutral" variant="light">selecionado</Badge>}

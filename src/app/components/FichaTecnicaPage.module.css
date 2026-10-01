@@ -47,11 +47,6 @@
   overflow: hidden;
 }
 
-/* Botão de baixar sobre a imagem: fundo escuro translúcido com desfoque */
-.downloadButton {
-  backdrop-filter: blur(4px);
-}
-
 /* Legenda da foto no canto inferior esquerdo do tile */
 .tileLabel {
   position: absolute;

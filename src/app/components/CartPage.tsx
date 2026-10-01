@@ -223,7 +223,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             <CheckIcon size={32} />
           </ThemeIcon>
           <Title order={1}>Pedido enviado para aprovação</Title>
-          <Text c="dimmed" mt={8}>
+          <Text c="dimmed" mt="xs">
             Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>PED-2026-0413</Text>
           </Text>
           <Text c="dimmed" mt={4}>
@@ -250,7 +250,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
   return (
     <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {cartContext && (
-        <Group justify="space-between" gap="sm" mb="md">
+        <Group justify="space-between" gap="sm" mb="lg">
           <Group gap="sm" wrap="nowrap" miw={0}>
             <Button
               onClick={() => onNavigate('carts')}
@@ -263,7 +263,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             </Button>
             <Divider orientation="vertical" h={20} my="auto" />
             <Box miw={0}>
-              <Group gap={8}>
+              <Group gap="xs">
                 <Text fw={700} truncate>{cartContext.cartName}</Text>
                 {cartContext.createdBy && (
                   <Badge
@@ -277,7 +277,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                   </Badge>
                 )}
               </Group>
-              <Group gap={6} c="dimmed" wrap="nowrap">
+              <Group gap="xs" mt={4} c="dimmed" wrap="nowrap">
                 <StorefrontIcon size={12} />
                 <Text size="sm" c="dimmed" truncate>
                   Cliente: <Text span fw={600} c="var(--mantine-color-text)" inherit>{cartContext.clientName}</Text>
@@ -299,6 +299,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                   setNewCartName('');
                   setShowNewCartDialog(true);
                 }}
+                variant="default"
                 leftSection={<FolderPlusIcon size={14} />}
               >
                 Criar Carrinho
@@ -344,8 +345,9 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
         </Group>
       </Modal>
 
-      {/* Etapas: a etapa concluída (itens) volta a ser clicável; a futura não é */}
-      <Group gap="sm" mb="lg" wrap="nowrap">
+      {/* Etapas: a etapa concluída (itens) volta a ser clicável; a futura não é.
+          Etapa atual em "light": o único botão cheio da tela é a ação principal do resumo. */}
+      <Group gap="sm" mb="xl" wrap="nowrap">
         {step === 'checkout' ? (
           <Button
             onClick={() => setStep('cart')}
@@ -358,7 +360,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
           </Button>
         ) : (
           <Button
-            variant="filled"
+            variant="light"
             color="neutral"
             leftSection={<ShoppingCartIcon size={14} />}
             component="div"
@@ -370,7 +372,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
         <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
         {step === 'checkout' ? (
           <Button
-            variant="filled"
+            variant="light"
             color="neutral"
             leftSection={<CreditCardIcon size={14} />}
             component="div"
@@ -379,7 +381,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             {STEP_NAMES.checkout}
           </Button>
         ) : (
-          <Group gap={6} wrap="nowrap" c="dimmed" px="sm">
+          <Group gap="xs" wrap="nowrap" c="dimmed" px="sm">
             <CreditCardIcon size={14} />
             <Text c="dimmed" fw={600}>{STEP_NAMES.checkout}</Text>
           </Group>
@@ -406,7 +408,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             {step === 'cart' && loading ? (
               <ListSkeleton rows={cart.length} />
             ) : step === 'cart' ? (
-              <Stack gap="sm">
+              <Stack gap="md">
                 {cart.map(item => {
                   const { pairs, value } = getItemTotal(item);
                   return (
@@ -416,7 +418,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                         <Box miw={0} flex={1}>
                           <Text fw={600}>{item.product.name}</Text>
                           <Text c="dimmed" size="sm">{item.product.reference} · {formatCurrency(item.product.price)}/par</Text>
-                          <Text className="mono" fw={700} mt={2}>{formatCurrency(value)}</Text>
+                          <Text className="mono" fw={700} mt={4}>{formatCurrency(value)}</Text>
                         </Box>
                         <Button
                           onClick={() => removeItem(item.product.id)}
@@ -429,10 +431,10 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                           Remover
                         </Button>
                       </Group>
-                      <Group gap={8}>
+                      <Group gap="xs">
                         {Object.entries(item.sizes).map(([size, qty]) => (
-                          <Paper key={size} withBorder px={8} py={4} bg="var(--mantine-color-default-hover)">
-                            <Group gap={6} wrap="nowrap">
+                          <Paper key={size} withBorder px="xs" py={4} bg="var(--mantine-color-default-hover)">
+                            <Group gap={4} wrap="nowrap">
                               <Text c="dimmed" size="sm">Nº {size}</Text>
                               <ActionIcon onClick={() => updateQty(item.product.id, size, -1)} variant="subtle" color="gray" size="input-sm" aria-label={`Diminuir Nº ${size}`}>
                                 <MinusIcon size={16} />
@@ -445,7 +447,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                           </Paper>
                         ))}
                       </Group>
-                      <Text c="dimmed" size="sm" mt={8}>{pairs} pares neste item</Text>
+                      <Text c="dimmed" size="sm" mt="sm">{pairs} pares neste item</Text>
                     </Paper>
                   );
                 })}
@@ -455,12 +457,12 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
               <Stack gap="md">
                 {/* Tabela de preço aplicada */}
                 <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-                  <Group gap={8} mb="sm">
+                  <Group gap="xs" mb="md">
                     <TagIcon size={16} />
                     <Title order={3} fw={600}>Política comercial aplicada</Title>
                   </Group>
                   {/* Poucas tabelas fixas: cartões de opção em vez de lista suspensa */}
-                  <Radio.Group value={tableId} onChange={handleTableChange} name="price-table" label="Tabela de preço" mb="md">
+                  <Radio.Group value={tableId} onChange={handleTableChange} name="price-table" label="Tabela de preço" mb="lg">
                     <Stack gap="sm">
                       {priceTables.map(pt => (
                         <Radio.Card key={pt.id} value={pt.id} p="sm" className={classes.choiceCard}>
@@ -468,7 +470,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                             <Radio.Indicator color="neutral" mt={2} />
                             <Box flex={1} miw={0}>
                               <Text fw={600}>{pt.label}</Text>
-                              <Text c="dimmed" size="sm" mt={2}>{pt.desc}</Text>
+                              <Text c="dimmed" size="sm" mt={4}>{pt.desc}</Text>
                             </Box>
                           </Group>
                         </Radio.Card>
@@ -476,33 +478,33 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     </Stack>
                   </Radio.Group>
                   {/* Uma coluna, rótulo acima do valor: leitura pela borda esquerda */}
-                  <Stack gap="md">
+                  <Stack gap="sm">
                     <Box>
                       <Text c="dimmed" size="sm">Desconto da tabela</Text>
-                      <Text className="mono" fw={600} mt={2}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
+                      <Text className="mono" fw={600} mt={4}>{policyDetails.discount === 0 ? 'sem desconto' : `${policyDetails.discount}%`}</Text>
                     </Box>
                     <Box>
                       <Text c="dimmed" size="sm">Pagamento padrão</Text>
-                      <Text fw={600} mt={2}>{policyDetails.paymentCondition}</Text>
+                      <Text fw={600} mt={4}>{policyDetails.paymentCondition}</Text>
                     </Box>
                     <Box>
                       <Text c="dimmed" size="sm">Pedido mínimo</Text>
-                      <Text className="mono" fw={600} mt={2}>{formatCurrency(policyDetails.minOrderValue)}</Text>
+                      <Text className="mono" fw={600} mt={4}>{formatCurrency(policyDetails.minOrderValue)}</Text>
                     </Box>
                   </Stack>
                 </Paper>
 
                 {/* Condições de pagamento disponíveis */}
                 <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-                  <Group gap={8} mb="sm">
+                  <Group gap="xs" mb="xs">
                     <CreditCardIcon size={16} />
                     <Title order={3} fw={600}>Condições de pagamento disponíveis</Title>
                   </Group>
-                  <Text c="dimmed" size="sm" mb="sm">
+                  <Text c="dimmed" size="sm" mb="md">
                     Opções habilitadas para a <Text span fw={600} c="var(--mantine-color-text)" inherit>{policy.label}</Text>.
                   </Text>
                   <Radio.Group value={paymentId} onChange={setPaymentId} name="payment">
-                    <Stack gap={8}>
+                    <Stack gap="sm">
                       {paymentOptions.map(opt => (
                         <Radio.Card key={opt.id} value={opt.id} p="sm" className={classes.choiceCard}>
                           <Group align="flex-start" gap="sm" wrap="nowrap">
@@ -516,7 +518,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                                   </Text>
                                 )}
                               </Group>
-                              {opt.description && <Text c="dimmed" size="sm" mt={2}>{opt.description}</Text>}
+                              {opt.description && <Text c="dimmed" size="sm" mt={4}>{opt.description}</Text>}
                             </Box>
                           </Group>
                         </Radio.Card>
@@ -528,12 +530,12 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                 {/* Campanhas disponíveis */}
                 {campaigns.length > 0 && (
                   <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-                    <Group gap={8} mb="sm">
+                    <Group gap="xs" mb="md">
                       <SparkleIcon size={16} />
                       <Title order={3} fw={600}>Campanhas disponíveis</Title>
                     </Group>
                     <Checkbox.Group value={campaignIds} onChange={setCampaignIds}>
-                      <Stack gap={8}>
+                      <Stack gap="sm">
                         {campaigns.map(c => (
                           <Checkbox.Card
                             key={c.id}
@@ -545,13 +547,13 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                               <Checkbox.Indicator color="neutral" mt={2} />
                               <Box flex={1} miw={0}>
                                 <Group justify="space-between">
-                                  <Group gap={6}>
+                                  <Group gap="xs">
                                     <PercentIcon size={12} color="var(--mantine-color-teal-6)" />
                                     <Text fw={600}>{c.name}</Text>
                                   </Group>
                                   <Text c="teal.6" className="mono" size="sm" fw={600}>-{c.discount}%</Text>
                                 </Group>
-                                <Text c="dimmed" size="sm" mt={2}>{c.description}</Text>
+                                <Text c="dimmed" size="sm" mt={4}>{c.description}</Text>
                               </Box>
                             </Group>
                           </Checkbox.Card>
@@ -593,7 +595,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
             <Stack gap="md">
               <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
                 <Title order={3} fw={600} mb="md">Resumo do pedido</Title>
-                <Stack gap={8}>
+                <Stack gap="xs">
                   <Group justify="space-between" wrap="nowrap">
                     <Text c="dimmed" size="sm">Valor bruto · {grandPairs} pares</Text>
                     <Text className="mono">{formatCurrency(grandTotal)}</Text>
@@ -633,7 +635,7 @@ export function CartPage({ onNavigate, cartContext, multiCart, onCreateNewCart, 
                     </Text>
                   )}
                   {belowMin && step === 'checkout' && (
-                    <Alert variant="light" color="yellow" p={8} mt={8}>
+                    <Alert variant="light" color="yellow" p="xs" mt="xs">
                       <Text c="yellow.8" size="sm">Pedido mínimo da {policy.label}: {formatCurrency(policyDetails.minOrderValue)}. Adicione {formatCurrency(policyDetails.minOrderValue - finalTotal)} em produtos ou troque a tabela de preço.</Text>
                     </Alert>
                   )}

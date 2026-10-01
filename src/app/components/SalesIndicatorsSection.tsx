@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, NavLink, ColorSwatch, Box, Anchor,
+  Stack, Group, SimpleGrid, Grid, Paper, Text, Title, SegmentedControl, NavLink, ColorSwatch, Box, Anchor, Progress, Tooltip,
 } from "@mantine/core";
 import { CompositeChart } from "@mantine/charts";
 import { AddressBookIcon, ArrowRightIcon, CaretRightIcon, ChartBarIcon, UsersThreeIcon } from "@phosphor-icons/react";
@@ -69,10 +69,11 @@ const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
 
 export const brl = (n: number) => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
 
+// eixo em pt-BR: "1,2 mi", "450 mil"
 function formatAxisValue(v: number): string {
-  if (v >= 1e6) return `${(v / 1e6).toFixed(1)}mi`;
-  if (v >= 1e3) return `${(v / 1e3).toFixed(0)}k`;
-  return `${v}`;
+  if (v >= 1e6) return `${(v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`;
+  if (v >= 1e3) return `${Math.round(v / 1e3).toLocaleString('pt-BR')} mil`;
+  return v.toLocaleString('pt-BR');
 }
 
 export function scaleValue(monthlyBase: number, period: Period): number {
@@ -192,7 +193,7 @@ export function SalesIndicatorsSection({
   const financeDelta = seededPercent(`finance-${scope}-${period}`, 4, 15);
 
   return (
-    <Stack gap="md">
+    <Stack gap="xl">
       <Group justify="flex-end">
         <SegmentedControl
           value={period}
@@ -203,7 +204,7 @@ export function SalesIndicatorsSection({
 
       {loading ? (
         // skeleton com o mesmo formato: 2 KPIs, gráfico + status, ranking e prioridades
-        <Stack gap="md">
+        <Stack gap="xl">
           <KpiSkeleton count={2} cols={{ base: 1, xs: 2 }} />
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, lg: 8 }}><ChartSkeleton height={240} /></Grid.Col>
@@ -223,7 +224,7 @@ export function SalesIndicatorsSection({
       <Grid gutter="md">
         <Grid.Col span={{ base: 12, lg: 8 }}>
           <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
-            <CardTitle title="Vendas vs. ano passado" subtitle="Colunas do período atual · linha do mesmo ciclo no ano anterior" />
+            <CardTitle title="Vendas vs. ano passado" subtitle="Colunas do período atual · linha do mesmo ciclo no ano anterior · em R$" />
             <CompositeChart
               h={240}
               mt="sm"
@@ -247,7 +248,15 @@ export function SalesIndicatorsSection({
         <Grid.Col span={{ base: 12, lg: 4 }}>
           <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
             <CardTitle title="Pedidos por status" subtitle={`${periodOrders.toLocaleString('pt-BR')} pedidos no período`} />
-            <Stack gap={2} mt="sm">
+            {/* parte do todo (5 status): barra 100% empilhada; a lista abaixo é a legenda com valores */}
+            <Progress.Root size={12} mt="sm">
+              {statusRows.map(s => (
+                <Tooltip key={s.key} label={`${s.label}: ${s.count.toLocaleString('pt-BR')} pedidos`}>
+                  <Progress.Section value={(s.count / Math.max(1, statusRows.reduce((a, b) => a + b.count, 0))) * 100} color={s.color} />
+                </Tooltip>
+              ))}
+            </Progress.Root>
+            <Stack gap={4} mt="sm">
               {statusRows.map(s => (
                 <NavLink
                   key={s.key}
@@ -255,7 +264,7 @@ export function SalesIndicatorsSection({
                   onClick={() => onOpenStatus(s.orderStatus)}
                   label={<Text>{s.label}</Text>}
                   leftSection={<ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} withShadow={false} />}
-                  rightSection={<Text fw={700} className="mono">{s.count}</Text>}
+                  rightSection={<Text fw={700} className="mono">{s.count.toLocaleString('pt-BR')}</Text>}
                   styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
                 />
               ))}
@@ -267,7 +276,7 @@ export function SalesIndicatorsSection({
       {/* D: top 10 vendedores */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
-          <CardTitle title="Vendas por representante" />
+          <CardTitle title="Vendas por representante" subtitle="Top 10 · maior venda primeiro" />
           <SeeMoreLink onClick={onOpenSalesTeam} label="Ver Todos os Vendedores" />
         </Group>
         <Stack gap="xs">
@@ -303,11 +312,11 @@ export function SalesIndicatorsSection({
 
       {/* E: 5 clientes prioritários */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-        <Group justify="space-between" gap="xs" mb="xs" wrap="nowrap">
-          <CardTitle title="Prioridade de contato" />
+        <Group justify="space-between" gap="xs" mb="sm" wrap="nowrap">
+          <CardTitle title="Prioridade de contato" subtitle="Mais dias sem pedido primeiro" />
           <SeeMoreLink onClick={onNavigateClients} label="Ver Todos os Clientes" />
         </Group>
-        <Stack gap={2}>
+        <Stack gap={4}>
           {priorityClients.map(c => (
             <NavLink
               key={c.id}
@@ -349,7 +358,7 @@ function CardTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <Box>
       <Title order={3}>{title}</Title>
-      {subtitle && <Text c="dimmed" size="sm" mt={2}>{subtitle}</Text>}
+      {subtitle && <Text c="dimmed" size="sm" mt={4}>{subtitle}</Text>}
     </Box>
   );
 }

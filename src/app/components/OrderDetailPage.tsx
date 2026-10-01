@@ -38,7 +38,7 @@ function DetailField({ label, children }: { label: string; children: React.React
   return (
     <Box>
       <Text c="dimmed" size="sm">{label}</Text>
-      <Box mt={2}>{children}</Box>
+      <Box mt={4}>{children}</Box>
     </Box>
   );
 }
@@ -84,7 +84,7 @@ function DetailsSkeleton({ fields = 5 }: { fields?: number }) {
       <Stack gap="md">
         {Array.from({ length: fields }).map((_, i) => (
           <Box key={i}>
-            <Skeleton height={12} width="25%" mb={8} />
+            <Skeleton height={12} width="25%" mb="xs" />
             <Skeleton height={16} width="55%" />
           </Box>
         ))}
@@ -138,7 +138,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
   const client = clients.find(c => c.id === order.clientId);
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
       <Box>
         <Button
           onClick={() => onNavigate('history')}
@@ -163,7 +163,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
       {profile !== 'lojista' && client && (
         <Paper withBorder p="md">
           <SectionTitle>Cliente</SectionTitle>
-          <Group gap={8} mb={6}>
+          <Group gap="xs" mb="xs">
             <Text fw={700}>{client.name}</Text>
             <Badge variant="light" color={clientStatusColors[client.status]} styles={badgeStyles}>
               {client.status}
@@ -172,7 +172,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
               <Badge variant="light" color="yellow" styles={badgeStyles}>inadimplente</Badge>
             )}
           </Group>
-          <Text c="dimmed" size="sm" mb={2}>{client.cnpj}</Text>
+          <Text c="dimmed" size="sm" mb={4}>{client.cnpj}</Text>
           <Text c="dimmed" size="sm">{client.city} / {client.state}</Text>
         </Paper>
       )}
@@ -189,7 +189,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                   <Text fw={600} truncate>{product.name}</Text>
                   <Text c="dimmed" size="sm">Ref. {product.reference}</Text>
                 </Box>
-                <Text className="mono" fw={600} flex="none" ta="right">{quantity} pares</Text>
+                <Text className="mono" fw={600} flex="none" ta="right">{quantity.toLocaleString('pt-BR')} pares</Text>
               </Group>
             ))
           ) : (
@@ -201,7 +201,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 <Text fw={600} truncate>{productName}</Text>
                 <Text c="dimmed" size="sm">{order.collection}</Text>
               </Box>
-              <Text className="mono" fw={600} flex="none" ta="right">{order.items} pares</Text>
+              <Text className="mono" fw={600} flex="none" ta="right">{order.items.toLocaleString('pt-BR')} pares</Text>
             </Group>
           )}
         </Stack>
@@ -213,7 +213,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
         {/* Uma coluna, rótulo acima do valor: leitura rápida pela borda esquerda */}
         <Stack gap="md">
           <DetailField label="Status">
-            <Group gap={8}>
+            <Group gap="xs">
               <OrderStatusBadge status={order.status} />
               <Text c="dimmed" size="sm">{support}</Text>
             </Group>
@@ -236,7 +236,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 type="button"
                 onClick={() => onNavigate('boletos')}
                 display="inline-flex"
-                mt={6}
+                mt="xs"
                 style={{ alignItems: 'center', gap: 4 }}
               >
                 Abrir Pagamentos e Boletos

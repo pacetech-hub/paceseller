@@ -11,7 +11,8 @@
   padding: var(--mantine-spacing-xs) 4px;
   border-radius: var(--mantine-radius-md);
   min-height: 90px;
-  background-color: var(--mantine-color-body);
+  /* Bloco é a camada mais próxima: no escuro fica MAIS CLARO que o cartão (dark-6/dark-5) */
+  background-color: light-dark(var(--mantine-color-body), var(--mantine-color-dark-4));
   transition: box-shadow 150ms ease, transform 100ms ease;
 
   @mixin hover {

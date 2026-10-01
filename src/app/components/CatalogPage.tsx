@@ -130,7 +130,7 @@ function StarRating({ rating }: { rating: number }) {
           opacity={s <= Math.round(rating) ? 1 : 0.3}
         />
       ))}
-      <Text lh={1.5} c="dimmed" ml={4} size="sm">{rating}</Text>
+      <Text lh={1.5} c="dimmed" ml={4} size="sm">{rating.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</Text>
     </Group>
   );
 }
@@ -161,7 +161,7 @@ function QtyStepper({ value, onChange }: { value: number; onChange: (v: number) 
 
 function GradeHeader({ onClose }: { onClose?: () => void }) {
   return (
-    <Group justify="space-between" mb={8} wrap="nowrap">
+    <Group justify="space-between" mb="xs" wrap="nowrap">
       <Text lh={1.5} fw={600}>
         Compra rápida — grade
       </Text>
@@ -186,11 +186,11 @@ function GradeCompact({ product, onAdd, onClose }: {
   return (
     <>
       <Divider color={BORDER_COLOR} />
-      <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
+      <Box px="sm" pb="sm" pt="xs" bg="var(--mantine-color-default-hover)">
         <GradeHeader onClose={onClose} />
         <Stack gap={4}>
           {sizes.map(s => (
-            <Paper key={s} px={8} py={4}>
+            <Paper key={s} px="xs" py={4}>
               {/* Em cards estreitos o stepper desce para baixo da numeração em vez de estourar */}
               <Group justify="space-between" gap={4}>
                 <Box>
@@ -202,7 +202,7 @@ function GradeCompact({ product, onAdd, onClose }: {
             </Paper>
           ))}
         </Stack>
-        <Group justify="space-between" mt={8} mb={8}>
+        <Group justify="space-between" my="xs">
           <Text lh={1.5} c="dimmed" size="sm">
             {total} {total === 1 ? 'par' : 'pares'}
           </Text>
@@ -247,14 +247,14 @@ function GradeInline({ product, onAdd, onClose, onCancel }: {
   return (
     <>
       <Divider color={BORDER_COLOR} />
-      <Box px="sm" pb="sm" pt={8} bg="var(--mantine-color-default-hover)">
+      <Box px="sm" pb="sm" pt="xs" bg="var(--mantine-color-default-hover)">
         <GradeHeader onClose={onClose} />
 
         {/* Grade larga (uma coluna por numeração): rola na horizontal, mas a coluna de rótulos
             (Numeração / Estoque / Quantidade) fica fixa à esquerda. Números alinhados à direita. */}
         <Paper withBorder>
           <Table.ScrollContainer minWidth={GRADE_LABEL_W + GRADE_TOTAL_W + sizes.length * GRADE_COL_W} type="native">
-            <Table className={sticky.firstCol} verticalSpacing={8} horizontalSpacing="sm" withRowBorders>
+            <Table className={sticky.firstCol} verticalSpacing="xs" horizontalSpacing="sm" withRowBorders>
               <Table.Thead>
                 <Table.Tr>
                   {rowLabel('Numeração')}
@@ -291,7 +291,7 @@ function GradeInline({ product, onAdd, onClose, onCancel }: {
         </Paper>
 
         {/* Fechar à esquerda, ação principal à direita */}
-        <Group justify="flex-end" gap="sm" mt={8} mb={4}>
+        <Group justify="flex-end" gap="sm" mt="xs" mb={4}>
           <Text lh={1.5} c="dimmed" size="sm" mr="auto">
             {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" fw={700}>{formatCurrency(subtotal)}</Text>
           </Text>
@@ -351,7 +351,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             </Paper>
           </UnstyledButton>
           <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
-            <Group gap={8} align="flex-start" wrap="nowrap">
+            <Group gap="xs" align="flex-start" wrap="nowrap">
               <Box flex={1} miw={0}>
                 <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.reference}</Text>
                 <Text lh={1.5} fw={600}>{product.name}</Text>
@@ -359,14 +359,14 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
               </Box>
               <Box visibleFrom="xs"><StarRating rating={product.rating} /></Box>
             </Group>
-            <Group gap="sm" mt={8}>
+            <Group gap="sm" mt="xs">
               <Badge variant="light" color={availBadgeColor}>{product.availability}</Badge>
               <Text lh={1.5} c="dimmed" size="sm">{product.material}</Text>
               <Text lh={1.5} c="dimmed" size="sm">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
             </Group>
           </UnstyledButton>
           <Flex
-            gap={8}
+            gap="xs"
             direction={{ base: 'row', sm: 'column' }}
             align={{ base: 'center', sm: 'flex-end' }}
             justify="space-between"
@@ -379,12 +379,13 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
               <Text lh={1.5} c="dimmed" td="line-through" size="sm">{formatCurrency(product.priceRetail)}</Text>
               <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
             </Box>
-            {/* Secundária (favoritar) à esquerda, principal (compra rápida) à direita */}
+            {/* Favoritar à esquerda, compra rápida à direita; ambas sem preenchimento — o botão
+                preenchido fica só para "Adicionar ao Carrinho" quando a grade abre */}
             <Group gap="sm" justify="flex-end">
               <Button
                 onClick={onToggleFav}
                 variant={product.isFavorite ? 'light' : 'default'}
-                color={product.isFavorite ? 'neutral' : 'gray'}
+                color="neutral"
                 leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />}
                 aria-pressed={product.isFavorite}
               >
@@ -392,6 +393,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
               </Button>
               <Button
                 onClick={onQuickBuy}
+                variant="default"
                 disabled={product.availability === 'esgotado'}
                 leftSection={<LightningIcon size={18} />}
               >
@@ -440,7 +442,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
           top={8}
           right={8}
           size="sm"
-          px={10}
+          px="xs"
           variant={product.isFavorite ? 'light' : 'default'}
           color="neutral"
           leftSection={<HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />}
@@ -455,7 +457,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             onClick={onOpenDetail}
             flex={1}
             miw={0}
-            px={8}
+            px="xs"
             variant="default"
             visibleFrom="sm"
             leftSection={<EyeIcon size={18} />}
@@ -466,8 +468,8 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             onClick={onQuickBuy}
             flex={1}
             miw={0}
-            px={{ base: 4, sm: 8 }}
-            color="neutral"
+            px={{ base: 4, sm: 'xs' }}
+            variant="default"
             classNames={{ section: classes.quickBuySection }}
             disabled={product.availability === 'esgotado'}
             leftSection={<LightningIcon size={18} />}
@@ -478,14 +480,14 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
       </Box>
 
       <UnstyledButton onClick={onOpenDetail} display="block" w="100%" p="sm">
-        <Badge variant="light" color={availBadgeColor} mb={8}>
+        <Badge variant="light" color={availBadgeColor} mb="xs">
           {product.availability}
         </Badge>
         <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
-        <Text lh={1.5} mt={2} truncate fw={600}>{product.name}</Text>
+        <Text lh={1.5} mt={4} truncate fw={600}>{product.name}</Text>
         <Text lh={1.5} c="dimmed" size="sm">{product.material}</Text>
 
-        <Group justify="space-between" mt={8} gap={4} wrap="nowrap">
+        <Group justify="space-between" mt="xs" gap={4} wrap="nowrap">
           <StarRating rating={product.rating} />
           <Text lh={1.5} c="dimmed" size="sm" flex="none" visibleFrom="xs">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
         </Group>
@@ -498,7 +500,7 @@ function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode,
             <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
           </Box>
           {/* Nos cards estreitos do celular (2 colunas) as cores ficam só no detalhe */}
-          <Group gap={6} wrap="nowrap" visibleFrom="sm">
+          <Group gap="xs" wrap="nowrap" visibleFrom="sm">
             {product.colors.slice(0, 3).map(color => (
               <Text lh={1.5} key={color} c="dimmed" size="sm">
                 {color === product.colors[0] ? color : '·'}
@@ -549,15 +551,15 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
       }
       styles={{
         content: { display: 'flex', flexDirection: 'column', maxHeight: fullScreen ? '100dvh' : '90vh', overflow: 'hidden' },
-        header: { padding: '12px 20px', minHeight: 0, borderBottom: BORDER },
+        header: { padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-lg)', minHeight: 0, borderBottom: BORDER },
         body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0 },
       }}
     >
       <Box className={classes.detailBody}>
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
-          <Stack gap="sm" p="md" bg="var(--mantine-color-gray-0)">
+          <Stack gap="sm" p="md" className={classes.galleryPane}>
             <Paper pos="relative" w="100%" pt="90%" bg="white">
-              <Box pos="absolute" inset={0} p={16}>
+              <Box pos="absolute" inset={0} p="md">
                 <ProductImage
                   key={images[activeImg].src}
                   src={images[activeImg].src}
@@ -571,7 +573,7 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
                 />
               </Box>
             </Paper>
-            <Group gap={8} role="tablist" aria-label="Vistas do produto">
+            <Group gap="xs" role="tablist" aria-label="Vistas do produto">
               {images.map((img, i) => (
                 <UnstyledButton
                   key={img.label}
@@ -593,12 +595,12 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
           </Stack>
           <Stack gap="md" p={{ base: 'md', sm: 'lg' }}>
             <Box>
-              <Group justify="space-between" align="flex-start" gap={8} wrap="nowrap">
+              <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap">
                 <Title order={2}>{product.name}</Title>
                 <Button
                   onClick={onToggleFav}
                   variant={isFavorite ? 'light' : 'default'}
-                  color={isFavorite ? 'neutral' : 'gray'}
+                  color="neutral"
                   flex="none"
                   leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />}
                   aria-pressed={isFavorite}
@@ -621,16 +623,16 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
             <Stack gap="md">
               <Box>
                 <Text lh={1.5} c="dimmed" size="sm">Material</Text>
-                <Text lh={1.5} mt={2} fw={600}>{product.material}</Text>
+                <Text lh={1.5} mt={4} fw={600}>{product.material}</Text>
               </Box>
               <Box>
                 <Text lh={1.5} c="dimmed" size="sm">Coleção</Text>
-                <Text lh={1.5} mt={2} fw={600}>{product.collection}</Text>
+                <Text lh={1.5} mt={4} fw={600}>{product.collection}</Text>
               </Box>
             </Stack>
             <Box>
-              <Text lh={1.5} c="dimmed" mb={6} size="sm">Cores</Text>
-              <Group gap={6}>
+              <Text lh={1.5} c="dimmed" mb={4} size="sm">Cores</Text>
+              <Group gap="xs">
                 {product.colors.map(c => (
                   <Badge key={c} variant="light" color="gray">{c}</Badge>
                 ))}
@@ -823,7 +825,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   // popular: opções mais usadas primeiro (só onde a ordem não tem significado — coleções seguem a ordem das estações)
   const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void, popular?: string[], restLabel?: string) => (
     <Box>
-      <Text lh={1.5} mb={8} fw={600}>{label}</Text>
+      <Text lh={1.5} mb="xs" fw={600}>{label}</Text>
       <ChoiceChips options={options} value={value} onSelect={onSelect} popular={popular} restLabel={restLabel} />
     </Box>
   );
@@ -844,7 +846,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
   );
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    // Hierarquia de espaços: seções da página (filtros · banner · produtos) a 32px;
+    // dentro de "produtos", barra de busca/ordenação → lista a 24px; controles da barra a 16px
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Tabela de preço e filtros no topo da página */}
       {usingExternal && onExternalFiltersChange && (
         <CatalogFiltersBar filters={externalFilters!} onChange={onExternalFiltersChange} />
@@ -855,6 +859,9 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
       </Card>
 
+      {/* Produtos: barra de controles + grade/lista */}
+      <Stack gap="lg">
+      <Stack gap="md">
       {/* Header + Controls */}
       <Group gap="sm" wrap="wrap">
         {/* Abaixo de sm a busca ocupa a linha inteira; filtros e modo de exibição ficam na linha de baixo */}
@@ -895,8 +902,8 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           onChange={v => setViewMode(v as 'grid' | 'list')}
           aria-label="Modo de exibição"
           data={[
-            { value: 'grid', label: <Group gap={6} wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
-            { value: 'list', label: <Group gap={6} wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
+            { value: 'grid', label: <Group gap="xs" wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
+            { value: 'list', label: <Group gap="xs" wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
           ]}
         />
       </Group>
@@ -904,7 +911,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
       {/* Ordenação: 5 opções fixas → chips de escolha única (radio), sempre visíveis; quebram linha em telas estreitas */}
       <Input.Wrapper label="Ordenar por" labelElement="div" id="catalog-sort">
         <Chip.Group multiple={false} value={sortBy} onChange={v => v && setSortBy(v)}>
-          <Group gap="sm" mt={4} role="radiogroup" aria-labelledby="catalog-sort-label">
+          <Group gap="sm" mt="xs" role="radiogroup" aria-labelledby="catalog-sort-label">
             {SORT_OPTIONS.map(o => (
               <Chip
                 key={o.value}
@@ -980,6 +987,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           )}
         </Group>
       )}
+      </Stack>
 
       {/* Products Grid/List — skeleton com o mesmo formato enquanto carrega */}
       {loading ? (
@@ -1018,6 +1026,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
           {sorted.map(product => renderProductCard(product, 'list'))}
         </Stack>
       )}
+      </Stack>
 
       {detailProduct && (
         <ProductDetailModal
@@ -1159,11 +1168,7 @@ export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChan
                   />
                 )}
                 {creatingMode ? (
-                  <Paper
-                    p="sm"
-                    bg="var(--mantine-color-neutral-0)"
-                    bd="1px solid var(--mantine-color-neutral-3)"
-                  >
+                  <Paper p="sm" className={classes.newCartPanel}>
                     <Stack gap="md">
                       <TextInput
                         autoFocus

@@ -207,7 +207,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                       px="sm"
                       py="sm"
                     >
-                      <Group gap={8} wrap="nowrap">
+                      <Group gap="xs" wrap="nowrap">
                         <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
                         <Text>{c.name}</Text>
                         <Text c="dimmed" size="sm" ml="auto" className="mono">{c.id}</Text>
@@ -240,7 +240,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             {
               value: 'all',
               label: (
-                <Group gap={6} wrap="nowrap" justify="center">
+                <Group gap="xs" wrap="nowrap" justify="center">
                   <ArrowsLeftRightIcon size={14} />
                   Todos os clientes
                   {otherCarts.length > 0 && (
@@ -256,7 +256,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
       {newOpen && selectedClient && (
         <Paper withBorder p="md" mb="lg">
           <Title order={2} mb={4}>Criar novo carrinho</Title>
-          <Group gap={6} mb="sm" c="dimmed">
+          <Group gap="xs" mb="md" c="dimmed">
             <StorefrontIcon size={12} />
             <Text size="sm" c="dimmed">
               Cliente: <Text span fw={600} c="var(--mantine-color-text)" inherit>{selectedClient.name}</Text>
@@ -270,7 +270,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             maxLength={60}
             description="Até 60 caracteres"
           />
-          <Group justify="flex-end" gap="sm" mt="sm">
+          <Group justify="flex-end" gap="sm" mt="md">
             <Button onClick={() => setNewOpen(false)} variant="default">Cancelar</Button>
             <Button onClick={handleCreate}>Criar e Abrir Carrinho</Button>
           </Group>
@@ -302,7 +302,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   <ThemeIcon variant="light" color="neutral" size={40}>
                     <ShoppingCartIcon size={16} />
                   </ThemeIcon>
-                  <Group gap={8} wrap="nowrap">
+                  <Group gap="xs" wrap="nowrap">
                     {isOther && (
                       <Badge
                         variant="light"
@@ -317,37 +317,38 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
                   </Group>
                 </Group>
                 <Text fw={600} truncate>{c.cartName}</Text>
-                <Group gap={6} mt={4} c="dimmed" wrap="nowrap">
+                <Group gap="xs" mt={4} c="dimmed" wrap="nowrap">
                   <StorefrontIcon size={12} />
                   <Text size="sm" c="dimmed" truncate>{c.clientName}</Text>
                 </Group>
-                <Box mt={8}>
+                <Box mt="xs">
                   <CreatorBadge createdBy={c.createdBy} viewerRole={viewerRole} />
                 </Box>
                 <Divider mt="sm" />
-                <SimpleGrid cols={2} spacing={8} pt="sm">
+                <SimpleGrid cols={2} spacing="xs" pt="sm">
                   <Group gap={4} c="dimmed" wrap="nowrap">
                     <PackageIcon size={12} />
                     <Text size="sm" c="dimmed">{c.items} itens</Text>
                   </Group>
                   <Text size="sm" c="dimmed" className="mono" ta="right">{c.pairs} pares</Text>
                 </SimpleGrid>
-                <Group gap={4} mt={8} c="dimmed" wrap="nowrap">
+                <Group gap={4} mt="xs" c="dimmed" wrap="nowrap">
                   <CalendarBlankIcon size={12} />
-                  <Text size="sm" c="dimmed">Atualizado em {new Date(c.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
+                  <Text size="sm" c="dimmed">Atualizado em {new Date(`${c.updatedAt}T00:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>
                 </Group>
-                <Group gap={4} mt={8} pb="md" c="dimmed" wrap="nowrap">
+                <Group gap={4} mt="xs" pb="md" c="dimmed" wrap="nowrap">
                   <UserIcon size={12} />
                   <Text size="sm" c="dimmed" truncate>Rep: {c.rep}</Text>
                 </Group>
               </UnstyledButton>
               <Divider color="var(--mantine-color-default-border)" />
               <Group gap="sm" p="md" pt="sm" grow>
+                {/* Ações repetidas em cada cartão ficam discretas: o único botão cheio da tela é "Criar Carrinho" */}
                 <Button onClick={() => onOpenCart(ctx)} variant="default" leftSection={<EyeIcon size={14} />}>
                   Abrir Carrinho
                 </Button>
                 {onGoToCatalog && (
-                  <Button onClick={() => onGoToCatalog(ctx)} rightSection={<ArrowRightIcon size={16} />}>
+                  <Button onClick={() => onGoToCatalog(ctx)} variant="default" rightSection={<ArrowRightIcon size={16} />}>
                     Adicionar Produtos
                   </Button>
                 )}
@@ -377,6 +378,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
         if (!lockClient && onNavigateClients) {
           suggestions.push({ label: 'Buscar cliente na carteira', description: 'Escolha outro cliente para montar o pedido', icon: UsersIcon, onClick: onNavigateClients });
         }
+        // o cabeçalho já tem "Criar Carrinho" cheio; aqui ele aparece como secundário para não competir
         return (
           <EmptyState
             icon={ShoppingCartIcon}
@@ -384,7 +386,7 @@ export function CartsListPage({ onOpenCart, onCreateCart, onNavigateClients, sel
             description={canCreate
               ? 'Crie um carrinho para começar um pedido. Você pode manter mais de um por cliente.'
               : 'Selecione um cliente acima para criar o primeiro carrinho.'}
-            action={canCreate && !newOpen ? { label: 'Criar Carrinho', onClick: () => setNewOpen(true), forward: false } : undefined}
+            secondaryAction={canCreate && !newOpen ? { label: 'Criar Carrinho', onClick: () => setNewOpen(true), forward: false } : undefined}
             suggestions={suggestions}
           />
         );

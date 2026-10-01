@@ -18,7 +18,7 @@ export function RepStockPage() {
 
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
-      <Stack gap="lg">
+      <Stack gap="xl">
         <Group justify="space-between" gap="sm" wrap="wrap">
           <SegmentedControl
             w={{ base: '100%', sm: 'auto' }}
@@ -29,7 +29,7 @@ export function RepStockPage() {
               return {
                 value: tab.id,
                 label: (
-                  <Group gap={8} wrap="nowrap">
+                  <Group gap="xs" wrap="nowrap">
                     <Icon size={16} />
                     {tab.label}
                   </Group>

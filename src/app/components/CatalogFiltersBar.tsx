@@ -108,7 +108,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
 
   // Amostras de cor: botões só com a cor → o nome aparece em tooltip (rótulo extra; aria-label tem o nome)
   const renderSwatches = (list: string[]) => (
-    <SimpleGrid cols={6} spacing={6} verticalSpacing={8} className={classes.swatchGrid}>
+    <SimpleGrid cols={6} spacing="xs" verticalSpacing="xs" className={classes.swatchGrid}>
       {list.map(c => {
         const active = filters.colors.includes(c);
         const bg = colorSwatch[c] || '#94a3b8';
@@ -176,7 +176,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           </Radio.Group>
         </FilterPopover>
 
-        <Group gap={8} wrap="nowrap" ml={{ sm: 'xs' }}>
+        <Group gap="xs" wrap="nowrap" ml={{ sm: 'xs' }}>
           <FunnelIcon size={18} />
           <Text lh={1.5} fw={600}>Filtros</Text>
           {activeCount > 0 && (
@@ -260,7 +260,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             )}
           </Stack>
           {filters.colors.length > 0 && (
-            <Text lh={1.5} mt={8} c="dimmed" size="sm">
+            <Text lh={1.5} mt="xs" c="dimmed" size="sm">
               {filters.colors.join(', ')}
             </Text>
           )}
@@ -271,7 +271,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           label={priceActive ? `Até ${formatCurrency(filters.priceRange[1])}` : 'Faixa de preço'}
           active={priceActive}
         >
-          <Stack gap={8}>
+          <Stack gap="xs">
             <Group justify="space-between">
               <Text lh={1.5} c="dimmed" size="sm">{formatCurrency(priceMin)}</Text>
               <Text lh={1.5} c="dimmed" size="sm">{formatCurrency(filters.priceRange[1])}</Text>

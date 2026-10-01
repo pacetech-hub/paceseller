@@ -35,6 +35,8 @@ interface RadarAction {
   suggestion?: string;
   ctaLabel: string;
   onAction: () => void;
+  // a ação mais importante do período: único botão cheio da grade
+  primary?: boolean;
 }
 
 const PERIODS: { value: Period; label: string }[] = [
@@ -66,7 +68,7 @@ function ActionCard({ action }: { action: RadarAction }) {
   return (
     <Paper withBorder p="lg" h="100%">
       <Stack gap="xs" h="100%">
-        <Group gap={8} wrap="nowrap">
+        <Group gap="xs" wrap="nowrap">
           <ThemeIcon variant="light" color={tone.color} size="sm">
             <ToneIcon size={14} />
           </ThemeIcon>
@@ -75,24 +77,31 @@ function ActionCard({ action }: { action: RadarAction }) {
         <Text fz="xl" fw={700} lh={1.1} c={tone.color} className="mono">{action.metric}</Text>
         <Box>
           <Text fw={600}>{action.title}</Text>
-          <Text size="sm" c="dimmed" mt={2}>{action.description}</Text>
+          <Text size="sm" c="dimmed" mt={4}>{action.description}</Text>
         </Box>
         {action.suggestion && (
           <Paper p="xs" bg="var(--mantine-color-gray-0)">
             <Text size="sm">{action.suggestion}</Text>
           </Paper>
         )}
-        <Group mt="auto">
-          {/* Botão terciário alinhado ao texto do card (compensa o padding lateral) */}
-          <Button
-            variant="subtle"
-            color="neutral"
-            ml="calc(var(--button-padding-x) * -1)"
-            rightSection={<ArrowRightIcon size={16} />}
-            onClick={action.onAction}
-          >
-            {action.ctaLabel}
-          </Button>
+        <Group mt="auto" pt="xs">
+          {action.primary ? (
+            // ação principal do período: único botão cheio da grade
+            <Button variant="filled" rightSection={<ArrowRightIcon size={16} />} onClick={action.onAction}>
+              {action.ctaLabel}
+            </Button>
+          ) : (
+            // demais cards: botão terciário alinhado ao texto do card (compensa o padding lateral)
+            <Button
+              variant="subtle"
+              color="neutral"
+              ml="calc(var(--button-padding-x) * -1)"
+              rightSection={<ArrowRightIcon size={16} />}
+              onClick={action.onAction}
+            >
+              {action.ctaLabel}
+            </Button>
+          )}
         </Group>
       </Stack>
     </Paper>
@@ -120,12 +129,13 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       period: 'hoje',
       tone: 'stock',
       eyebrow: 'Estoque baixo · 12 dias',
-      metric: '32 un.',
+      metric: '32 pares',
       title: 'Linha Coil',
       description: 'Vendendo mais rápido que a reposição atual',
-      suggestion: 'Sugestão: repor 32 unidades',
+      suggestion: 'Sugestão: repor 32 pares',
       ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P002', 32),
+      primary: true,
     },
     {
       id: 'late-order-4790-1',
@@ -135,7 +145,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: '2 dias',
       title: 'Pedido #4790-1 atrasou',
       description: 'Previsão de entrega vencida',
-      ctaLabel: 'Ver pedido',
+      ctaLabel: 'Ver Pedido',
       onAction: () => onOpenOrder('4790-1'),
     },
     {
@@ -143,12 +153,13 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       period: '15d',
       tone: 'stock',
       eyebrow: 'Estoque baixo · 15 dias',
-      metric: '60 un.',
+      metric: '60 pares',
       title: 'Tênis Tesla TG II Black Reflect',
       description: 'Sugestão de reposição antes de faltar',
-      suggestion: 'Sugestão: repor 60 unidades',
+      suggestion: 'Sugestão: repor 60 pares',
       ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P010', 60),
+      primary: true,
     },
     {
       id: 'launch-fusion-mix',
@@ -202,15 +213,18 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       metric: '6 SKUs',
       title: 'Vendendo acima da média',
       description: 'Coil Black White, Denim, Hertz All Black Furta Cor e mais 3',
-      ctaLabel: 'Ver Todos',
+      ctaLabel: 'Ver Produtos em Alta',
       onAction: () => onOpenCatalog({ sortBy: 'mais vendidos' }),
+      primary: true,
     },
   ];
 
   const visible = actions.filter(a => a.period === period);
 
   return (
-    <Stack gap="lg">
+    <Stack gap="xl">
+      {/* cabeçalho (saudação + períodos) mais junto; a grade de ações é outra seção */}
+      <Stack gap="md">
       <Title order={1}>{getGreeting()}, {userName}</Title>
 
       <Tabs value={period} onChange={(v) => v && setPeriod(v as Period)} variant="pills">
@@ -239,6 +253,7 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
           })}
         </Tabs.List>
       </Tabs>
+      </Stack>
 
       {loading ? (
         <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />

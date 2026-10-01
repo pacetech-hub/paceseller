@@ -24,7 +24,7 @@ import {
 } from "@phosphor-icons/react";
 import classes from "./interactive.module.css";
 import detail from "./ClientDetailPage.module.css";
-import { formatCurrency, products, type Client, type Product } from "../data/mockData";
+import { formatCurrency, formatDate, products, type Client, type Product } from "../data/mockData";
 import type { View } from "./Sidebar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, KpiSkeleton } from "./ui/Skeletons";
@@ -41,8 +41,8 @@ const statusColors: Record<Client['status'], string> = {
   'inativo': 'red',
 };
 
-const formatOrderDate = (dateStr: string) =>
-  new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+// datas no formato pt-BR por extenso curto ("16 de jun. de 2026")
+const formatOrderDate = formatDate;
 
 // mock: número de pedidos históricos determinístico por cliente, usado para estimar o ticket médio
 function seededOrderCount(clientId: string): number {
@@ -184,12 +184,12 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   // Skeleton com o formato da página: cabeçalho, indicadores, rankings e grade de sugestões
   if (loading) {
     return (
-      <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" aria-busy="true" aria-label="Carregando cliente">
+      <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" aria-busy="true" aria-label="Carregando cliente">
         {backButton}
         <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Group gap="md" wrap="nowrap">
             <Skeleton height={56} width={56} circle />
-            <Stack gap={8} flex={1}>
+            <Stack gap="xs" flex={1}>
               <Skeleton height={16} width={120} />
               <Skeleton height={28} width="50%" />
               <Skeleton height={12} width={160} />
@@ -219,7 +219,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
   const missingFields = registrationFields.filter(f => !f.value.trim());
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto">
       {backButton}
 
       {/* Header */}
@@ -229,7 +229,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             {client.avatar}
           </Avatar>
           <Box miw={0}>
-            <Group gap={8} mb={4}>
+            <Group gap="xs" mb={4}>
               <Badge variant="light" color={statusColors[client.status]}>{client.status}</Badge>
               {client.inadimplente && (
                 <Badge variant="light" color="yellow">inadimplente</Badge>
@@ -258,12 +258,12 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             {expanded ? 'Ocultar Dados Cadastrais' : 'Mostrar Dados Cadastrais'}
           </Button>
           {missingFields.length === 0 ? (
-            <Group gap={6} wrap="nowrap">
+            <Group gap="xs" wrap="nowrap">
               <CheckCircleIcon size={16} color="var(--mantine-color-teal-6)" />
               <Text size="sm" c="teal.7">Completo</Text>
             </Group>
           ) : (
-            <Group gap={6} wrap="nowrap">
+            <Group gap="xs" wrap="nowrap">
               <WarningCircleIcon size={16} color="var(--mantine-color-red-6)" />
               <Text size="sm" c="red.7">
                 {missingFields.length === 1 ? '1 campo precisa de atenção' : `${missingFields.length} campos precisam de atenção`}
@@ -283,7 +283,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                 {info.value.trim() ? (
                   <Text>{info.value}</Text>
                 ) : (
-                  <Group gap={6} wrap="nowrap">
+                  <Group gap="xs" wrap="nowrap">
                     <WarningCircleIcon size={16} color="var(--mantine-color-red-6)" />
                     <Text c="red.7">Não informado</Text>
                   </Group>
@@ -301,7 +301,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             <ClockIcon size={16} />
           </ThemeIcon>
           <Text c="dimmed" size="sm">Último pedido</Text>
-          <Text className="mono" size="xl" fw={700} mt={2}>{formatOrderDate(client.lastOrder)}</Text>
+          <Text className="mono" size="xl" fw={700} mt={4}>{formatOrderDate(client.lastOrder)}</Text>
         </Paper>
 
         <Paper withBorder p="md">
@@ -309,7 +309,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             <ChartBarIcon size={16} />
           </ThemeIcon>
           <Text c="dimmed" size="sm">Ticket médio por pedido</Text>
-          <Text className="mono" size="xl" fw={700} mt={2}>{formatCurrency(avgTicket)}</Text>
+          <Text className="mono" size="xl" fw={700} mt={4}>{formatCurrency(avgTicket)}</Text>
         </Paper>
       </SimpleGrid>
 
@@ -320,18 +320,18 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             <PlusIcon size={16} />
           </ThemeIcon>
           <Text fw={600}>Novo carrinho</Text>
-          <Text c="dimmed" size="sm" mt={2}>Criar um novo carrinho para este cliente</Text>
+          <Text c="dimmed" size="sm" mt={4}>Criar um novo carrinho para este cliente</Text>
         </Paper>
 
         <Paper withBorder p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
           <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
             <ShoppingCartIcon size={16} />
           </ThemeIcon>
-          <Group gap={8}>
+          <Group gap="xs">
             <Text fw={600}>Carrinhos</Text>
             <Badge variant="light" color="neutral" circle>{cartCount}</Badge>
           </Group>
-          <Text c="dimmed" size="sm" mt={2}>
+          <Text c="dimmed" size="sm" mt={4}>
             {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
           </Text>
         </Paper>
@@ -347,7 +347,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             title="Cores com mais vendas"
             items={colorRanks}
             renderLabel={c => (
-              <Group gap={6} wrap="nowrap">
+              <Group gap="xs" wrap="nowrap">
                 <ColorSwatch color={COLOR_SWATCH[c.key] ?? 'var(--mantine-color-gray-5)'} size={10} withShadow={false} bd="1px solid var(--mantine-color-default-border)" />
                 {c.label}
               </Group>
@@ -366,7 +366,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               <Text c="dimmed" size="sm">Baixo giro nos últimos meses — considere oferecer com condição especial</Text>
             </Box>
           </Group>
-          <Stack gap={8}>
+          <Stack gap="sm">
             {stuckProducts.map(p => (
               <Paper key={p.id} withBorder p="sm">
                 <Group gap="sm" wrap="nowrap">
@@ -376,7 +376,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                     <Text c="dimmed" size="sm" truncate>{p.line} · {p.reference}</Text>
                   </Box>
                   <Box ta="right" flex="none">
-                    <Text className="mono" fw={700}>{p.soldUnits} un.</Text>
+                    <Text className="mono" fw={700}>{p.soldUnits.toLocaleString('pt-BR')} pares</Text>
                     <Text c="dimmed" size="sm">vendidas · giro baixo</Text>
                   </Box>
                 </Group>
@@ -402,7 +402,8 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         <Group gap="sm" mb="md">
           <Button
             onClick={() => setStockFilter('todos')}
-            variant={stockFilter === 'todos' ? 'filled' : 'default'}
+            variant={stockFilter === 'todos' ? 'light' : 'default'}
+            aria-pressed={stockFilter === 'todos'}
             color="neutral"
           >
             Todos
@@ -413,7 +414,8 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
               <Button
                 key={key}
                 onClick={() => setStockFilter(key)}
-                variant={active ? 'filled' : 'default'}
+                variant={active ? 'light' : 'default'}
+                aria-pressed={active}
                 color="neutral"
               >
                 {STOCK_STATUS_CONFIG[key].filterLabel}
@@ -510,10 +512,11 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
       <Stack gap={0} p="sm" flex={1}>
         <Text fw={600} truncate>{product.name}</Text>
         <Text c="dimmed" size="sm" truncate>{product.line} · {product.reference}</Text>
-        <Divider mt={8} color="var(--mantine-color-default-border)" />
+        <Divider mt="xs" color="var(--mantine-color-default-border)" />
         {/* preço acima e ação principal no rodapé do cartão, em largura total (cabe nos cartões estreitos do mobile) */}
-        <Text className="mono" size="lg" fw={700} pt={8}>{formatCurrency(product.price)}</Text>
-        <Button onClick={onBuy} fullWidth mt="sm" rightSection={<ArrowRightIcon size={16} />}>Montar Pedido</Button>
+        <Text className="mono" size="lg" fw={700} pt="xs">{formatCurrency(product.price)}</Text>
+        {/* repetido em cada cartão: ação secundária (bordada), não compete com a principal da página */}
+        <Button onClick={onBuy} variant="default" fullWidth mt="sm" rightSection={<ArrowRightIcon size={16} />}>Montar Pedido</Button>
       </Stack>
     </Card>
   );

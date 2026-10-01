@@ -136,8 +136,8 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
 
       {/* Profile pill */}
       {!isCollapsed && (
-        <Paper withBorder mx="sm" mt="sm" px="sm" py={8} bg="var(--mantine-color-default-hover)">
-          <Group gap={8} wrap="nowrap">
+        <Paper withBorder mx="sm" mt="sm" px="sm" py="xs" bg="var(--mantine-color-default-hover)">
+          <Group gap="xs" wrap="nowrap">
             <ProfileIcon size={16} color={profileInfo.color} />
             <Text size="sm" fw={600} truncate>{profileInfo.label}</Text>
           </Group>
@@ -146,9 +146,9 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
 
       {/* Selected client chip — rep only */}
       {!isCollapsed && profile === 'rep' && selectedClient && (
-        <Paper withBorder mx="sm" mt={8} px="sm" py={8}>
+        <Paper withBorder mx="sm" mt="xs" px="sm" py="xs">
           <Text c="dimmed" size="sm">Pedindo para</Text>
-          <Text fw={600} truncate mt={2}>{selectedClient.name}</Text>
+          <Text fw={600} truncate mt={4}>{selectedClient.name}</Text>
         </Paper>
       )}
 
@@ -156,7 +156,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       {!isCollapsed && (
         <UnstyledButton mx="sm" mt="sm">
           <Paper withBorder px="sm" mih={42} display="flex" style={{ alignItems: 'center' }}>
-            <Group gap={8} wrap="nowrap" c="dimmed" w="100%">
+            <Group gap="xs" wrap="nowrap" c="dimmed" w="100%">
               <MagnifyingGlassIcon size={16} />
               <Text c="dimmed" truncate>Buscar por produto ou cliente</Text>
               <Kbd ml="auto">⌘K</Kbd>
@@ -166,8 +166,8 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
       )}
 
       {/* Nav */}
-      <ScrollArea component="nav" flex={1} px={8} py="sm">
-        <Stack gap={2} align={isCollapsed ? 'center' : 'stretch'}>
+      <ScrollArea component="nav" flex={1} px="xs" py="sm">
+        <Stack gap={4} align={isCollapsed ? 'center' : 'stretch'}>
           {visibleItems.map(item => {
             const ItemIcon = item.icon;
             const active = currentView === item.id;
@@ -208,7 +208,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
 
       {/* Bottom */}
       <Divider color={BORDER_COLOR} />
-      <Box p={8} flex="none">
+      <Box p="xs" flex="none">
         {isCollapsed ? (
           <Group justify="center">
             <Tooltip label="Expandir Menu" position="right" withArrow>
@@ -247,7 +247,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
               Fechar Menu
             </Button>
           )}
-          <Group gap={8} px="sm" py={8} wrap="nowrap">
+          <Group gap="xs" px="sm" py="xs" wrap="nowrap">
             <Avatar size={32} color="neutral" variant="light">
               TF
             </Avatar>

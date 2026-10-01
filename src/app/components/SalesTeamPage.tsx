@@ -21,7 +21,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
     .sort((a, b) => b.value - a.value);
 
   return (
-    <Stack gap="lg" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
+    <Stack gap="xl" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       {/* Link de voltar: margem negativa só para alinhar o texto ao conteúdo */}
       <Button onClick={onBack} variant="subtle" color="neutral" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
         Voltar para Indicadores
@@ -50,7 +50,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
         />
       ) : (
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-        <Stack gap="xs">
+        <Stack gap="sm">
           {ranked.map((e, i) => (
             <Group key={e.id} gap="sm" wrap="nowrap">
               <Text c="dimmed" fw={600} size="sm" ta="right" w={24} flex="none">{i + 1}</Text>

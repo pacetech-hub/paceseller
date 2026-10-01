@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, SimpleGrid,
   ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, Skeleton, type BoxProps, type ImageProps,
-  type ComboboxData,
+  type ComboboxData, type MantineSpacing,
 } from "@mantine/core";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, TableSkeleton } from "./ui/Skeletons";
@@ -241,7 +241,7 @@ function ProductImage({ src, alt, fallback, imageProps }: {
 }
 
 // título de seção da ficha (20px) — diferencia por hierarquia, não por caixa alta
-function SectionLabel({ children, mb = 8 }: { children: React.ReactNode; mb?: number }) {
+function SectionLabel({ children, mb = 'sm' }: { children: React.ReactNode; mb?: MantineSpacing }) {
   return (
     <Title order={2} mb={mb}>
       {children}
@@ -251,7 +251,7 @@ function SectionLabel({ children, mb = 8 }: { children: React.ReactNode; mb?: nu
 
 function AvailabilityBadges({ product }: { product: Product }) {
   return (
-    <Group gap={6}>
+    <Group gap="xs">
       <Badge variant="light" color={availabilityColors[product.availability]}>
         {product.availability}
       </Badge>
@@ -274,15 +274,15 @@ function ProductCard({ product, onOpen, compact = false }: { product: Product; o
     >
       {/* o Box mantém o quadrado mesmo se a imagem falhar e for escondida */}
       <AspectRatio ratio={1}>
-        <Box bg="white" p={compact ? 8 : 12}>
+        <Box bg="white" p={compact ? 'xs' : 'sm'}>
           {/* se a foto falhar, o quadrado branco continua no lugar */}
           <ProductImage src={product.image} alt={product.name} imageProps={{ fit: 'contain' }} />
         </Box>
       </AspectRatio>
       <Divider color="var(--mantine-color-default-border)" />
-      <Box p={compact ? 10 : 'sm'}>
+      <Box p={compact ? 'xs' : 'sm'}>
         <Text c="dimmed" size="sm">Ref. {product.reference}</Text>
-        <Text fw={600} truncate mt={compact ? 0 : 2} mb={compact ? 0 : 6}>{product.name}</Text>
+        <Text fw={600} truncate mt={compact ? 0 : 4} mb={compact ? 0 : 'xs'}>{product.name}</Text>
         {compact ? (
           isDiscontinued(product) && (
             <Badge variant="light" color="gray" mt={4}>Fora de linha</Badge>
@@ -317,7 +317,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   });
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <Box>
         <Title order={1}>Ficha Técnica</Title>
         <Text c="dimmed">Consulte informações completas, imagens e medidas de cada produto</Text>
@@ -440,18 +440,16 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </Box>
         {/* legenda visível dizendo qual foto é */}
         <Text component="span" className={classes.tileLabel} size="sm" fw={600}>{label}</Text>
-        {/* "Baixar" com texto onde o tile tem espaço; nos tiles pequenos do celular fica só o ícone
+        {/* "Baixar" com texto onde o tile tem espaço; nos tiles pequenos do celular fica só o ícone.
+            Botão sem preenchimento: repete em cada foto, o preenchido da página é "Baixar PDF" 
             (o tooltip é só o rótulo desse botão de ícone, que também tem aria-label) */}
         <Button
           onClick={e => { e.stopPropagation(); downloadPhoto(label); }}
           aria-label={`Baixar foto ${label.toLowerCase()}`}
-          variant="filled"
-          color="dark"
+          variant="default"
           pos="absolute"
           top={8}
           right={8}
-          bg="rgba(0, 0, 0, 0.6)"
-          className={classes.downloadButton}
           leftSection={<DownloadSimpleIcon size={18} />}
           visibleFrom="md"
         >
@@ -461,14 +459,11 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           <ActionIcon
             onClick={e => { e.stopPropagation(); downloadPhoto(label); }}
             aria-label={`Baixar foto ${label.toLowerCase()}`}
-            variant="filled"
-            color="dark"
+            variant="default"
             size="input-sm"
             pos="absolute"
             top={8}
             right={8}
-            bg="rgba(0, 0, 0, 0.6)"
-            className={classes.downloadButton}
             hiddenFrom="md"
           >
             <DownloadSimpleIcon size={18} />
@@ -479,8 +474,9 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
   };
 
   return (
-    <Stack gap="lg" p={{ base: 'md', sm: 'lg' }} maw={1200} mx="auto" w="100%">
-      <Box>
+    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1200} mx="auto" w="100%">
+      {/* Cabeçalho: voltar à esquerda e downloads à direita, num mesmo grupo (antes eram duas seções) */}
+      <Group justify="space-between" gap="sm" wrap="wrap">
         <Button
           onClick={onBack}
           variant="subtle"
@@ -490,7 +486,6 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         >
           Voltar para Ficha Técnica
         </Button>
-      </Box>
 
       <Group justify="flex-end" gap="sm">
         <Button onClick={downloadAllImages} variant="default" leftSection={<DownloadSimpleIcon size={18} />}>
@@ -499,6 +494,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         <Button onClick={downloadPdf} leftSection={<FileTextIcon size={18} />}>
           Baixar PDF
         </Button>
+      </Group>
       </Group>
 
       {loading ? (
@@ -540,10 +536,11 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
 
       {/* Informações do produto */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-        <Stack gap="md">
+        {/* blocos do cartão (cabeçalho, descrição, destaques) a 24px; título → conteúdo a 12px */}
+        <Stack gap="lg">
           <Box>
-            <Text c="dimmed" size="sm" mb={2}>Ref. {product.reference}</Text>
-            <Title order={1} mb={6}>{product.name}</Title>
+            <Text c="dimmed" size="sm" mb={4}>Ref. {product.reference}</Text>
+            <Title order={1} mb="xs">{product.name}</Title>
             <AvailabilityBadges product={product} />
           </Box>
 
@@ -556,7 +553,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
             <Box>
               <SectionLabel>Destaques do produto</SectionLabel>
               <List
-                spacing={10}
+                spacing="sm"
                 center={false}
                 icon={<Box display="flex" mt={4}><CheckCircleIcon size={16} color="var(--mantine-color-teal-5)" /></Box>}
                 styles={{ itemWrapper: { alignItems: 'flex-start' } }}
@@ -585,12 +582,12 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         </SectionLabel>
         {/* Até 3 colunas: tabela a partir de sm; no celular vira lista de cartões (sem rolagem lateral) */}
         <Box visibleFrom="sm">
-          <Table verticalSpacing={10} horizontalSpacing="md">
+          <Table verticalSpacing="sm" horizontalSpacing="md">
             <Table.Thead>
               <Table.Tr c="dimmed" fz="sm">
                 <Table.Th fw={400} pl={0}>Tamanho</Table.Th>
-                <Table.Th fw={400} ta="right">Estoque fábrica</Table.Th>
-                {profile === 'lojista' && <Table.Th fw={400} ta="right">Estoque loja</Table.Th>}
+                <Table.Th fw={400} ta="right">Estoque fábrica (pares)</Table.Th>
+                {profile === 'lojista' && <Table.Th fw={400} ta="right">Estoque loja (pares)</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -648,11 +645,11 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
                   </Button>
                 ) : undefined}
               >
-                <CellField label="Estoque fábrica">
+                <CellField label="Estoque fábrica (pares)">
                   <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
                 </CellField>
                 {profile === 'lojista' && (
-                  <CellField label="Estoque loja">
+                  <CellField label="Estoque loja (pares)">
                     <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
                   </CellField>
                 )}
@@ -665,7 +662,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
       {/* Produtos relacionados */}
       {related.length > 0 && (
         <Box>
-          <SectionLabel mb={12}>Produtos relacionados</SectionLabel>
+          <SectionLabel>Produtos relacionados</SectionLabel>
           <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
             {related.map(p => (
               <ProductCard key={p.id} product={p} onOpen={() => onOpenRelated(p)} compact />

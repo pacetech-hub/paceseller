@@ -59,13 +59,18 @@ const periods = [
 // tooltip dos gráficos: valor completo em reais, sem centavos (ex.: "R$ 23.818")
 const formatChartCurrency = (v: number) => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 
-const formatK = (v: number) => `${(v / 1000).toFixed(0)}k`;
+// eixo em pt-BR: "12 mil"
+const formatK = (v: number) => `${Math.round(v / 1000).toLocaleString('pt-BR')} mil`;
+
+// variação com sinal e vírgula decimal: "+22,4%" / "-3,1%"
+const formatGrowth = (v: number) => (v >= 0 ? '+' : '') + v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
 
 export function LojistaHistoryDashboard({ onNavigate }: Props) {
   const [period, setPeriod] = useState<'30d' | '90d' | '6m'>('90d');
   const loading = useMockLoading();
 
-  const lines = linesByPeriod[period];
+  // ranking sempre do maior faturamento para o menor
+  const lines = useMemo(() => [...linesByPeriod[period]].sort((a, b) => b.revenue - a.revenue), [period]);
   const maxRev = Math.max(...lines.map(l => l.revenue));
 
   // Reescala selloutData para a visão do lojista (valores menores)
@@ -80,7 +85,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
 
   const totalSellIn = chartData.reduce((a, b) => a + b['Sell-in'], 0);
   const totalSellOut = chartData.reduce((a, b) => a + b['Sell-out'], 0);
-  const selloutRate = ((totalSellOut / totalSellIn) * 100).toFixed(1);
+  const selloutRate = ((totalSellOut / totalSellIn) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const totalUnits = lines.reduce((a, b) => a + b.units, 0);
 
   const kpis = [
@@ -94,7 +99,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
     },
     {
       label: 'Taxa de Sell-out', value: `${selloutRate}%`, sub: 'conversão de estoque',
-      icon: TrendUpIcon, trend: '+2,1pp', up: true,
+      icon: TrendUpIcon, trend: '+2,1 p.p.', up: true,
     },
     {
       label: 'Pares vendidos', value: totalUnits.toLocaleString('pt-BR'), sub: 'no período',
@@ -104,12 +109,12 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
 
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
-      <Stack gap="lg">
+      <Stack gap="xl">
         {/* Header */}
         <Group justify="space-between" gap="sm">
           <Box>
             <Title order={2}>Histórico de Compras</Title>
-            <Text c="dimmed">Visão de sell-in × sell-out e linhas em destaque</Text>
+            <Text c="dimmed" mt={4}>Visão de sell-in × sell-out e linhas em destaque</Text>
           </Box>
           <Group gap="sm">
             <CalendarBlankIcon size={16} color="var(--mantine-color-dimmed)" />
@@ -130,10 +135,10 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
 
         {loading ? (
           // skeleton no formato do conteúdo: KPIs, gráfico mensal, gráfico de linhas + ranking
-          <Stack gap="lg">
+          <Stack gap="xl">
             <KpiSkeleton count={4} />
             <ChartSkeleton height={260} />
-            <Grid gutter="lg">
+            <Grid gutter="md">
               <Grid.Col span={{ base: 12, lg: 8 }}><ChartSkeleton height={260} /></Grid.Col>
               <Grid.Col span={{ base: 12, lg: 4 }}><ListSkeleton rows={5} withAvatar={false} /></Grid.Col>
             </Grid>
@@ -145,19 +150,23 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             const Icon = k.icon;
             const TrendIcon = k.up ? TrendUpIcon : TrendDownIcon;
             return (
+              // tile: rótulo + número grande + linha de comparação (sinal, unidade e base)
               <Paper key={k.label} withBorder p="md">
-                <Group justify="space-between" mb="xs">
+                <Group gap="xs" wrap="nowrap" mb="xs">
                   <ThemeIcon size={32} variant="light">
                     <Icon size={16} />
                   </ThemeIcon>
-                  <Group gap={4} c={k.up ? 'teal.7' : 'red.6'} wrap="nowrap">
-                    <TrendIcon size={12} />
-                    <Text size="sm" fw={700} c="inherit">{k.trend}</Text>
-                  </Group>
+                  <Box miw={0}>
+                    <Text c="dimmed" size="sm">{k.label}</Text>
+                    <Text c="dimmed" size="sm" truncate>{k.sub}</Text>
+                  </Box>
                 </Group>
-                <Text c="dimmed" size="sm">{k.label}</Text>
                 <Text fz={{ base: 'lg', sm: 'xl' }} fw={700} className="mono">{k.value}</Text>
-                <Text c="dimmed" size="sm">{k.sub}</Text>
+                <Group gap={4} c={k.up ? 'teal.7' : 'red.7'} wrap="nowrap" mt={4}>
+                  <TrendIcon size={12} />
+                  <Text size="sm" fw={600} c="inherit">{k.trend}</Text>
+                  <Text size="sm" c="dimmed" truncate>vs. período anterior</Text>
+                </Group>
               </Paper>
             );
           })}
@@ -167,7 +176,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md">
             <Title order={3}>Sell-in × Sell-out</Title>
-            <Text c="dimmed" size="sm">Comparativo mensal</Text>
+            <Text c="dimmed" size="sm" mt={4}>Comparativo mensal · em R$</Text>
           </Box>
           <AreaChart
             h={260}
@@ -188,7 +197,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         </Paper>
 
         {/* Linhas em destaque */}
-        <Grid gutter="lg">
+        <Grid gutter="md">
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="md">
@@ -196,7 +205,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                   <TrophyIcon size={20} color="var(--mantine-color-dimmed)" />
                   <Title order={3}>Linhas mais vendidas</Title>
                 </Group>
-                <Text c="dimmed" size="sm">{periods.find(p => p.id === period)?.label}</Text>
+                <Text c="dimmed" size="sm">Receita · {periods.find(p => p.id === period)?.label}</Text>
               </Group>
               <BarChart
                 h={260}
@@ -220,7 +229,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             <Paper withBorder p={{ base: 'md', sm: 'lg' }} h="100%">
               <Group justify="space-between" mb="sm">
                 <Title order={3}>Ranking</Title>
-                <Text c="dimmed" size="sm">Top 5</Text>
+                <Text c="dimmed" size="sm">Top 5 por receita</Text>
               </Group>
               <Stack gap="xs">
                 {lines.map((l, i) => {
@@ -233,7 +242,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                       bg={top ? undefined : 'var(--mantine-color-gray-0)'}
                       bd={top ? '1px solid var(--mantine-color-neutral-9)' : undefined}
                     >
-                      <Group justify="space-between" mb={6} wrap="nowrap">
+                      <Group justify="space-between" mb="xs" wrap="nowrap">
                         <Group gap="xs" wrap="nowrap" miw={0}>
                           <Center
                             w={24}
@@ -248,14 +257,14 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                           <Text fw={600} truncate>{l.name}</Text>
                         </Group>
                         <Text c={l.growth >= 0 ? 'teal.7' : 'red.6'} size="sm" fw={700}>
-                          {l.growth >= 0 ? '+' : ''}{l.growth}%
+                          {formatGrowth(l.growth)}
                         </Text>
                       </Group>
                       <Group justify="space-between">
-                        <Text c="dimmed" size="sm">{l.units} pares</Text>
+                        <Text c="dimmed" size="sm">{l.units.toLocaleString('pt-BR')} pares</Text>
                         <Text size="sm" fw={600} className="mono">{formatCurrency(l.revenue)}</Text>
                       </Group>
-                      <Progress value={(l.revenue / maxRev) * 100} size={4} mt={6} />
+                      <Progress value={(l.revenue / maxRev) * 100} size={4} mt="xs" />
                     </Paper>
                   );
                 })}
