@@ -36,7 +36,6 @@ interface RadarAction {
   ctaLabel: string;
   onAction: () => void;
   // a ação mais importante do período: único botão cheio da grade
-  primary?: boolean;
 }
 
 const PERIODS: { value: Period; label: string }[] = [
@@ -45,14 +44,17 @@ const PERIODS: { value: Period; label: string }[] = [
   { value: '30d', label: 'Nos próximos 30 dias' },
 ];
 
-const TONES: Record<Tone, { color: string; icon: Icon }> = {
-  opportunity: { color: 'teal.7', icon: TrendUpIcon },
-  stock: { color: 'yellow.8', icon: PackageIcon },
-  alert: { color: 'red.7', icon: WarningIcon },
+// Cada tipo de ação tem uma cor de status; o cartão inteiro usa o fundo claro dessa cor
+// (variáveis "-light" do Mantine, que também se ajustam no modo escuro) e uma borda no mesmo tom,
+// para o tipo ser reconhecido de relance.
+const TONES: Record<Tone, { color: string; base: string; icon: Icon }> = {
+  opportunity: { color: 'teal.7', base: 'teal', icon: TrendUpIcon },
+  stock: { color: 'yellow.8', base: 'yellow', icon: PackageIcon },
+  alert: { color: 'red.7', base: 'red', icon: WarningIcon },
   // lançamento e benchmark são informativos: neutros (azul fica só para links)
-  launch: { color: 'neutral.9', icon: RocketLaunchIcon },
-  benchmark: { color: 'gray.7', icon: UsersThreeIcon },
-  lowTurnover: { color: 'gray.7', icon: TrendDownIcon },
+  launch: { color: 'neutral.9', base: 'neutral', icon: RocketLaunchIcon },
+  benchmark: { color: 'gray.7', base: 'gray', icon: UsersThreeIcon },
+  lowTurnover: { color: 'gray.7', base: 'gray', icon: TrendDownIcon },
 };
 
 export function getGreeting(date = new Date()): string {
@@ -66,7 +68,13 @@ function ActionCard({ action }: { action: RadarAction }) {
   const tone = TONES[action.tone];
   const ToneIcon = tone.icon;
   return (
-    <Paper withBorder p="lg" h="100%">
+    <Paper
+      withBorder
+      p="lg"
+      h="100%"
+      bg={`var(--mantine-color-${tone.base}-light)`}
+      style={{ borderColor: `var(--mantine-color-${tone.base}-light-hover)` }}
+    >
       <Stack gap="xs" h="100%">
         <Group gap="xs" wrap="nowrap">
           <ThemeIcon variant="light" color={tone.color} size="sm">
@@ -80,28 +88,22 @@ function ActionCard({ action }: { action: RadarAction }) {
           <Text size="sm" c="dimmed" mt={4}>{action.description}</Text>
         </Box>
         {action.suggestion && (
-          <Paper p="xs" bg="var(--mantine-color-gray-0)">
+          <Paper p="xs" bg="var(--mantine-color-body)">
             <Text size="sm">{action.suggestion}</Text>
           </Paper>
         )}
         <Group mt="auto" pt="xs">
-          {action.primary ? (
-            // ação principal do período: único botão cheio da grade
-            <Button variant="filled" rightSection={<ArrowRightIcon size={16} />} onClick={action.onAction}>
-              {action.ctaLabel}
-            </Button>
-          ) : (
-            // demais cards: botão terciário alinhado ao texto do card (compensa o padding lateral)
-            <Button
-              variant="subtle"
-              color="neutral"
-              ml="calc(var(--button-padding-x) * -1)"
-              rightSection={<ArrowRightIcon size={16} />}
-              onClick={action.onAction}
-            >
-              {action.ctaLabel}
-            </Button>
-          )}
+          {/* Todas as ações do Radar são terciárias (subtle): o destaque fica com a cor do cartão,
+              e o botão alinha o texto ao conteúdo (compensa o padding lateral) */}
+          <Button
+            variant="subtle"
+            color="neutral"
+            ml="calc(var(--button-padding-x) * -1)"
+            rightSection={<ArrowRightIcon size={16} />}
+            onClick={action.onAction}
+          >
+            {action.ctaLabel}
+          </Button>
         </Group>
       </Stack>
     </Paper>
@@ -135,7 +137,6 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       suggestion: 'Sugestão: repor 32 pares',
       ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P002', 32),
-      primary: true,
     },
     {
       id: 'late-order-4790-1',
@@ -159,7 +160,6 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       suggestion: 'Sugestão: repor 60 pares',
       ctaLabel: 'Repor Agora',
       onAction: () => onRestock('P010', 60),
-      primary: true,
     },
     {
       id: 'launch-fusion-mix',
@@ -215,7 +215,6 @@ function LojistaRadar({ userName, onOpenProduct, onRestock, onOpenOrder, onOpenC
       description: 'Coil Black White, Denim, Hertz All Black Furta Cor e mais 3',
       ctaLabel: 'Ver Produtos em Alta',
       onAction: () => onOpenCatalog({ sortBy: 'mais vendidos' }),
-      primary: true,
     },
   ];
 
