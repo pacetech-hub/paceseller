@@ -10,7 +10,7 @@ import {
   ArrowsClockwiseIcon,
   CheckCircleIcon,
 } from "@phosphor-icons/react";
-import { products } from "../data/mockData";
+import { formatDate, products } from "../data/mockData";
 import type { StockItem } from "../data/stockData";
 import {
   StockKpis, StockToolbar, StockTableHeader, StockProductCell, StockStatusBadge, StockEmptyFilterRow,
@@ -78,7 +78,7 @@ export function StockPage() {
 
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
-      <Stack gap="lg">
+      <Stack gap="xl">
         {/* Header / mode toggle */}
         <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Group justify="space-between" gap="sm" wrap="wrap">
@@ -102,7 +102,7 @@ export function StockPage() {
                 return {
                   value: o.value,
                   label: (
-                    <Group gap={6} wrap="nowrap">
+                    <Group gap="xs" wrap="nowrap">
                       <Icon size={16} />
                       {o.label}
                     </Group>
@@ -124,7 +124,7 @@ export function StockPage() {
               </ThemeIcon>
               <Box flex={1} miw={0}>
                 <Title order={2} fw={600}>Integração com seu sistema de estoque</Title>
-                <Text c="dimmed" size="sm" mt={2}>
+                <Text c="dimmed" size="sm" mt={4}>
                   Sincronize automaticamente seu ERP / sistema de gestão. Os dados são lidos a cada hora.
                 </Text>
               </Box>
@@ -140,7 +140,7 @@ export function StockPage() {
                 <UnstyledButton key={p} onClick={() => connect(p)}>
                   <Paper withBorder p="sm" className={interactive.hoverable}>
                     <Text fw={600}>{p}</Text>
-                    <Text c="dimmed" size="sm" mt={2}>Conectar via OAuth</Text>
+                    <Text c="dimmed" size="sm" mt={4}>Conectar via OAuth</Text>
                   </Paper>
                 </UnstyledButton>
               ))}
@@ -205,7 +205,7 @@ export function StockPage() {
                         )}
                       </Table.Td>
                       <Table.Td><StockStatusBadge item={it} /></Table.Td>
-                      <Table.Td><Text c="dimmed" size="sm">{it.updatedAt}</Text></Table.Td>
+                      <Table.Td><Text c="dimmed" size="sm">{formatDate(it.updatedAt)}</Text></Table.Td>
                       <Table.Td ta="right">
                         {mode === 'manual' ? (
                           isEditing

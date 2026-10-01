@@ -18,7 +18,7 @@ import {
   PlusIcon,
   PackageIcon,
 } from "@phosphor-icons/react";
-import { formatCurrency } from "../data/mockData";
+import { formatCurrency, formatDate } from "../data/mockData";
 import { toast } from "../lib/toast";
 import { statusOf, type StockItem, type StockStatusKey } from "../data/stockData";
 import { useMockLoading } from "../lib/useMockLoading";
@@ -61,10 +61,15 @@ export function StockKpis({ items }: { items: StockItem[] }) {
     return { ruptura, baixo, ok, valor, total: items.length };
   }, [items]);
 
+  // participação de cada status no total de SKUs, em % pt-BR ("16,7%")
+  const pct = (n: number) =>
+    `${(kpis.total ? (n / kpis.total) * 100 : 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+  const skus = (n: number) => (n === 1 ? '1 SKU' : `${n.toLocaleString('pt-BR')} SKUs`);
+
   const cards = [
-    { label: 'Sem estoque', value: String(kpis.ruptura), sub: `${kpis.total} SKUs cadastrados`, icon: EmptyIcon, color: 'red' },
-    { label: 'Estoque baixo', value: String(kpis.baixo), sub: 'abaixo do estoque mínimo', icon: TrendDownIcon, color: 'yellow' },
-    { label: 'Estoque normal', value: String(kpis.ok), sub: 'disponíveis para venda', icon: CheckSquareIcon, color: 'teal' },
+    { label: 'Sem estoque', value: skus(kpis.ruptura), sub: `${pct(kpis.ruptura)} dos ${kpis.total} SKUs cadastrados`, icon: EmptyIcon, color: 'red' },
+    { label: 'Estoque baixo', value: skus(kpis.baixo), sub: `${pct(kpis.baixo)} · abaixo do estoque mínimo`, icon: TrendDownIcon, color: 'yellow' },
+    { label: 'Estoque normal', value: skus(kpis.ok), sub: `${pct(kpis.ok)} · disponíveis para venda`, icon: CheckSquareIcon, color: 'teal' },
     { label: 'Valor em estoque', value: formatCurrency(kpis.valor), sub: 'a preço de tabela', icon: WarehouseIcon, color: 'neutral' },
   ];
 
@@ -75,12 +80,12 @@ export function StockKpis({ items }: { items: StockItem[] }) {
         return (
           <Paper key={k.label} withBorder p="md">
             <Group justify="space-between" mb="xs" wrap="nowrap">
-              <Text c="dimmed" size="sm" fw={600}>{k.label}</Text>
+              <Text c="dimmed" size="sm">{k.label}</Text>
               <ThemeIcon size={32} variant="light" color={k.color}>
                 <Icon size={16} />
               </ThemeIcon>
             </Group>
-            <Text fw={700} fz={{ base: 'lg', sm: 'xl' }} lh={1}>{k.value}</Text>
+            <Text fw={700} fz="xl" lh={1} className="mono">{k.value}</Text>
             <Text c="dimmed" size="sm" mt={4}>{k.sub}</Text>
           </Paper>
         );
@@ -310,7 +315,7 @@ export function StockTable({ items, onUpdateStock, readOnly = false, showBulkAct
                     </Table.Td>
                     <Table.Td ta="right"><Text c="dimmed" className="mono">{it.min}</Text></Table.Td>
                     <Table.Td><StockStatusBadge item={it} /></Table.Td>
-                    <Table.Td><Text c="dimmed" size="sm">{it.updatedAt}</Text></Table.Td>
+                    <Table.Td><Text c="dimmed" size="sm">{formatDate(it.updatedAt)}</Text></Table.Td>
                     {!readOnly && (
                       <Table.Td ta="right">
                         {isEditing
