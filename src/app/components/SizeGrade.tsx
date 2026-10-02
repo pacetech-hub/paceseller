@@ -142,7 +142,7 @@ export function TargetCartPicker({ cart, clientId }: { cart: Cart | null; client
       {cart && <Text size="sm" c="dimmed">· {cartPairs(cart)}/{CART_PARAMS.minOrderPairs} pares</Text>}
       <Menu position="bottom-start" withinPortal shadow="md" width={300}>
         <Menu.Target>
-          <Button variant="subtle" color="neutral" size="compact-sm" rightSection={<CaretDownIcon size={14} />}>trocar</Button>
+          <Button variant="subtle" color="neutral" size="compact-sm" rightSection={<CaretDownIcon size={16} />}>trocar</Button>
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Carrinhos que aceitam itens</Menu.Label>
@@ -150,7 +150,7 @@ export function TargetCartPicker({ cart, clientId }: { cart: Cart | null; client
             <Menu.Item
               key={c.id}
               onClick={() => setTargetCart(c.id)}
-              rightSection={cart?.id === c.id ? <CheckIcon size={14} /> : null}
+              rightSection={cart?.id === c.id ? <CheckIcon size={16} /> : null}
             >
               <Text size="sm" fw={600}>{c.cartName}</Text>
               <Text size="xs" c="dimmed">{statusLabel(cartStatus(c), c.rep)} · {pairsText(cartPairs(c))}</Text>
@@ -158,7 +158,7 @@ export function TargetCartPicker({ cart, clientId }: { cart: Cart | null; client
           ))}
           {options.length > 0 && <Menu.Divider />}
           <Menu.Item
-            leftSection={<PlusIcon size={14} />}
+            leftSection={<PlusIcon size={16} />}
             disabled={!clientId}
             onClick={() => clientId && createCart({ clientId, createdBy: role })}
           >

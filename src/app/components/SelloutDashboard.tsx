@@ -171,7 +171,7 @@ export function SelloutDashboard() {
               <Text className="mono" fw={700} fz={{ base: 'lg', sm: 'xl' }} mt={4}>{kpi.value}</Text>
               <Group gap="xs" mt={4} wrap="nowrap">
                 <Group gap={4} c={kpi.color} wrap="nowrap" flex="none">
-                  <TrendIcon size={12} />
+                  <TrendIcon size={16} />
                   <Text size="sm" fw={600} c={kpi.color}>{kpi.trendVal}</Text>
                 </Group>
                 <Text c="dimmed" size="sm" truncate>{kpi.sub}</Text>

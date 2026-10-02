@@ -95,8 +95,8 @@ function CartCard({ cart, viewerRole, onOpen, isOther }: { cart: Cart; viewerRol
         </Group>
         <Group gap="xs" mt="xs">
           <Badge variant="light" color={statusColor[status]}>{statusLabel(status, cart.rep)}</Badge>
-          {cart.createdBy === 'rep' && <Badge variant="light" color="neutral" leftSection={<UserCheckIcon size={12} />}>Montado por {repFirstName(cart.rep)}</Badge>}
-          {isOther && <Badge variant="light" color="yellow" leftSection={<ArrowsLeftRightIcon size={12} />}>troca cliente</Badge>}
+          {cart.createdBy === 'rep' && <Badge variant="light" color="neutral" leftSection={<UserCheckIcon size={14} />}>Montado por {repFirstName(cart.rep)}</Badge>}
+          {isOther && <Badge variant="light" color="yellow" leftSection={<ArrowsLeftRightIcon size={14} />}>troca cliente</Badge>}
         </Group>
         {/* miniaturas dos produtos */}
         <Group gap={6} mt="sm">
@@ -117,11 +117,11 @@ function CartCard({ cart, viewerRole, onOpen, isOther }: { cart: Cart; viewerRol
           {cart.exception && <Text size="xs" c="dimmed" mt={4}>Exceção aprovada por {repFirstName(cart.exception.by)}</Text>}
         </Box>
         {auto && (
-          <Group gap={4} mt="xs" wrap="nowrap"><ClockIcon size={14} /><Text size="sm">{auto}</Text></Group>
+          <Group gap={4} mt="xs" wrap="nowrap"><ClockIcon size={16} /><Text size="sm">{auto}</Text></Group>
         )}
         {last && (
           <Group gap={6} mt="xs" wrap="nowrap" align="flex-start">
-            <ChatCircleIcon size={14} style={{ flex: 'none', marginTop: 3 }} />
+            <ChatCircleIcon size={16} style={{ flex: 'none', marginTop: 3 }} />
             <Text size="sm" c="dimmed" lineClamp={1}>{last.name === 'Você' ? 'Você' : repFirstName(last.name)}: {last.text}</Text>
           </Group>
         )}
@@ -249,7 +249,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
                   onChange={e => { setClientQuery(e.currentTarget.value); setClientDropdownOpen(true); }}
                   onFocus={() => setClientDropdownOpen(true)}
                   placeholder="Buscar cliente por nome ou código (ex.: CLI-001)"
-                  leftSection={<MagnifyingGlassIcon size={14} />}
+                  leftSection={<MagnifyingGlassIcon size={16} />}
                   flex={{ base: '1 1 100%', sm: 1 }}
                   miw={{ sm: 220 }}
                 />
@@ -258,7 +258,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
                 {clientMatches.length > 0 ? clientMatches.map(c => (
                   <Paper key={c.id} component="button" type="button" onClick={() => { onSelectClient?.(c); setClientQuery(''); setNewOpen(true); }} className={`${classes.cardButton} ${classes.hoverable}`} bd="none" px="sm" py="sm">
                     <Group gap="xs" wrap="nowrap">
-                      <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
+                      <StorefrontIcon size={16} color="var(--mantine-color-dimmed)" />
                       <Text>{c.name}</Text>
                       <Text c="dimmed" size="sm" ml="auto" className="mono">{c.id}</Text>
                     </Group>
@@ -269,7 +269,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
               </Popover.Dropdown>
             </Popover>
             {onNavigateClients && (
-              <Button onClick={onNavigateClients} variant="default" w={{ base: '100%', sm: 'auto' }} leftSection={<UsersIcon size={14} />}>Buscar Clientes em Carteira</Button>
+              <Button onClick={onNavigateClients} variant="default" w={{ base: '100%', sm: 'auto' }} leftSection={<UsersIcon size={16} />}>Buscar Clientes em Carteira</Button>
             )}
           </Group>
         </Paper>
@@ -285,7 +285,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
             { value: 'client', label: 'Deste cliente' },
             { value: 'all', label: (
               <Group gap="xs" wrap="nowrap" justify="center">
-                <ArrowsLeftRightIcon size={14} />Todos os clientes
+                <ArrowsLeftRightIcon size={16} />Todos os clientes
                 {otherCarts.length > 0 && <Badge variant="default">+{otherCarts.length}</Badge>}
               </Group>
             ) },
@@ -297,7 +297,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
         <Paper withBorder p="md" mb="lg">
           <Title order={2} mb={4}>Criar novo carrinho</Title>
           <Group gap="xs" mb="md" c="dimmed">
-            <StorefrontIcon size={12} />
+            <StorefrontIcon size={16} />
             <Text size="sm" c="dimmed">Cliente: <Text span fw={600} c="var(--mantine-color-text)" inherit>{selectedClient.name}</Text></Text>
           </Group>
           <TextInput label="Nome do carrinho" value={newName} onChange={e => setNewName(e.currentTarget.value)} placeholder="ex.: Coleção Inverno" maxLength={60} description="Até 60 caracteres" />
@@ -343,7 +343,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
       )}
 
       <Group gap="sm" mb="lg" align="flex-end" wrap="wrap">
-        <TextInput value={q} onChange={e => setQ(e.currentTarget.value)} placeholder="Buscar por nome do cliente ou do carrinho" leftSection={<MagnifyingGlassIcon size={14} />} w={{ base: '100%', sm: 360 }} />
+        <TextInput value={q} onChange={e => setQ(e.currentTarget.value)} placeholder="Buscar por nome do cliente ou do carrinho" leftSection={<MagnifyingGlassIcon size={16} />} w={{ base: '100%', sm: 360 }} />
       </Group>
       {/* FR-504: filtros por status com contagem */}
       <Tabs value={statusFilter} onChange={v => v && setStatusFilter(v as typeof statusFilter)} variant="pills" mb="lg">

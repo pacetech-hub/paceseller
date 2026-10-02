@@ -229,7 +229,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               yAxisProps={{ tickFormatter: (v: number) => `${v} mil`, domain: lineDomain }}
             />
             <Group gap={4} c={POS} mt="xs" wrap="nowrap">
-              <TrendUpIcon size={14} />
+              <TrendUpIcon size={16} />
               <Text c="inherit" size="sm" fw={600}>+8% jul vs jun · +44% vs fev</Text>
             </Group>
           </Card>
@@ -237,7 +237,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           <Card title="Pedidos repetidos" hint="Contados pelo botão “repetir pedido” do histórico" span={5}>
             <Text size="xl" fw={700} className="mono">4 pedidos</Text>
             <Group gap={4} c={POS} wrap="nowrap" mt={4}>
-              <TrendUpIcon size={14} />
+              <TrendUpIcon size={16} />
               <Text c="inherit" size="sm" fw={600}>+2 pedidos vs. período anterior</Text>
             </Group>
             <Stack gap="xs" mt="sm">
@@ -295,7 +295,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
         <Grid gutter="md">
           <Card title="Sell-out" hint="Envio do dado de venda na ponta" span={3}>
             <Stack gap="sm" align="stretch">
-              <Box><Badge tone="ok" icon={<CheckIcon size={12} />}>Loja participante</Badge></Box>
+              <Box><Badge tone="ok" icon={<CheckIcon size={16} />}>Loja participante</Badge></Box>
               <Tile lab="Giro médio do estoque" val="20 dias" sub="alerta acima de 30 dias" />
               <Tile lab="Valor em estoque" val={brl(9435)} />
               <Tile lab="SKUs em ruptura" val="1" tone="neg" />

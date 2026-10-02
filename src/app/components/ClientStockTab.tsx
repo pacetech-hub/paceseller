@@ -72,10 +72,10 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
         limit={8}
         placeholder="Buscar por nome ou código do cliente"
         nothingFoundMessage="Nenhum cliente encontrado. Confira o nome ou busque pelo código do cliente."
-        leftSection={<MagnifyingGlassIcon size={14} />}
+        leftSection={<MagnifyingGlassIcon size={16} />}
         renderOption={({ option }) => (
           <Group gap="xs" wrap="nowrap" w="100%">
-            <StorefrontIcon size={14} color="var(--mantine-color-dimmed)" />
+            <StorefrontIcon size={16} color="var(--mantine-color-dimmed)" />
             <Text truncate flex={1}>{option.label}</Text>
             <Text c="dimmed" size="sm" className="mono">{option.value}</Text>
           </Group>
@@ -107,7 +107,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
               <Box miw={0}>
                 <Text fw={700} truncate>{selected.name}</Text>
                 <Group gap="xs" c="dimmed" wrap="nowrap">
-                  <MapPinIcon size={12} style={{ flexShrink: 0 }} />
+                  <MapPinIcon size={16} style={{ flexShrink: 0 }} />
                   <Text size="sm" c="dimmed" truncate>{selected.city} · {selected.state} · Rep: {selected.rep}</Text>
                 </Group>
               </Box>

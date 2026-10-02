@@ -91,7 +91,7 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
           <UnstyledButton onClick={() => setOpen(o => !o)} mt={4} aria-expanded={open}>
             <Group gap={4}>
               <Text size="sm" fw={600}>{pairsText(n)}</Text>
-              {open ? <CaretUpIcon size={14} /> : <CaretDownIcon size={14} />}
+              {open ? <CaretUpIcon size={16} /> : <CaretDownIcon size={16} />}
               <Text size="sm" c="dimmed">{open ? 'ocultar numeração' : 'ver por numeração'}</Text>
             </Group>
           </UnstyledButton>
@@ -100,10 +100,10 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
           <Text className="mono" fw={700}>{formatCurrency(value * (1 - discountPct / 100))}</Text>
           {editable && (
             <Group gap={4}>
-              <Button size="compact-sm" variant="default" leftSection={<PencilSimpleIcon size={14} />} onClick={() => openGrade({ productId, mode: 'edit', cartId: cart.id, initial: sizes })}>
+              <Button size="compact-sm" variant="default" leftSection={<PencilSimpleIcon size={16} />} onClick={() => openGrade({ productId, mode: 'edit', cartId: cart.id, initial: sizes })}>
                 Editar grade
               </Button>
-              <Button size="compact-sm" variant="subtle" color="red" leftSection={<TrashIcon size={14} />} onClick={() => removeLine(cart.id, productId, role)} aria-label={`Remover ${p.name} do carrinho`}>
+              <Button size="compact-sm" variant="subtle" color="red" leftSection={<TrashIcon size={16} />} onClick={() => removeLine(cart.id, productId, role)} aria-label={`Remover ${p.name} do carrinho`}>
                 Remover
               </Button>
             </Group>
@@ -217,7 +217,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
 
   return (
     <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
-      <Button onClick={() => onNavigate('carts')} variant="subtle" color="gray" ml={-12} mb="xs" leftSection={<CaretLeftIcon size={14} />}>
+      <Button onClick={() => onNavigate('carts')} variant="subtle" color="gray" ml={-12} mb="xs" leftSection={<CaretLeftIcon size={16} />}>
         Meus carrinhos
       </Button>
 
@@ -232,7 +232,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
             ))}
           </Tabs.List>
         </Tabs>
-        <Button variant="default" size="compact-md" leftSection={<PlusIcon size={14} />} onClick={newCart} flex="none">Novo carrinho</Button>
+        <Button variant="default" size="compact-md" leftSection={<PlusIcon size={16} />} onClick={newCart} flex="none">Novo carrinho</Button>
       </Group>
 
       {/* FR-602: quem vê o carrinho e permissão de edição do representante */}
@@ -267,7 +267,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                   </Group>
                   <Group gap="md" mt="xs">
                     <Text size="sm" c="dimmed">Condição: {status === 'aguardando-pagamento' || status === 'confirmado' ? `30/60/90 dias ou à vista com ${CART_PARAMS.cashDiscountPct}%` : `a confirmar com ${repName}`}</Text>
-                    <Group gap={4}><TruckIcon size={14} /><Text size="sm" c="dimmed">{CART_PARAMS.leadTimeLabel}</Text></Group>
+                    <Group gap={4}><TruckIcon size={16} /><Text size="sm" c="dimmed">{CART_PARAMS.leadTimeLabel}</Text></Group>
                   </Group>
                 </Box>
                 {primary && (
@@ -377,7 +377,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                       {m.suggestions.length > 0 && (
                         <Group gap="xs" mt="xs">
                           {m.suggestions.map(p => (
-                            <Button key={p.id} size="compact-sm" variant="default" leftSection={<PlusIcon size={12} />} disabled={!editable} onClick={() => openGrade({ productId: p.id, cartId: cart.id })}>
+                            <Button key={p.id} size="compact-sm" variant="default" leftSection={<PlusIcon size={16} />} disabled={!editable} onClick={() => openGrade({ productId: p.id, cartId: cart.id })}>
                               {p.name}
                             </Button>
                           ))}

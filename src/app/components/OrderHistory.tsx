@@ -58,7 +58,7 @@ export function OrderStatusBadge({ status }: { status: string }) {
     <Badge
       variant="light"
       color={statusColors[status]}
-      leftSection={<StatusIcon size={12} />}
+      leftSection={<StatusIcon size={14} />}
       styles={{ root: { flexShrink: 0 } }}
     >
       {status}
@@ -224,7 +224,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
       <Group gap="sm" wrap="wrap">
         <TextInput
           placeholder="Buscar por nº do pedido, cliente ou representante"
-          leftSection={<MagnifyingGlassIcon size={14} />}
+          leftSection={<MagnifyingGlassIcon size={16} />}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
           flex={{ base: '1 1 100%', sm: 1 }}

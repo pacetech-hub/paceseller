@@ -151,7 +151,7 @@ function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggle
     <Group gap={4} wrap="wrap">
       <Badge variant="light" color={availColor[product.availability]}>{product.availability}</Badge>
       <SignalTag signal={signal} />
-      {topSeller && <Badge variant="light" color="neutral" leftSection={<StarIcon size={12} weight="fill" />}>Mais vendida</Badge>}
+      {topSeller && <Badge variant="light" color="neutral" leftSection={<StarIcon size={14} weight="fill" />}>Mais vendida</Badge>}
     </Group>
   );
   const addButton = (
@@ -282,7 +282,7 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
           />
         </Box>
         {topSeller && (
-          <Badge pos="absolute" top={12} left={12} variant="filled" color="neutral.9" radius="sm" ff="monospace" leftSection={<StarIcon size={12} weight="fill" />}>
+          <Badge pos="absolute" top={12} left={12} variant="filled" color="neutral.9" radius="sm" ff="monospace" leftSection={<StarIcon size={14} weight="fill" />}>
             Mais vendida
           </Badge>
         )}
@@ -292,7 +292,7 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
       <Group gap={6} wrap="nowrap" px="xs" pt={2} pb="xs" style={{ borderTop: BORDER, borderBottom: BORDER }}>
         {showArrows && (
           <ActionIcon variant="default" radius="xl" size="sm" onClick={() => scroll(-1)} aria-label="Cores anteriores" flex="none">
-            <CaretLeftIcon size={12} />
+            <CaretLeftIcon size={16} />
           </ActionIcon>
         )}
         <Box ref={stripRef} flex={1} miw={0} style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
@@ -319,7 +319,7 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
                     <ProductImage src={v.image} alt="" imageProps={{ fit: 'contain', p: 2 }} fallback={<Group h="100%" justify="center"><PackageIcon size={18} color={DIMMED} /></Group>} />
                     {isTopSeller(v.id, radar) && (
                       <ThemeIcon pos="absolute" top={-6} right={-6} size={16} radius="xl" color="neutral.9" aria-hidden>
-                        <StarIcon size={10} weight="fill" />
+                        <StarIcon size={12} weight="fill" />
                       </ThemeIcon>
                     )}
                   </UnstyledButton>
@@ -330,7 +330,7 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
         </Box>
         {showArrows && (
           <ActionIcon variant="default" radius="xl" size="sm" onClick={() => scroll(1)} aria-label="Próximas cores" flex="none">
-            <CaretRightIcon size={12} />
+            <CaretRightIcon size={16} />
           </ActionIcon>
         )}
       </Group>
@@ -437,7 +437,7 @@ function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, is
         <Group gap="sm" wrap="wrap">
           {entry?.fromRadar && onBackToRadar && (
             <Anchor component="button" type="button" size="sm" fw={600} onClick={onBackToRadar}>
-              <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={14} />Voltar ao Radar</Group>
+              <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={16} />Voltar ao Radar</Group>
             </Anchor>
           )}
           <Text lh={1.5} component="span" c="dimmed" size="sm" fw={600}>Catálogo / {product.name}</Text>
@@ -735,7 +735,7 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
               {viewMode === 'grid' && <Text span c="dimmed" fw={400} inherit> em {models.length} {models.length === 1 ? 'modelo' : 'modelos'}</Text>}
             </Text>
             {activeChips.map(ch => (
-              <Button key={ch.key} variant="light" color="neutral" size="compact-md" rightSection={<XIcon size={14} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
+              <Button key={ch.key} variant="light" color="neutral" size="compact-md" rightSection={<XIcon size={16} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
                 {ch.label}
               </Button>
             ))}

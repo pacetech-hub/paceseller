@@ -459,7 +459,7 @@ function FilterPopover({
           variant={active ? 'light' : 'default'}
           color="neutral"
           leftSection={<SectionIcon size={16} />}
-          rightSection={<CaretDownIcon size={14} />}
+          rightSection={<CaretDownIcon size={16} />}
           aria-label={ariaLabel}
         >
           {label}

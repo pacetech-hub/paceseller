@@ -100,7 +100,7 @@ export function StockStatusBadge({ item }: { item: Pick<StockItem, 'stock' | 'mi
     <Badge
       variant="light"
       color={st.color}
-      leftSection={st.key !== 'ok' ? <WarningIcon size={14} /> : undefined}
+      leftSection={st.key !== 'ok' ? <WarningIcon size={16} /> : undefined}
     >
       {STATUS_PLAIN_LABEL[st.key]}
     </Badge>

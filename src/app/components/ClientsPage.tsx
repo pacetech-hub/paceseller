@@ -133,7 +133,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         <Group gap="sm" wrap="wrap">
           <TextInput
             placeholder="Buscar por nome, cidade ou representante"
-            leftSection={<MagnifyingGlassIcon size={14} />}
+            leftSection={<MagnifyingGlassIcon size={16} />}
             value={search}
             onChange={e => setSearch(e.currentTarget.value)}
             flex={{ base: '1 1 100%', sm: 1 }}
@@ -145,7 +145,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               <Button
                 variant={activeFilterCount > 0 ? 'light' : 'default'}
                 color="neutral"
-                leftSection={<FunnelIcon size={14} />}
+                leftSection={<FunnelIcon size={16} />}
                 rightSection={activeFilterCount > 0 ? (
                   <Badge circle color="neutral">{activeFilterCount}</Badge>
                 ) : undefined}
@@ -270,7 +270,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                         </Table.Td>
                         <Table.Td>
                           <Group gap={4} wrap="nowrap">
-                            <MapPinIcon size={12} color="var(--mantine-color-dimmed)" />
+                            <MapPinIcon size={16} color="var(--mantine-color-dimmed)" />
                             <Text c="dimmed">{client.city}/{client.state}</Text>
                           </Group>
                         </Table.Td>
