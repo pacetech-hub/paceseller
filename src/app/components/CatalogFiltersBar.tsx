@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Stack, Text, TextInput, Tooltip,
+  ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Select, Group, Paper, Popover, Radio, SimpleGrid, Stack, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -14,6 +14,7 @@ import {
   MagnifyingGlassIcon,
   CrosshairIcon,
   RulerIcon,
+  SortAscendingIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import { products } from "../data/mockData";
@@ -101,13 +102,25 @@ export const defaultFilters: CatalogFilters = {
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
+/** Ordenação do catálogo (lista suspensa "Ordenar", à direita dos filtros). */
+export const SORT_OPTIONS = [
+  { value: 'lancamento', label: 'Lançamento' },
+  { value: 'menor-preco', label: 'Menor preço' },
+  { value: 'maior-preco', label: 'Maior preço' },
+  // diferença entre o PDV sugerido e o Seu custo (a margem do lojista)
+  { value: 'maior-desconto', label: 'Maior desconto' },
+];
+export type CatalogSort = (typeof SORT_OPTIONS)[number]['value'];
+
 interface Props {
   filters: CatalogFilters;
   onChange: (f: CatalogFilters) => void;
+  sortBy: string;
+  onSortChange: (v: string) => void;
 }
 
-// Barra de filtros no topo do catálogo: tabela de preço + filtros em popovers.
-export function CatalogFiltersBar({ filters, onChange }: Props) {
+// Barra do topo do catálogo: linha 1 = tabela de preço + busca; linha 2 = filtros em popovers + ordenar.
+export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: Props) {
   const [colorQuery, setColorQuery] = useState('');
   const visibleColors = allColors.filter(c => normalize(c).includes(normalize(colorQuery.trim())));
   const visiblePopularColors = popularColors.filter(c => visibleColors.includes(c));
@@ -165,6 +178,7 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
 
   return (
     <Paper withBorder p="sm">
+      <Stack gap="sm">
       <Group gap="sm" wrap="wrap" align="center">
         {/* Tabela de Preço — 4 opções fixas com descrição: cartões de opção (radio) em vez de lista suspensa */}
         <FilterPopover
@@ -195,7 +209,25 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           </Radio.Group>
         </FilterPopover>
 
-        <Group gap="xs" wrap="nowrap" ml={{ sm: 'xs' }}>
+        {/* Busca no topo, à direita da tabela de preço */}
+        <TextInput
+          flex={{ base: '1 1 100%', xs: 1 }}
+          miw={{ xs: 200 }}
+          placeholder="Buscar por nome, linha ou código"
+          aria-label="Buscar produtos"
+          value={filters.search}
+          onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
+          leftSection={<MagnifyingGlassIcon size={18} />}
+          rightSection={filters.search ? (
+            <ActionIcon onClick={() => onChange({ ...filters, search: '' })} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
+              <XIcon size={16} />
+            </ActionIcon>
+          ) : null}
+        />
+      </Group>
+
+      <Group gap="sm" wrap="wrap" align="center">
+        <Group gap="xs" wrap="nowrap">
           <FunnelIcon size={18} />
           <Text lh={1.5} fw={600}>Filtros</Text>
           {activeCount > 0 && (
@@ -344,7 +376,28 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             Limpar Filtros
           </Button>
         )}
+
+        {/* Ordenar: à direita dos filtros */}
+        <Select
+          ml={{ md: 'auto' }}
+          w={{ base: '100%', xs: 220 }}
+          aria-label="Ordenar"
+          leftSection={<SortAscendingIcon size={18} />}
+          data={SORT_OPTIONS}
+          value={sortBy}
+          onChange={v => v && onSortChange(v)}
+          allowDeselect={false}
+          comboboxProps={{ withinPortal: true }}
+          renderOption={({ option, checked }) => (
+            <Group gap="xs" wrap="nowrap">
+              {checked ? <CheckIcon size={16} /> : <Box w={16} />}
+              <Text inherit>{option.label}</Text>
+            </Group>
+          )}
+          styles={{ input: { fontWeight: 600 } }}
+        />
       </Group>
+      </Stack>
     </Paper>
   );
 }

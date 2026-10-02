@@ -34,7 +34,7 @@ import { useShop } from "../lib/shop";
 import bannerLimitedAsset from "../../assets/banner-edicao-limitada.webp";
 import classes from "./CatalogPage.module.css";
 import {
-  CatalogFiltersBar, PRICE_BANDS, countActiveFilters, defaultFilters, priceBandOf, type CatalogFilters,
+  CatalogFiltersBar, SORT_OPTIONS, PRICE_BANDS, countActiveFilters, defaultFilters, priceBandOf, type CatalogFilters,
 } from "./CatalogFiltersBar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, ListSkeleton } from "./ui/Skeletons";
@@ -90,14 +90,6 @@ interface CatalogPageProps {
   onBackToRadar?: () => void;
 }
 
-// rótulos dizem a ordem resultante
-const SORT_OPTIONS = [
-  { value: 'relevância', label: 'Mais relevantes' },
-  { value: 'mais vendidos', label: 'Mais vendidos primeiro' },
-  { value: 'menor preço', label: 'Menor custo primeiro' },
-  { value: 'maior preço', label: 'Maior custo primeiro' },
-  { value: 'margem', label: 'Maior margem primeiro' },
-];
 
 const availColor: Record<Product['availability'], string> = {
   'disponível': 'teal',
@@ -595,7 +587,7 @@ function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, is
 
 export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, onBackToRadar }: CatalogPageProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState(initialSortBy ?? 'relevância');
+  const [sortBy, setSortBy] = useState<string>(SORT_OPTIONS.some(o => o.value === initialSortBy) ? initialSortBy! : 'lancamento');
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set(products.filter(p => p.isFavorite).map(p => p.id)));
   const [detailProduct, setDetailProduct] = useState<Product | null>(() => products.find(p => p.id === entry?.productId) ?? null);
   const [detailEntry, setDetailEntry] = useState<CatalogEntry | undefined>(entry);
@@ -620,10 +612,11 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
   });
 
   const sorted = [...filtered].sort((a, b) => {
-    if (sortBy === 'menor preço') return a.price - b.price;
-    if (sortBy === 'maior preço') return b.price - a.price;
-    if (sortBy === 'mais vendidos') return b.soldUnits - a.soldUnits;
-    if (sortBy === 'margem') return (b.priceRetail - b.price) / b.priceRetail - (a.priceRetail - a.price) / a.priceRetail;
+    if (sortBy === 'menor-preco') return a.price - b.price;
+    if (sortBy === 'maior-preco') return b.price - a.price;
+    if (sortBy === 'maior-desconto') return (b.priceRetail - b.price) / b.priceRetail - (a.priceRetail - a.price) / a.priceRetail;
+    // lançamento: os mais recentes primeiro (sem data de lançamento vão para o fim)
+    if (sortBy === 'lancamento') return (storeSku(a.id)?.launchedDaysAgo ?? Infinity) - (storeSku(b.id)?.launchedDaysAgo ?? Infinity);
     return 0;
   });
 
@@ -684,7 +677,7 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
           <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={16} />Voltar ao Radar</Group>
         </Anchor>
       )}
-      <CatalogFiltersBar filters={filters} onChange={onFiltersChange} />
+      <CatalogFiltersBar filters={filters} onChange={onFiltersChange} sortBy={sortBy} onSortChange={setSortBy} />
 
       <Card withBorder shadow="xs" padding={0}>
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
@@ -692,42 +685,6 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
 
       <Stack gap="lg">
         <Stack gap="md">
-          <Group gap="sm" wrap="wrap">
-            <TextInput
-              flex={{ base: '1 1 100%', sm: 1 }}
-              miw={{ sm: 200 }}
-              placeholder="Buscar por nome, linha ou código"
-              aria-label="Buscar produtos"
-              value={search}
-              onChange={e => setSearch(e.currentTarget.value)}
-              leftSection={<MagnifyingGlassIcon size={18} />}
-              rightSection={search ? (
-                <ActionIcon onClick={() => setSearch('')} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
-                  <XIcon size={16} />
-                </ActionIcon>
-              ) : null}
-            />
-            <SegmentedControl
-              value={viewMode}
-              onChange={v => setViewMode(v as 'grid' | 'list')}
-              aria-label="Modo de exibição"
-              data={[
-                { value: 'grid', label: <Group gap="xs" wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
-                { value: 'list', label: <Group gap="xs" wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
-              ]}
-            />
-          </Group>
-
-          <Input.Wrapper label="Ordenar por" labelElement="div" id="catalog-sort">
-            <Chip.Group multiple={false} value={sortBy} onChange={v => v && setSortBy(v)}>
-              <Group gap="sm" mt="xs" role="radiogroup" aria-labelledby="catalog-sort-label">
-                {SORT_OPTIONS.map(o => (
-                  <Chip key={o.value} value={o.value} variant="filled" icon={null} styles={{ iconWrapper: { display: 'none' } }}>{o.label}</Chip>
-                ))}
-              </Group>
-            </Chip.Group>
-          </Input.Wrapper>
-
           {/* contagem de resultados + filtros ativos removíveis + limpar */}
           <Group gap="sm" wrap="wrap">
             <Text fw={600} aria-live="polite">
@@ -742,6 +699,16 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
             {countActiveFilters(filters) > 0 && (
               <Button variant="subtle" color="neutral" size="compact-md" onClick={clearFilters}>Limpar filtros</Button>
             )}
+            <SegmentedControl
+              ml="auto"
+              value={viewMode}
+              onChange={v => setViewMode(v as 'grid' | 'list')}
+              aria-label="Modo de exibição"
+              data={[
+                { value: 'grid', label: <Group gap="xs" wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
+                { value: 'list', label: <Group gap="xs" wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
+              ]}
+            />
           </Group>
         </Stack>
 
