@@ -1,45 +1,47 @@
-import { useState, type ReactNode } from "react";
-import { toast } from "../lib/toast";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSmallerThan } from "../lib/responsive";
 import {
-  ActionIcon, Badge, Box, Button, Card, Chip, CloseButton, Divider, Flex, Group, Modal, NumberInput,
-  Input, Paper, ScrollArea, SegmentedControl, SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  ActionIcon, Anchor, Badge, Box, Button, Card, Chip, Divider, Flex, Group, Modal, Input, Paper, SegmentedControl,
+  SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, Title, Tooltip, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
-  FunnelIcon,
   GridNineIcon,
   ListBulletsIcon,
   HeartIcon,
-  StarIcon,
   ShoppingCartIcon,
   XIcon,
   PackageIcon,
   EyeIcon,
-  LightningIcon,
-  MinusIcon,
   PlusIcon,
-  StorefrontIcon,
-  UserCheckIcon,
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  UsersThreeIcon,
+  MegaphoneIcon,
+  LightningIcon,
+  StarIcon,
 } from "@phosphor-icons/react";
-import { products, Product, formatCurrency, Client } from "../data/mockData";
+import { products, Product, formatCurrency, type Client } from "../data/mockData";
+import {
+  COST_BASIS, PEER_GROUP_SIZE, RADAR_FILTERS, SEVERITY_META, SIGNAL_META, buyReasons, isTopSeller, marginLabel, markupLabel,
+  matchesRadarFilter, productDisplayName, storeSku, suggestedGrade, useRadar, type RadarFilter, type RadarSignal,
+} from "../data/radar";
+import { resolveTargetCart, useCartStore } from "../data/cartStore";
+import { useShop } from "../lib/shop";
 import bannerLimitedAsset from "../../assets/banner-edicao-limitada.webp";
-import interactive from "./interactive.module.css";
 import classes from "./CatalogPage.module.css";
-
-import type { CartContext, CartCreator } from "./CartsListPage";
-import { CatalogFiltersBar, ChoiceChips, defaultFilters, popularCategories } from "./CatalogFiltersBar";
+import {
+  CatalogFiltersBar, PRICE_BANDS, countActiveFilters, defaultFilters, priceBandOf, type CatalogFilters,
+} from "./CatalogFiltersBar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
-import sticky from "./ui/stickyTable.module.css";
+import { GradeOrderSummary, SignalLine, SizeGradeEditor, TargetCartPicker, useCommitAdd } from "./SizeGrade";
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 const BORDER = `1px solid ${BORDER_COLOR}`;
-const PRIMARY_TEXT = 'var(--mantine-primary-color-filled)';
 const DIMMED = 'var(--mantine-color-dimmed)';
-const DASHED_BORDER = `1px dashed ${BORDER_COLOR}`;
 
 // Foto remota do produto: skeleton no lugar até a imagem carregar; se falhar, mostra o fallback
 function ProductImage({ src, alt, fallback, imageProps }: {
@@ -63,255 +65,37 @@ function ProductImage({ src, alt, fallback, imageProps }: {
   );
 }
 
-function CartCreatorTag({ createdBy }: { createdBy?: CartCreator }) {
-  if (!createdBy) return null;
-  const isLojista = createdBy === 'lojista';
-  return (
-    <Badge
-      mt={4}
-      variant="light"
-      color="neutral"
-      leftSection={isLojista ? <StorefrontIcon size={14} /> : <UserCheckIcon size={14} />}
-    >
-      {isLojista ? 'Lojista' : 'Representante'}
-    </Badge>
-  );
-}
-
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
 
-interface CatalogFiltersShape {
-  search: string;
-  line: string;
-  category: string;
-  colors: string[];
-  priceRange: [number, number];
-  priceTable: string;
+export interface CatalogEntry {
+  /** Produto aberto ao entrar (ex.: CTA do Radar). */
+  productId?: string | null;
+  /** Abre a grade preenchida com a sugestão do Radar. */
+  prefill?: boolean;
+  /** Bloco da página do produto para destacar ("Como girar" ou benchmark). */
+  block?: 'benchmark' | 'como-girar';
+  /** Veio do Radar: mostra "← Voltar ao Radar" (BR-72). */
+  fromRadar?: boolean;
 }
-
 
 interface CatalogPageProps {
   onNavigate: (view: View) => void;
-  onSelectProduct?: (product: Product) => void;
   selectedClient?: Client | null;
-  externalFilters?: CatalogFiltersShape;
-  onExternalFiltersChange?: (f: CatalogFiltersShape) => void;
-  clientCarts?: CartContext[];
-  activeCartId?: string | null;
-  onPickCart?: (ctx: CartContext) => void;
-  onCreateCart?: (name: string) => CartContext | null;
-  /** Abre o detalhe deste produto ao entrar no catálogo (ex.: vindo do Radar). */
-  initialDetailProductId?: string | null;
-  /** Ordenação inicial ao entrar no catálogo (ex.: "mais vendidos" vindo do Radar). */
+  filters: CatalogFilters;
+  onFiltersChange: (f: CatalogFilters) => void;
+  entry?: CatalogEntry;
   initialSortBy?: string | null;
+  onBackToRadar?: () => void;
 }
 
-const lines = ['Todos', 'Premium', 'Urban', 'Sport'];
-const categories = ['Todos', 'Social', 'Casual', 'Esportivo', 'Sandália', 'Bota'];
-const collections = ['Todas', 'Inverno 2026', 'Primavera/Verão 2026'];
-// rótulos dizem a ordem resultante; os valores internos ficam estáveis ('mais vendidos' vem do Radar)
+// rótulos dizem a ordem resultante
 const SORT_OPTIONS = [
   { value: 'relevância', label: 'Mais relevantes' },
   { value: 'mais vendidos', label: 'Mais vendidos primeiro' },
-  { value: 'avaliação', label: 'Mais bem avaliados primeiro' },
-  { value: 'menor preço', label: 'Menor preço primeiro' },
-  { value: 'maior preço', label: 'Maior preço primeiro' },
+  { value: 'menor preço', label: 'Menor custo primeiro' },
+  { value: 'maior preço', label: 'Maior custo primeiro' },
+  { value: 'margem', label: 'Maior margem primeiro' },
 ];
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <Group gap={2} wrap="nowrap">
-      {[1, 2, 3, 4, 5].map(s => (
-        <StarIcon
-          key={s}
-          size={14}
-          weight={s <= Math.round(rating) ? 'fill' : 'regular'}
-          color={s <= Math.round(rating) ? 'var(--mantine-color-neutral-9)' : DIMMED}
-          opacity={s <= Math.round(rating) ? 1 : 0.3}
-        />
-      ))}
-      <Text lh={1.5} c="dimmed" ml={4} size="sm">{rating.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</Text>
-    </Group>
-  );
-}
-
-// Stepper de quantidade: botões de 36px (área de clique confortável também no desktop)
-function QtyStepper({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <Group gap="sm" wrap="nowrap">
-      <ActionIcon size="input-sm" variant="default" onClick={() => onChange(value - 1)} aria-label="Diminuir quantidade">
-        <MinusIcon size={16} />
-      </ActionIcon>
-      <NumberInput
-        value={value}
-        onChange={v => onChange(Number(v) || 0)}
-        hideControls
-        placeholder="0"
-        w={56}
-        size="sm"
-        aria-label="Quantidade"
-        styles={{ input: { textAlign: 'center', paddingInline: 4 } }}
-      />
-      <ActionIcon size="input-sm" variant="default" onClick={() => onChange(value + 1)} aria-label="Aumentar quantidade">
-        <PlusIcon size={16} />
-      </ActionIcon>
-    </Group>
-  );
-}
-
-function GradeHeader({ onClose }: { onClose?: () => void }) {
-  return (
-    <Group justify="space-between" mb="xs" wrap="nowrap">
-      <Text lh={1.5} fw={600}>
-        Compra rápida — grade
-      </Text>
-      {onClose && (
-        <CloseButton onClick={onClose} aria-label="Fechar compra rápida" />
-      )}
-    </Group>
-  );
-}
-
-function GradeCompact({ product, onAdd, onClose }: {
-  product: Product; onAdd: (qtys: Record<string, number>) => void; onClose?: () => void;
-}) {
-  const sizes = Object.keys(product.grades);
-  const [qtys, setQtys] = useState<Record<string, number>>(
-    Object.fromEntries(sizes.map(s => [s, 0]))
-  );
-  const total = Object.values(qtys).reduce((a, b) => a + b, 0);
-  const subtotal = total * product.price;
-  const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
-
-  return (
-    <>
-      <Divider color={BORDER_COLOR} />
-      <Box px="sm" pb="sm" pt="xs" bg="var(--mantine-color-default-hover)">
-        <GradeHeader onClose={onClose} />
-        <Stack gap={4}>
-          {sizes.map(s => (
-            <Paper key={s} px="xs" py={4}>
-              {/* Em cards estreitos o stepper desce para baixo da numeração em vez de estourar */}
-              <Group justify="space-between" gap={4}>
-                <Box>
-                  <Text lh={1.5} fw={600}>Nº {s}</Text>
-                  <Text lh={1.5} c="teal.6" size="sm">{product.grades[s]} disp.</Text>
-                </Box>
-                <QtyStepper value={qtys[s]} onChange={v => set(s, v)} />
-              </Group>
-            </Paper>
-          ))}
-        </Stack>
-        <Group justify="space-between" my="xs">
-          <Text lh={1.5} c="dimmed" size="sm">
-            {total} {total === 1 ? 'par' : 'pares'}
-          </Text>
-          <Text lh={1.5} className="mono" fw={700}>{formatCurrency(subtotal)}</Text>
-        </Group>
-        <Button
-          fullWidth
-          onClick={() => onAdd(qtys)}
-          disabled={total === 0}
-          leftSection={<ShoppingCartIcon size={18} />}
-        >
-          Adicionar ao Carrinho
-        </Button>
-      </Box>
-    </>
-  );
-}
-
-// larguras da grade: rótulo · uma coluna por numeração (cabe o stepper de 36px) · total
-const GRADE_LABEL_W = 120;
-const GRADE_COL_W = 164;
-const GRADE_TOTAL_W = 80;
-
-function GradeInline({ product, onAdd, onClose, onCancel }: {
-  product: Product; onAdd: (qtys: Record<string, number>) => void; onClose?: () => void;
-  /** Botão "Fechar" no rodapé (à esquerda da ação principal) — usado no modal de detalhes. */
-  onCancel?: () => void;
-}) {
-  const sizes = Object.keys(product.grades);
-  const [qtys, setQtys] = useState<Record<string, number>>(
-    Object.fromEntries(sizes.map(s => [s, 0]))
-  );
-  const total = Object.values(qtys).reduce((a, b) => a + b, 0);
-  const subtotal = total * product.price;
-  const set = (s: string, v: number) => setQtys(q => ({ ...q, [s]: Math.max(0, v) }));
-
-  // Rótulo da linha: menor e esmaecido, em peso regular — o destaque fica nos números
-  const rowLabel = (text: string) => (
-    <Table.Th w={GRADE_LABEL_W} miw={GRADE_LABEL_W} fz="sm" fw={400} c="dimmed">{text}</Table.Th>
-  );
-
-  return (
-    <>
-      <Divider color={BORDER_COLOR} />
-      <Box px="sm" pb="sm" pt="xs" bg="var(--mantine-color-default-hover)">
-        <GradeHeader onClose={onClose} />
-
-        {/* Grade larga (uma coluna por numeração): rola na horizontal, mas a coluna de rótulos
-            (Numeração / Estoque / Quantidade) fica fixa à esquerda. Números alinhados à direita. */}
-        <Paper withBorder>
-          <Table.ScrollContainer minWidth={GRADE_LABEL_W + GRADE_TOTAL_W + sizes.length * GRADE_COL_W} type="native">
-            <Table className={sticky.firstCol} verticalSpacing="xs" horizontalSpacing="sm" withRowBorders>
-              <Table.Thead>
-                <Table.Tr>
-                  {rowLabel('Numeração')}
-                  {sizes.map(s => (
-                    <Table.Th key={s} miw={GRADE_COL_W} ta="right" fw={600}>Nº {s}</Table.Th>
-                  ))}
-                  <Table.Th w={GRADE_TOTAL_W} ta="right" fz="sm" fw={400} c="dimmed">Total</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                <Table.Tr>
-                  {rowLabel('Estoque')}
-                  {sizes.map(s => (
-                    <Table.Td key={s} ta="right" className="mono" c="teal.6">{product.grades[s]}</Table.Td>
-                  ))}
-                  <Table.Td ta="right" className="mono" c="dimmed">
-                    {Object.values(product.grades).reduce((a, b) => a + b, 0)}
-                  </Table.Td>
-                </Table.Tr>
-                <Table.Tr>
-                  {rowLabel('Quantidade')}
-                  {sizes.map(s => (
-                    <Table.Td key={s} ta="right">
-                      <Group justify="flex-end" wrap="nowrap">
-                        <QtyStepper value={qtys[s]} onChange={v => set(s, v)} />
-                      </Group>
-                    </Table.Td>
-                  ))}
-                  <Table.Td ta="right" className="mono" fw={700}>{total}</Table.Td>
-                </Table.Tr>
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
-        </Paper>
-
-        {/* Fechar à esquerda, ação principal à direita */}
-        <Group justify="flex-end" gap="sm" mt="xs" mb={4}>
-          <Text lh={1.5} c="dimmed" size="sm" mr="auto">
-            {total} {total === 1 ? 'par' : 'pares'} · <Text lh={1.5} span className="mono" c="var(--mantine-color-text)" fw={700}>{formatCurrency(subtotal)}</Text>
-          </Text>
-          <Group gap="sm">
-            {onCancel && (
-              <Button variant="default" onClick={onCancel}>Fechar</Button>
-            )}
-            <Button
-              onClick={() => onAdd(qtys)}
-              disabled={total === 0}
-              leftSection={<ShoppingCartIcon size={18} />}
-            >
-              Adicionar ao Carrinho
-            </Button>
-          </Group>
-        </Group>
-      </Box>
-    </>
-  );
-}
 
 const availColor: Record<Product['availability'], string> = {
   'disponível': 'teal',
@@ -319,238 +103,201 @@ const availColor: Record<Product['availability'], string> = {
   'esgotado': 'red',
 };
 
-function ProductCard({ product, onQuickBuy, onOpenDetail, onToggleFav, viewMode, gradeOpen, onAddGrade, onCloseGrade }: {
+/** Selo do sinal principal do Radar (o mesmo sinal em todas as telas — BR-30/31). */
+function SignalTag({ signal }: { signal?: RadarSignal }) {
+  if (!signal) return null;
+  const sev = SEVERITY_META[signal.severity];
+  return (
+    <Tooltip label={`${sev.label} · ${signal.context}`} multiline maw={260}>
+      <Badge variant="light" color={sev.color}>{SIGNAL_META[signal.type].label}</Badge>
+    </Tooltip>
+  );
+}
+
+/** Seu custo, PDV sugerido e a única margem (BR-01 a BR-04). */
+function PriceBlock({ product, size = 'sm' }: { product: Product; size?: 'sm' | 'lg' }) {
+  return (
+    <Box>
+      <Group gap="lg" wrap="wrap" align="flex-end">
+        <Box>
+          <Text size="sm" c="dimmed">Seu custo</Text>
+          <Text className="mono" fw={700} fz={size === 'lg' ? 'xl' : undefined}>{formatCurrency(product.price)}</Text>
+        </Box>
+        <Box>
+          <Text size="sm" c="dimmed">PDV sugerido</Text>
+          <Text className="mono" fz={size === 'lg' ? 'xl' : undefined}>{formatCurrency(product.priceRetail)}</Text>
+        </Box>
+      </Group>
+      <Tooltip label={markupLabel(product)}>
+        <Badge mt="xs" variant="light" color="neutral" styles={{ label: { textTransform: 'none' } }}>{marginLabel(product)}</Badge>
+      </Tooltip>
+    </Box>
+  );
+}
+
+function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggleFav, viewMode }: {
   product: Product;
-  onOrder: () => void;
-  onQuickBuy: () => void;
+  signal?: RadarSignal;
+  topSeller: boolean;
+  onAdd: () => void;
   onOpenDetail: () => void;
   onToggleFav: () => void;
   viewMode: 'grid' | 'list';
-  gradeOpen: boolean;
-  onAddGrade: (qtys: Record<string, number>) => void;
-  onCloseGrade: () => void;
 }) {
-  const availBadgeColor = availColor[product.availability];
+  const name = productDisplayName(product);
+  const tags = (
+    <Group gap={4} wrap="wrap">
+      <Badge variant="light" color={availColor[product.availability]}>{product.availability}</Badge>
+      <SignalTag signal={signal} />
+      {topSeller && <Badge variant="light" color="neutral" leftSection={<StarIcon size={12} weight="fill" />}>Mais vendida</Badge>}
+    </Group>
+  );
+  const addButton = (
+    <Button
+      onClick={onAdd}
+      variant="default"
+      disabled={product.availability === 'esgotado'}
+      leftSection={<PlusIcon size={18} />}
+    >
+      Adicionar
+    </Button>
+  );
 
   if (viewMode === 'list') {
     return (
       <Card withBorder padding={0}>
-        {/* Abaixo de sm o bloco de preço/ações desce para uma linha própria */}
         <Flex p={{ base: 'sm', sm: 'md' }} gap={{ base: 'sm', sm: 'md' }} wrap={{ base: 'wrap', sm: 'nowrap' }} align="center">
           <UnstyledButton onClick={onOpenDetail} w={{ base: 64, sm: 80 }} h={{ base: 64, sm: 80 }} flex="none">
             <Paper bg="white" h="100%">
-              <ProductImage
-                src={product.image}
-                alt={product.name}
-                fallback={
-                  <Group w="100%" h="100%" justify="center">
-                    <PackageIcon size={24} color={DIMMED} opacity={0.4} />
-                  </Group>
-                }
-              />
+              <ProductImage src={product.image} alt={name} fallback={<Group w="100%" h="100%" justify="center"><PackageIcon size={24} color={DIMMED} opacity={0.4} /></Group>} />
             </Paper>
           </UnstyledButton>
           <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
-            <Group gap="xs" align="flex-start" wrap="nowrap">
-              <Box flex={1} miw={0}>
-                <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.reference}</Text>
-                <Text lh={1.5} fw={600}>{product.name}</Text>
-                <Text lh={1.5} c="dimmed" size="sm">{product.line} · {product.category} · {product.collection}</Text>
-              </Box>
-              <Box visibleFrom="xs"><StarRating rating={product.rating} /></Box>
-            </Group>
-            <Group gap="sm" mt="xs">
-              <Badge variant="light" color={availBadgeColor}>{product.availability}</Badge>
-              <Text lh={1.5} c="dimmed" size="sm">{product.material}</Text>
-              <Text lh={1.5} c="dimmed" size="sm">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
-            </Group>
+            <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
+            <Text lh={1.5} fw={600}>{name}</Text>
+            <Text lh={1.5} c="dimmed" size="sm">{product.colors.join(' · ')} · {product.collection}</Text>
+            <Box mt="xs">{tags}</Box>
           </UnstyledButton>
-          <Flex
-            gap="xs"
-            direction={{ base: 'row', sm: 'column' }}
-            align={{ base: 'center', sm: 'flex-end' }}
-            justify="space-between"
-            wrap="wrap"
-            w={{ base: '100%', sm: 'auto' }}
-            flex="none"
-          >
-            <Box ta={{ base: 'left', sm: 'right' }}>
-              <Text lh={1.5} className="mono" size="lg" fw={700}>{formatCurrency(product.price)}</Text>
-              <Text lh={1.5} c="dimmed" td="line-through" size="sm">{formatCurrency(product.priceRetail)}</Text>
-              <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
-            </Box>
-            {/* Favoritar à esquerda, compra rápida à direita; ambas sem preenchimento — o botão
-                preenchido fica só para "Adicionar ao Carrinho" quando a grade abre */}
-            <Group gap="sm" justify="flex-end">
-              <Button
-                onClick={onToggleFav}
-                variant={product.isFavorite ? 'light' : 'default'}
-                color="neutral"
-                leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />}
-                aria-pressed={product.isFavorite}
-              >
+          <Flex gap="sm" direction={{ base: 'row', sm: 'column' }} align={{ base: 'center', sm: 'flex-end' }} justify="space-between" wrap="wrap" w={{ base: '100%', sm: 'auto' }} flex="none">
+            <PriceBlock product={product} />
+            <Group gap="sm">
+              <Button onClick={onToggleFav} variant={product.isFavorite ? 'light' : 'default'} color="neutral" leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />} aria-pressed={product.isFavorite}>
                 {product.isFavorite ? 'Favoritado' : 'Favoritar'}
               </Button>
-              <Button
-                onClick={onQuickBuy}
-                variant="default"
-                disabled={product.availability === 'esgotado'}
-                leftSection={<LightningIcon size={18} />}
-              >
-                Compra Rápida
-              </Button>
+              {addButton}
             </Group>
           </Flex>
         </Flex>
-        {gradeOpen && (
-          <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
-        )}
       </Card>
     );
   }
 
   return (
     <Card withBorder padding={0} className={classes.card}>
-      {/* Imagem clicável; favoritar e ações ficam por cima como irmãos (botão não pode ficar dentro de botão) */}
       <Box pos="relative">
-        <UnstyledButton
-          onClick={onOpenDetail}
-          pos="relative"
-          display="block"
-          w="100%"
-          pt="80%"
-          bg="white"
-          aria-label={`Ver detalhes de ${product.name}`}
-        >
+        <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" bg="white" aria-label={`Ver detalhes de ${name}`}>
           <Box pos="absolute" inset={0}>
             <ProductImage
               src={product.image}
-              alt={product.name}
+              alt={name}
               imageProps={{ fit: 'contain', pt: 8, px: 8, className: classes.cardImage }}
-              fallback={
-                <Group h="100%" justify="center">
-                  <PackageIcon size={40} color={DIMMED} opacity={0.3} />
-                </Group>
-              }
+              fallback={<Group h="100%" justify="center"><PackageIcon size={40} color={DIMMED} opacity={0.3} /></Group>}
             />
           </Box>
         </UnstyledButton>
-        {/* Favoritar com ícone + texto, compacto para caber no card estreito */}
         <Button
           onClick={onToggleFav}
-          pos="absolute"
-          top={8}
-          right={8}
-          size="sm"
-          px="xs"
-          variant={product.isFavorite ? 'light' : 'default'}
-          color="neutral"
+          pos="absolute" top={8} right={8} size="sm" px="xs"
+          variant={product.isFavorite ? 'light' : 'default'} color="neutral"
           leftSection={<HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />}
           aria-pressed={!!product.isFavorite}
         >
           {product.isFavorite ? 'Favoritado' : 'Favoritar'}
         </Button>
-        {/* Ações sobre a imagem: aparecem no hover/foco; em telas de toque ficam sempre visíveis */}
-        <Group pos="absolute" left={8} right={8} bottom={8} gap="sm" wrap="nowrap" className={classes.overlay}>
-          {/* Cards estreitos (2 colunas no celular): o card inteiro já abre os detalhes */}
-          <Button
-            onClick={onOpenDetail}
-            flex={1}
-            miw={0}
-            px="xs"
-            variant="default"
-            visibleFrom="sm"
-            leftSection={<EyeIcon size={18} />}
-          >
-            Detalhes
-          </Button>
-          <Button
-            onClick={onQuickBuy}
-            flex={1}
-            miw={0}
-            px={{ base: 4, sm: 'xs' }}
-            variant="default"
-            classNames={{ section: classes.quickBuySection }}
-            disabled={product.availability === 'esgotado'}
-            leftSection={<LightningIcon size={18} />}
-          >
-            Compra Rápida
-          </Button>
+        <Group pos="absolute" left={8} right={8} bottom={8} gap="sm" wrap="nowrap" className={classes.overlay} visibleFrom="sm">
+          <Button onClick={onOpenDetail} flex={1} miw={0} px="xs" variant="default" leftSection={<EyeIcon size={18} />}>Ver</Button>
         </Group>
       </Box>
 
-      <UnstyledButton onClick={onOpenDetail} display="block" w="100%" p="sm">
-        <Badge variant="light" color={availBadgeColor} mb="xs">
-          {product.availability}
-        </Badge>
-        <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
-        <Text lh={1.5} mt={4} truncate fw={600}>{product.name}</Text>
-        <Text lh={1.5} c="dimmed" size="sm">{product.material}</Text>
-
-        <Group justify="space-between" mt="xs" gap={4} wrap="nowrap">
-          <StarRating rating={product.rating} />
-          <Text lh={1.5} c="dimmed" size="sm" flex="none" visibleFrom="xs">{product.soldUnits.toLocaleString('pt-BR')} un.</Text>
-        </Group>
-
-        <Divider mt="sm" color={BORDER_COLOR} />
-        <Group justify="space-between" pt="sm" wrap="nowrap">
-          <Box>
-            <Text lh={1.5} className="mono" fw={700}>{formatCurrency(product.price)}</Text>
-            <Text lh={1.5} c="dimmed" td="line-through" size="sm">{formatCurrency(product.priceRetail)}</Text>
-            <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
-          </Box>
-          {/* Nos cards estreitos do celular (2 colunas) as cores ficam só no detalhe */}
-          <Group gap="xs" wrap="nowrap" visibleFrom="sm">
-            {product.colors.slice(0, 3).map(color => (
-              <Text lh={1.5} key={color} c="dimmed" size="sm">
-                {color === product.colors[0] ? color : '·'}
-              </Text>
-            ))}
-            {product.colors.length > 1 && (
-              <Text lh={1.5} c="dimmed" size="sm">+{product.colors.length - 1}</Text>
-            )}
-          </Group>
-        </Group>
-      </UnstyledButton>
-
-      {gradeOpen && (
-        <GradeCompact product={product} onAdd={onAddGrade} onClose={onCloseGrade} />
-      )}
+      <Box p="sm">
+        <UnstyledButton onClick={onOpenDetail} display="block" w="100%">
+          <Box mb="xs">{tags}</Box>
+          <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
+          <Text lh={1.5} mt={4} fw={600} lineClamp={2}>{name}</Text>
+          {/* cores do modelo (variações de cor) */}
+          <Text lh={1.5} c="dimmed" size="sm" truncate>{product.colors.join(' · ')}</Text>
+        </UnstyledButton>
+        <Divider my="sm" color={BORDER_COLOR} />
+        <PriceBlock product={product} />
+        <Group mt="sm" grow>{addButton}</Group>
+      </Box>
     </Card>
   );
 }
 
+// Tabela de medidas: comprimento interno aproximado por numeração
+const footLength = (size: string) => (Number(size) * 0.667 - 0.5).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
-function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavorite }: {
-  product: Product; onClose: () => void; onAddGrade: (qtys: Record<string, number>) => void;
-  onToggleFav: () => void; isFavorite: boolean;
+/** Página do produto (M3): por que comprar e montar o pedido por numeração. */
+function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, isFavorite, onBackToRadar }: {
+  product: Product; entry?: CatalogEntry; onClose: () => void; onSwitch: (p: Product) => void;
+  onToggleFav: () => void; isFavorite: boolean; onBackToRadar?: () => void;
 }) {
   const [activeImg, setActiveImg] = useState(0);
-  // cada miniatura tem um rótulo visível dizendo qual vista do produto ela mostra
+  const radar = useRadar();
+  const { carts } = useCartStore();
+  const { role, clientId } = useShop();
+  const commit = useCommitAdd();
+  const signal = radar.byProduct[product.id];
+  const suggestion = useMemo(() => suggestedGrade(product, radar), [product, radar]);
+  const [sizes, setSizes] = useState<Record<string, number>>(() => (entry?.prefill && suggestion ? suggestion.sizes : {}));
+  const [triedEmpty, setTriedEmpty] = useState(false);
+  const target = clientId ? resolveTargetCart(clientId, role) : null;
+  void carts;
+  const reasons = buyReasons(product);
+  const sku = storeSku(product.id);
+  const siblings = products.filter(p => p.line === product.line && p.id !== product.id);
   const images = [
     { src: product.image, label: 'Lateral' },
     { src: product.image, label: 'Frontal' },
     { src: product.image, label: 'Solado' },
   ];
-  // Abaixo do breakpoint sm o modal ocupa a tela inteira
   const fullScreen = useSmallerThan('sm');
+  const n = Object.values(sizes).reduce((a, b) => a + b, 0);
+  const stuck = signal?.type === 'sem-giro' || signal?.type === 'giro-baixo';
+
+  useEffect(() => {
+    if (entry?.block) document.getElementById(`bloco-${entry.block}`)?.scrollIntoView({ block: 'center' });
+  }, [entry?.block]);
+
+  const add = () => {
+    if (n === 0) { setTriedEmpty(true); return; }
+    if (commit(product, sizes, target?.id)) { setSizes({}); onClose(); }
+  };
+
   return (
     <Modal
       opened
       onClose={onClose}
       centered
-      size="56rem"
+      size="64rem"
       fullScreen={fullScreen}
       radius={fullScreen ? 0 : undefined}
       padding={0}
       overlayProps={{ backgroundOpacity: 0.7 }}
       title={
-        <Text lh={1.5} component="span" c="dimmed" size="sm" fw={600}>
-          {product.line} · {product.reference}
-        </Text>
+        // BR-72: breadcrumb começa no módulo; vindo do Radar, link de volta mantém o contexto
+        <Group gap="sm" wrap="wrap">
+          {entry?.fromRadar && onBackToRadar && (
+            <Anchor component="button" type="button" size="sm" fw={600} onClick={onBackToRadar}>
+              <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={14} />Voltar ao Radar</Group>
+            </Anchor>
+          )}
+          <Text lh={1.5} component="span" c="dimmed" size="sm" fw={600}>Catálogo / {product.name}</Text>
+        </Group>
       }
       styles={{
-        content: { display: 'flex', flexDirection: 'column', maxHeight: fullScreen ? '100dvh' : '90vh', overflow: 'hidden' },
+        content: { display: 'flex', flexDirection: 'column', maxHeight: fullScreen ? '100dvh' : '92vh', overflow: 'hidden' },
         header: { padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-lg)', minHeight: 0, borderBottom: BORDER },
         body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0 },
       }}
@@ -561,669 +308,319 @@ function ProductDetailModal({ product, onClose, onAddGrade, onToggleFav, isFavor
             <Paper pos="relative" w="100%" pt="90%" bg="white">
               <Box pos="absolute" inset={0} p="md">
                 <ProductImage
-                  key={images[activeImg].src}
+                  key={images[activeImg].src + product.id}
                   src={images[activeImg].src}
-                  alt={`${product.name} — vista ${images[activeImg].label.toLowerCase()}`}
-                  imageProps={{ fit: 'contain' }}
-                  fallback={
-                    <Group h="100%" justify="center">
-                      <PackageIcon size={48} color={DIMMED} opacity={0.3} />
-                    </Group>
-                  }
+                  alt={`${productDisplayName(product)} — vista ${images[activeImg].label.toLowerCase()}`}
+                  imageProps={{ fit: 'contain', style: { cursor: 'zoom-in' } }}
+                  fallback={<Group h="100%" justify="center"><PackageIcon size={48} color={DIMMED} opacity={0.3} /></Group>}
                 />
               </Box>
             </Paper>
             <Group gap="xs" role="tablist" aria-label="Vistas do produto">
               {images.map((img, i) => (
-                <UnstyledButton
-                  key={img.label}
-                  onClick={() => setActiveImg(i)}
-                  className={classes.thumbButton}
-                  data-active={activeImg === i || undefined}
-                  role="tab"
-                  aria-selected={activeImg === i}
-                >
-                  <Box className={classes.thumb}>
-                    <ProductImage src={img.src} alt="" />
-                  </Box>
-                  <Text lh={1.5} size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>
-                    {img.label}
-                  </Text>
+                <UnstyledButton key={img.label} onClick={() => setActiveImg(i)} className={classes.thumbButton} data-active={activeImg === i || undefined} role="tab" aria-selected={activeImg === i}>
+                  <Box className={classes.thumb}><ProductImage src={img.src} alt="" /></Box>
+                  <Text lh={1.5} size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>{img.label}</Text>
                 </UnstyledButton>
               ))}
             </Group>
+            {/* Troca de cor: outros modelos da mesma linha */}
+            {siblings.length > 0 && (
+              <Box>
+                <Text size="sm" c="dimmed" mb={4}>Outras cores da linha {product.line}</Text>
+                <Group gap="xs">
+                  <Badge variant="filled" color="neutral">{product.colors[0]}</Badge>
+                  {siblings.map(s => (
+                    <Button key={s.id} size="compact-sm" variant="default" onClick={() => onSwitch(s)}>{s.name.replace(`${s.line} `, '')}</Button>
+                  ))}
+                </Group>
+              </Box>
+            )}
           </Stack>
+
           <Stack gap="md" p={{ base: 'md', sm: 'lg' }}>
+            {/* FR-301: categoria · linha · código, nome no padrão Tênis Tesla + linha + cor */}
             <Box>
+              <Text size="sm" c="dimmed" fw={600}>{product.category} · {product.line} · {product.reference}</Text>
               <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap">
-                <Title order={2}>{product.name}</Title>
-                <Button
-                  onClick={onToggleFav}
-                  variant={isFavorite ? 'light' : 'default'}
-                  color="neutral"
-                  flex="none"
-                  leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />}
-                  aria-pressed={isFavorite}
-                >
+                <Title order={2}>{productDisplayName(product)}</Title>
+                <Button onClick={onToggleFav} variant={isFavorite ? 'light' : 'default'} color="neutral" flex="none" leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />} aria-pressed={isFavorite}>
                   {isFavorite ? 'Favoritado' : 'Favoritar'}
                 </Button>
               </Group>
-              <Group gap="sm" mt={4}>
-                <StarRating rating={product.rating} />
-                <Text lh={1.5} c="dimmed" size="sm">{product.soldUnits.toLocaleString('pt-BR')} vendidos</Text>
-              </Group>
             </Box>
-            <Group gap="sm" align="baseline">
-              <Text lh={1.5} className="mono" size="xl" fw={700}>{formatCurrency(product.price)}</Text>
-              <Text lh={1.5} c="dimmed" td="line-through">{formatCurrency(product.priceRetail)}</Text>
-              <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={600}>+ IVA</Text>
-            </Group>
-            <Text lh={1.6}>{product.description}</Text>
-            {/* Especificações em uma coluna: rótulo acima do valor, leitura pela borda esquerda */}
-            <Stack gap="md">
-              <Box>
-                <Text lh={1.5} c="dimmed" size="sm">Material</Text>
-                <Text lh={1.5} mt={4} fw={600}>{product.material}</Text>
-              </Box>
-              <Box>
-                <Text lh={1.5} c="dimmed" size="sm">Coleção</Text>
-                <Text lh={1.5} mt={4} fw={600}>{product.collection}</Text>
-              </Box>
-            </Stack>
+            {/* FR-302: Seu custo, PDV sugerido e margem; "margem real" só com preços de sell-out (não integrados) */}
             <Box>
-              <Text lh={1.5} c="dimmed" mb={4} size="sm">Cores</Text>
-              <Group gap="xs">
-                {product.colors.map(c => (
-                  <Badge key={c} variant="light" color="gray">{c}</Badge>
-                ))}
+              <PriceBlock product={product} size="lg" />
+              <Text size="sm" c="dimmed" mt={4}>Seu custo por par, {COST_BASIS}.</Text>
+            </Box>
+
+            {/* FR-304: mesmo sinal, data de agir e quantidade do cartão do Radar */}
+            {signal && <SignalLine signal={signal} />}
+
+            {/* FR-303: só razões com dados, cada uma com escopo e período */}
+            {reasons.length > 0 && !stuck && (
+              <Box>
+                <Text fw={600} mb={4}>Por que comprar</Text>
+                <Stack gap={4}>
+                  {reasons.map(r => (
+                    <Group key={r} gap="xs" wrap="nowrap" align="flex-start">
+                      <CheckCircleIcon size={16} color="var(--mantine-color-teal-7)" style={{ flex: 'none', marginTop: 3 }} />
+                      <Text size="sm">{r}</Text>
+                    </Group>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {stuck && (
+              <Paper id="bloco-como-girar" withBorder p="sm" bd={entry?.block === 'como-girar' ? '2px solid var(--mantine-color-yellow-6)' : undefined}>
+                <Group gap="xs" mb={4}><MegaphoneIcon size={16} /><Text fw={600}>Como girar</Text></Group>
+                <Stack gap={2}>
+                  <Text size="sm">• Crie uma campanha no Marketing IA com este modelo.</Text>
+                  <Text size="sm">• Coloque na vitrine ou perto do caixa por 15 dias.</Text>
+                  <Text size="sm">• O Radar não sugere reposição nem combos com este produto enquanto o giro estiver baixo.</Text>
+                </Stack>
+              </Paper>
+            )}
+
+            {sku && sku.peerSalesDiffPct > 0 && (
+              <Paper id="bloco-benchmark" withBorder p="sm" bd={entry?.block === 'benchmark' ? '2px solid var(--mantine-color-blue-6)' : undefined}>
+                <Group gap="xs" mb={4}><UsersThreeIcon size={16} /><Text fw={600}>Benchmark: lojas parecidas</Text></Group>
+                <Text size="sm">Lojas parecidas venderam {sku.peerSalesDiffPct}% mais deste modelo que a sua loja, últimos 30 dias.</Text>
+                <Text size="sm" c="dimmed">Grupo de {PEER_GROUP_SIZE} lojas da mesma região, porte e posicionamento de preço · dados agregados e anônimos.</Text>
+              </Paper>
+            )}
+
+            {/* FR-308: sobre o produto */}
+            <Box>
+              <Text fw={600} mb={4}>Sobre o produto</Text>
+              <Text lh={1.6} size="sm">{product.description}</Text>
+              <Group gap="lg" mt="xs">
+                <Box><Text size="sm" c="dimmed">Material</Text><Text size="sm" fw={600}>{product.material}</Text></Box>
+                <Box><Text size="sm" c="dimmed">Coleção</Text><Text size="sm" fw={600}>{product.collection}</Text></Box>
+                <Box><Text size="sm" c="dimmed">Cores</Text><Text size="sm" fw={600}>{product.colors.join(', ')}</Text></Box>
               </Group>
             </Box>
           </Stack>
         </SimpleGrid>
+
+        {/* FR-305/306/307: grade, resumo e carrinho de destino */}
+        <Stack gap="md" p={{ base: 'md', sm: 'lg' }} style={{ borderTop: BORDER }}>
+          <Title order={3}>Montar pedido por numeração</Title>
+          <SizeGradeEditor product={product} value={sizes} onChange={v => { setSizes(v); setTriedEmpty(false); }} suggestion={suggestion} />
+          <Box>
+            <Text size="sm" c="dimmed" mb={4}>Tabela de medidas (comprimento interno aproximado)</Text>
+            <Table.ScrollContainer minWidth={520} type="native">
+              <Table withTableBorder verticalSpacing={4} fz="sm">
+                <Table.Tbody>
+                  <Table.Tr>
+                    <Table.Th>Nº</Table.Th>
+                    {Object.keys(product.grades).map(s => <Table.Td key={s} ta="center">{s}</Table.Td>)}
+                  </Table.Tr>
+                  <Table.Tr>
+                    <Table.Th>cm</Table.Th>
+                    {Object.keys(product.grades).map(s => <Table.Td key={s} ta="center" className="mono">{footLength(s)}</Table.Td>)}
+                  </Table.Tr>
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Box>
+        </Stack>
       </Box>
-      <Box flex="none">
-        <GradeInline product={product} onAdd={onAddGrade} onCancel={onClose} />
+      <Box flex="none" px={{ base: 'md', sm: 'lg' }} py="sm" style={{ borderTop: BORDER }} bg="var(--mantine-color-default-hover)">
+        <Group justify="space-between" gap="sm" wrap="wrap">
+          <GradeOrderSummary product={product} sizes={sizes} />
+          <Stack gap={4} align="flex-end">
+            <TargetCartPicker cart={target} clientId={clientId} />
+            <Group gap="sm">
+              <Button variant="default" onClick={onClose}>Fechar</Button>
+              {/* o botão fica habilitado; com 0 pares ele explica o que falta */}
+              <Button onClick={add} leftSection={<ShoppingCartIcon size={18} />}>Adicionar ao carrinho</Button>
+            </Group>
+            {triedEmpty && n === 0 && <Text size="sm" c="red.7">Selecione ao menos 1 par</Text>}
+          </Stack>
+        </Group>
       </Box>
     </Modal>
   );
 }
 
-function CartOption({ cart, selected, onClick }: { cart: CartContext; selected: boolean; onClick: () => void }) {
-  return (
-    <Paper
-      component="button"
-      type="button"
-      onClick={onClick}
-      withBorder
-      p="sm"
-      className={`${interactive.cardButton} ${interactive.choiceCard}`}
-      data-checked={selected || undefined}
-    >
-      <Group gap="sm" wrap="nowrap">
-        <ThemeIcon size={36} variant="light" color="neutral">
-          <ShoppingCartIcon size={18} />
-        </ThemeIcon>
-        <Box flex={1} miw={0}>
-          <Text lh={1.5} truncate fw={600}>{cart.cartName}</Text>
-          <Group gap={4} wrap="nowrap">
-            <StorefrontIcon size={14} color={DIMMED} />
-            <Text lh={1.5} c="dimmed" size="sm">{cart.clientName}</Text>
-          </Group>
-          <CartCreatorTag createdBy={cart.createdBy} />
-        </Box>
-        {selected && (
-          <Text lh={1.5} c={PRIMARY_TEXT} size="sm" fw={700}>Atual</Text>
-        )}
-      </Group>
-    </Paper>
-  );
-}
-
-const CART_MODAL_STYLES = {
-  content: { overflow: 'hidden' },
-  body: { padding: 0 },
-} as const;
-
-export function CatalogPage({ onNavigate, externalFilters, onExternalFiltersChange, clientCarts, activeCartId, onPickCart, onCreateCart, initialDetailProductId, initialSortBy }: CatalogPageProps) {
-  const usingExternal = !!externalFilters;
-  const [internalSearch, setInternalSearch] = useState('');
+export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, onBackToRadar }: CatalogPageProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedLine, setSelectedLine] = useState('Todos');
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [selectedCollection, setSelectedCollection] = useState('Todas');
   const [sortBy, setSortBy] = useState(initialSortBy ?? 'relevância');
-  const [showFilters, setShowFilters] = useState(false);
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(
-    new Set(products.filter(p => p.isFavorite).map(p => p.id))
-  );
-  const [gradeOpenId, setGradeOpenId] = useState<string | null>(null);
-  const [detailProduct, setDetailProduct] = useState<Product | null>(
-    () => products.find(p => p.id === initialDetailProductId) ?? null
-  );
-  // Multi-cart picker
-  const multiCartEnabled = Array.isArray(clientCarts);
-  const [pendingAdd, setPendingAdd] = useState<{ product: Product; qtys: Record<string, number> } | null>(null);
-  const [confirmAdd, setConfirmAdd] = useState<{ product: Product; qtys: Record<string, number>; selectedCartId: string } | null>(null);
-  const [creatingNewName, setCreatingNewName] = useState('');
-  const [creatingMode, setCreatingMode] = useState(false);
-  // Simula a busca dos produtos: skeleton da grade/lista enquanto carrega
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set(products.filter(p => p.isFavorite).map(p => p.id)));
+  const [detailProduct, setDetailProduct] = useState<Product | null>(() => products.find(p => p.id === entry?.productId) ?? null);
+  const [detailEntry, setDetailEntry] = useState<CatalogEntry | undefined>(entry);
   const loading = useMockLoading();
-  // Filtro da lista de carrinhos (aparece com 7+ carrinhos)
-  const [cartQuery, setCartQuery] = useState('');
-  const allCarts = clientCarts ?? [];
-  const showCartFilter = allCarts.length >= 7;
-  const cartQ = cartQuery.trim().toLowerCase();
-  const visibleCarts = showCartFilter && cartQ
-    ? allCarts.filter(c => c.cartName.toLowerCase().includes(cartQ) || c.clientName.toLowerCase().includes(cartQ) || c.id.toLowerCase().includes(cartQ))
-    : allCarts;
-  const cartFilter = showCartFilter ? (
-    <TextInput
-      aria-label="Buscar carrinho"
-      placeholder="Buscar por nome ou código"
-      leftSection={<MagnifyingGlassIcon size={18} />}
-      value={cartQuery}
-      onChange={e => setCartQuery(e.currentTarget.value)}
-    />
-  ) : null;
-  const cartFilterEmpty = showCartFilter && cartQ && visibleCarts.length === 0 ? (
-    <EmptyState
-      withBorder={false}
-      icon={MagnifyingGlassIcon}
-      title="Nenhum carrinho encontrado"
-      description={`Nenhum carrinho com "${cartQuery.trim()}". Confira o nome ou limpe a busca para ver todos.`}
-      action={{ label: 'Limpar Busca', onClick: () => setCartQuery(''), forward: false }}
-    />
-  ) : null;
+  const radar = useRadar();
+  const { openGrade } = useShop();
+  const search = filters.search;
+  const setSearch = (v: string) => onFiltersChange({ ...filters, search: v });
 
-  const commitAdd = (p: Product, qtys: Record<string, number>, cartName?: string) => {
-    const total = Object.values(qtys).reduce((a, b) => a + b, 0);
-    setGradeOpenId(null);
-    toast.success(
-      `${total} ${total === 1 ? 'par' : 'pares'} de ${p.name} adicionados${cartName ? ` em "${cartName}"` : ' ao carrinho'}`,
-      'Revise as quantidades e envie o pedido em Carrinho',
-    );
-  };
-  const addGrade = (p: Product, qtys: Record<string, number>) => {
-    const total = Object.values(qtys).reduce((a, b) => a + b, 0);
-    if (total === 0) return;
-    setCartQuery('');
-    if (multiCartEnabled) {
-      // Se já tem carrinho ativo, confirma antes de adicionar
-      if (activeCartId) {
-        setConfirmAdd({ product: p, qtys, selectedCartId: activeCartId });
-        setGradeOpenId(null);
-        return;
-      }
-      // Se não tem nenhum carrinho pro cliente, cria um automaticamente
-      if (!clientCarts || clientCarts.length === 0) {
-        const ctx = onCreateCart?.('Novo carrinho');
-        commitAdd(p, qtys, ctx?.cartName);
-        return;
-      }
-      // Se tem carrinhos mas nenhum ativo, mostra o picker
-      setPendingAdd({ product: p, qtys });
-      setCreatingMode(false);
-      setCreatingNewName('');
-      return;
-    }
-    commitAdd(p, qtys);
-  };
-
-
-  const search = usingExternal ? externalFilters!.search : internalSearch;
-  const setSearch = (v: string) => {
-    if (usingExternal && onExternalFiltersChange) onExternalFiltersChange({ ...externalFilters!, search: v });
-    else setInternalSearch(v);
-  };
-  const effLine = usingExternal ? externalFilters!.line : selectedLine;
-  const effCategory = usingExternal ? externalFilters!.category : selectedCategory;
-  const effColors = usingExternal ? externalFilters!.colors : [];
-  const effPriceRange = usingExternal ? externalFilters!.priceRange : null;
-
+  const band = priceBandOf(filters.priceBand);
   const filtered = products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.reference.toLowerCase().includes(search.toLowerCase()) ||
-      p.line.toLowerCase().includes(search.toLowerCase());
-    const matchLine = effLine === 'Todos' || p.line === effLine;
-    const matchCat = effCategory === 'Todos' || p.category === effCategory;
-    const matchCol = usingExternal || selectedCollection === 'Todas' || p.collection === selectedCollection;
-    const matchColors = effColors.length === 0 || p.colors.some(c => effColors.includes(c));
-    const matchPrice = !effPriceRange || (p.price >= effPriceRange[0] && p.price <= effPriceRange[1]);
-    return matchSearch && matchLine && matchCat && matchCol && matchColors && matchPrice;
+    const q = search.toLowerCase();
+    const matchSearch = !q || p.name.toLowerCase().includes(q) || p.reference.toLowerCase().includes(q) || p.line.toLowerCase().includes(q);
+    const matchLine = filters.line === 'Todos' || p.line === filters.line;
+    const matchCat = filters.category === 'Todos' || p.category === filters.category;
+    const matchColors = filters.colors.length === 0 || p.colors.some(c => filters.colors.includes(c));
+    const matchPrice = !band || (p.price >= band.min && p.price <= band.max);
+    const matchRadar = filters.radar.length === 0 || filters.radar.some(f => matchesRadarFilter(p, f, radar));
+    const matchCollection = filters.collection === 'Todas' || p.collection === filters.collection;
+    const matchSize = !filters.size || (p.grades[filters.size] ?? 0) > 0;
+    return matchSearch && matchLine && matchCat && matchColors && matchPrice && matchRadar && matchCollection && matchSize;
   });
 
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === 'menor preço') return a.price - b.price;
     if (sortBy === 'maior preço') return b.price - a.price;
     if (sortBy === 'mais vendidos') return b.soldUnits - a.soldUnits;
-    if (sortBy === 'avaliação') return b.rating - a.rating;
+    if (sortBy === 'margem') return (b.priceRetail - b.price) / b.priceRetail - (a.priceRetail - a.price) / a.priceRetail;
     return 0;
   });
 
   const toggleFav = (id: string) => {
     setFavoriteIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
 
-  const activeFilterCount = (selectedLine !== 'Todos' ? 1 : 0) + (selectedCategory !== 'Todos' ? 1 : 0) + (selectedCollection !== 'Todas' ? 1 : 0);
-  const hasActiveFilters = activeFilterCount > 0;
-  const clearInternalFilters = () => { setSelectedLine('Todos'); setSelectedCategory('Todos'); setSelectedCollection('Todas'); };
-  // Estado vazio: limpa busca e filtros (os da barra do topo também); a tabela de preço continua
-  const clearSearchAndFilters = () => {
-    if (usingExternal && onExternalFiltersChange) {
-      onExternalFiltersChange({ ...defaultFilters, priceTable: externalFilters!.priceTable });
-    } else {
-      setInternalSearch('');
-      clearInternalFilters();
-    }
-  };
+  const clearFilters = () => onFiltersChange({ ...defaultFilters, search: filters.search, priceTable: filters.priceTable });
+  const clearSearchAndFilters = () => onFiltersChange({ ...defaultFilters, priceTable: filters.priceTable });
 
-  // popular: opções mais usadas primeiro (só onde a ordem não tem significado — coleções seguem a ordem das estações)
-  const renderChipFilter = (label: string, options: string[], value: string, onSelect: (v: string) => void, popular?: string[], restLabel?: string) => (
-    <Box>
-      <Text lh={1.5} mb="xs" fw={600}>{label}</Text>
-      <ChoiceChips options={options} value={value} onSelect={onSelect} popular={popular} restLabel={restLabel} />
-    </Box>
-  );
+  // FR-203: filtros ativos como chips removíveis
+  const activeChips: { key: string; label: string; remove: () => void }[] = [
+    ...filters.radar.map(r => ({ key: `radar-${r}`, label: RADAR_FILTERS.find(f => f.value === r)?.label ?? r, remove: () => onFiltersChange({ ...filters, radar: filters.radar.filter(x => x !== r) }) })),
+    ...(filters.line !== 'Todos' ? [{ key: 'line', label: `Linha: ${filters.line}`, remove: () => onFiltersChange({ ...filters, line: 'Todos' }) }] : []),
+    ...(filters.collection !== 'Todas' ? [{ key: 'col', label: `Coleção: ${filters.collection}`, remove: () => onFiltersChange({ ...filters, collection: 'Todas' }) }] : []),
+    ...(filters.category !== 'Todos' ? [{ key: 'cat', label: `Categoria: ${filters.category}`, remove: () => onFiltersChange({ ...filters, category: 'Todos' }) }] : []),
+    ...(band ? [{ key: 'band', label: `Seu custo: ${PRICE_BANDS.find(b => b.value === filters.priceBand)?.label}`, remove: () => onFiltersChange({ ...filters, priceBand: '' }) }] : []),
+    ...(filters.size ? [{ key: 'size', label: `Numeração: ${filters.size}`, remove: () => onFiltersChange({ ...filters, size: '' }) }] : []),
+    ...filters.colors.map(c => ({ key: `color-${c}`, label: `Cor: ${c}`, remove: () => onFiltersChange({ ...filters, colors: filters.colors.filter(x => x !== c) }) })),
+  ];
+
+  const openDetail = (p: Product, e?: CatalogEntry) => { setDetailEntry(e); setDetailProduct(p); };
 
   const renderProductCard = (product: Product, mode: 'grid' | 'list') => (
     <ProductCard
       key={product.id}
       product={{ ...product, isFavorite: favoriteIds.has(product.id) }}
+      signal={radar.byProduct[product.id]}
+      topSeller={isTopSeller(product.id, radar)}
       viewMode={mode}
-      onOrder={() => onNavigate('order-grade')}
-      onQuickBuy={() => setGradeOpenId(gradeOpenId === product.id ? null : product.id)}
-      onOpenDetail={() => setDetailProduct(product)}
+      // "Adicionar" sempre abre a grade, preenchida quando há sinal (FR-205)
+      onAdd={() => openGrade({ productId: product.id })}
+      onOpenDetail={() => openDetail(product)}
       onToggleFav={() => toggleFav(product.id)}
-      gradeOpen={gradeOpenId === product.id}
-      onAddGrade={(qtys) => addGrade(product, qtys)}
-      onCloseGrade={() => setGradeOpenId(null)}
     />
   );
 
   return (
-    // Hierarquia de espaços: seções da página (filtros · banner · produtos) a 32px;
-    // dentro de "produtos", barra de busca/ordenação → lista a 24px; controles da barra a 16px
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
-      {/* Tabela de preço e filtros no topo da página */}
-      {usingExternal && onExternalFiltersChange && (
-        <CatalogFiltersBar filters={externalFilters!} onChange={onExternalFiltersChange} />
+      {entry?.fromRadar && onBackToRadar && (
+        <Anchor component="button" type="button" fw={600} onClick={onBackToRadar} mb={-16}>
+          <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={16} />Voltar ao Radar</Group>
+        </Anchor>
       )}
+      <CatalogFiltersBar filters={filters} onChange={onFiltersChange} />
 
-      {/* Promo Banner */}
       <Card withBorder shadow="xs" padding={0}>
         <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
       </Card>
 
-      {/* Produtos: barra de controles + grade/lista */}
       <Stack gap="lg">
-      <Stack gap="md">
-      {/* Header + Controls */}
-      <Group gap="sm" wrap="wrap">
-        {/* Abaixo de sm a busca ocupa a linha inteira; filtros e modo de exibição ficam na linha de baixo */}
-        <TextInput
-          flex={{ base: '1 1 100%', sm: 1 }}
-          miw={{ sm: 200 }}
-          placeholder="Buscar por nome, referência ou linha"
-          aria-label="Buscar produtos"
-          value={search}
-          onChange={e => setSearch(e.currentTarget.value)}
-          leftSection={<MagnifyingGlassIcon size={18} />}
-          rightSection={search ? (
-            <ActionIcon onClick={() => setSearch('')} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
-              <XIcon size={16} />
-            </ActionIcon>
-          ) : null}
-        />
-
-        {!usingExternal && (
-          <Button
-            onClick={() => setShowFilters(!showFilters)}
-            variant="default"
-            leftSection={<FunnelIcon size={18} />}
-            rightSection={activeFilterCount > 0 ? (
-              <Badge variant="light" color="neutral">
-                {activeFilterCount} {activeFilterCount === 1 ? 'ativo' : 'ativos'}
-              </Badge>
-            ) : undefined}
-            aria-expanded={showFilters}
-          >
-            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-          </Button>
-        )}
-
-        {/* Modo de exibição com ícone + texto */}
-        <SegmentedControl
-          value={viewMode}
-          onChange={v => setViewMode(v as 'grid' | 'list')}
-          aria-label="Modo de exibição"
-          data={[
-            { value: 'grid', label: <Group gap="xs" wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
-            { value: 'list', label: <Group gap="xs" wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
-          ]}
-        />
-      </Group>
-
-      {/* Ordenação: 5 opções fixas → chips de escolha única (radio), sempre visíveis; quebram linha em telas estreitas */}
-      <Input.Wrapper label="Ordenar por" labelElement="div" id="catalog-sort">
-        <Chip.Group multiple={false} value={sortBy} onChange={v => v && setSortBy(v)}>
-          <Group gap="sm" mt="xs" role="radiogroup" aria-labelledby="catalog-sort-label">
-            {SORT_OPTIONS.map(o => (
-              <Chip
-                key={o.value}
-                value={o.value}
-                variant="filled"
-                icon={null}
-                styles={{ iconWrapper: { display: 'none' } }}
-              >
-                {o.label}
-              </Chip>
-            ))}
+        <Stack gap="md">
+          <Group gap="sm" wrap="wrap">
+            <TextInput
+              flex={{ base: '1 1 100%', sm: 1 }}
+              miw={{ sm: 200 }}
+              placeholder="Buscar por nome, linha ou código"
+              aria-label="Buscar produtos"
+              value={search}
+              onChange={e => setSearch(e.currentTarget.value)}
+              leftSection={<MagnifyingGlassIcon size={18} />}
+              rightSection={search ? (
+                <ActionIcon onClick={() => setSearch('')} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
+                  <XIcon size={16} />
+                </ActionIcon>
+              ) : null}
+            />
+            <SegmentedControl
+              value={viewMode}
+              onChange={v => setViewMode(v as 'grid' | 'list')}
+              aria-label="Modo de exibição"
+              data={[
+                { value: 'grid', label: <Group gap="xs" wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
+                { value: 'list', label: <Group gap="xs" wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
+              ]}
+            />
           </Group>
-        </Chip.Group>
-      </Input.Wrapper>
 
-      {/* Filter Panel */}
-      {!usingExternal && showFilters && (
-        <Paper withBorder p="md">
-          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-            {renderChipFilter('Linha', lines, selectedLine, setSelectedLine)}
-            {renderChipFilter('Categoria', categories, selectedCategory, setSelectedCategory, popularCategories, 'Outras categorias')}
-            {renderChipFilter('Coleção', collections, selectedCollection, setSelectedCollection)}
-          </SimpleGrid>
-          {hasActiveFilters && (
-            <Button
-              onClick={clearInternalFilters}
-              mt="sm"
-              variant="subtle"
-              color="neutral"
-              leftSection={<XIcon size={16} />}
-            >
-              Limpar Filtros
-            </Button>
-          )}
-        </Paper>
-      )}
+          <Input.Wrapper label="Ordenar por" labelElement="div" id="catalog-sort">
+            <Chip.Group multiple={false} value={sortBy} onChange={v => v && setSortBy(v)}>
+              <Group gap="sm" mt="xs" role="radiogroup" aria-labelledby="catalog-sort-label">
+                {SORT_OPTIONS.map(o => (
+                  <Chip key={o.value} value={o.value} variant="filled" icon={null} styles={{ iconWrapper: { display: 'none' } }}>{o.label}</Chip>
+                ))}
+              </Group>
+            </Chip.Group>
+          </Input.Wrapper>
 
-      {/* Filtros ativos: cada um é um botão que remove o filtro */}
-      {hasActiveFilters && (
-        <Group justify="flex-end" gap="sm">
-          {selectedLine !== 'Todos' && (
-            <Button
-              variant="light"
-              color="neutral"
-              rightSection={<XIcon size={16} />}
-              onClick={() => setSelectedLine('Todos')}
-              aria-label={`Remover filtro de linha: ${selectedLine}`}
-            >
-              Linha: {selectedLine}
-            </Button>
-          )}
-          {selectedCategory !== 'Todos' && (
-            <Button
-              variant="light"
-              color="neutral"
-              rightSection={<XIcon size={16} />}
-              onClick={() => setSelectedCategory('Todos')}
-              aria-label={`Remover filtro de categoria: ${selectedCategory}`}
-            >
-              Categoria: {selectedCategory}
-            </Button>
-          )}
-          {selectedCollection !== 'Todas' && (
-            <Button
-              variant="light"
-              color="neutral"
-              rightSection={<XIcon size={16} />}
-              onClick={() => setSelectedCollection('Todas')}
-              aria-label={`Remover filtro de coleção: ${selectedCollection}`}
-            >
-              Coleção: {selectedCollection}
-            </Button>
-          )}
-        </Group>
-      )}
-      </Stack>
-
-      {/* Products Grid/List — skeleton com o mesmo formato enquanto carrega */}
-      {loading ? (
-        viewMode === 'grid'
-          ? <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} imageRatio={1.25} />
-          : <ListSkeleton rows={5} withAvatar />
-      ) : sorted.length === 0 ? (
-        <EmptyState
-          icon={PackageIcon}
-          title="Nenhum produto encontrado"
-          description={usingExternal
-            ? 'Nenhum produto combina com a busca e os filtros do topo da página. Limpe a busca e os filtros para ver o catálogo inteiro.'
-            : 'Nenhum produto combina com a busca e os filtros atuais. Limpe a busca e os filtros para ver o catálogo inteiro.'}
-          action={{ label: 'Limpar Busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
-          suggestions={[
-            {
-              label: 'Ver mais vendidos',
-              description: 'Catálogo inteiro, dos modelos que mais vendem para os que menos vendem',
-              icon: LightningIcon,
-              onClick: () => { clearSearchAndFilters(); setSortBy('mais vendidos'); },
-            },
-            {
-              label: 'Ver mais bem avaliados',
-              description: 'Catálogo inteiro, ordenado pela avaliação dos lojistas',
-              icon: StarIcon,
-              onClick: () => { clearSearchAndFilters(); setSortBy('avaliação'); },
-            },
-          ]}
-        />
-      ) : viewMode === 'grid' ? (
-        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={{ base: 'sm', sm: 'md' }} className={classes.grid}>
-          {sorted.map(product => renderProductCard(product, 'grid'))}
-        </SimpleGrid>
-      ) : (
-        <Stack gap="sm">
-          {sorted.map(product => renderProductCard(product, 'list'))}
+          {/* contagem de resultados + filtros ativos removíveis + limpar */}
+          <Group gap="sm" wrap="wrap">
+            <Text fw={600} aria-live="polite">{sorted.length} {sorted.length === 1 ? 'produto' : 'produtos'}</Text>
+            {activeChips.map(ch => (
+              <Button key={ch.key} variant="light" color="neutral" size="compact-md" rightSection={<XIcon size={14} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
+                {ch.label}
+              </Button>
+            ))}
+            {countActiveFilters(filters) > 0 && (
+              <Button variant="subtle" color="neutral" size="compact-md" onClick={clearFilters}>Limpar filtros</Button>
+            )}
+          </Group>
         </Stack>
-      )}
+
+        {loading ? (
+          viewMode === 'grid'
+            ? <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} imageRatio={1.25} />
+            : <ListSkeleton rows={5} withAvatar />
+        ) : sorted.length === 0 ? (
+          <EmptyState
+            icon={PackageIcon}
+            title="Nenhum produto encontrado"
+            description="Nenhum produto combina com a busca e os filtros. Limpe a busca e os filtros para ver o catálogo inteiro."
+            action={{ label: 'Limpar Busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
+            suggestions={[
+              { label: 'Ver produtos em alta', description: 'Sinal Alto giro do Radar', icon: LightningIcon, onClick: () => onFiltersChange({ ...defaultFilters, priceTable: filters.priceTable, radar: ['alto-giro' as RadarFilter] }) },
+            ]}
+          />
+        ) : viewMode === 'grid' ? (
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing={{ base: 'sm', sm: 'md' }} className={classes.grid}>
+            {sorted.map(product => renderProductCard(product, 'grid'))}
+          </SimpleGrid>
+        ) : (
+          <Stack gap="sm">
+            {sorted.map(product => renderProductCard(product, 'list'))}
+          </Stack>
+        )}
       </Stack>
 
       {detailProduct && (
         <ProductDetailModal
+          key={detailProduct.id}
           product={{ ...detailProduct, isFavorite: favoriteIds.has(detailProduct.id) }}
+          entry={detailEntry}
           isFavorite={favoriteIds.has(detailProduct.id)}
           onClose={() => setDetailProduct(null)}
-          onAddGrade={(qtys) => { addGrade(detailProduct, qtys); setDetailProduct(null); }}
+          onSwitch={p => openDetail(p, detailEntry?.fromRadar ? { fromRadar: true } : undefined)}
           onToggleFav={() => toggleFav(detailProduct.id)}
+          onBackToRadar={onBackToRadar}
         />
       )}
-
-
-      <Modal
-        opened={!!confirmAdd}
-        onClose={() => setConfirmAdd(null)}
-        centered
-        size="26rem"
-        withCloseButton={false}
-        overlayProps={{ backgroundOpacity: 0.6 }}
-        styles={CART_MODAL_STYLES}
-      >
-        {confirmAdd && (
-          <>
-            {/* Cabeçalho próprio: título à esquerda, X grande (44px) no canto superior direito */}
-            <Group justify="space-between" align="flex-start" pl="lg" pr="sm" py="sm" gap="sm" wrap="nowrap">
-              <Box miw={0} pt={8}>
-                <Title order={3}>Adicionar ao carrinho</Title>
-                <Text lh={1.5} c="dimmed" mt={4} size="sm">
-                  {Object.values(confirmAdd.qtys).reduce((a, b) => a + b, 0)} pares de <Text lh={1.5} span c="var(--mantine-color-text)" fw={600} inherit>{confirmAdd.product.name}</Text>. Escolha o carrinho de destino.
-                </Text>
-              </Box>
-              <CloseButton onClick={() => setConfirmAdd(null)} aria-label="Fechar" flex="none" />
-            </Group>
-            <Divider color={BORDER_COLOR} />
-            <ScrollArea.Autosize mah="40vh" type="auto">
-              <Stack gap="sm" px="lg" py="md">
-                {cartFilter}
-                {cartFilterEmpty}
-                {visibleCarts.map(c => (
-                  <CartOption
-                    key={c.id}
-                    cart={c}
-                    selected={confirmAdd.selectedCartId === c.id}
-                    onClick={() => setConfirmAdd(prev => prev ? { ...prev, selectedCartId: c.id } : prev)}
-                  />
-                ))}
-                {(clientCarts ?? []).length === 0 && (
-                  <EmptyState
-                    withBorder={false}
-                    icon={ShoppingCartIcon}
-                    title="Este cliente ainda não tem carrinhos"
-                    description="Crie um carrinho para adicionar os pares."
-                  />
-                )}
-                {/* Criar outro carrinho fica na lista; o rodapé tem só Cancelar e a ação principal */}
-                <Button
-                  onClick={() => {
-                    setConfirmAdd(null);
-                    setPendingAdd({ product: confirmAdd.product, qtys: confirmAdd.qtys });
-                    setCreatingMode(true);
-                    setCreatingNewName('');
-                  }}
-                  variant="default"
-                  bd={DASHED_BORDER}
-                  fullWidth
-                  leftSection={<PlusIcon size={16} />}
-                >
-                  Criar Novo Carrinho
-                </Button>
-              </Stack>
-            </ScrollArea.Autosize>
-            <Divider color={BORDER_COLOR} />
-            {/* Cancelar à esquerda, principal à direita */}
-            <Group px="lg" py="md" gap="sm" justify="flex-end">
-              <Button variant="default" onClick={() => setConfirmAdd(null)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => {
-                  const chosen = clientCarts?.find(c => c.id === confirmAdd.selectedCartId);
-                  if (chosen) {
-                    onPickCart?.(chosen);
-                    commitAdd(confirmAdd.product, confirmAdd.qtys, chosen.cartName);
-                  }
-                  setConfirmAdd(null);
-                }}
-              >
-                Adicionar ao Carrinho
-              </Button>
-            </Group>
-          </>
-        )}
-      </Modal>
-
-      <Modal
-        opened={!!pendingAdd}
-        onClose={() => setPendingAdd(null)}
-        centered
-        size="28rem"
-        withCloseButton={false}
-        overlayProps={{ backgroundOpacity: 0.6 }}
-        styles={CART_MODAL_STYLES}
-      >
-        {pendingAdd && (
-          <>
-            {/* Cabeçalho próprio: título à esquerda, X grande (44px) no canto superior direito */}
-            <Group justify="space-between" align="flex-start" pl="lg" pr="sm" py="sm" gap="sm" wrap="nowrap">
-              <Box miw={0} pt={8}>
-                <Title order={3}>Adicionar a qual carrinho?</Title>
-                <Text lh={1.5} c="dimmed" truncate size="sm">
-                  {Object.values(pendingAdd.qtys).reduce((a, b) => a + b, 0)} pares · {pendingAdd.product.name}
-                </Text>
-              </Box>
-              <CloseButton onClick={() => setPendingAdd(null)} aria-label="Fechar" flex="none" />
-            </Group>
-            <Divider color={BORDER_COLOR} />
-            <ScrollArea.Autosize mah="50vh" type="auto">
-              <Stack gap="sm" p="md">
-                {cartFilter}
-                {cartFilterEmpty}
-                {visibleCarts.map(c => (
-                  <CartOption
-                    key={c.id}
-                    cart={c}
-                    selected={activeCartId === c.id}
-                    onClick={() => {
-                      onPickCart?.(c);
-                      commitAdd(pendingAdd.product, pendingAdd.qtys, c.cartName);
-                      setPendingAdd(null);
-                    }}
-                  />
-                ))}
-                {(clientCarts ?? []).length === 0 && !creatingMode && (
-                  <EmptyState
-                    withBorder={false}
-                    icon={ShoppingCartIcon}
-                    title="Este cliente ainda não tem carrinhos"
-                    description="Crie um carrinho abaixo para adicionar os pares."
-                  />
-                )}
-                {creatingMode ? (
-                  <Paper p="sm" className={classes.newCartPanel}>
-                    <Stack gap="md">
-                      <TextInput
-                        autoFocus
-                        label="Nome do novo carrinho"
-                        value={creatingNewName}
-                        onChange={e => setCreatingNewName(e.currentTarget.value)}
-                        placeholder="ex.: Reposição Inverno 26"
-                        maxLength={40}
-                        description="Até 40 caracteres"
-                      />
-                      <Group justify="flex-end" gap="sm">
-                        <Button
-                          onClick={() => { setCreatingMode(false); setCreatingNewName(''); }}
-                          variant="default"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            const ctx = onCreateCart?.(creatingNewName || 'Novo carrinho');
-                            if (ctx) {
-                              commitAdd(pendingAdd.product, pendingAdd.qtys, ctx.cartName);
-                              setPendingAdd(null);
-                            }
-                          }}
-                        >
-                          Criar Carrinho e Adicionar
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </Paper>
-                ) : (
-                  <Button
-                    onClick={() => setCreatingMode(true)}
-                    variant="default"
-                    bd={DASHED_BORDER}
-                    fullWidth
-                    leftSection={<PlusIcon size={16} />}
-                  >
-                    Criar Novo Carrinho
-                  </Button>
-                )}
-              </Stack>
-            </ScrollArea.Autosize>
-            <Divider color={BORDER_COLOR} />
-            {/* Rodapé: fechar sem adicionar (escolher um carrinho da lista já adiciona) */}
-            <Group px="lg" py="md" gap="sm">
-              <Button variant="default" onClick={() => setPendingAdd(null)}>
-                Cancelar
-              </Button>
-            </Group>
-          </>
-        )}
-      </Modal>
-
     </Stack>
   );
 }
+

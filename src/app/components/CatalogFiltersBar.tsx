@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Slider, Stack, Text, TextInput, Tooltip,
+  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Stack, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -12,9 +12,12 @@ import {
   CaretDownIcon,
   CheckIcon,
   MagnifyingGlassIcon,
+  CrosshairIcon,
+  RulerIcon,
   type Icon,
 } from "@phosphor-icons/react";
-import { products, formatCurrency } from "../data/mockData";
+import { products } from "../data/mockData";
+import { RADAR_FILTERS, goodMarginFilterVisible, type RadarFilter } from "../data/radar";
 import classes from "./CatalogFiltersBar.module.css";
 import interactive from "./interactive.module.css";
 import { EmptyState } from "./ui/EmptyState";
@@ -24,9 +27,26 @@ export type CatalogFilters = {
   line: string;
   category: string;
   colors: string[];
-  priceRange: [number, number];
+  /** Faixa de preço sobre o Seu custo, sem sobreposição (FR-202). '' = todas. */
+  priceBand: string;
+  /** Sinais do Radar (várias ao mesmo tempo). */
+  radar: RadarFilter[];
+  collection: string;
+  /** Numeração com pares disponíveis. '' = todas. */
+  size: string;
   priceTable: string;
 };
+
+// Faixas de preço sobre o Seu custo, sem sobreposição (FR-202)
+export const PRICE_BANDS = [
+  { value: 'ate-250', label: 'Até R$ 249,99', min: 0, max: 249.99 },
+  { value: '250-320', label: 'R$ 250 a R$ 319,99', min: 250, max: 319.99 },
+  { value: '320-mais', label: 'R$ 320 ou mais', min: 320, max: Infinity },
+];
+export const priceBandOf = (v: string) => PRICE_BANDS.find(b => b.value === v);
+export const allCollections = Array.from(new Set(products.map(p => p.collection))).sort();
+export const allSizes = Array.from(new Set(products.flatMap(p => Object.keys(p.grades)))).sort();
+export const radarFilterOptions = RADAR_FILTERS.filter(f => f.value !== 'boa-margem' || goodMarginFilterVisible);
 
 export const priceTables = [
   { id: 'padrao', label: 'Tabela Padrão', desc: '30/60/90 dias' },
@@ -67,15 +87,15 @@ const colorSwatch: Record<string, string> = {
   Rosa: '#ec4899', Bege: '#d6c2a3',
 };
 
-const priceMin = Math.floor(Math.min(...products.map(p => p.price)));
-const priceMax = Math.ceil(Math.max(...products.map(p => p.price)));
-
 export const defaultFilters: CatalogFilters = {
   search: '',
   line: 'Todos',
   category: 'Todos',
   colors: [],
-  priceRange: [priceMin, priceMax],
+  priceBand: '',
+  radar: [],
+  collection: 'Todas',
+  size: '',
   priceTable: 'padrao',
 };
 
@@ -137,12 +157,11 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
   );
 
   const currentTable = priceTables.find(t => t.id === filters.priceTable);
-  const priceActive = filters.priceRange[0] !== priceMin || filters.priceRange[1] !== priceMax;
-  const activeCount =
-    (filters.line !== 'Todos' ? 1 : 0) +
-    (filters.category !== 'Todos' ? 1 : 0) +
-    filters.colors.length +
-    (priceActive ? 1 : 0);
+  const activeCount = countActiveFilters(filters);
+  const toggleRadar = (v: RadarFilter) => onChange({
+    ...filters,
+    radar: filters.radar.includes(v) ? filters.radar.filter(x => x !== v) : [...filters.radar, v],
+  });
 
   return (
     <Paper withBorder p="sm">
@@ -185,6 +204,22 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             </Badge>
           )}
         </Group>
+
+        {/* Sinais do Radar: os mesmos sinais do Radar e da página do produto */}
+        <FilterPopover
+          icon={CrosshairIcon}
+          label={filters.radar.length > 0 ? `Sinais do Radar (${filters.radar.length})` : 'Sinais do Radar'}
+          active={filters.radar.length > 0}
+        >
+          <Text lh={1.5} fw={600} mb="xs">Sinais do Radar</Text>
+          <Group gap="sm">
+            {radarFilterOptions.map(f => (
+              <Chip key={f.value} checked={filters.radar.includes(f.value)} onChange={() => toggleRadar(f.value)} variant="filled">
+                {f.label}
+              </Chip>
+            ))}
+          </Group>
+        </FilterPopover>
 
         <FilterPopover
           icon={TagIcon}
@@ -267,24 +302,36 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
         </FilterPopover>
 
         <FilterPopover
-          icon={CurrencyDollarIcon}
-          label={priceActive ? `Até ${formatCurrency(filters.priceRange[1])}` : 'Faixa de preço'}
-          active={priceActive}
+          icon={StackIcon}
+          label={filters.collection !== 'Todas' ? `Coleção: ${filters.collection}` : 'Coleção'}
+          active={filters.collection !== 'Todas'}
         >
-          <Stack gap="xs">
-            <Group justify="space-between">
-              <Text lh={1.5} c="dimmed" size="sm">{formatCurrency(priceMin)}</Text>
-              <Text lh={1.5} c="dimmed" size="sm">{formatCurrency(filters.priceRange[1])}</Text>
-            </Group>
-            <Slider
-              min={priceMin}
-              max={priceMax}
-              value={filters.priceRange[1]}
-              onChange={v => onChange({ ...filters, priceRange: [priceMin, v] })}
-              label={v => formatCurrency(v)}
-              mb={4}
-            />
-          </Stack>
+          <Text lh={1.5} fw={600} mb="xs">Coleção</Text>
+          <ChoiceChips options={['Todas', ...allCollections]} value={filters.collection} onSelect={v => onChange({ ...filters, collection: v })} />
+        </FilterPopover>
+
+        <FilterPopover
+          icon={CurrencyDollarIcon}
+          label={priceBandOf(filters.priceBand)?.label ?? 'Faixa de preço'}
+          active={!!filters.priceBand}
+        >
+          <Text lh={1.5} fw={600}>Faixa de preço</Text>
+          <Text lh={1.5} c="dimmed" size="sm" mb="xs">Sobre o Seu custo por par</Text>
+          <ChoiceChips
+            options={['Todas', ...PRICE_BANDS.map(b => b.label)]}
+            value={priceBandOf(filters.priceBand)?.label ?? 'Todas'}
+            onSelect={v => onChange({ ...filters, priceBand: PRICE_BANDS.find(b => b.label === v)?.value ?? '' })}
+          />
+        </FilterPopover>
+
+        <FilterPopover
+          icon={RulerIcon}
+          label={filters.size ? `Numeração: ${filters.size}` : 'Numeração'}
+          active={!!filters.size}
+        >
+          <Text lh={1.5} fw={600}>Numeração</Text>
+          <Text lh={1.5} c="dimmed" size="sm" mb="xs">Só produtos com pares disponíveis nesta numeração</Text>
+          <ChoiceChips options={['Todas', ...allSizes]} value={filters.size || 'Todas'} onSelect={v => onChange({ ...filters, size: v === 'Todas' ? '' : v })} />
         </FilterPopover>
 
         {activeCount > 0 && (
@@ -300,6 +347,12 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
       </Group>
     </Paper>
   );
+}
+
+/** Quantos filtros estão ativos (busca e tabela de preço não contam). */
+export function countActiveFilters(f: CatalogFilters): number {
+  return (f.line !== 'Todos' ? 1 : 0) + (f.category !== 'Todos' ? 1 : 0) + f.colors.length + (f.priceBand ? 1 : 0)
+    + f.radar.length + (f.collection !== 'Todas' ? 1 : 0) + (f.size ? 1 : 0);
 }
 
 // busca sem diferenciar maiúsculas nem acentos

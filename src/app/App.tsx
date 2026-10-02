@@ -4,8 +4,7 @@ import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
 import { TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
-import { clients as clientsList, orders as ordersList, products as productsList, type Client, type Order } from "./data/mockData";
-import { toast } from "./lib/toast";
+import { clients as clientsList, orders as ordersList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
 import { DashboardRep, CURRENT_REP_NAME } from "./components/DashboardRep";
 import { SalesTeamPage } from "./components/SalesTeamPage";
@@ -14,7 +13,13 @@ import { DashboardLojista } from "./components/DashboardLojista";
 import { CatalogPage } from "./components/CatalogPage";
 import { OrderGrade } from "./components/OrderGrade";
 import { CartPage } from "./components/CartPage";
-import { CartsListPage, mockCarts, type CartContext, type CartCreator } from "./components/CartsListPage";
+import { CartsListPage } from "./components/CartsListPage";
+import { CartDrawer } from "./components/CartDrawer";
+import { GradeSheet } from "./components/SizeGrade";
+import { isOpen, toContext, getCart, useCartStore, type CartContext, type CartCreator } from "./data/cartStore";
+import { useRadar, isCritical, type CtaTarget } from "./data/radar";
+import { ShopContext, type GradeRequest, type ShopContextValue } from "./lib/shop";
+import type { CatalogEntry } from "./components/CatalogPage";
 import { OrderHistory } from "./components/OrderHistory";
 import { LojistaHistoryDashboard } from "./components/LojistaHistoryDashboard";
 import { MarketingStudio } from "./components/MarketingStudio";
@@ -42,8 +47,8 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   catalog: { title: 'Catálogo' },
   'order-grade': { title: 'Pedido por Grade', subtitle: 'Monte pedidos em menos de 2 minutos' },
   cart: { title: 'Carrinho', subtitle: 'Revise e finalize seu pedido' },
-  carts: { title: 'Carrinhos', subtitle: 'Selecione um carrinho ou crie um novo' },
-  history: { title: 'Histórico de Pedidos', subtitle: 'Todos os seus pedidos' },
+  carts: { title: 'Meus carrinhos', subtitle: 'Carrinhos compartilhados com o representante' },
+  history: { title: 'Pedidos', subtitle: 'Todos os seus pedidos' },
   marketing: { title: 'Estúdio de Marketing IA', subtitle: 'Crie campanhas profissionais automaticamente' },
   sellout: { title: 'Sell-out Intelligence', subtitle: 'Análise de performance comercial' },
   admin: { title: 'Gestão', subtitle: 'Usuários, produtos, políticas e configurações' },
@@ -57,7 +62,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
   'ficha-tecnica': { title: 'Ficha Técnica', subtitle: 'Informações completas, imagens e medidas dos produtos' },
   'sales-team': { title: 'Vendedores', subtitle: 'Representantes e prepostos' },
-  radar: { title: 'Radar', subtitle: 'Ações recomendadas para reposição e cobertura de estoque' },
+  radar: { title: 'Radar', subtitle: 'O que precisa de ação na sua loja, por quando agir' },
 };
 
 export default function App() {
@@ -67,40 +72,47 @@ export default function App() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
-  const [carts, setCarts] = useState<CartContext[]>(() =>
-    mockCarts.map(({ id, clientId, clientName, cartName, createdBy }) => ({ id, clientId, clientName, cartName, createdBy }))
-  );
+  const { carts } = useCartStore();
+  const radar = useRadar();
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
-  const [catalogDetailId, setCatalogDetailId] = useState<string | null>(null);
+  const [catalogEntry, setCatalogEntry] = useState<CatalogEntry | undefined>(undefined);
+  const [catalogKey, setCatalogKey] = useState(0);
   const [catalogSortBy, setCatalogSortBy] = useState<string | null>(null);
+  const [gradeRequest, setGradeRequest] = useState<GradeRequest | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Todos os perfis suportam múltiplos carrinhos.
-  const multiCart = true;
   const viewerRole: CartCreator = profile === 'lojista' ? 'lojista' : 'rep';
   // Lojista não seleciona cliente — ele é o próprio cliente da sua loja.
   const cartsClient = profile === 'lojista' ? clientsList[0] : selectedClient;
-  const clientCarts = cartsClient ? carts.filter(c => c.clientId === cartsClient.id) : [];
+  const clientCarts = cartsClient ? carts.filter(c => c.clientId === cartsClient.id && isOpen(c)) : [];
 
-  const createCart = (name: string, client?: Client | null): CartContext | null => {
-    const c = client ?? cartsClient;
-    if (!c) return null;
-    const ctx: CartContext = {
-      id: `CART-NEW-${Date.now()}`,
-      clientId: c.id,
-      clientName: c.name,
-      cartName: name?.trim() || 'Novo carrinho',
-      createdBy: viewerRole,
-    };
-    setCarts(prev => [ctx, ...prev]);
-    return ctx;
+  const openCart = (cartId: string) => {
+    const cart = getCart(cartId);
+    if (!cart) return;
+    if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== cart.clientId)) {
+      const c = clientsList.find(x => x.id === cart.clientId) ?? null;
+      if (c) setSelectedClient(c);
+    }
+    setActiveCart(toContext(cart));
+    setDrawerOpen(false);
+    setGradeRequest(null);
+    setCurrentView('cart');
+  };
+
+  const shop: ShopContextValue = {
+    role: viewerRole,
+    clientId: cartsClient?.id ?? null,
+    openGrade: (req) => setGradeRequest(req),
+    openCart,
+    openDrawer: () => setDrawerOpen(true),
   };
 
   const handleLogin = (selectedProfile: Profile) => {
     setProfile(selectedProfile);
     setAuthenticated(true);
-    // Lojista entra direto no catálogo; Rep entra direto na lista de clientes
-    if (selectedProfile === 'lojista') setCurrentView('catalog');
+    // Lojista entra no Radar (a home da loja); Rep entra direto na lista de clientes
+    if (selectedProfile === 'lojista') setCurrentView('radar');
     else if (selectedProfile === 'rep') setCurrentView('clients');
     else setCurrentView('dashboard');
     setSelectedClient(null);
@@ -120,42 +132,43 @@ export default function App() {
   };
 
   const navigate = (view: View) => {
-    setCatalogDetailId(null);
+    setCatalogEntry(undefined);
     setCatalogSortBy(null);
+    setDrawerOpen(false);
+    if (view === 'catalog') setCatalogKey(k => k + 1);
     setCurrentView(view);
-  };
-
-  // Radar → abre o catálogo filtrado por linha e/ou com uma ordenação.
-  const openCatalog = ({ line, sortBy }: { line?: string; sortBy?: string }) => {
-    setCatalogDetailId(null);
-    setCatalogSortBy(sortBy ?? null);
-    setCatalogFilters(f => ({ ...defaultFilters, priceTable: f.priceTable, line: line ?? defaultFilters.line }));
-    setCurrentView('catalog');
-  };
-
-  // Radar → abre o catálogo já com o detalhe do produto.
-  const openProductDetail = (productId: string) => {
-    setCatalogSortBy(null);
-    setCatalogDetailId(productId);
-    setCurrentView('catalog');
-  };
-
-  // Radar → adiciona a quantidade sugerida ao carrinho ativo ou cria um novo.
-  const restockProduct = (productId: string, quantity: number) => {
-    const product = productsList.find(p => p.id === productId);
-    if (!product) return;
-    const cart = activeCart ?? createCart(`Reposição ${product.line}`);
-    if (!cart) return;
-    if (!activeCart) setActiveCart(cart);
-    toast.success(
-      `${quantity} pares de ${product.name} adicionados em "${cart.cartName}"`,
-      'Revise as quantidades e envie o pedido em Carrinho',
-    );
   };
 
   const openOrderById = (orderId: string) => {
     const order = ordersList.find(o => o.id === orderId);
     if (order) openOrder(order);
+  };
+
+  // Todo CTA do Radar abre o destino com o contexto aplicado (FR-108): filtro, grade preenchida, carrinho aberto.
+  const handleRadarCta = (target: CtaTarget) => {
+    switch (target.kind) {
+      case 'order': openOrderById(target.orderId); return;
+      case 'carts': navigate('carts'); return;
+      case 'cart': openCart(target.cartId); return;
+      case 'catalog':
+        setCatalogSortBy(null);
+        setCatalogFilters(f => ({
+          ...defaultFilters,
+          priceTable: f.priceTable,
+          line: target.line ?? defaultFilters.line,
+          radar: target.radarFilter ? [target.radarFilter] : [],
+        }));
+        setCatalogEntry({ fromRadar: true });
+        setCatalogKey(k => k + 1);
+        setCurrentView('catalog');
+        return;
+      case 'product':
+        setCatalogSortBy(null);
+        setCatalogEntry({ productId: target.productId, prefill: target.prefill, block: target.block, fromRadar: true });
+        setCatalogKey(k => k + 1);
+        setCurrentView('catalog');
+        return;
+    }
   };
 
   const viewInfo = currentView === 'dashboard'
@@ -190,33 +203,19 @@ export default function App() {
         if (profile === 'rep') return <DashboardRep onNavigate={navigate} selectedClient={selectedClient} onSelectClient={openClientDetail} onOpenOrderStatus={openOrderStatus} />;
         return <DashboardLojista onNavigate={navigate} />;
       }
-      case 'catalog': {
-        const useFilters = true;
+      case 'catalog':
         return (
           <CatalogPage
+            key={catalogKey}
             onNavigate={navigate}
             selectedClient={selectedClient}
-            externalFilters={useFilters ? catalogFilters : undefined}
-            onExternalFiltersChange={useFilters ? setCatalogFilters : undefined}
-            initialDetailProductId={catalogDetailId}
+            filters={catalogFilters}
+            onFiltersChange={setCatalogFilters}
+            entry={catalogEntry}
             initialSortBy={catalogSortBy}
-            clientCarts={cartsClient ? clientCarts : carts}
-            activeCartId={activeCart?.id ?? null}
-            onPickCart={(ctx) => {
-              if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== ctx.clientId)) {
-                const c = clientsList.find(x => x.id === ctx.clientId) ?? null;
-                if (c) setSelectedClient(c);
-              }
-              setActiveCart(ctx);
-            }}
-            onCreateCart={(name) => {
-              const ctx = createCart(name);
-              if (ctx) setActiveCart(ctx);
-              return ctx;
-            }}
+            onBackToRadar={() => navigate('radar')}
           />
         );
-      }
       case 'order-grade':
         return <OrderGrade onNavigate={navigate} selectedClient={selectedClient} />;
       case 'cart':
@@ -224,16 +223,8 @@ export default function App() {
           <CartPage
             onNavigate={navigate}
             cartContext={activeCart}
-            multiCart={multiCart}
+            onSwitchCart={setActiveCart}
             viewerRole={viewerRole}
-            onCreateNewCart={(name) => {
-              const ctx = createCart(name);
-              if (ctx) {
-                setActiveCart(ctx);
-                setCurrentView('catalog');
-              }
-            }}
-            selectedPriceTable={catalogFilters.priceTable}
           />
         );
       case 'carts':
@@ -244,30 +235,14 @@ export default function App() {
             lockClient={profile === 'lojista'}
             onNavigateClients={profile === 'lojista' ? undefined : () => setCurrentView('clients')}
             onSelectClient={profile === 'lojista' ? undefined : (c) => setSelectedClient(c)}
-            onOpenCart={(ctx) => {
+            onOpenCart={(ctx) => openCart(ctx.id)}
+            onCartCreated={(ctx) => {
               if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== ctx.clientId)) {
                 const c = clientsList.find(x => x.id === ctx.clientId) ?? null;
                 if (c) setSelectedClient(c);
               }
               setActiveCart(ctx);
-              setCurrentView('cart');
-            }}
-            onCreateCart={(ctx) => {
-              setCarts(prev => [ctx, ...prev]);
-              if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== ctx.clientId)) {
-                const c = clientsList.find(x => x.id === ctx.clientId) ?? null;
-                if (c) setSelectedClient(c);
-              }
-              setActiveCart(ctx);
-              setCurrentView('catalog');
-            }}
-            onGoToCatalog={(ctx) => {
-              if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== ctx.clientId)) {
-                const c = clientsList.find(x => x.id === ctx.clientId) ?? null;
-                if (c) setSelectedClient(c);
-              }
-              setActiveCart(ctx);
-              setCurrentView('catalog');
+              navigate('catalog');
             }}
           />
         );
@@ -321,10 +296,7 @@ export default function App() {
           <RadarPage
             profile={profile}
             userName={CURRENT_LOJISTA_NAME}
-            onOpenProduct={openProductDetail}
-            onRestock={restockProduct}
-            onOpenOrder={openOrderById}
-            onOpenCatalog={openCatalog}
+            onCta={handleRadarCta}
           />
         );
       case 'permissions':
@@ -340,7 +312,13 @@ export default function App() {
     }
   };
 
+  // FR-801: sino = críticos em aberto + carrinhos em "Aguardando você"
+  const bellCount = profile === 'lojista'
+    ? radar.open.filter(isCritical).length + clientCarts.filter(c => c.stage === 'aguardando-voce').length
+    : 4;
+
   return (
+    <ShopContext.Provider value={shop}>
     <Box h="100dvh" display="flex" className={classes.shell}>
       <Stack gap={0} flex={1} miw={0}>
         <TopBar
@@ -348,16 +326,20 @@ export default function App() {
           subtitle={viewInfo.subtitle}
           profile={profile}
           currentView={currentView}
-          notifications={4}
+          notifications={bellCount}
           onNavigate={navigate}
           onLogout={handleLogout}
-          cartCount={cartsClient ? clientCarts.length : carts.length}
+          onOpenCartDrawer={() => setDrawerOpen(true)}
+          cartCount={cartsClient ? clientCarts.length : carts.filter(isOpen).length}
           selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
         />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>
       </Stack>
+      <CartDrawer opened={drawerOpen} onClose={() => setDrawerOpen(false)} onViewCarts={() => navigate('carts')} />
+      <GradeSheet request={gradeRequest} onClose={() => setGradeRequest(null)} />
     </Box>
+    </ShopContext.Provider>
   );
 }
