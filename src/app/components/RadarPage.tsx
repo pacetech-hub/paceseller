@@ -66,37 +66,57 @@ export function getGreeting(date = new Date()): string {
   return 'Boa noite';
 }
 
-// Anatomia do cartão (FR-105): ícone, sobretítulo (sinal · tempo em palavras), métrica principal
-// (a situação), assunto, uma linha de contexto, sugestão opcional, um CTA e "Atualizado há".
+// Anatomia do cartão (FR-105), no formato do layout: ícone em bloco, sobretítulo em caixa-alta
+// mono (severidade · sinal), métrica principal grande (a situação), assunto, uma linha de contexto,
+// sugestão em mono, CTA como link na cor do cartão e, no rodapé, prazo e "Atualizado há".
 // Cor pela severidade, nunca pelo tipo; a severidade também vem escrita (não só na cor).
-function ActionCard({ signal, onCta, onWhy, onDismiss, resolved }: {
-  signal: RadarSignal; onCta: () => void; onWhy: () => void; onDismiss: () => void; resolved?: boolean;
+// "highlight" = Destaque da semana (cartão preto); "resolved" = resolvido nas últimas 24 h.
+type CardVariant = 'default' | 'highlight' | 'resolved';
+
+function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marginText }: {
+  signal: RadarSignal; onCta: () => void; onWhy?: () => void; onDismiss?: () => void;
+  variant?: CardVariant; marginText?: string;
 }) {
   const sev = SEVERITY_META[signal.severity];
-  const SignalIcon = SIGNAL_ICON[signal.type];
+  const SignalIcon = variant === 'highlight' ? StarIcon : SIGNAL_ICON[signal.type];
+  const highlight = variant === 'highlight';
+  const resolved = variant === 'resolved';
   const base = resolved ? 'gray' : sev.color;
-  const tone = resolved ? 'dimmed' : `${sev.color}.8`;
+  // texto na cor do status: tom 8 sobre o fundo claro; no destaque, branco sobre preto
+  const tone = highlight ? 'white' : resolved ? 'dimmed' : `${sev.color}.8`;
+  const muted = highlight ? 'neutral.3' : 'dimmed';
+  const eyebrow = highlight
+    ? `Destaque da semana · ${SIGNAL_META[signal.type].label}`
+    : `${resolved ? 'Resolvido' : sev.label} · ${SIGNAL_META[signal.type].label}`;
+  const context = marginText ? `${signal.context} · ${marginText}` : signal.context;
+
   return (
     <Paper
       withBorder
       p="lg"
       h="100%"
-      bg={`var(--mantine-color-${base}-light)`}
-      style={{ borderColor: `var(--mantine-color-${base}-light-hover)`, opacity: resolved ? 0.8 : 1 }}
+      bg={highlight ? 'neutral.9' : `var(--mantine-color-${base}-light)`}
+      // no destaque a borda só aparece no modo escuro, para o cartão preto não sumir no fundo
+      style={highlight
+        ? { borderColor: 'light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-7))' }
+        : { borderColor: `var(--mantine-color-${base}-light-hover)`, opacity: resolved ? 0.8 : 1 }}
     >
-      <Stack gap="xs" h="100%">
-        <Group gap="xs" wrap="nowrap" justify="space-between" align="flex-start">
-          <Group gap="xs" wrap="nowrap" miw={0}>
-            <ThemeIcon variant="light" color={base} size="sm">
-              <SignalIcon size={14} />
-            </ThemeIcon>
-            <Text size="sm" fw={600} c={tone} lineClamp={2}>{SIGNAL_META[signal.type].label} · {signal.timeText}</Text>
-          </Group>
-          {!resolved && (
+      <Stack gap="md" h="100%">
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
+          <ThemeIcon
+            size={40}
+            radius="md"
+            variant="filled"
+            color={highlight ? 'neutral.7' : base}
+            aria-hidden
+          >
+            <SignalIcon size={20} weight={highlight ? 'fill' : 'regular'} />
+          </ThemeIcon>
+          {!resolved && onWhy && onDismiss && (
             <Menu position="bottom-end" withinPortal shadow="md">
               <Menu.Target>
-                <ActionIcon variant="subtle" color="neutral" size="sm" aria-label="Mais opções do aviso" mt={-4} mr={-8}>
-                  <DotsThreeVerticalIcon size={18} />
+                <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'neutral'} aria-label="Mais opções do aviso" mr={-8}>
+                  <DotsThreeVerticalIcon size={20} />
                 </ActionIcon>
               </Menu.Target>
               {/* FR-106: por que aparece, adiar e dispensar (com motivo) */}
@@ -122,38 +142,47 @@ function ActionCard({ signal, onCta, onWhy, onDismiss, resolved }: {
             </Menu>
           )}
         </Group>
-        <Group gap="xs" align="baseline" wrap="wrap">
-          <Text fz="xl" fw={700} lh={1.1} c={tone} className="mono">{signal.metric}</Text>
-          <Badge size="sm" variant={resolved ? 'light' : 'filled'} color={base}>{resolved ? 'Resolvido' : sev.label}</Badge>
-        </Group>
+
+        <Stack gap={6}>
+          <Text size="xs" fw={700} tt="uppercase" ff="monospace" lts={0.5} c={highlight ? muted : tone} lineClamp={2}>
+            {eyebrow}
+          </Text>
+          <Text fz={32} fw={700} lh={1.1} c={tone}>{signal.metric}</Text>
+        </Stack>
+
         <Box>
-          <Text fw={600}>{signal.subject}</Text>
-          <Text size="sm" c="dimmed" mt={4}>{signal.context}</Text>
+          <Text fw={600} c={highlight ? 'white' : undefined}>{signal.subject}</Text>
+          <Text size="sm" c={muted} mt={4}>{context}</Text>
+          {signal.suggestion && !resolved && (
+            <Text size="sm" fw={700} ff="monospace" mt="sm" c={highlight ? 'white' : undefined}>{signal.suggestion}</Text>
+          )}
         </Box>
-        {signal.suggestion && !resolved && (
-          <Paper p="xs" bg="var(--mantine-color-body)">
-            <Text size="sm">{signal.suggestion}</Text>
-          </Paper>
-        )}
-        <Group mt="auto" pt="xs" justify="space-between" wrap="wrap" gap="xs">
+
+        <Stack gap={4} mt="auto">
           {resolved ? (
             <Text size="sm" c="dimmed">Sai do Radar em até 24 h</Text>
           ) : (
-            <Button
-              variant="subtle"
-              color="neutral"
-              ml="calc(var(--button-padding-x) * -1)"
-              rightSection={<ArrowRightIcon size={16} />}
-              onClick={onCta}
-            >
-              {signal.ctaLabel}
-            </Button>
+            <Group>
+              {/* CTA como link na cor do cartão; o padding lateral é compensado para alinhar ao texto */}
+              <Button
+                variant="transparent"
+                color={highlight ? 'white' : sev.color}
+                c={tone}
+                px={0}
+                fw={600}
+                fz="md"
+                rightSection={<ArrowRightIcon size={18} />}
+                onClick={onCta}
+              >
+                {signal.ctaLabel}
+              </Button>
+            </Group>
           )}
-          <Stack gap={0} align="flex-end">
-            {!resolved && <Text size="sm" fw={600}>{actByText(signal.actByDays)}</Text>}
-            <Text size="xs" c="dimmed">{updatedText(signal.updatedHoursAgo)}</Text>
-          </Stack>
-        </Group>
+          {/* prazo em palavras + data de agir (BR-40/42) e atualização dos dados (BR-60) */}
+          <Text size="xs" c={muted}>
+            {signal.timeText}{!resolved && ` · ${actByText(signal.actByDays)}`} · {updatedText(signal.updatedHoursAgo)}
+          </Text>
+        </Stack>
       </Stack>
     </Paper>
   );
@@ -258,33 +287,21 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
         </Tabs>
       </Stack>
 
-      {/* FR-107: Destaque da semana, compacto, em preto */}
-      {destaque && !loading && (
-        <Paper p="md" bg="neutral.9" c="white">
-          <Group justify="space-between" wrap="wrap" gap="sm">
-            <Group gap="sm" wrap="nowrap" miw={0}>
-              <ThemeIcon color="white" variant="white" c="neutral.9" size="lg"><StarIcon size={18} weight="fill" /></ThemeIcon>
-              <Box miw={0}>
-                <Text size="sm" fw={600} c="neutral.2">Destaque da semana · {SIGNAL_META[destaque.type].label}</Text>
-                <Text fw={700}>{destaque.subject}</Text>
-                <Text size="sm" c="neutral.2">
-                  {destaque.context}{destaqueProduct ? ` · ${marginLabel(destaqueProduct)}` : ''}
-                </Text>
-              </Box>
-            </Group>
-            <Button variant="white" color="neutral" rightSection={<ArrowRightIcon size={16} />} onClick={() => onCta(destaque.cta)}>
-              {destaque.ctaLabel}
-            </Button>
-          </Group>
-        </Paper>
-      )}
-
       {loading ? (
         <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />
       ) : visible.length > 0 ? (
         <Stack gap="md">
           {/* FR-104: severidade, depois data de agir, depois impacto (R$) */}
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+            {/* FR-107: Destaque da semana — primeiro cartão, em preto */}
+            {destaque && (
+              <ActionCard
+                signal={destaque}
+                variant="highlight"
+                marginText={destaqueProduct ? marginLabel(destaqueProduct) : undefined}
+                onCta={() => onCta(destaque.cta)}
+              />
+            )}
             {shown.map(s => (
               <ActionCard key={s.id} signal={s} onCta={() => onCta(s.cta)} onWhy={() => setWhy(s)} onDismiss={() => setDismissing(s)} />
             ))}
@@ -312,7 +329,7 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
           <Text fw={600}>Resolvidos nas últimas 24 h</Text>
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
             {resolved.map(s => (
-              <ActionCard key={s.id} signal={s} resolved onCta={() => {}} onWhy={() => {}} onDismiss={() => {}} />
+              <ActionCard key={s.id} signal={s} variant="resolved" onCta={() => {}} />
             ))}
           </SimpleGrid>
         </Stack>
