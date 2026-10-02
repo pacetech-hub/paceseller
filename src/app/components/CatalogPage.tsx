@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSmallerThan } from "../lib/responsive";
 import {
   ActionIcon, Anchor, Badge, Box, Button, Card, Chip, Divider, Flex, Group, Modal, Input, Paper, SegmentedControl,
-  SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, Title, Tooltip, UnstyledButton,
+  SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, ThemeIcon, Title, Tooltip, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
 import {
@@ -21,6 +21,8 @@ import {
   MegaphoneIcon,
   LightningIcon,
   StarIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
 } from "@phosphor-icons/react";
 import { products, Product, formatCurrency, type Client } from "../data/mockData";
 import {
@@ -231,6 +233,151 @@ function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggle
         <PriceBlock product={product} />
         <Group mt="sm" grow>{addButton}</Group>
       </Box>
+    </Card>
+  );
+}
+
+/** Cor do modelo: o nome sem a linha ("Flow XL Purple" → "Purple"). */
+const colorwayOf = (p: Product) => p.name.replace(p.line, '').trim() || p.colors[0];
+
+/** Selo curto do sinal no cartão: crescimento sempre com escopo e período (BR-34). */
+function signalChip(signal: RadarSignal, product: Product) {
+  const growth = storeSku(product.id)?.regionalGrowthPct ?? 0;
+  if (signal.type === 'alta-demanda') return `+${growth}% na região · 30 dias`;
+  return SIGNAL_META[signal.type].label;
+}
+
+/**
+ * Cartão do modelo no catálogo (grade): um cartão por linha, com as cores em miniaturas.
+ * Clicar no cartão abre a página do produto da cor escolhida; as miniaturas só trocam a cor
+ * mostrada e "Adicionar ao carrinho" abre a grade de numeração (BR-20).
+ */
+function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
+  variants: Product[];
+  initialId: string;
+  onOpenDetail: (p: Product) => void;
+  onAdd: (p: Product) => void;
+}) {
+  const radar = useRadar();
+  const [selectedId, setSelectedId] = useState(initialId);
+  const product = variants.find(v => v.id === selectedId) ?? variants[0];
+  const signal = radar.byProduct[product.id];
+  const topSeller = isTopSeller(product.id, radar);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const scroll = (dir: 1 | -1) => stripRef.current?.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  const lineName = `Tênis Tesla ${product.line}`;
+  const showArrows = variants.length > 4;
+
+  return (
+    <Card withBorder padding={0} className={classes.card}>
+      {/* foto: clicável, abre o detalhe; selo "Mais vendida" sobre a foto (BR-33) */}
+      <UnstyledButton onClick={() => onOpenDetail(product)} pos="relative" display="block" w="100%" pt="62%" bg="white" aria-label={`Ver detalhes de ${productDisplayName(product)}`}>
+        <Box pos="absolute" inset={0}>
+          <ProductImage
+            key={product.id}
+            src={product.image}
+            alt={productDisplayName(product)}
+            imageProps={{ fit: 'contain', p: 'sm' }}
+            fallback={<Group h="100%" justify="center"><PackageIcon size={40} color={DIMMED} opacity={0.3} /></Group>}
+          />
+        </Box>
+        {topSeller && (
+          <Badge pos="absolute" top={12} left={12} variant="filled" color="neutral.9" radius="sm" ff="monospace" leftSection={<StarIcon size={12} weight="fill" />}>
+            Mais vendida
+          </Badge>
+        )}
+      </UnstyledButton>
+
+      {/* miniaturas das cores: trocam a cor mostrada no cartão */}
+      <Group gap={6} wrap="nowrap" px="xs" pt={2} pb="xs" style={{ borderTop: BORDER, borderBottom: BORDER }}>
+        {showArrows && (
+          <ActionIcon variant="default" radius="xl" size="sm" onClick={() => scroll(-1)} aria-label="Cores anteriores" flex="none">
+            <CaretLeftIcon size={12} />
+          </ActionIcon>
+        )}
+        <Box ref={stripRef} flex={1} miw={0} style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <Group gap={6} wrap="nowrap" pt={6} pr={6} role="radiogroup" aria-label={`Cores de ${lineName}`}>
+            {variants.map(v => {
+              const active = v.id === product.id;
+              return (
+                <Tooltip key={v.id} label={colorwayOf(v)}>
+                  <UnstyledButton
+                    role="radio"
+                    aria-checked={active}
+                    aria-label={`Cor ${colorwayOf(v)}`}
+                    onClick={() => setSelectedId(v.id)}
+                    pos="relative"
+                    w={56}
+                    h={56}
+                    flex="none"
+                    bg="white"
+                    style={{
+                      borderRadius: 'var(--mantine-radius-sm)',
+                      border: active ? '2px solid var(--mantine-color-neutral-9)' : BORDER,
+                    }}
+                  >
+                    <ProductImage src={v.image} alt="" imageProps={{ fit: 'contain', p: 2 }} fallback={<Group h="100%" justify="center"><PackageIcon size={18} color={DIMMED} /></Group>} />
+                    {isTopSeller(v.id, radar) && (
+                      <ThemeIcon pos="absolute" top={-6} right={-6} size={16} radius="xl" color="neutral.9" aria-hidden>
+                        <StarIcon size={10} weight="fill" />
+                      </ThemeIcon>
+                    )}
+                  </UnstyledButton>
+                </Tooltip>
+              );
+            })}
+          </Group>
+        </Box>
+        {showArrows && (
+          <ActionIcon variant="default" radius="xl" size="sm" onClick={() => scroll(1)} aria-label="Próximas cores" flex="none">
+            <CaretRightIcon size={12} />
+          </ActionIcon>
+        )}
+      </Group>
+
+      <Stack gap="sm" p="md" flex={1}>
+        {/* texto, preço e selos: clicáveis, abrem o detalhe */}
+        <UnstyledButton onClick={() => onOpenDetail(product)} display="block" w="100%">
+          <Text fw={700} fz="lg" lh={1.3}>{lineName}</Text>
+          <Text size="sm" c="dimmed">{colorwayOf(product)}</Text>
+          <Group gap={6} align="baseline" mt="sm">
+            <Text className="mono" fw={700} fz="lg">{formatCurrency(product.price)}</Text>
+            <Text size="sm" c="dimmed">Seu custo</Text>
+          </Group>
+          <Group gap="xs" mt={4} wrap="wrap">
+            <Text size="sm" c="dimmed" className="mono">PDV sugerido {formatCurrency(product.priceRetail)}</Text>
+            <Tooltip label={markupLabel(product)}>
+              <Badge variant="light" color="teal" radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>
+                {marginLabel(product)}
+              </Badge>
+            </Tooltip>
+          </Group>
+          <Group gap={6} mt="sm" wrap="wrap">
+            {signal && (
+              <Tooltip label={`${SEVERITY_META[signal.severity].label} · ${signal.context}`} multiline maw={260}>
+                <Badge variant="light" color={SEVERITY_META[signal.severity].color} radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>
+                  {signalChip(signal, product)}
+                </Badge>
+              </Tooltip>
+            )}
+            {product.availability !== 'disponível' && (
+              <Badge variant="light" color={availColor[product.availability]} radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>
+                {product.availability}
+              </Badge>
+            )}
+          </Group>
+        </UnstyledButton>
+        <Button
+          mt="auto"
+          fullWidth
+          variant="default"
+          disabled={product.availability === 'esgotado'}
+          leftSection={<ShoppingCartIcon size={18} />}
+          onClick={() => onAdd(product)}
+        >
+          Adicionar ao carrinho
+        </Button>
+      </Stack>
     </Card>
   );
 }
@@ -504,6 +651,18 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
 
   const openDetail = (p: Product, e?: CatalogEntry) => { setDetailEntry(e); setDetailProduct(p); };
 
+  // Grade: um cartão por modelo (linha), na ordem do primeiro produto de cada linha; as cores
+  // que passam nos filtros vêm primeiro, mas todas as cores da linha ficam nas miniaturas
+  const models = useMemo(() => {
+    const order: string[] = [];
+    sorted.forEach(p => { if (!order.includes(p.line)) order.push(p.line); });
+    return order.map(line => {
+      const matching = sorted.filter(p => p.line === line);
+      const others = products.filter(p => p.line === line && !matching.includes(p));
+      return { line, variants: [...matching, ...others] };
+    });
+  }, [sorted]);
+
   const renderProductCard = (product: Product, mode: 'grid' | 'list') => (
     <ProductCard
       key={product.id}
@@ -571,7 +730,10 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
 
           {/* contagem de resultados + filtros ativos removíveis + limpar */}
           <Group gap="sm" wrap="wrap">
-            <Text fw={600} aria-live="polite">{sorted.length} {sorted.length === 1 ? 'produto' : 'produtos'}</Text>
+            <Text fw={600} aria-live="polite">
+              {sorted.length} {sorted.length === 1 ? 'produto' : 'produtos'}
+              {viewMode === 'grid' && <Text span c="dimmed" fw={400} inherit> em {models.length} {models.length === 1 ? 'modelo' : 'modelos'}</Text>}
+            </Text>
             {activeChips.map(ch => (
               <Button key={ch.key} variant="light" color="neutral" size="compact-md" rightSection={<XIcon size={14} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
                 {ch.label}
@@ -598,8 +760,17 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
             ]}
           />
         ) : viewMode === 'grid' ? (
-          <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing={{ base: 'sm', sm: 'md' }} className={classes.grid}>
-            {sorted.map(product => renderProductCard(product, 'grid'))}
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing={{ base: 'sm', sm: 'md' }}>
+            {models.map(m => (
+              <ModelCard
+                key={m.line}
+                variants={m.variants}
+                initialId={m.variants[0].id}
+                onOpenDetail={p => openDetail(p)}
+                // "Adicionar" sempre abre a grade, preenchida quando há sinal (FR-205)
+                onAdd={p => openGrade({ productId: p.id })}
+              />
+            ))}
           </SimpleGrid>
         ) : (
           <Stack gap="sm">
