@@ -33,6 +33,7 @@ import {
   ShoppingCartIcon,
   XIcon,
   UserCircleIcon,
+  HeadsetIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -43,7 +44,7 @@ import { AppsGridMenu, type AppsGridItem } from "./AppsGridMenu";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar';
+  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -405,6 +406,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
           { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
+          { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
           { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
         ];
 

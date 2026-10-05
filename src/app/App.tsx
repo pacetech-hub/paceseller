@@ -36,6 +36,7 @@ import { StockPage } from "./components/StockPage";
 import { RepStockPage } from "./components/RepStockPage";
 import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
 import { RadarPage } from "./components/RadarPage";
+import { SupportPage } from "./components/SupportPage";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -62,6 +63,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   'order-detail': { title: 'Pedido', subtitle: 'Detalhes do pedido' },
   'ficha-tecnica': { title: 'Ficha Técnica', subtitle: 'Informações completas, imagens e medidas dos produtos' },
   'sales-team': { title: 'Vendedores', subtitle: 'Representantes e prepostos' },
+  support: { title: 'Suporte', subtitle: 'Contatos de atendimento e do seu representante' },
   radar: { title: 'Radar', subtitle: 'O que precisa de ação na sua loja, por quando agir' },
 };
 
@@ -299,6 +301,8 @@ export default function App() {
             onCta={handleRadarCta}
           />
         );
+      case 'support':
+        return <SupportPage />;
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:
