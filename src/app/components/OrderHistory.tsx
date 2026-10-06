@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Stack, Group, Box, Center, Paper, Text, TextInput, Chip, Badge, UnstyledButton, Card } from "@mantine/core";
-import historyClasses from "./OrderHistory.module.css";
+import { Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, Card, Table } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
-  CaretRightIcon,
+  EyeIcon,
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -14,11 +13,11 @@ import {
   ShoppingBagIcon,
   type Icon,
 } from "@phosphor-icons/react";
-import classes from "./interactive.module.css";
 import { useMockLoading } from "../lib/useMockLoading";
-import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellList, CellCard, CellField } from "./ui/CellView";
+import { TableSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
+import { StockTableHeader } from "./StockTable";
+import sticky from "./ui/stickyTable.module.css";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
@@ -59,7 +58,7 @@ export function OrderStatusBadge({ status }: { status: string }) {
       variant="light"
       color={statusColors[status]}
       leftSection={<StatusIcon size={14} />}
-      styles={{ root: { flexShrink: 0 } }}
+      styles={{ root: { flexShrink: 0, minWidth: 'max-content' } }}
     >
       {status}
     </Badge>
@@ -99,93 +98,45 @@ export function statusSupportText(order: Order): string {
   }
 }
 
-// shared column template so the legend row and every card line up exactly
-// (a partir do breakpoint md; abaixo dele cada pedido vira um cartão em "cell view")
-// Larguras fixas das colunas; a coluna do pedido ocupa o espaço restante.
+// Mesma estrutura de tabela do Meu Estoque: tabela densa mantida também no celular,
+// com rolagem lateral, cabeçalho fixo e a coluna Pedido sempre visível.
 // Cliente só aparece para admin/rep e representante só para admin/lojista.
-const COL = { client: 160, rep: 150, qty: 100, total: 130, caret: 20 } as const;
+const NUMERIC_HEADERS = ['Quantidade', 'Total'];
 
-/** Mesmo pedido no celular: cartão com rótulo acima do valor, sem rolagem lateral. */
-function OrderCellCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
+function OrderRow({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
   const productName = orderProductNames[order.id] ?? order.collection;
   const client = clients.find(c => c.id === order.clientId);
   return (
-    <CellCard
-      title={<Text span inherit className="mono">{order.id}</Text>}
-      aside={<OrderStatusBadge status={order.status} />}
-      onClick={onOpen}
-    >
-      <Text c="dimmed" size="sm">{statusSupportText(order)}</Text>
-      <CellField label="Produto">{productName}</CellField>
+    <Table.Tr onClick={onOpen} style={{ cursor: 'pointer' }}>
+      <Table.Td maw={300}>
+        <Text fw={600} className="mono">{order.id}</Text>
+        <Text c="dimmed" size="sm" truncate>{productName}</Text>
+      </Table.Td>
+      <Table.Td miw={180} style={{ whiteSpace: 'normal' }}>
+        <OrderStatusBadge status={order.status} />
+        <Text c="dimmed" size="sm" mt={4}>{statusSupportText(order)}</Text>
+      </Table.Td>
       {profile !== 'lojista' && (
-        <CellField label="Cliente">
-          {client?.name ?? order.client}
+        <Table.Td maw={220}>
+          <Text truncate>{client?.name ?? order.client}</Text>
           {client && <Text c="dimmed" size="sm">{client.city} / {client.state}</Text>}
-        </CellField>
+        </Table.Td>
       )}
-      {profile !== 'rep' && <CellField label="Representante">{order.rep}</CellField>}
-      <CellField label="Quantidade"><Text className="mono" fw={600}>{order.items.toLocaleString('pt-BR')} pares</Text></CellField>
-      <CellField label="Total"><Text className="mono" fw={600}>{formatCurrency(order.total)}</Text></CellField>
-    </CellCard>
-  );
-}
-
-function OrderCard({ order, profile, onOpen }: { order: Order; profile: Profile; onOpen: () => void }) {
-  const support = statusSupportText(order);
-  const productName = orderProductNames[order.id] ?? order.collection;
-  const client = clients.find(c => c.id === order.clientId);
-
-  return (
-    <Card withBorder padding={0}>
-      <UnstyledButton
-        onClick={onOpen}
-        className={classes.hoverable}
-        p={{ base: 'sm', sm: 'md' }}
-        w="100%"
-      >
-        <Group gap="md" wrap="nowrap">
-          {/* column 1: order info */}
-          <Box flex={1} miw={0}>
-            <Group gap="xs" mb={4}>
-              <OrderStatusBadge status={order.status} />
-              <Text c="dimmed" size="sm">{support}</Text>
-            </Group>
-            <Text fw={600} truncate>
-              <Text span inherit className="mono">{order.id}</Text> — {productName}
-            </Text>
-          </Box>
-
-          {/* column 2: cliente (admin/rep only) */}
-          {profile !== 'lojista' && (
-            <Box w={COL.client} flex="none">
-              <Text fw={600} truncate>{client?.name ?? order.client}</Text>
-              <Text c="dimmed" size="sm" truncate>{client ? `${client.city} / ${client.state}` : ''}</Text>
-            </Box>
-          )}
-
-          {/* column 3: representante (hidden for rep, viewing their own orders) */}
-          {profile !== 'rep' && (
-            <Box w={COL.rep} flex="none">
-              <Text truncate>{order.rep}</Text>
-            </Box>
-          )}
-
-          {/* column 4: quantidade */}
-          <Box w={COL.qty} flex="none" ta="right">
-            <Text className="mono" truncate>{order.items.toLocaleString('pt-BR')} pares</Text>
-          </Box>
-
-          {/* column 5: total */}
-          <Box w={COL.total} flex="none" ta="right">
-            <Text className="mono" fw={700} truncate>{formatCurrency(order.total)}</Text>
-          </Box>
-
-          <Center w={COL.caret} flex="none">
-            <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
-          </Center>
-        </Group>
-      </UnstyledButton>
-    </Card>
+      {profile !== 'rep' && <Table.Td><Text>{order.rep}</Text></Table.Td>}
+      <Table.Td ta="right"><Text className="mono">{order.items.toLocaleString('pt-BR')} pares</Text></Table.Td>
+      <Table.Td ta="right"><Text fw={600} className="mono">{formatCurrency(order.total)}</Text></Table.Td>
+      <Table.Td ta="right">
+        <Button
+          variant="default"
+          size="sm"
+          leftSection={<EyeIcon size={16} />}
+          onClick={e => { e.stopPropagation(); onOpen(); }}
+          aria-label={`Ver pedido ${order.id}`}
+        >
+          Ver
+        </Button>
+      </Table.Td>
+    </Table.Tr>
   );
 }
 
@@ -218,89 +169,64 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
 
   const hasFilters = search.trim() !== '' || statusFilter !== 'todos';
 
+  const headers = [
+    'Pedido', 'Status',
+    ...(profile !== 'lojista' ? ['Cliente'] : []),
+    ...(profile !== 'rep' ? ['Representante'] : []),
+    'Quantidade', 'Total', 'Ações',
+  ];
+
   return (
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Filters */}
-      <Group gap="sm" wrap="wrap">
-        <TextInput
-          placeholder="Buscar por nº do pedido, cliente ou representante"
-          leftSection={<MagnifyingGlassIcon size={16} />}
-          value={search}
-          onChange={e => setSearch(e.currentTarget.value)}
-          flex={{ base: '1 1 100%', sm: 1 }}
-          miw={{ sm: 160 }}
-        />
-        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
-          <Group gap="sm">
-            {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral">
-                {statusLabels[s]}
-              </Chip>
-            ))}
-          </Group>
-        </Chip.Group>
-      </Group>
+      <Paper withBorder p="sm">
+        <Group gap="sm" wrap="wrap">
+          <TextInput
+            placeholder="Buscar por nº do pedido, cliente ou representante"
+            leftSection={<MagnifyingGlassIcon size={16} />}
+            value={search}
+            onChange={e => setSearch(e.currentTarget.value)}
+            flex={{ base: '1 1 100%', sm: 1 }}
+            miw={{ sm: 160 }}
+          />
+          <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
+            <Group gap="sm">
+              {statuses.map(s => (
+                <Chip key={s} value={s} variant="filled" color="neutral">
+                  {statusLabels[s]}
+                </Chip>
+              ))}
+            </Group>
+          </Chip.Group>
+        </Group>
+      </Paper>
 
-      {/* Orders — enquanto carrega, skeleton no formato da lista (colunas no desktop, cartões no celular) */}
-      {loading ? (
-        <>
-          <Box visibleFrom="md"><TableSkeleton rows={6} cols={profile === 'admin' ? 5 : 4} /></Box>
-          <Box hiddenFrom="md"><ListSkeleton rows={4} withAvatar={false} /></Box>
-        </>
-      ) : (
+      {/* Orders */}
+      {loading ? <TableSkeleton rows={8} cols={headers.length} /> : (
       <Stack gap="sm">
         {/* ordem da lista em palavras simples */}
         {filtered.length > 0 && (
           <Text c="dimmed" size="sm">Em análise primeiro, depois aprovados, faturados, entregues e cancelados</Text>
         )}
         {filtered.length > 0 && (
-          <Paper
-            withBorder
-            px="md"
-            py="sm"
-            visibleFrom="md"
-            pos="sticky"
-            top={0}
-            c="dimmed"
-            fz="sm"
-            fw={600}
-            className={historyClasses.stickyHeader}
-          >
-            <Group gap="md" wrap="nowrap">
-              <Box flex={1} miw={0}>Pedido</Box>
-              {profile !== 'lojista' && <Box w={COL.client} flex="none">Cliente</Box>}
-              {profile !== 'rep' && <Box w={COL.rep} flex="none">Representante</Box>}
-              <Box w={COL.qty} flex="none" ta="right">Quantidade</Box>
-              <Box w={COL.total} flex="none" ta="right">Total</Box>
-              <Box w={COL.caret} flex="none" />
-            </Group>
-          </Paper>
-        )}
-
-        {filtered.length > 0 && (
-          <Stack gap="sm" visibleFrom="md">
-            {filtered.map(order => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                profile={profile}
-                onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
-              />
-            ))}
-          </Stack>
-        )}
-
-        {filtered.length > 0 && (
-          <CellList hiddenFrom="md">
-            {filtered.map(order => (
-              <OrderCellCard
-                key={order.id}
-                order={order}
-                profile={profile}
-                onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
-              />
-            ))}
-          </CellList>
+          <Card withBorder padding={0}>
+            <Table.ScrollContainer minWidth={900} maxHeight={560}>
+              <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
+                highlightOnHover verticalSpacing="sm" horizontalSpacing="md" style={{ whiteSpace: 'nowrap' }}>
+                <StockTableHeader labels={headers} numeric={NUMERIC_HEADERS} />
+                <Table.Tbody>
+                  {filtered.map(order => (
+                    <OrderRow
+                      key={order.id}
+                      order={order}
+                      profile={profile}
+                      onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
+                    />
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Card>
         )}
 
         {filtered.length === 0 && (hasFilters ? (

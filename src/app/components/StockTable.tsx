@@ -126,14 +126,14 @@ export function StockProductCell({ item }: { item: StockItem }) {
 /** Colunas numéricas (quantidades) alinhadas à direita no cabeçalho e nas células. */
 export const STOCK_NUMERIC_HEADERS = ['Estoque', 'Estoque atual', 'Estoque mínimo'];
 
-export function StockTableHeader({ labels }: { labels: string[] }) {
+export function StockTableHeader({ labels, numeric = STOCK_NUMERIC_HEADERS }: { labels: string[]; numeric?: string[] }) {
   return (
     <Table.Thead>
       <Table.Tr>
         {labels.map(h => (
           // fundo em cada Th (não no Thead) para o cabeçalho fixo e a 1ª coluna fixa ficarem iguais
           <Table.Th key={h} bg="var(--mantine-color-gray-0)"
-            ta={STOCK_NUMERIC_HEADERS.includes(h) || h === 'Ações' ? 'right' : undefined}>
+            ta={numeric.includes(h) || h === 'Ações' ? 'right' : undefined}>
             <Text c="dimmed" size="sm" fw={600} tt="uppercase">{h}</Text>
           </Table.Th>
         ))}

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code,
-  SimpleGrid, UnstyledButton, Collapse, List, Card, Divider,
+  SimpleGrid, List, Card, Table, Modal,
 } from "@mantine/core";
 import { toast } from "../lib/toast";
-import classes from "./interactive.module.css";
 import boletos from "./BoletosPage.module.css";
 import {
   MagnifyingGlassIcon,
@@ -14,15 +13,17 @@ import {
   ClockIcon,
   WarningIcon,
   ReceiptIcon,
-  CaretDownIcon,
+  CurrencyCircleDollarIcon,
   BarcodeIcon,
   QrCodeIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import { formatCurrency, formatDate } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
-import { KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
+import { KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
+import { StockTableHeader } from "./StockTable";
+import sticky from "./ui/stickyTable.module.css";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -225,8 +226,8 @@ function CodeBlock({ label, code }: { label: string; code: string }) {
   );
 }
 
-function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile }) {
-  const [expanded, setExpanded] = useState(false);
+// Formas de pagamento (boleto ou Pix) de uma parcela em aberto, aberta pelo botão "Pagar" da tabela
+function PaymentPanel({ payment }: { payment: Payment }) {
   const [method, setMethod] = useState<PaymentMethod>('boleto');
   const [showQr, setShowQr] = useState(false);
   // qual código acabou de ser copiado (troca o texto do botão por alguns segundos)
@@ -262,148 +263,142 @@ function PaymentCard({ payment, profile }: { payment: Payment; profile: Profile 
     </Group>
   );
 
-  const isPago = payment.status === 'pago';
-  const StatusIcon = statusIcon[payment.status];
-
-  const metaParts = [
-    `Pedido ${payment.orderId}`,
-    `Parcela ${payment.installment}`,
-    `Valor do pedido: ${formatCurrency(payment.orderTotal)}`,
-    ...(profile !== 'lojista' ? [payment.client] : []),
-    ...(profile === 'admin' ? [payment.rep] : []),
-  ];
-
-  const summary = (
-    <Group gap="md" wrap="nowrap" p="md">
-      <Box miw={0} flex={1}>
-        {/* line 1: status + due/payment date */}
-        <Group gap="xs" mb={4}>
-          <Badge
-            variant="light"
-            color={statusColors[payment.status]}
-            leftSection={<StatusIcon size={14} />}
-            style={{ flexShrink: 0 }}
-          >
-            {statusLabel[payment.status]}
-          </Badge>
-          <Text c="dimmed" size="sm" flex="none">
-            {formatDate(isPago ? (payment.paymentDate as string) : payment.dueDate)}
-          </Text>
-        </Group>
-        {/* line 2: order title */}
-        <Text fw={600} truncate mb={4}>{payment.product}</Text>
-        {/* line 3: order id + parcela + valor do pedido (+ client/rep) */}
-        <Text c="dimmed" size="sm" truncate>{metaParts.join(' · ')}</Text>
-      </Box>
-
-      <Text className="mono" size="lg" fw={700} ta="right" flex="none">
-        {formatCurrency(payment.amount)}
-      </Text>
-
-      {!isPago && (
-        <CaretDownIcon
-          size={16}
-          color="var(--mantine-color-dimmed)"
-          className={boletos.caret}
-          data-expanded={expanded || undefined}
-        />
-      )}
-    </Group>
-  );
-
   return (
-    <Card withBorder padding={0}>
-      {isPago ? summary : (
-        <UnstyledButton onClick={() => setExpanded(e => !e)} className={classes.hoverable} w="100%" aria-expanded={expanded}>
-          {summary}
-        </UnstyledButton>
+    <Box>
+      <SegmentedControl
+        value={method}
+        onChange={v => setMethod(v as PaymentMethod)}
+        mb="sm"
+        aria-label="Forma de pagamento"
+        data={[
+          { value: 'boleto', label: <Group gap="xs" wrap="nowrap"><BarcodeIcon size={16} /> Boleto</Group> },
+          { value: 'pix', label: <Group gap="xs" wrap="nowrap"><QrCodeIcon size={16} /> Pix</Group> },
+        ]}
+      />
+
+      {method === 'boleto' ? (
+        <Stack gap="sm">
+          <CodeBlock label="Linha digitável" code={payment.boletoLine} />
+          {/* secundária à esquerda, principal (copiar) à direita */}
+          <Group gap="sm" justify="flex-end">
+            <Button
+              onClick={() => toast.success('Download da fatura iniciado', 'O PDF vai para a pasta Downloads do seu dispositivo')}
+              variant="default"
+              leftSection={<DownloadSimpleIcon size={16} />}
+            >
+              Baixar Fatura
+            </Button>
+            <Button
+              onClick={() => handleCopy('boleto')}
+              variant="filled"
+              color={justCopied === 'boleto' ? 'teal' : undefined}
+              leftSection={justCopied === 'boleto' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
+            >
+              {justCopied === 'boleto' ? 'Código Copiado' : 'Copiar Código de Barras'}
+            </Button>
+          </Group>
+          {copyHint('boleto')}
+        </Stack>
+      ) : (
+        <Stack gap="sm">
+          <CodeBlock label="Pix Copia e Cola" code={payment.pixCode} />
+          {/* secundária à esquerda, principal (copiar) à direita */}
+          <Group gap="sm" justify="flex-end">
+            <Button
+              onClick={() => setShowQr(v => !v)}
+              variant="default"
+              leftSection={<QrCodeIcon size={16} />}
+            >
+              {showQr ? 'Ocultar QR Code' : 'Mostrar QR Code Pix'}
+            </Button>
+            <Button
+              onClick={() => handleCopy('pix')}
+              variant="filled"
+              color={justCopied === 'pix' ? 'teal' : undefined}
+              leftSection={justCopied === 'pix' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
+            >
+              {justCopied === 'pix' ? 'Código Copiado' : 'Copiar Código Pix'}
+            </Button>
+          </Group>
+          {copyHint('pix')}
+
+          {showQr && (
+            <Group gap="md" align="flex-start" pt={4}>
+              <Paper withBorder p="sm" bg="white" flex="none">
+                <PixQrCode data={payment.pixCode} />
+              </Paper>
+              <Box flex={1} miw={220}>
+                <Text fw={600} mb={4}>Como pagar</Text>
+                <List type="ordered" withPadding listStyleType="decimal" size="sm" c="dimmed" spacing={4}>
+                  <List.Item>Abra o app do seu banco</List.Item>
+                  <List.Item>Escolha pagar via Pix com QR Code ou Copia e Cola</List.Item>
+                  <List.Item>Escaneie o código ao lado ou cole o código copiado</List.Item>
+                  <List.Item>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</List.Item>
+                </List>
+              </Box>
+            </Group>
+          )}
+        </Stack>
       )}
-
-      {!isPago && (
-        <Collapse in={expanded}>
-          <Divider color="var(--mantine-color-default-border)" />
-          <Box p="md" bg="var(--mantine-color-default-hover)">
-            <SegmentedControl
-              value={method}
-              onChange={v => setMethod(v as PaymentMethod)}
-              mb="sm"
-              aria-label="Forma de pagamento"
-              data={[
-                { value: 'boleto', label: <Group gap="xs" wrap="nowrap"><BarcodeIcon size={16} /> Boleto</Group> },
-                { value: 'pix', label: <Group gap="xs" wrap="nowrap"><QrCodeIcon size={16} /> Pix</Group> },
-              ]}
-            />
-
-            {method === 'boleto' ? (
-              <Stack gap="sm">
-                <CodeBlock label="Linha digitável" code={payment.boletoLine} />
-                {/* secundária à esquerda, principal (copiar) à direita */}
-                <Group gap="sm" justify="flex-end">
-                  <Button
-                    onClick={() => toast.success('Download da fatura iniciado', 'O PDF vai para a pasta Downloads do seu dispositivo')}
-                    variant="default"
-                    leftSection={<DownloadSimpleIcon size={16} />}
-                  >
-                    Baixar Fatura
-                  </Button>
-                  <Button
-                    onClick={() => handleCopy('boleto')}
-                    variant="filled"
-                    color={justCopied === 'boleto' ? 'teal' : undefined}
-                    leftSection={justCopied === 'boleto' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
-                  >
-                    {justCopied === 'boleto' ? 'Código Copiado' : 'Copiar Código de Barras'}
-                  </Button>
-                </Group>
-                {copyHint('boleto')}
-              </Stack>
-            ) : (
-              <Stack gap="sm">
-                <CodeBlock label="Pix Copia e Cola" code={payment.pixCode} />
-                {/* secundária à esquerda, principal (copiar) à direita */}
-                <Group gap="sm" justify="flex-end">
-                  <Button
-                    onClick={() => setShowQr(v => !v)}
-                    variant="default"
-                    leftSection={<QrCodeIcon size={16} />}
-                  >
-                    {showQr ? 'Ocultar QR Code' : 'Mostrar QR Code Pix'}
-                  </Button>
-                  <Button
-                    onClick={() => handleCopy('pix')}
-                    variant="filled"
-                    color={justCopied === 'pix' ? 'teal' : undefined}
-                    leftSection={justCopied === 'pix' ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
-                  >
-                    {justCopied === 'pix' ? 'Código Copiado' : 'Copiar Código Pix'}
-                  </Button>
-                </Group>
-                {copyHint('pix')}
-
-                {showQr && (
-                  <Group gap="md" align="flex-start" pt={4}>
-                    <Paper withBorder p="sm" bg="white" flex="none">
-                      <PixQrCode data={payment.pixCode} />
-                    </Paper>
-                    <Box flex={1} miw={220}>
-                      <Text fw={600} mb={4}>Como pagar</Text>
-                      <List type="ordered" withPadding listStyleType="decimal" size="sm" c="dimmed" spacing={4}>
-                        <List.Item>Abra o app do seu banco</List.Item>
-                        <List.Item>Escolha pagar via Pix com QR Code ou Copia e Cola</List.Item>
-                        <List.Item>Escaneie o código ao lado ou cole o código copiado</List.Item>
-                        <List.Item>Confirme o valor de {formatCurrency(payment.amount)} e finalize o pagamento</List.Item>
-                      </List>
-                    </Box>
-                  </Group>
-                )}
-              </Stack>
-            )}
-          </Box>
-        </Collapse>
-      )}
-    </Card>
+    </Box>
   );
 }
+
+function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
+  const StatusIcon = statusIcon[status];
+  return (
+    <Badge variant="light" color={statusColors[status]} leftSection={<StatusIcon size={14} />} style={{ flexShrink: 0, minWidth: 'max-content' }}>
+      {statusLabel[status]}
+    </Badge>
+  );
+}
+
+const NUMERIC_HEADERS = ['Valor'];
+
+function PaymentRow({ payment, profile, onPay }: { payment: Payment; profile: Profile; onPay: () => void }) {
+  const isPago = payment.status === 'pago';
+  return (
+    <Table.Tr>
+      <Table.Td maw={260}>
+        <Text fw={600} truncate>{payment.product}</Text>
+        <Text c="dimmed" size="sm" className="mono">{payment.id}</Text>
+      </Table.Td>
+      <Table.Td><PaymentStatusBadge status={payment.status} /></Table.Td>
+      <Table.Td miw={150} style={{ whiteSpace: 'normal' }}>
+        <Text size="sm">{formatDate(payment.dueDate)}</Text>
+        {isPago && payment.paymentDate && <Text c="dimmed" size="sm">Pago em {formatDate(payment.paymentDate)}</Text>}
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm" className="mono">{payment.orderId}</Text>
+        <Text c="dimmed" size="sm">Parcela {payment.installment} de {formatCurrency(payment.orderTotal)}</Text>
+      </Table.Td>
+      {profile !== 'lojista' && (
+        <Table.Td maw={220}>
+          <Text truncate>{payment.client}</Text>
+          {/* indústria vê também o representante, abaixo do cliente */}
+          {profile === 'admin' && <Text c="dimmed" size="sm" truncate>{payment.rep}</Text>}
+        </Table.Td>
+      )}
+      <Table.Td ta="right"><Text fw={600} className="mono">{formatCurrency(payment.amount)}</Text></Table.Td>
+      <Table.Td ta="right">
+        {isPago ? (
+          <Text c="dimmed" size="sm">Quitado</Text>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            leftSection={<CurrencyCircleDollarIcon size={16} />}
+            onClick={onPay}
+            aria-label={`Pagar boleto ${payment.id}`}
+          >
+            Pagar
+          </Button>
+        )}
+      </Table.Td>
+    </Table.Tr>
+  );
+}
+
 export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'todos' | PaymentStatus>('todos');
@@ -417,6 +412,14 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
     : isRep
     ? boletosCarteira.filter(p => p.rep === 'Marcos Andrade')
     : boletosCarteira;
+
+  const [paying, setPaying] = useState<Payment | null>(null);
+
+  const headers = [
+    'Boleto', 'Status', 'Vencimento', 'Pedido',
+    ...(profile !== 'lojista' ? ['Cliente'] : []),
+    'Valor', 'Ações',
+  ];
 
   const statuses: Array<'todos' | PaymentStatus> = ['todos', 'atrasado', 'pendente', 'pago'];
 
@@ -481,32 +484,47 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
       )}
 
       {/* Filters */}
-      <Group gap="sm" wrap="wrap">
-        <TextInput
-          placeholder={isLojista ? 'Buscar por boleto, pedido ou produto' : 'Buscar por boleto, pedido, cliente ou produto'}
-          leftSection={<MagnifyingGlassIcon size={16} />}
-          value={search}
-          onChange={e => setSearch(e.currentTarget.value)}
-          flex={{ base: '1 1 100%', sm: 1 }}
-          miw={{ sm: 160 }}
-        />
-        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
-          <Group gap="sm">
-            {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral">
-                {s === 'todos' ? 'Todos' : statusLabel[s]}
-              </Chip>
-            ))}
-          </Group>
-        </Chip.Group>
-      </Group>
+      <Paper withBorder p="sm">
+        <Group gap="sm" wrap="wrap">
+          <TextInput
+            placeholder={isLojista ? 'Buscar por boleto, pedido ou produto' : 'Buscar por boleto, pedido, cliente ou produto'}
+            leftSection={<MagnifyingGlassIcon size={16} />}
+            value={search}
+            onChange={e => setSearch(e.currentTarget.value)}
+            flex={{ base: '1 1 100%', sm: 1 }}
+            miw={{ sm: 160 }}
+          />
+          <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
+            <Group gap="sm">
+              {statuses.map(s => (
+                <Chip key={s} value={s} variant="filled" color="neutral">
+                  {s === 'todos' ? 'Todos' : statusLabel[s]}
+                </Chip>
+              ))}
+            </Group>
+          </Chip.Group>
+        </Group>
+      </Paper>
 
-      {/* Payment cards */}
-      {loading ? <ListSkeleton rows={6} withAvatar={false} /> : (
+      {/* Payments — mesma tabela do Meu Estoque: mantida no celular, com rolagem lateral,
+          cabeçalho fixo e a coluna Boleto sempre visível */}
+      {loading ? <TableSkeleton rows={8} cols={headers.length} /> : (
       <Stack gap="sm">
-        {filtered.map(payment => (
-          <PaymentCard key={payment.id} payment={payment} profile={profile} />
-        ))}
+        {filtered.length > 0 && (
+          <Card withBorder padding={0}>
+            <Table.ScrollContainer minWidth={900} maxHeight={560}>
+              <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
+                highlightOnHover verticalSpacing="sm" horizontalSpacing="md" style={{ whiteSpace: 'nowrap' }}>
+                <StockTableHeader labels={headers} numeric={NUMERIC_HEADERS} />
+                <Table.Tbody>
+                  {filtered.map(payment => (
+                    <PaymentRow key={payment.id} payment={payment} profile={profile} onPay={() => setPaying(payment)} />
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Card>
+        )}
 
         {filtered.length === 0 && (
           basePayments.length === 0 ? (
@@ -526,6 +544,21 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
         )}
       </Stack>
       )}
+
+      <Modal
+        opened={paying !== null}
+        onClose={() => setPaying(null)}
+        size="lg"
+        centered
+        title={paying && (
+          <Box>
+            <Text fw={600} size="lg">Pagar parcela {paying.installment} · {formatCurrency(paying.amount)}</Text>
+            <Text c="dimmed" size="sm">{paying.product} · vence em {formatDate(paying.dueDate)}</Text>
+          </Box>
+        )}
+      >
+        {paying && <PaymentPanel key={paying.id} payment={paying} />}
+      </Modal>
     </Stack>
   );
 }
