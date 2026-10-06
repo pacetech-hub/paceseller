@@ -380,6 +380,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
           { icon: ShieldIcon, label: 'Administração', view: 'admin' },
+          { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
           { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
         ]
       : profile === 'rep'
@@ -393,6 +394,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
           { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
+          { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
           { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
         ]
       : [

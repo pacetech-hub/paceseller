@@ -181,6 +181,11 @@ export default function App() {
           profile === 'rep' ? 'Sua performance e carteira' :
           'Sua loja em números',
       }
+    : currentView === 'support' && profile !== 'lojista'
+    ? {
+        title: 'Suporte',
+        subtitle: profile === 'admin' ? 'Contatos de atendimento exibidos para os lojistas' : 'Seus contatos exibidos para os lojistas',
+      }
     : currentView === 'order-detail' && selectedOrder
     ? { title: selectedOrder.id, subtitle: 'Detalhes do pedido' }
     : currentView === 'client-detail' && selectedClient
@@ -302,7 +307,7 @@ export default function App() {
           />
         );
       case 'support':
-        return <SupportPage />;
+        return <SupportPage profile={profile} />;
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:
