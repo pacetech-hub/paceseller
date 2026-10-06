@@ -153,6 +153,17 @@ export const lateOrders = [
   { orderId: '4790-1', daysLate: 2, originalForecast: '30/09', newForecast: '06/10', reason: 'Atraso na transportadora', value: 6718, updatedHoursAgo: 0 },
 ];
 
+/**
+ * Boletos da loja a vencer (mock, datas relativas a hoje). A tela de Pagamentos e Boletos usa
+ * os mesmos registros, então o cartão do Radar e a lista mostram os mesmos valores.
+ */
+export const upcomingBills = [
+  { id: 'BOL-2026-9011', orderId: '4790-1', product: 'Tênis Fusion — Coleção 2026', orderTotal: 6718.00, amount: 2239.33, installment: '1/3', dueInDays: 3 },
+  { id: 'BOL-2026-9005', orderId: 'PED-2026-0377', product: 'Tênis Coil — Reposição', orderTotal: 3780.00, amount: 1890.00, installment: '2/2', dueInDays: 6 },
+];
+/** Janela do aviso de boletos: vencimentos nos próximos N dias. */
+const BILLS_WINDOW_DAYS = 7;
+
 export const storeSku = (productId: string) => storeSkus.find(s => s.productId === productId);
 
 // ---------------------------------------------------------------------------
@@ -211,7 +222,7 @@ export function suggestedQuantity(s: StoreSku, carts: Cart[]): number {
 export type SignalType =
   | 'pedido-atrasado' | 'estoque-baixo' | 'sem-giro' | 'giro-baixo' | 'alta-demanda' | 'produtos-em-alta'
   | 'oportunidade-perdida' | 'lancamento' | 'benchmark' | 'fechamento' | 'aguardando-voce'
-  | 'abaixo-ano-passado' | 'mix-desbalanceado';
+  | 'abaixo-ano-passado' | 'mix-desbalanceado' | 'boleto-a-vencer';
 export type Severity = 'critico' | 'atencao' | 'oportunidade' | 'informacao';
 export type Bucket = 'hoje' | '15d' | '30d';
 
@@ -229,6 +240,8 @@ export const SIGNAL_META: Record<SignalType, { code: string; label: string }> = 
   'aguardando-voce': { code: 'S-11', label: 'Aguardando você' },
   'abaixo-ano-passado': { code: 'S-12', label: 'Abaixo do ano passado' },
   'mix-desbalanceado': { code: 'S-13', label: 'Mix desbalanceado' },
+  // fora do catálogo da spec v1: aviso financeiro (mock)
+  'boleto-a-vencer': { code: 'S-14', label: 'Boletos a vencer' },
 };
 
 /** Cor por severidade, não por tipo de sinal. */
@@ -250,7 +263,8 @@ export type CtaTarget =
   | { kind: 'product'; productId: string; prefill?: boolean; block?: 'benchmark' | 'como-girar' }
   | { kind: 'catalog'; radarFilter?: RadarFilter; line?: string }
   | { kind: 'carts' }
-  | { kind: 'cart'; cartId: string };
+  | { kind: 'cart'; cartId: string }
+  | { kind: 'boletos' };
 
 export interface RadarSignal {
   id: string;
@@ -534,6 +548,24 @@ function compute(carts: Cart[]): RadarResult {
     why: 'A data prevista de entrega do pedido já passou. O sinal sai do Radar quando o pedido for entregue.',
     updatedHoursAgo: o.updatedHoursAgo,
   }));
+
+  // S-14 Boletos a vencer (mock): soma dos boletos que vencem nos próximos 7 dias
+  const dueSoon = upcomingBills.filter(b => b.dueInDays >= 0 && b.dueInDays <= BILLS_WINDOW_DAYS).sort((a, b) => a.dueInDays - b.dueInDays);
+  if (dueSoon.length > 0) {
+    const next = dueSoon[0];
+    const total = dueSoon.reduce((a, b) => a + b.amount, 0);
+    all.push({
+      id: 'boleto-a-vencer', type: 'boleto-a-vencer', severity: 'atencao', actByDays: next.dueInDays,
+      timeText: next.dueInDays === 0 ? 'vence hoje' : `vence em ${days(next.dueInDays)}`,
+      metric: formatCurrency(total),
+      subject: `${dueSoon.length} ${dueSoon.length === 1 ? 'boleto vence' : 'boletos vencem'} nos próximos ${days(BILLS_WINDOW_DAYS)}`,
+      context: `Próximo: ${formatCurrency(next.amount)} em ${ddmm(dateInDays(next.dueInDays))} · pedido #${next.orderId}, parcela ${next.installment}`,
+      suggestion: 'Pague pelo PIX ou boleto em Pagamentos e Boletos',
+      impact: total, ctaLabel: 'Ver boletos', cta: { kind: 'boletos' },
+      why: `Soma dos boletos da loja com vencimento nos próximos ${days(BILLS_WINDOW_DAYS)}. A data de agir é o vencimento do primeiro boleto; pagar em dia evita juros e bloqueio de novos pedidos.`,
+      updatedHoursAgo: 1,
+    });
+  }
 
   products.forEach(p => {
     const s = storeSku(p.id);

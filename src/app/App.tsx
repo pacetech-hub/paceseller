@@ -151,6 +151,7 @@ export default function App() {
     switch (target.kind) {
       case 'order': openOrderById(target.orderId); return;
       case 'carts': navigate('carts'); return;
+      case 'boletos': navigate('boletos'); return;
       case 'cart': openCart(target.cartId); return;
       case 'catalog':
         setCatalogSortBy(null);

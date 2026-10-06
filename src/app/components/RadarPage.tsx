@@ -8,7 +8,7 @@ import {
 import {
   CrosshairIcon, TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
   RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, DotsThreeVerticalIcon, InfoIcon, ClockIcon, XIcon,
-  ShoppingCartIcon, StarIcon, PauseIcon,
+  ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import {
@@ -49,6 +49,7 @@ const SIGNAL_ICON: Record<SignalType, Icon> = {
   'aguardando-voce': ClockIcon,
   'abaixo-ano-passado': TrendDownIcon,
   'mix-desbalanceado': ShoppingCartIcon,
+  'boleto-a-vencer': ReceiptIcon,
 };
 
 const HEALTH = {

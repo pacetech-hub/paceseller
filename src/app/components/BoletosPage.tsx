@@ -16,6 +16,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import { formatCurrency, formatDate } from "../data/mockData";
+import { upcomingBills } from "../data/radar";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
@@ -110,7 +111,15 @@ function makePayment(base: Omit<Payment, 'boletoLine' | 'pixCode' | 'paymentDate
   };
 }
 
+// Boletos a vencer nos próximos dias (os mesmos do aviso "Boletos a vencer" do Radar)
+const isoInDays = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const upcomingLojista: Payment[] = upcomingBills.map(b => makePayment({
+  id: b.id, orderId: b.orderId, client: 'Calçadão Paulista LTDA', rep: 'Marcos Andrade', product: b.product,
+  orderTotal: b.orderTotal, amount: b.amount, installment: b.installment, dueDate: isoInDays(b.dueInDays), status: 'pendente',
+}));
+
 const boletosCarteira: Payment[] = [
+  ...upcomingLojista,
   makePayment({ id: 'BOL-2026-8121', orderId: 'PED-2026-0412', client: 'Calçadão Paulista LTDA', rep: 'Marcos Andrade', product: 'Tênis Casual — Grade Mista', orderTotal: 10540.00, amount: 3513.33, installment: '1/3', dueDate: '2026-07-09', status: 'pago' }),
   makePayment({ id: 'BOL-2026-8122', orderId: 'PED-2026-0412', client: 'Calçadão Paulista LTDA', rep: 'Marcos Andrade', product: 'Tênis Casual — Grade Mista', orderTotal: 10540.00, amount: 3513.33, installment: '2/3', dueDate: '2026-08-09', status: 'atrasado' }),
   makePayment({ id: 'BOL-2026-8123', orderId: 'PED-2026-0412', client: 'Calçadão Paulista LTDA', rep: 'Marcos Andrade', product: 'Tênis Casual — Grade Mista', orderTotal: 10540.00, amount: 3513.34, installment: '3/3', dueDate: '2026-09-09', status: 'pendente' }),
@@ -132,6 +141,7 @@ const boletosCarteira: Payment[] = [
 ];
 
 const boletosLojista: Payment[] = [
+  ...upcomingLojista,
   makePayment({ id: 'BOL-2026-9001', orderId: 'PED-2026-0388', client: 'Bella Moda', rep: 'Marina Costa', product: 'Tênis Casual — Reposição', orderTotal: 8420.00, amount: 2807.00, installment: '1/3', dueDate: '2026-06-20', status: 'pago' }),
   makePayment({ id: 'BOL-2026-9002', orderId: 'PED-2026-0388', client: 'Bella Moda', rep: 'Marina Costa', product: 'Tênis Casual — Reposição', orderTotal: 8420.00, amount: 2807.00, installment: '2/3', dueDate: '2026-07-20', status: 'pago' }),
   makePayment({ id: 'BOL-2026-9003', orderId: 'PED-2026-0388', client: 'Bella Moda', rep: 'Marina Costa', product: 'Tênis Casual — Reposição', orderTotal: 8420.00, amount: 2806.00, installment: '3/3', dueDate: '2026-08-20', status: 'atrasado' }),
