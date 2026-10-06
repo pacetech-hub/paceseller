@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Stack, Group, Box, ThemeIcon, Text, Title, Alert, Button, TextInput,
-  Table, Avatar, Badge, SegmentedControl, Card, Divider,
+  Table, Avatar, Badge, SegmentedControl, Paper,
 } from "@mantine/core";
 import {
   UsersIcon,
@@ -17,11 +17,13 @@ import { clients, formatDate } from "../data/mockData";
 import { PermissionMatrixTable } from "./PermissionMatrixTable";
 import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
-import { ListSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellList, CellCard, CellField } from "./ui/CellView";
+import { TableSkeleton } from "./ui/Skeletons";
+import { DataTable, DataTableEmptyRow } from "./ui/DataTable";
 import { EmptyState } from "./ui/EmptyState";
 
 type Profile = 'rep' | 'lojista';
+
+const USER_HEADERS = ['Usuário', 'Perfil de acesso', 'Status', 'Último acesso', 'Ações'];
 
 interface AccessPermissionsPageProps {
   profile: Profile;
@@ -127,31 +129,6 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
 
   const lastLogin = (u: LinkedUser) => (u.lastLogin === '—' ? '—' : formatDate(u.lastLogin));
 
-  const removeButton = (u: LinkedUser) => (
-    <Button
-      onClick={() => removeUser(u)}
-      variant="subtle"
-      color="red"
-      size="sm"
-      leftSection={<TrashIcon size={16} />}
-      aria-label={`Remover vínculo de ${u.name}`}
-    >
-      Remover
-    </Button>
-  );
-
-  // Estado vazio: explica o motivo e oferece a ação (mesmo conteúdo na tabela e nos cartões)
-  const usersEmpty = (withBorder: boolean) => (
-    <EmptyState
-      icon={UsersIcon}
-      title="Nenhum usuário vinculado ainda"
-      description={`Convide alguém da sua equipe para acessar com o perfil ${subProfile}. Você pode trocar o perfil depois.`}
-      // Abre o formulário de convite aqui mesmo (ação no lugar, sem seta)
-      action={showInvite ? undefined : { label: 'Convidar Usuário', onClick: () => setShowInvite(true), forward: false }}
-      withBorder={withBorder}
-    />
-  );
-
   const Icon = scope.icon;
   const visaoInfo = visoes.find(v => v.id === scope.visao)!;
 
@@ -171,9 +148,9 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
       </Alert>
 
-      {/* Usuários vinculados */}
-      <Card withBorder padding={0}>
-        <Group justify="space-between" p={{ base: 'md', sm: 'lg' }} wrap="wrap">
+      {/* Usuários vinculados: cabeçalho e convite acima, lista no padrão único de tabela */}
+      <Stack gap="sm">
+        <Group justify="space-between" align="flex-end" wrap="wrap">
           <Box>
             <Title order={2}>Usuários vinculados</Title>
             <Text c="dimmed" size="sm" mt={4}>{scope.usersHint}</Text>
@@ -187,12 +164,11 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             Convidar Usuário
           </Button>
         </Group>
-        <Divider color="var(--mantine-color-default-border)" />
 
         {showInvite && (
-          <>
-          {/* Formulário de convite em coluna única */}
-          <Stack gap="md" p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
+          // Formulário de convite em coluna única
+          <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
+            <Stack gap="md">
               <TextInput
                 label="Nome completo"
                 value={inviteName}
@@ -208,42 +184,24 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                 placeholder={profile === 'lojista' ? 'nome@loja.com.br' : 'nome@empresa.com.br'}
                 error={inviteErrors.email}
               />
-            <Text c="dimmed" size="sm">
-              Será convidado com o perfil <Text component="span" fw={600} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
-            </Text>
-            <Group justify="flex-end" gap="sm">
-              <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default">Cancelar</Button>
-              <Button onClick={inviteUser} color="neutral">Enviar Convite</Button>
-            </Group>
-          </Stack>
-          <Divider color="var(--mantine-color-default-border)" />
-          </>
+              <Text c="dimmed" size="sm">
+                Será convidado com o perfil <Text component="span" fw={600} c="var(--mantine-color-text)">{subProfile}</Text>. Você pode trocar o perfil depois de criado.
+              </Text>
+              <Group justify="flex-end" gap="sm">
+                <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default">Cancelar</Button>
+                <Button onClick={inviteUser} color="neutral">Enviar Convite</Button>
+              </Group>
+            </Stack>
+          </Paper>
         )}
 
-        {loading ? (
-          // Skeleton só da lista; título e botão de convite continuam visíveis
-          <Box p={{ base: 'md', sm: 'lg' }}>
-            <Box visibleFrom="sm"><TableSkeleton rows={3} cols={5} /></Box>
-            <Box hiddenFrom="sm"><ListSkeleton rows={3} /></Box>
-          </Box>
-        ) : (
-        <>
-        {/* 5 colunas: tabela a partir de sm, cartões no celular */}
-        <Box visibleFrom="sm">
-        <Table verticalSpacing="sm" fz="md">
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Usuário</Table.Th>
-              <Table.Th>Perfil de acesso</Table.Th>
-              <Table.Th>Status</Table.Th>
-              <Table.Th>Último acesso</Table.Th>
-              <Table.Th ta="right">Ações</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
+        {/* Skeleton só da lista; título e botão de convite continuam visíveis */}
+        {loading ? <TableSkeleton rows={3} cols={USER_HEADERS.length} /> : (
+          // Mantida no celular, com rolagem lateral e a coluna Usuário sempre visível
+          <DataTable headers={USER_HEADERS} minWidth={900}>
             {users.map(u => (
               <Table.Tr key={u.id}>
-                <Table.Td>
+                <Table.Td maw={280}>
                   <Group gap="sm" wrap="nowrap">
                     <Avatar size={28} color="neutral">{initials(u.name)}</Avatar>
                     <Box miw={0}>
@@ -263,53 +221,41 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   />
                 </Table.Td>
                 <Table.Td>
-                  <Badge color={u.status === 'ativo' ? 'teal' : 'gray'} variant="light">{u.status}</Badge>
+                  <Badge color={u.status === 'ativo' ? 'teal' : 'gray'} variant="light"
+                    styles={{ root: { minWidth: 'max-content' } }}>{u.status}</Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text c="dimmed" size="sm" className="mono">{lastLogin(u)}</Text>
+                  <Text size="sm" className="mono">{lastLogin(u)}</Text>
                 </Table.Td>
-                <Table.Td ta="right">{removeButton(u)}</Table.Td>
+                <Table.Td ta="right">
+                  <Button
+                    onClick={() => removeUser(u)}
+                    variant="default"
+                    size="sm"
+                    leftSection={<TrashIcon size={16} />}
+                    aria-label={`Remover vínculo de ${u.name}`}
+                  >
+                    Remover
+                  </Button>
+                </Table.Td>
               </Table.Tr>
             ))}
             {users.length === 0 && (
-              <Table.Tr>
-                <Table.Td colSpan={5}>{usersEmpty(false)}</Table.Td>
-              </Table.Tr>
+              // Estado vazio: explica o motivo e oferece a ação
+              <DataTableEmptyRow colSpan={USER_HEADERS.length}>
+                <EmptyState
+                  icon={UsersIcon}
+                  title="Nenhum usuário vinculado ainda"
+                  description={`Convide alguém da sua equipe para acessar com o perfil ${subProfile}. Você pode trocar o perfil depois.`}
+                  // Abre o formulário de convite aqui mesmo (ação no lugar, sem seta)
+                  action={showInvite ? undefined : { label: 'Convidar Usuário', onClick: () => setShowInvite(true), forward: false }}
+                  withBorder={false}
+                />
+              </DataTableEmptyRow>
             )}
-          </Table.Tbody>
-        </Table>
-        </Box>
-        <Box hiddenFrom="sm" p="md">
-          <CellList>
-            {users.map(u => (
-              <CellCard
-                key={u.id}
-                title={u.name}
-                aside={<Badge color={u.status === 'ativo' ? 'teal' : 'gray'} variant="light">{u.status}</Badge>}
-                actions={removeButton(u)}
-              >
-                <CellField label="E-mail">{u.email}</CellField>
-                <CellField label="Perfil de acesso">
-                  <SegmentedControl
-                    value={u.profile}
-                    onChange={v => changeUserProfile(u.id, v)}
-                    data={availableProfiles}
-                    color="neutral"
-                    fullWidth
-                    aria-label={`Perfil de acesso de ${u.name}`}
-                  />
-                </CellField>
-                <CellField label="Último acesso">
-                  <Text span className="mono" inherit>{lastLogin(u)}</Text>
-                </CellField>
-              </CellCard>
-            ))}
-            {users.length === 0 && usersEmpty(true)}
-          </CellList>
-        </Box>
-        </>
+          </DataTable>
         )}
-      </Card>
+      </Stack>
 
       {/* O que cada perfil pode acessar */}
       <Box>

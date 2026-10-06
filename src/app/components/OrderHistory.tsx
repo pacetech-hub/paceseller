@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, Card, Table } from "@mantine/core";
+import { Stack, Group, Text, TextInput, Chip, Badge, Button, Table } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
   EyeIcon,
@@ -16,8 +16,7 @@ import {
 import { useMockLoading } from "../lib/useMockLoading";
 import { TableSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
-import { StockTableHeader } from "./StockTable";
-import sticky from "./ui/stickyTable.module.css";
+import { DataTable, TableToolbar } from "./ui/DataTable";
 import { orders, clients, formatCurrency, formatDate, type Order } from "../data/mockData";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'order-detail';
@@ -179,27 +178,25 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
   return (
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Filters */}
-      <Paper withBorder p="sm">
-        <Group gap="sm" wrap="wrap">
-          <TextInput
-            placeholder="Buscar por nº do pedido, cliente ou representante"
-            leftSection={<MagnifyingGlassIcon size={16} />}
-            value={search}
-            onChange={e => setSearch(e.currentTarget.value)}
-            flex={{ base: '1 1 100%', sm: 1 }}
-            miw={{ sm: 160 }}
-          />
-          <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
-            <Group gap="sm">
-              {statuses.map(s => (
-                <Chip key={s} value={s} variant="filled" color="neutral">
-                  {statusLabels[s]}
-                </Chip>
-              ))}
-            </Group>
-          </Chip.Group>
-        </Group>
-      </Paper>
+      <TableToolbar>
+        <TextInput
+          placeholder="Buscar por nº do pedido, cliente ou representante"
+          leftSection={<MagnifyingGlassIcon size={16} />}
+          value={search}
+          onChange={e => setSearch(e.currentTarget.value)}
+          flex={{ base: '1 1 100%', sm: 1 }}
+          miw={{ sm: 160 }}
+        />
+        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
+          <Group gap="sm">
+            {statuses.map(s => (
+              <Chip key={s} value={s} variant="filled" color="neutral">
+                {statusLabels[s]}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </TableToolbar>
 
       {/* Orders */}
       {loading ? <TableSkeleton rows={8} cols={headers.length} /> : (
@@ -209,24 +206,16 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           <Text c="dimmed" size="sm">Em análise primeiro, depois aprovados, faturados, entregues e cancelados</Text>
         )}
         {filtered.length > 0 && (
-          <Card withBorder padding={0}>
-            <Table.ScrollContainer minWidth={900} maxHeight={560}>
-              <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
-                highlightOnHover verticalSpacing="sm" horizontalSpacing="md" style={{ whiteSpace: 'nowrap' }}>
-                <StockTableHeader labels={headers} numeric={NUMERIC_HEADERS} />
-                <Table.Tbody>
-                  {filtered.map(order => (
-                    <OrderRow
-                      key={order.id}
-                      order={order}
-                      profile={profile}
-                      onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
-                    />
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          </Card>
+          <DataTable headers={headers} numeric={NUMERIC_HEADERS} minWidth={900}>
+            {filtered.map(order => (
+              <OrderRow
+                key={order.id}
+                order={order}
+                profile={profile}
+                onOpen={() => { onSelectOrder(order); onNavigate('order-detail'); }}
+              />
+            ))}
+          </DataTable>
         )}
 
         {filtered.length === 0 && (hasFilters ? (

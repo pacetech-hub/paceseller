@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code,
-  SimpleGrid, List, Card, Table, Modal,
-} from "@mantine/core";
+import { Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code, SimpleGrid, List, Table, Modal } from "@mantine/core";
 import { toast } from "../lib/toast";
 import boletos from "./BoletosPage.module.css";
 import {
@@ -22,8 +19,7 @@ import { formatCurrency, formatDate } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
-import { StockTableHeader } from "./StockTable";
-import sticky from "./ui/stickyTable.module.css";
+import { DataTable, TableToolbar } from "./ui/DataTable";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -484,46 +480,36 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
       )}
 
       {/* Filters */}
-      <Paper withBorder p="sm">
-        <Group gap="sm" wrap="wrap">
-          <TextInput
-            placeholder={isLojista ? 'Buscar por boleto, pedido ou produto' : 'Buscar por boleto, pedido, cliente ou produto'}
-            leftSection={<MagnifyingGlassIcon size={16} />}
-            value={search}
-            onChange={e => setSearch(e.currentTarget.value)}
-            flex={{ base: '1 1 100%', sm: 1 }}
-            miw={{ sm: 160 }}
-          />
-          <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
-            <Group gap="sm">
-              {statuses.map(s => (
-                <Chip key={s} value={s} variant="filled" color="neutral">
-                  {s === 'todos' ? 'Todos' : statusLabel[s]}
-                </Chip>
-              ))}
-            </Group>
-          </Chip.Group>
-        </Group>
-      </Paper>
+      <TableToolbar>
+        <TextInput
+          placeholder={isLojista ? 'Buscar por boleto, pedido ou produto' : 'Buscar por boleto, pedido, cliente ou produto'}
+          leftSection={<MagnifyingGlassIcon size={16} />}
+          value={search}
+          onChange={e => setSearch(e.currentTarget.value)}
+          flex={{ base: '1 1 100%', sm: 1 }}
+          miw={{ sm: 160 }}
+        />
+        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
+          <Group gap="sm">
+            {statuses.map(s => (
+              <Chip key={s} value={s} variant="filled" color="neutral">
+                {s === 'todos' ? 'Todos' : statusLabel[s]}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </TableToolbar>
 
       {/* Payments — mesma tabela do Meu Estoque: mantida no celular, com rolagem lateral,
           cabeçalho fixo e a coluna Boleto sempre visível */}
       {loading ? <TableSkeleton rows={8} cols={headers.length} /> : (
       <Stack gap="sm">
         {filtered.length > 0 && (
-          <Card withBorder padding={0}>
-            <Table.ScrollContainer minWidth={900} maxHeight={560}>
-              <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
-                highlightOnHover verticalSpacing="sm" horizontalSpacing="md" style={{ whiteSpace: 'nowrap' }}>
-                <StockTableHeader labels={headers} numeric={NUMERIC_HEADERS} />
-                <Table.Tbody>
-                  {filtered.map(payment => (
-                    <PaymentRow key={payment.id} payment={payment} profile={profile} onPay={() => setPaying(payment)} />
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          </Card>
+          <DataTable headers={headers} numeric={NUMERIC_HEADERS} minWidth={900}>
+            {filtered.map(payment => (
+              <PaymentRow key={payment.id} payment={payment} profile={profile} onPay={() => setPaying(payment)} />
+            ))}
+          </DataTable>
         )}
 
         {filtered.length === 0 && (

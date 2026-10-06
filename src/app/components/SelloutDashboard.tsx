@@ -17,7 +17,7 @@ import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { barDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellCard, CellField, CellList } from "./ui/CellView";
+import { DataTable } from "./ui/DataTable";
 import { selloutData, regionData, formatCurrency } from "../data/mockData";
 
 // alertas ordenados por urgência: mais dias parado primeiro
@@ -326,46 +326,21 @@ export function SelloutDashboard() {
             Atualizar Alertas
           </Button>
         </Group>
-        <Table.ScrollContainer minWidth={720} visibleFrom="sm">
-          <Table highlightOnHover verticalSpacing="sm" horizontalSpacing={0}>
-            <Table.Thead>
-              <Table.Tr>
-                {/* números e ações à direita; texto, códigos e região à esquerda */}
-                {['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ações'].map(col => (
-                  <Table.Th key={col} c="dimmed" fw={600} pr="md" fz="sm"
-                    ta={['Estoque (pares)', 'Dias parado', 'Ações'].includes(col) ? 'right' : undefined}>{col}</Table.Th>
-                ))}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {encalheAlerts.map((alert, i) => (
-                <Table.Tr key={i}>
-                  <Table.Td pr="md"><Text fw={600}>{alert.product}</Text></Table.Td>
-                  <Table.Td pr="md"><Text c="dimmed" className="mono" size="sm">{alert.sku}</Text></Table.Td>
-                  <Table.Td pr="md" ta="right"><Text className="mono" fw={600}>{alert.stock.toLocaleString('pt-BR')}</Text></Table.Td>
-                  <Table.Td pr="md" ta="right">
-                    <Text className="mono" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque} dias</Text>
-                  </Table.Td>
-                  <Table.Td pr="md"><Text c="dimmed">{alert.region}</Text></Table.Td>
-                  <Table.Td ta="right"><Group justify="flex-end">{renderAlertAction(alert)}</Group></Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
-        {/* celular: cada alerta vira um cartão, sem rolagem lateral */}
-        <CellList>
+        <DataTable headers={['Produto', 'SKU', 'Estoque (pares)', 'Dias parado', 'Região', 'Ações']}
+          numeric={['Estoque (pares)', 'Dias parado']} minWidth={720}>
           {encalheAlerts.map(alert => (
-            <CellCard key={alert.sku} title={alert.product} actions={renderAlertAction(alert)}>
-              <CellField label="SKU"><Text className="mono" c="dimmed">{alert.sku}</Text></CellField>
-              <CellField label="Estoque (pares)"><Text className="mono" fw={600}>{alert.stock.toLocaleString('pt-BR')}</Text></CellField>
-              <CellField label="Dias parado">
+            <Table.Tr key={alert.sku}>
+              <Table.Td><Text fw={600}>{alert.product}</Text></Table.Td>
+              <Table.Td><Text c="dimmed" className="mono" size="sm">{alert.sku}</Text></Table.Td>
+              <Table.Td ta="right"><Text className="mono" fw={600}>{alert.stock.toLocaleString('pt-BR')}</Text></Table.Td>
+              <Table.Td ta="right">
                 <Text className="mono" fw={600} c={daysColor(alert.diasEstoque)}>{alert.diasEstoque} dias</Text>
-              </CellField>
-              <CellField label="Região">{alert.region}</CellField>
-            </CellCard>
+              </Table.Td>
+              <Table.Td><Text c="dimmed">{alert.region}</Text></Table.Td>
+              <Table.Td ta="right"><Group justify="flex-end" wrap="nowrap">{renderAlertAction(alert)}</Group></Table.Td>
+            </Table.Tr>
           ))}
-        </CellList>
+        </DataTable>
       </Paper>
     </Stack>
   );

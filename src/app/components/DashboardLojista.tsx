@@ -7,7 +7,7 @@ import { ArrowRightIcon, CheckIcon, TrendUpIcon } from "@phosphor-icons/react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { lineDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellCard, CellField, CellList } from "./ui/CellView";
+import { DataTable } from "./ui/DataTable";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'stock';
 
@@ -49,7 +49,7 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
 
 function Badge({ children, tone = 'ok', icon }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'risk'; icon?: React.ReactNode }) {
   return (
-    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : tone === 'risk' ? 'red' : 'yellow'} leftSection={icon}>
+    <MantineBadge variant="light" color={tone === 'ok' ? 'teal' : tone === 'risk' ? 'red' : 'yellow'} leftSection={icon} style={{ minWidth: 'max-content' }}>
       {children}
     </MantineBadge>
   );
@@ -115,23 +115,6 @@ function Rank({ rows, unit }: { rows: { n: string; v: number }[]; unit: string }
         </Group>
       ))}
     </Stack>
-  );
-}
-
-// tabela só a partir de `sm`; no celular cada tabela vira uma lista de cartões (CellList).
-// `numeric`: colunas numéricas, alinhadas à direita (cabeçalho e células)
-function SimpleTable({ head, numeric = [], children }: { head: string[]; numeric?: string[]; children: React.ReactNode }) {
-  return (
-    <Table.ScrollContainer minWidth={480} visibleFrom="sm">
-      <Table verticalSpacing={8} horizontalSpacing={8}>
-        <Table.Thead>
-          <Table.Tr>
-            {head.map(h => <Table.Th key={h} fw={600} c="dimmed" ta={numeric.includes(h) ? 'right' : undefined}>{h}</Table.Th>)}
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>{children}</Table.Tbody>
-      </Table>
-    </Table.ScrollContainer>
   );
 }
 
@@ -262,29 +245,17 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Card>
 
           <Card title="Compra recorrente" hint="Itens comprados com regularidade · frequência por SKU" span={7}>
-            <SimpleTable head={['Produto', 'Cadência', 'Compras', 'Última', 'Próxima']} numeric={['Compras']}>
+            <DataTable headers={['Produto', 'Cadência', 'Compras', 'Última', 'Próxima']} numeric={['Compras']} minWidth={560}>
               {recurringRows.map(r => (
                 <Table.Tr key={r.product}>
-                  <Table.Td>{r.product}</Table.Td>
+                  <Table.Td><Text fw={600}>{r.product}</Text></Table.Td>
                   <Table.Td c="dimmed">{r.cadence}</Table.Td>
                   <Table.Td ta="right" className="mono">{r.count}</Table.Td>
                   <Table.Td c="dimmed">{r.last}</Table.Td>
                   <Table.Td c={r.soon ? WARN : undefined} fw={r.soon ? 600 : undefined}>{r.next}</Table.Td>
                 </Table.Tr>
               ))}
-            </SimpleTable>
-            <CellList>
-              {recurringRows.map(r => (
-                <CellCard key={r.product} title={r.product}>
-                  <CellField label="Cadência">{r.cadence}</CellField>
-                  <CellField label="Compras">{r.count}</CellField>
-                  <CellField label="Última">{r.last}</CellField>
-                  <CellField label="Próxima">
-                    <Text c={r.soon ? WARN : undefined} fw={r.soon ? 600 : undefined}>{r.next}</Text>
-                  </CellField>
-                </CellCard>
-              ))}
-            </CellList>
+            </DataTable>
           </Card>
         </Grid>
         </Stack>
@@ -303,13 +274,14 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Card>
 
           <Card title="Controle de estoque" hint="Situação por SKU · ruptura, baixo, OK e valor" span={9}>
-            <SimpleTable
-              head={['Produto', 'Situação', 'Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}
+            <DataTable
+              headers={['Produto', 'Situação', 'Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}
               numeric={['Estoque (pares)', 'Dias ruptura', 'Giro (dias)', 'Valor']}
+              minWidth={720}
             >
               {stockRows.map(r => (
                 <Table.Tr key={r.product}>
-                  <Table.Td>{r.product}</Table.Td>
+                  <Table.Td><Text fw={600}>{r.product}</Text></Table.Td>
                   <Table.Td><Badge tone={r.tone}>{r.status}</Badge></Table.Td>
                   <Table.Td ta="right" className="mono">{fmt(r.stock)}</Table.Td>
                   <Table.Td ta="right" className="mono" c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Table.Td>
@@ -317,21 +289,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
                   <Table.Td ta="right" className="mono">{r.value}</Table.Td>
                 </Table.Tr>
               ))}
-            </SimpleTable>
-            <CellList>
-              {stockRows.map(r => (
-                <CellCard key={r.product} title={r.product} aside={<Badge tone={r.tone}>{r.status}</Badge>}>
-                  <CellField label="Estoque (pares)">{r.stock}</CellField>
-                  <CellField label="Dias ruptura">
-                    <Text c={typeof r.ruptureDays === 'number' ? WARN : 'dimmed'} fw={typeof r.ruptureDays === 'number' ? 600 : undefined}>{r.ruptureDays}</Text>
-                  </CellField>
-                  <CellField label="Giro (dias)">
-                    <Text c={r.turnover > 30 ? WARN : undefined} fw={r.turnover > 30 ? 600 : undefined}>{r.turnover}</Text>
-                  </CellField>
-                  <CellField label="Valor">{r.value}</CellField>
-                </CellCard>
-              ))}
-            </CellList>
+            </DataTable>
           </Card>
         </Grid>
         </Stack>

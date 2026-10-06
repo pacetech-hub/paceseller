@@ -1,20 +1,19 @@
 import { useState } from "react";
 import {
   Container, SimpleGrid, Paper, Text, Group, TextInput, Popover, Button,
-  Stack, Chip, Table, Avatar, Badge, Box, Card, Radio,
+  Stack, Chip, Table, Badge, Box, Radio,
 } from "@mantine/core";
-import interactive from "./interactive.module.css";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
   UsersIcon,
   FunnelIcon,
-  CaretRightIcon,
+  EyeIcon,
 } from "@phosphor-icons/react";
 import { clients, Client, formatDate } from "../data/mockData";
 import { useMockLoading } from "../lib/useMockLoading";
-import { KpiSkeleton, ListSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellCard, CellField, CellList } from "./ui/CellView";
+import { KpiSkeleton, TableSkeleton } from "./ui/Skeletons";
+import { DataTable, TableToolbar } from "./ui/DataTable";
 import { EmptyState } from "./ui/EmptyState";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail';
@@ -24,6 +23,9 @@ interface ClientsPageProps {
   selectedClient: Client | null;
   setSelectedClient: (client: Client | null) => void;
 }
+
+// badges não encolhem dentro da tabela
+const badgeStyles = { root: { flexShrink: 0, minWidth: 'max-content' } };
 
 const statusColor: Record<string, string> = {
   'ativo': 'teal',
@@ -129,8 +131,8 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
         </SimpleGrid>
         )}
 
-        {/* Filters */}
-        <Group gap="sm" wrap="wrap">
+        {/* Busca e filtros */}
+        <TableToolbar>
           <TextInput
             placeholder="Buscar por nome, cidade ou representante"
             leftSection={<MagnifyingGlassIcon size={16} />}
@@ -217,15 +219,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
               </Stack>
             </Popover.Dropdown>
           </Popover>
-        </Group>
+        </TableToolbar>
 
-        {/* Client table (sm+) / cell view (mobile) */}
-        {loading ? (
-          <>
-            <Box visibleFrom="sm"><TableSkeleton rows={8} cols={3} /></Box>
-            <Box hiddenFrom="sm"><ListSkeleton rows={6} withAvatar={false} /></Box>
-          </>
-        ) : filtered.length === 0 ? (
+        {/* Tabela de clientes: mesmo padrão em todas as larguras (rolagem lateral no celular) */}
+        {loading ? <TableSkeleton rows={8} cols={5} /> : filtered.length === 0 ? (
           <EmptyState
             icon={UsersIcon}
             title="Nenhum cliente encontrado"
@@ -233,82 +230,44 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             action={{ label: 'Limpar Busca e Filtros', onClick: () => { setSearch(''); clearFilters(); }, forward: false }}
           />
         ) : (
-          <>
-            <Card withBorder padding={0} visibleFrom="sm">
-              <Table highlightOnHover verticalSpacing="sm">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th w="50%">Cliente</Table.Th>
-                    <Table.Th>Cidade/Estado</Table.Th>
-                    <Table.Th>Representante</Table.Th>
-                    <Table.Th w={40} />
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {sortedClients.map(client => {
-                    const isSelected = selectedClient?.id === client.id;
-                    return (
-                      <Table.Tr
-                        key={client.id}
-                        onClick={() => handleSelectClient(client)}
-                        bg={isSelected ? 'var(--mantine-color-neutral-0)' : undefined}
-                        className={interactive.clickable}
-                      >
-                        <Table.Td>
-                          <Group gap="sm" wrap="nowrap">
-                            <Avatar size={36} color="neutral">{client.avatar}</Avatar>
-                            <Box miw={0}>
-                              <Group gap="xs" mb={4}>
-                                <Badge color={statusColor[client.status]} variant="light">{client.status}</Badge>
-                                {client.inadimplente && <Badge color="yellow" variant="light">inadimplente</Badge>}
-                                {isSelected && <Badge color="neutral" variant="light">selecionado</Badge>}
-                              </Group>
-                              <Text fw={600} truncate>{client.name}</Text>
-                              <Text c="dimmed" size="sm">Último pedido em {formatOrderDate(client.lastOrder)}</Text>
-                            </Box>
-                          </Group>
-                        </Table.Td>
-                        <Table.Td>
-                          <Group gap={4} wrap="nowrap">
-                            <MapPinIcon size={16} color="var(--mantine-color-dimmed)" />
-                            <Text c="dimmed">{client.city}/{client.state}</Text>
-                          </Group>
-                        </Table.Td>
-                        <Table.Td><Text c="dimmed">{client.rep}</Text></Table.Td>
-                        <Table.Td ta="right">
-                          <CaretRightIcon size={16} color="var(--mantine-color-dimmed)" />
-                        </Table.Td>
-                      </Table.Tr>
-                    );
-                  })}
-                </Table.Tbody>
-              </Table>
-            </Card>
-
-            <CellList>
-              {sortedClients.map(client => {
-                const isSelected = selectedClient?.id === client.id;
-                return (
-                  <CellCard
-                    key={client.id}
-                    title={client.name}
-                    aside={
-                      <Group gap="xs">
-                        <Badge color={statusColor[client.status]} variant="light">{client.status}</Badge>
-                        {client.inadimplente && <Badge color="yellow" variant="light">inadimplente</Badge>}
-                        {isSelected && <Badge color="neutral" variant="light">selecionado</Badge>}
-                      </Group>
-                    }
-                    onClick={() => handleSelectClient(client)}
-                  >
-                    <CellField label="Cidade/Estado">{client.city}/{client.state}</CellField>
-                    <CellField label="Representante">{client.rep}</CellField>
-                    <CellField label="Último pedido">{formatOrderDate(client.lastOrder)}</CellField>
-                  </CellCard>
-                );
-              })}
-            </CellList>
-          </>
+          <DataTable headers={['Cliente', 'Status', 'Cidade/Estado', 'Representante', 'Ações']} minWidth={860}>
+            {sortedClients.map(client => {
+              const isSelected = selectedClient?.id === client.id;
+              return (
+                <Table.Tr key={client.id} data-selected={isSelected || undefined} onClick={() => handleSelectClient(client)} style={{ cursor: 'pointer' }}>
+                  <Table.Td maw={320}>
+                    <Text fw={600} truncate>{client.name}</Text>
+                    <Text c="dimmed" size="sm">Último pedido em {formatOrderDate(client.lastOrder)}</Text>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs" wrap="nowrap">
+                      <Badge color={statusColor[client.status]} variant="light" styles={badgeStyles}>{client.status}</Badge>
+                      {client.inadimplente && <Badge color="yellow" variant="light" styles={badgeStyles}>inadimplente</Badge>}
+                      {isSelected && <Badge color="neutral" variant="light" styles={badgeStyles}>selecionado</Badge>}
+                    </Group>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap={4} wrap="nowrap">
+                      <MapPinIcon size={16} color="var(--mantine-color-dimmed)" />
+                      <Text c="dimmed">{client.city}/{client.state}</Text>
+                    </Group>
+                  </Table.Td>
+                  <Table.Td><Text c="dimmed">{client.rep}</Text></Table.Td>
+                  <Table.Td ta="right">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      leftSection={<EyeIcon size={16} />}
+                      onClick={e => { e.stopPropagation(); handleSelectClient(client); }}
+                      aria-label={`Ver cliente ${client.name}`}
+                    >
+                      Ver
+                    </Button>
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </DataTable>
         )}
       </Stack>
     </Container>
