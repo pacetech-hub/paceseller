@@ -155,6 +155,8 @@ export default function App() {
       case 'carts': navigate('carts'); return;
       case 'boletos': navigate('boletos'); return;
       case 'cart': openCart(target.cartId); return;
+      case 'orders': setOrderStatusFilter(target.status ?? 'todos'); navigate('history'); return;
+      case 'sales-team': navigate('sales-team'); return;
       case 'client': {
         const client = clientsList.find(c => c.id === target.clientId);
         if (client) { setSelectedClient(client); navigate('client-detail'); }

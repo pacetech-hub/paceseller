@@ -2,6 +2,8 @@ import { useState, type ReactNode } from "react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
+import { ThemeHeader } from "./ui/ThemeHeader";
+import { RepSalesSection } from "./RepSalesSection";
 import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
 } from "@mantine/core";
@@ -404,24 +406,6 @@ const CONTACT_ICON: Record<ContactReason, Icon> = {
   'pos-venda': HandshakeIcon,
 };
 
-/** Cartões temáticos do Radar do representante; cada tema vira uma seção com seus cartões. */
-function ThemeHeader({ icon: HeaderIcon, title, description, count }: { icon: Icon; title: string; description: string; count: number }) {
-  return (
-    <Group gap="sm" wrap="nowrap" align="flex-start">
-      <ThemeIcon size={32} radius="md" variant="light" color="neutral" aria-hidden>
-        <HeaderIcon size={18} />
-      </ThemeIcon>
-      <Box>
-        <Group gap="xs">
-          <Title order={2} fz="lg">{title}</Title>
-          <Badge size="sm" circle variant="filled" color={count > 0 ? 'neutral' : 'gray'}>{count}</Badge>
-        </Group>
-        <Text size="sm" c="dimmed">{description}</Text>
-      </Box>
-    </Group>
-  );
-}
-
 function ContactCard({ contact, onCta, onWhy, resolved }: {
   contact: ContactPriority; onCta: () => void; onWhy?: () => void; resolved?: boolean;
 }) {
@@ -535,6 +519,9 @@ function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
           </SimpleGrid>
         </Stack>
       )}
+
+      {/* Tema complementar: vendas, vendedores e pedidos do período vs. ano anterior */}
+      <RepSalesSection repName={userName} onCta={onCta} />
 
       <Modal opened={!!why} onClose={() => setWhy(null)} centered title={<Text fw={600}>Por que isso aparece</Text>}>
         {why && (
