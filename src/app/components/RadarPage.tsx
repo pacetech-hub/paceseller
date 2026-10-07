@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
@@ -8,14 +8,20 @@ import {
 import {
   CrosshairIcon, TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
   RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, DotsThreeVerticalIcon, InfoIcon, ClockIcon, XIcon,
-  ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon,
+  ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon, PhoneCallIcon, CurrencyCircleDollarIcon, HourglassIcon,
+  ArrowCounterClockwiseIcon, PaperPlaneTiltIcon, HandshakeIcon, ChatCircleDotsIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import {
-  SEVERITY_META, SIGNAL_META, actByText, bucketOf, dismissSignal, isCritical, marginLabel, snoozeSignal, undoSignalAction,
+  SEVERITY_META, SIGNAL_META, actByText, bucketOf, days, dismissSignal, isCritical, marginLabel, snoozeSignal, undoSignalAction,
   updatedText, useRadar, type Bucket, type CtaTarget, type RadarSignal, type SignalType,
 } from "../data/radar";
 import { productById } from "../data/cartStore";
+import { formatCurrency } from "../data/mockData";
+import {
+  CONTACT_REASON_META, markContacted, snoozeContact, undoContactAction, useRepRadar,
+  type ContactPriority, type ContactReason,
+} from "../data/repRadar";
 import { toast } from "../lib/toast";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -72,24 +78,24 @@ export function getGreeting(date = new Date()): string {
 // sugestão em mono, CTA como link na cor do cartão e, no rodapé, prazo e "Atualizado há".
 // Cor pela severidade, nunca pelo tipo; a severidade também vem escrita (não só na cor).
 // "highlight" = Destaque da semana (cartão preto); "resolved" = resolvido nas últimas 24 h.
+// O mesmo cartão serve ao Radar do lojista (sinais) e ao do representante (cartões temáticos).
 type CardVariant = 'default' | 'highlight' | 'resolved';
 
-function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marginText }: {
-  signal: RadarSignal; onCta: () => void; onWhy?: () => void; onDismiss?: () => void;
-  variant?: CardVariant; marginText?: string;
+function RadarCard({
+  icon: CardIcon, color, eyebrow, metric, subject, context, suggestion, ctaLabel, onCta, footer, menu,
+  variant = 'default', resolvedText = 'Sai do Radar em até 24 h',
+}: {
+  icon: Icon; color: string; eyebrow: string; metric: string; subject: string; context: string;
+  suggestion?: string; ctaLabel: string; onCta: () => void; footer: string;
+  /** Itens do menu "Mais opções" (sem menu nos resolvidos). */
+  menu?: ReactNode; variant?: CardVariant; resolvedText?: string;
 }) {
-  const sev = SEVERITY_META[signal.severity];
-  const SignalIcon = variant === 'highlight' ? StarIcon : SIGNAL_ICON[signal.type];
   const highlight = variant === 'highlight';
   const resolved = variant === 'resolved';
-  const base = resolved ? 'gray' : sev.color;
+  const base = resolved ? 'gray' : color;
   // texto na cor do status: tom 8 sobre o fundo claro; no destaque, branco sobre preto
-  const tone = highlight ? 'white' : resolved ? 'dimmed' : `${sev.color}.8`;
+  const tone = highlight ? 'white' : resolved ? 'dimmed' : `${color}.8`;
   const muted = highlight ? 'neutral.3' : 'dimmed';
-  const eyebrow = highlight
-    ? `Destaque da semana · ${SIGNAL_META[signal.type].label}`
-    : `${resolved ? 'Resolvido' : sev.label} · ${SIGNAL_META[signal.type].label}`;
-  const context = marginText ? `${signal.context} · ${marginText}` : signal.context;
 
   return (
     <Paper
@@ -111,35 +117,16 @@ function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marg
             color={highlight ? 'neutral.7' : base}
             aria-hidden
           >
-            <SignalIcon size={20} weight={highlight ? 'fill' : 'regular'} />
+            <CardIcon size={20} weight={highlight ? 'fill' : 'regular'} />
           </ThemeIcon>
-          {!resolved && onWhy && onDismiss && (
+          {!resolved && menu && (
             <Menu position="bottom-end" withinPortal shadow="md">
               <Menu.Target>
                 <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'neutral'} aria-label="Mais opções do aviso" mr={-8}>
                   <DotsThreeVerticalIcon size={20} />
                 </ActionIcon>
               </Menu.Target>
-              {/* FR-106: por que aparece, adiar e dispensar (com motivo) */}
-              <Menu.Dropdown>
-                <Menu.Item leftSection={<InfoIcon size={16} />} onClick={onWhy}>Por que isso aparece</Menu.Item>
-                <Menu.Divider />
-                <Menu.Label>Adiar</Menu.Label>
-                {[7, 15, 30].map(d => (
-                  <Menu.Item
-                    key={d}
-                    leftSection={<ClockIcon size={16} />}
-                    onClick={() => {
-                      snoozeSignal(signal.id, d);
-                      toast.successWithAction('Aviso adiado', `Volta ao Radar em ${d} dias.`, { label: 'Desfazer', onClick: () => undoSignalAction(signal.id) });
-                    }}
-                  >
-                    Adiar {d} dias
-                  </Menu.Item>
-                ))}
-                <Menu.Divider />
-                <Menu.Item leftSection={<XIcon size={16} />} onClick={onDismiss}>Dispensar</Menu.Item>
-              </Menu.Dropdown>
+              <Menu.Dropdown>{menu}</Menu.Dropdown>
             </Menu>
           )}
         </Group>
@@ -148,26 +135,26 @@ function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marg
           <Text size="xs" fw={700} tt="uppercase" ff="monospace" lts={0.5} c={highlight ? muted : tone} lineClamp={2}>
             {eyebrow}
           </Text>
-          <Text fz={32} fw={700} lh={1.1} c={tone}>{signal.metric}</Text>
+          <Text fz={32} fw={700} lh={1.1} c={tone}>{metric}</Text>
         </Stack>
 
         <Box>
-          <Text fw={600} c={highlight ? 'white' : undefined}>{signal.subject}</Text>
+          <Text fw={600} c={highlight ? 'white' : undefined}>{subject}</Text>
           <Text size="sm" c={muted} mt={4}>{context}</Text>
-          {signal.suggestion && !resolved && (
-            <Text size="sm" fw={700} ff="monospace" mt="sm" c={highlight ? 'white' : undefined}>{signal.suggestion}</Text>
+          {suggestion && !resolved && (
+            <Text size="sm" fw={700} ff="monospace" mt="sm" c={highlight ? 'white' : undefined}>{suggestion}</Text>
           )}
         </Box>
 
         <Stack gap={4} mt="auto">
           {resolved ? (
-            <Text size="sm" c="dimmed">Sai do Radar em até 24 h</Text>
+            <Text size="sm" c="dimmed">{resolvedText}</Text>
           ) : (
             <Group>
               {/* CTA como link na cor do cartão; o padding lateral é compensado para alinhar ao texto */}
               <Button
                 variant="transparent"
-                color={highlight ? 'white' : sev.color}
+                color={highlight ? 'white' : color}
                 c={tone}
                 px={0}
                 fw={600}
@@ -175,17 +162,73 @@ function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marg
                 rightSection={<ArrowRightIcon size={18} />}
                 onClick={onCta}
               >
-                {signal.ctaLabel}
+                {ctaLabel}
               </Button>
             </Group>
           )}
-          {/* prazo em palavras + data de agir (BR-40/42) e atualização dos dados (BR-60) */}
-          <Text size="xs" c={muted}>
-            {signal.timeText}{!resolved && ` · ${actByText(signal.actByDays)}`} · {updatedText(signal.updatedHoursAgo)}
-          </Text>
+          <Text size="xs" c={muted}>{footer}</Text>
         </Stack>
       </Stack>
     </Paper>
+  );
+}
+
+/** Adiar (FR-106): mesmas opções nos dois Radares. */
+function SnoozeItems({ options, onSnooze }: { options: number[]; onSnooze: (d: number) => void }) {
+  return (
+    <>
+      <Menu.Label>Adiar</Menu.Label>
+      {options.map(d => (
+        <Menu.Item key={d} leftSection={<ClockIcon size={16} />} onClick={() => onSnooze(d)}>
+          Adiar {days(d)}
+        </Menu.Item>
+      ))}
+    </>
+  );
+}
+
+function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marginText }: {
+  signal: RadarSignal; onCta: () => void; onWhy?: () => void; onDismiss?: () => void;
+  variant?: CardVariant; marginText?: string;
+}) {
+  const sev = SEVERITY_META[signal.severity];
+  const highlight = variant === 'highlight';
+  const resolved = variant === 'resolved';
+  const eyebrow = highlight
+    ? `Destaque da semana · ${SIGNAL_META[signal.type].label}`
+    : `${resolved ? 'Resolvido' : sev.label} · ${SIGNAL_META[signal.type].label}`;
+
+  return (
+    <RadarCard
+      icon={highlight ? StarIcon : SIGNAL_ICON[signal.type]}
+      color={sev.color}
+      eyebrow={eyebrow}
+      metric={signal.metric}
+      subject={signal.subject}
+      context={marginText ? `${signal.context} · ${marginText}` : signal.context}
+      suggestion={signal.suggestion}
+      ctaLabel={signal.ctaLabel}
+      onCta={onCta}
+      variant={variant}
+      // prazo em palavras + data de agir (BR-40/42) e atualização dos dados (BR-60)
+      footer={`${signal.timeText}${resolved ? '' : ` · ${actByText(signal.actByDays)}`} · ${updatedText(signal.updatedHoursAgo)}`}
+      menu={onWhy && onDismiss && (
+        // FR-106: por que aparece, adiar e dispensar (com motivo)
+        <>
+          <Menu.Item leftSection={<InfoIcon size={16} />} onClick={onWhy}>Por que isso aparece</Menu.Item>
+          <Menu.Divider />
+          <SnoozeItems
+            options={[7, 15, 30]}
+            onSnooze={d => {
+              snoozeSignal(signal.id, d);
+              toast.successWithAction('Aviso adiado', `Volta ao Radar em ${d} dias.`, { label: 'Desfazer', onClick: () => undoSignalAction(signal.id) });
+            }}
+          />
+          <Menu.Divider />
+          <Menu.Item leftSection={<XIcon size={16} />} onClick={onDismiss}>Dispensar</Menu.Item>
+        </>
+      )}
+    />
   );
 }
 
@@ -350,12 +393,173 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   );
 }
 
+const CONTACT_ICON: Record<ContactReason, Icon> = {
+  'carrinho-esperando': ShoppingCartIcon,
+  cobranca: CurrencyCircleDollarIcon,
+  'recompra-atrasada': HourglassIcon,
+  'queda-compras': TrendDownIcon,
+  reativacao: ArrowCounterClockwiseIcon,
+  'sugestao-sem-resposta': PaperPlaneTiltIcon,
+  'reposicao-cliente': PackageIcon,
+  'pos-venda': HandshakeIcon,
+};
+
+/** Cartões temáticos do Radar do representante; cada tema vira uma seção com seus cartões. */
+function ThemeHeader({ icon: HeaderIcon, title, description, count }: { icon: Icon; title: string; description: string; count: number }) {
+  return (
+    <Group gap="sm" wrap="nowrap" align="flex-start">
+      <ThemeIcon size={32} radius="md" variant="light" color="neutral" aria-hidden>
+        <HeaderIcon size={18} />
+      </ThemeIcon>
+      <Box>
+        <Group gap="xs">
+          <Title order={2} fz="lg">{title}</Title>
+          <Badge size="sm" circle variant="filled" color={count > 0 ? 'neutral' : 'gray'}>{count}</Badge>
+        </Group>
+        <Text size="sm" c="dimmed">{description}</Text>
+      </Box>
+    </Group>
+  );
+}
+
+function ContactCard({ contact, onCta, onWhy, resolved }: {
+  contact: ContactPriority; onCta: () => void; onWhy?: () => void; resolved?: boolean;
+}) {
+  const sev = SEVERITY_META[contact.severity];
+  const extra = contact.otherReasons.length;
+  return (
+    <RadarCard
+      icon={CONTACT_ICON[contact.reason]}
+      color={sev.color}
+      eyebrow={`${resolved ? 'Contatado' : sev.label} · ${CONTACT_REASON_META[contact.reason].label}`}
+      metric={contact.metric}
+      subject={contact.clientName}
+      context={extra > 0 ? `${contact.context} · +${extra} ${extra === 1 ? 'motivo' : 'motivos'}` : contact.context}
+      suggestion={`${contact.suggestion} · ${contact.channel}`}
+      ctaLabel={contact.ctaLabel}
+      onCta={onCta}
+      variant={resolved ? 'resolved' : 'default'}
+      resolvedText="Contato registrado · sai do Radar em até 24 h"
+      footer={`${contact.timeText}${resolved ? '' : ` · ${actByText(contact.actByDays).replace('agir', 'contatar')}`} · ${updatedText(contact.updatedHoursAgo)}`}
+      menu={onWhy && (
+        <>
+          <Menu.Item leftSection={<InfoIcon size={16} />} onClick={onWhy}>Por que isso aparece</Menu.Item>
+          <Menu.Item
+            leftSection={<PhoneCallIcon size={16} />}
+            onClick={() => {
+              markContacted(contact.id);
+              toast.successWithAction('Contato registrado', `${contact.clientName} sai das prioridades.`, { label: 'Desfazer', onClick: () => undoContactAction(contact.id) });
+            }}
+          >
+            Marcar como contatado
+          </Menu.Item>
+          <Menu.Divider />
+          <SnoozeItems
+            options={[1, 3, 7]}
+            onSnooze={d => {
+              snoozeContact(contact.id, d);
+              toast.successWithAction('Contato adiado', `Volta às prioridades em ${days(d)}.`, { label: 'Desfazer', onClick: () => undoContactAction(contact.id) });
+            }}
+          />
+        </>
+      )}
+    />
+  );
+}
+
+function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
+  const [showAll, setShowAll] = useState(false);
+  const [why, setWhy] = useState<ContactPriority | null>(null);
+  const loading = useMockLoading();
+  const radar = useRepRadar(userName);
+  const { contacts, contacted, urgent } = radar;
+  const shown = showAll ? contacts : contacts.slice(0, MAX_CARDS);
+  const firstName = userName.split(' ')[0];
+
+  return (
+    <Stack gap="xl">
+      <Box>
+        <Title order={1}>{getGreeting()}, {firstName}</Title>
+        <Group gap="sm" mt={4} wrap="wrap">
+          <Text fw={600} c={urgent > 0 ? 'red.7' : contacts.length > 0 ? 'yellow.8' : 'teal.8'}>
+            {urgent > 0
+              ? `${urgent} ${urgent === 1 ? 'contato urgente' : 'contatos urgentes'} hoje`
+              : contacts.length > 0 ? 'Carteira pede atenção' : 'Carteira em dia'}
+          </Text>
+          <Text c="dimmed">
+            {contacts.length} {contacts.length === 1 ? 'cliente para contatar' : 'clientes para contatar'}
+            {radar.impact > 0 && ` · ${formatCurrency(radar.impact)} em jogo`}
+          </Text>
+        </Group>
+      </Box>
+
+      <Stack gap="md">
+        <ThemeHeader
+          icon={ChatCircleDotsIcon}
+          title="Prioridades de contato"
+          description="Quem da sua carteira contatar primeiro, por quê e o que oferecer"
+          count={contacts.length}
+        />
+        {loading ? (
+          <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />
+        ) : contacts.length > 0 ? (
+          <>
+            {/* severidade, depois prazo para contatar, depois o motivo — uma prioridade por cliente */}
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+              {shown.map(c => (
+                <ContactCard key={c.id} contact={c} onCta={() => onCta(c.cta)} onWhy={() => setWhy(c)} />
+              ))}
+            </SimpleGrid>
+            {contacts.length > MAX_CARDS && (
+              <Button variant="default" onClick={() => setShowAll(v => !v)} mx="auto">
+                {showAll ? 'Ver menos' : `Ver todos (${contacts.length})`}
+              </Button>
+            )}
+          </>
+        ) : (
+          <EmptyState
+            icon={CheckCircleIcon}
+            title="Nenhum contato pendente"
+            description="Quando um cliente passar do ciclo de compra, tiver carrinho esperando você ou título vencido, ele aparece aqui."
+          />
+        )}
+      </Stack>
+
+      {!loading && contacted.length > 0 && (
+        <Stack gap="sm">
+          <Text fw={600}>Contatados nas últimas 24 h</Text>
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+            {contacted.map(c => (
+              <ContactCard key={c.id} contact={c} resolved onCta={() => {}} />
+            ))}
+          </SimpleGrid>
+        </Stack>
+      )}
+
+      <Modal opened={!!why} onClose={() => setWhy(null)} centered title={<Text fw={600}>Por que isso aparece</Text>}>
+        {why && (
+          <Stack gap="sm">
+            <Text fw={600}>{CONTACT_REASON_META[why.reason].code} · {CONTACT_REASON_META[why.reason].label} · {why.clientName}</Text>
+            <Text>{why.why}</Text>
+            {why.otherReasons.length > 0 && (
+              <Text size="sm">Também: {why.otherReasons.map(r => CONTACT_REASON_META[r].label).join(', ')}</Text>
+            )}
+            <Text size="sm" c="dimmed">{actByText(why.actByDays).replace('agir', 'contatar')} · {updatedText(why.updatedHoursAgo)}</Text>
+          </Stack>
+        )}
+      </Modal>
+    </Stack>
+  );
+}
+
 // Radar: motor de decisão da loja — o que precisa de ação, agrupado por quando agir.
 export function RadarPage({ profile, ...rest }: RadarPageProps) {
   return (
     <Box p={{ base: 'md', sm: 'lg' }} maw={1200} mx="auto" w="100%">
       {profile === 'lojista' ? (
         <LojistaRadar {...rest} />
+      ) : profile === 'rep' ? (
+        <RepRadar {...rest} />
       ) : (
         <EmptyState
           icon={CrosshairIcon}

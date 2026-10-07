@@ -264,7 +264,8 @@ export type CtaTarget =
   | { kind: 'catalog'; radarFilter?: RadarFilter; line?: string }
   | { kind: 'carts' }
   | { kind: 'cart'; cartId: string }
-  | { kind: 'boletos' };
+  | { kind: 'boletos' }
+  | { kind: 'client'; clientId: string };
 
 export interface RadarSignal {
   id: string;
