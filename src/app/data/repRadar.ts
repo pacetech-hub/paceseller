@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { clients, formatCurrency, type Client } from "./mockData";
 import { cartPairs, cartValue, getCartsState, isOpen, subscribeCarts, type Cart } from "./cartStore";
-import { SEVERITY_META, days, pairsText, type CtaTarget, type Severity } from "./radar";
+import { SEVERITY_META, bucketOf, days, pairsText, type CtaTarget, type Severity } from "./radar";
 
 // Radar do representante, organizado em cartões temáticos. Tema 1: "Prioridades de contato" —
 // quais clientes da carteira ligar primeiro e por quê. Uma prioridade por cliente (a de maior
@@ -24,6 +24,8 @@ export const REP_RADAR_PARAMS = {
   dropPct: 20,
   /** Pós-venda: contato até N dias depois da entrega. */
   afterSaleDays: 7,
+  /** Recompra prevista: contatar N dias antes do fim do ciclo médio. */
+  repurchaseLeadDays: 5,
 };
 
 // ---------------------------------------------------------------------------
@@ -67,7 +69,7 @@ const FACTS: ClientFacts[] = [
 // ---------------------------------------------------------------------------
 export type ContactReason =
   | 'carrinho-esperando' | 'cobranca' | 'recompra-atrasada' | 'queda-compras'
-  | 'reativacao' | 'sugestao-sem-resposta' | 'reposicao-cliente' | 'pos-venda';
+  | 'reativacao' | 'sugestao-sem-resposta' | 'reposicao-cliente' | 'pos-venda' | 'recompra-prevista';
 
 export const CONTACT_REASON_META: Record<ContactReason, { code: string; label: string }> = {
   'carrinho-esperando': { code: 'C-01', label: 'Carrinho esperando você' },
@@ -78,12 +80,13 @@ export const CONTACT_REASON_META: Record<ContactReason, { code: string; label: s
   'sugestao-sem-resposta': { code: 'C-06', label: 'Sugestão sem resposta' },
   'reposicao-cliente': { code: 'C-07', label: 'Estoque acabando no cliente' },
   'pos-venda': { code: 'C-08', label: 'Pós-venda' },
+  'recompra-prevista': { code: 'C-09', label: 'Recompra prevista' },
 };
 
 /** Desempate entre motivos de mesma severidade. */
 const REASON_PRIORITY: ContactReason[] = [
   'carrinho-esperando', 'cobranca', 'recompra-atrasada', 'reativacao', 'queda-compras',
-  'reposicao-cliente', 'sugestao-sem-resposta', 'pos-venda',
+  'reposicao-cliente', 'sugestao-sem-resposta', 'pos-venda', 'recompra-prevista',
 ];
 
 export interface ContactPriority {
@@ -193,6 +196,19 @@ function candidates(client: Client, f: ClientFacts, carts: Cart[]): Candidate[] 
         suggestion: 'Proponha a reposição dos mais vendidos',
         impact: Math.round(client.totalPurchased / 12), ctaLabel: 'Ver cliente', cta: toClient,
         why: `O cliente passou do ciclo médio de recompra (${days(f.cycleDays)}). Acima de ${Math.round(P.repurchaseCriticalRatio * 100)}% do ciclo o aviso vira Crítico.`,
+      });
+    } else {
+      // C-09 Recompra prevista: o ciclo médio termina em breve — contatar alguns dias antes
+      const left = f.cycleDays - f.daysSinceOrder;
+      out.push({
+        ...base, id: `recompra-prevista-${client.id}`, reason: 'recompra-prevista',
+        severity: 'informacao', actByDays: Math.max(1, left - P.repurchaseLeadDays),
+        timeText: left > 0 ? `ciclo termina em ${days(left)}` : 'ciclo terminando',
+        metric: left > 0 ? `em ${days(left)}` : 'agora',
+        context: `Costuma comprar a cada ${days(f.cycleDays)} · último pedido há ${days(f.daysSinceOrder)}`,
+        suggestion: 'Antecipe a sugestão do próximo pedido',
+        impact: Math.round(client.totalPurchased / 12), ctaLabel: 'Ver cliente', cta: toClient,
+        why: `A próxima compra deste cliente é esperada pelo ciclo médio de ${days(f.cycleDays)}. O aviso aparece ${days(P.repurchaseLeadDays)} antes para você chegar primeiro.`,
       });
     }
   }
@@ -306,8 +322,9 @@ function compute(repName: string, carts: Cart[]): RepRadarResult {
   });
 
   const contactedAt = (p: ContactPriority) => lifecycle.contacted[p.id];
+  // além de 30 dias o contato não entra no Radar (mesmos baldes do lojista)
   const contacts = all
-    .filter(p => !contactedAt(p) && (lifecycle.snoozed[p.id] ?? 0) <= now)
+    .filter(p => !contactedAt(p) && (lifecycle.snoozed[p.id] ?? 0) <= now && bucketOf(p.actByDays) !== null)
     .sort(sortCandidates);
   const contacted = all.filter(p => contactedAt(p) && now - contactedAt(p) < 86_400_000);
   return {

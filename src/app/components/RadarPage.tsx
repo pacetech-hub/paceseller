@@ -11,7 +11,7 @@ import {
   CrosshairIcon, TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
   RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, DotsThreeVerticalIcon, InfoIcon, ClockIcon, XIcon,
   ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon, PhoneCallIcon, CurrencyCircleDollarIcon, HourglassIcon,
-  ArrowCounterClockwiseIcon, PaperPlaneTiltIcon, HandshakeIcon, ChatCircleDotsIcon,
+  ArrowCounterClockwiseIcon, CalendarCheckIcon, PaperPlaneTiltIcon, HandshakeIcon, ChatCircleDotsIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import {
@@ -269,6 +269,42 @@ function DismissModal({ signal, onClose }: { signal: RadarSignal | null; onClose
   );
 }
 
+/** Abas por prazo (Hoje / 15 dias / 30 dias) com contagem; vermelho quando há críticos (BR-52). */
+function BucketTabs({ value, onChange, counts, noun = ['pendência', 'pendências'] }: {
+  value: Bucket; onChange: (b: Bucket) => void;
+  counts: (b: Bucket) => { total: number; critical: number };
+  noun?: [string, string];
+}) {
+  return (
+    <Tabs value={value} onChange={(v) => { if (v) onChange(v as Bucket); }} variant="pills">
+      <Tabs.List>
+        {PERIODS.map(p => {
+          const { total, critical } = counts(p.value);
+          return (
+            <Tabs.Tab
+              key={p.value}
+              value={p.value}
+              rightSection={
+                <Badge
+                  size="sm"
+                  circle
+                  color={critical > 0 ? 'red' : total > 0 ? 'neutral' : 'gray'}
+                  variant={total > 0 ? 'filled' : 'light'}
+                  aria-label={`${total} ${total === 1 ? noun[0] : noun[1]}${critical ? `, ${critical} críticos` : ''}`}
+                >
+                  {total}
+                </Badge>
+              }
+            >
+              {p.label}
+            </Tabs.Tab>
+          );
+        })}
+      </Tabs.List>
+    </Tabs>
+  );
+}
+
 function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Bucket>('hoje');
   const [showAll, setShowAll] = useState(false);
@@ -304,33 +340,11 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
         </Box>
 
         {/* FR-103: baldes exclusivos pela data de agir, com contagem (BR-52) */}
-        <Tabs value={period} onChange={(v) => { if (v) { setPeriod(v as Bucket); setShowAll(false); } }} variant="pills">
-          <Tabs.List>
-            {PERIODS.map(p => {
-              const items = inBucket(p.value);
-              const crit = items.filter(isCritical).length;
-              return (
-                <Tabs.Tab
-                  key={p.value}
-                  value={p.value}
-                  rightSection={
-                    <Badge
-                      size="sm"
-                      circle
-                      color={crit > 0 ? 'red' : items.length > 0 ? 'neutral' : 'gray'}
-                      variant={items.length > 0 ? 'filled' : 'light'}
-                      aria-label={`${items.length} ${items.length === 1 ? 'pendência' : 'pendências'}${crit ? `, ${crit} críticas` : ''}`}
-                    >
-                      {items.length}
-                    </Badge>
-                  }
-                >
-                  {p.label}
-                </Tabs.Tab>
-              );
-            })}
-          </Tabs.List>
-        </Tabs>
+        <BucketTabs
+          value={period}
+          onChange={b => { setPeriod(b); setShowAll(false); }}
+          counts={b => { const items = inBucket(b); return { total: items.length, critical: items.filter(isCritical).length }; }}
+        />
       </Stack>
 
       {loading ? (
@@ -404,6 +418,7 @@ const CONTACT_ICON: Record<ContactReason, Icon> = {
   'sugestao-sem-resposta': PaperPlaneTiltIcon,
   'reposicao-cliente': PackageIcon,
   'pos-venda': HandshakeIcon,
+  'recompra-prevista': CalendarCheckIcon,
 };
 
 function ContactCard({ contact, onCta, onWhy, resolved }: {
@@ -452,12 +467,18 @@ function ContactCard({ contact, onCta, onWhy, resolved }: {
 }
 
 function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
+  const [period, setPeriod] = useState<Bucket>('hoje');
   const [showAll, setShowAll] = useState(false);
   const [why, setWhy] = useState<ContactPriority | null>(null);
   const loading = useMockLoading();
   const radar = useRepRadar(userName);
-  const { contacts, contacted, urgent } = radar;
-  const shown = showAll ? contacts : contacts.slice(0, MAX_CARDS);
+  const { contacts, urgent } = radar;
+  // mesmos baldes do lojista, pela data de contatar
+  const inBucket = (b: Bucket) => contacts.filter(c => bucketOf(c.actByDays) === b);
+  const visible = inBucket(period);
+  const shown = showAll ? visible : visible.slice(0, MAX_CARDS);
+  const contacted = radar.contacted.filter(c => (bucketOf(c.actByDays) ?? 'hoje') === period);
+  const nextWithItems = PERIODS.find(p => p.value !== period && inBucket(p.value).length > 0);
   const firstName = userName.split(' ')[0];
 
   return (
@@ -484,9 +505,15 @@ function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
           description="Quem da sua carteira contatar primeiro, por quê e o que oferecer"
           count={contacts.length}
         />
+        <BucketTabs
+          value={period}
+          onChange={b => { setPeriod(b); setShowAll(false); }}
+          noun={['contato', 'contatos']}
+          counts={b => { const items = inBucket(b); return { total: items.length, critical: items.filter(c => c.severity === 'critico').length }; }}
+        />
         {loading ? (
           <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />
-        ) : contacts.length > 0 ? (
+        ) : visible.length > 0 ? (
           <>
             {/* severidade, depois prazo para contatar, depois o motivo — uma prioridade por cliente */}
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
@@ -494,17 +521,20 @@ function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
                 <ContactCard key={c.id} contact={c} onCta={() => onCta(c.cta)} onWhy={() => setWhy(c)} />
               ))}
             </SimpleGrid>
-            {contacts.length > MAX_CARDS && (
+            {visible.length > MAX_CARDS && (
               <Button variant="default" onClick={() => setShowAll(v => !v)} mx="auto">
-                {showAll ? 'Ver menos' : `Ver todos (${contacts.length})`}
+                {showAll ? 'Ver menos' : `Ver todos (${visible.length})`}
               </Button>
             )}
           </>
         ) : (
           <EmptyState
             icon={CheckCircleIcon}
-            title="Nenhum contato pendente"
+            title={period === 'hoje' ? 'Nenhum contato pra hoje' : 'Nenhum contato neste período'}
             description="Quando um cliente passar do ciclo de compra, tiver carrinho esperando você ou título vencido, ele aparece aqui."
+            action={nextWithItems
+              ? { label: `Ver ${nextWithItems.label.toLowerCase()} (${inBucket(nextWithItems.value).length})`, onClick: () => setPeriod(nextWithItems.value) }
+              : undefined}
           />
         )}
       </Stack>
