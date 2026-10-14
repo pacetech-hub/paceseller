@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import {
-  Badge, Box, Button, Grid, Group, Paper, Progress, ScrollArea, SegmentedControl, Stack, Text, ThemeIcon, Tooltip,
+  Badge, Box, Button, Grid, Group, Paper, ScrollArea, SegmentedControl, SimpleGrid, Stack, Text, ThemeIcon, Tooltip,
   UnstyledButton,
 } from "@mantine/core";
 import { CompositeChart, Sparkline } from "@mantine/charts";
@@ -32,15 +32,9 @@ const axis = (v: number) =>
 const CURRENT_COLOR = 'neutral.9';
 const PREVIOUS_COLOR = 'yellow.6';
 
-// Status: etapas intermediárias em neutro, atenção em amarelo, concluído em verde-azulado, cancelado em vermelho
-const STATUS_COLOR: Record<Order['status'], string> = {
-  'em análise': 'yellow.6',
-  aprovado: 'neutral.9',
-  faturado: 'neutral.5',
-  entregue: 'teal.6',
-  cancelado: 'red.5',
-};
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/** Os únicos status mostrados no Radar: pedidos que ainda estão andando. */
+const OPEN_STATUSES: Order['status'][] = ['em análise', 'aprovado'];
 
 // ---------------------------------------------------------------------------
 // Widget: moldura comum (ícone em bloco + sobretítulo mono + ação), corpo e rodapé
@@ -158,10 +152,6 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
   const [period, setPeriod] = useState<SalesPeriod>('mes');
   const loading = useMockLoading();
   const s = useMemo(() => getSalesSummary(repName, period), [repName, period]);
-  const topValue = Math.max(1, ...s.sellers.map(x => x.value));
-  const teamValue = s.sellers.reduce((a, x) => a + x.value, 0);
-  const allOrders = s.statusCounts.reduce((a, x) => a + x.count, 0);
-  const cancelled = s.statusCounts.find(x => x.status === 'cancelado')?.count ?? 0;
   const chartData = s.series.map(p => ({ label: p.label, current: p.current.value, previous: p.previous.value }));
   const prevYear = s.previousLabel;
   // legenda do gráfico pelos anos: no "Dia" o gráfico mostra os últimos 7 dias, não só a data
@@ -205,11 +195,11 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
             </Grid.Col>
           ))}
 
-          {/* Linha 2: vendas ano a ano + pedidos por status */}
+          {/* Linha 2: vendas ano a ano + pedidos em andamento e top 3 */}
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Widget icon={ChartBarIcon} title="Vendas vs. ano anterior" subtitle={`Colunas: ${year} · linha: mesmo intervalo de ${year - 1} · ${s.seriesUnit}`}>
               <CompositeChart
-                h={240}
+                h={380}
                 data={chartData}
                 dataKey="label"
                 series={[
@@ -232,100 +222,74 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, lg: 4 }}>
-            <Widget
-              icon={ShoppingBagIcon}
-              title="Pedidos por status"
-              subtitle={`${int(s.current.orders)} ${s.current.orders === 1 ? 'válido' : 'válidos'}${cancelled ? ` · ${cancelled} ${cancelled === 1 ? 'cancelado' : 'cancelados'}` : ''}`}
-              footer={<WidgetLink label="Ver todos os pedidos" onClick={() => onCta({ kind: 'orders' })} />}
-            >
-              {/* parte do todo: barra 100% empilhada; a lista abaixo é a legenda com valores */}
-              <Progress.Root size={12} aria-hidden>
-                {s.statusCounts.filter(x => x.count > 0).map(x => (
-                  <Tooltip key={x.status} label={`${cap(x.status)}: ${x.count} ${x.count === 1 ? 'pedido' : 'pedidos'} · ${reais(x.value)}`} withArrow>
-                    <Progress.Section value={(x.count / Math.max(1, allOrders)) * 100} color={STATUS_COLOR[x.status]} />
-                  </Tooltip>
-                ))}
-              </Progress.Root>
-              <Stack gap={2}>
-                {s.statusCounts.map(x => {
-                  const StIcon = statusIcon[x.status];
-                  return (
-                    <UnstyledButton
-                      key={x.status}
-                      // sem pedidos no status, nada para abrir
-                      disabled={x.count === 0}
-                      onClick={() => onCta({ kind: 'orders', status: x.status })}
-                      className={x.count > 0 ? interactive.hoverable : undefined}
-                      px="xs"
-                      py={6}
-                      style={{ borderRadius: 'var(--mantine-radius-md)', opacity: x.count > 0 ? 1 : 0.55 }}
-                      aria-label={`${x.count} pedidos ${x.status}, ver em Pedidos`}
-                    >
-                      <Group justify="space-between" wrap="nowrap" gap="sm">
-                        <Group gap="xs" wrap="nowrap">
-                          <Box w={10} h={10} style={{ borderRadius: 3, background: `var(--mantine-color-${STATUS_COLOR[x.status].replace('.', '-')})` }} />
-                          <StIcon size={16} aria-hidden />
-                          <Text size="sm">{cap(x.status)}</Text>
-                        </Group>
-                        <Group gap="sm" wrap="nowrap">
-                          <Text size="xs" c="dimmed" visibleFrom="xs">{reais(x.value)}</Text>
-                          <Text size="sm" fw={700} w={32} ta="right">{x.count}</Text>
-                        </Group>
+            <Stack gap="md" h="100%">
+              {/* Pedidos: só os que ainda pedem ação — em análise e aprovados — com a quantidade */}
+              <Widget
+                icon={ShoppingBagIcon}
+                title="Pedidos em andamento"
+                subtitle="Em análise e aprovados no período"
+                footer={<WidgetLink label="Ver todos os pedidos" onClick={() => onCta({ kind: 'orders' })} />}
+              >
+                <SimpleGrid cols={2} spacing="sm">
+                  {OPEN_STATUSES.map(st => {
+                    const row = s.statusCounts.find(x => x.status === st);
+                    const count = row?.count ?? 0;
+                    const StIcon = statusIcon[st];
+                    return (
+                      <UnstyledButton
+                        key={st}
+                        disabled={count === 0}
+                        onClick={() => onCta({ kind: 'orders', status: st })}
+                        aria-label={`${count} ${count === 1 ? 'pedido' : 'pedidos'} ${st}, ver em Pedidos`}
+                      >
+                        <Paper withBorder p="sm" radius="md" className={count > 0 ? interactive.hoverable : undefined}>
+                          <Group gap={6} wrap="nowrap" c={st === 'em análise' ? 'yellow.8' : 'dimmed'}>
+                            <StIcon size={16} aria-hidden />
+                            <Text size="sm" c="inherit" fw={600}>{cap(st)}</Text>
+                          </Group>
+                          <Text fz={32} fw={700} lh={1.1} mt={4}>{int(count)}</Text>
+                          <Text size="xs" c="dimmed">{count === 1 ? 'pedido' : 'pedidos'}</Text>
+                        </Paper>
+                      </UnstyledButton>
+                    );
+                  })}
+                </SimpleGrid>
+              </Widget>
+
+              {/* Os 3 que mais venderam no período: leitura rápida, só nome e valor */}
+              <Widget
+                icon={TrophyIcon}
+                title="Top 3 vendedores"
+                subtitle="Quem mais vendeu no período"
+                footer={<WidgetLink label="Ver vendedores" onClick={() => onCta({ kind: 'sales-team' })} />}
+              >
+                <Stack gap="xs">
+                  {s.sellers.slice(0, 3).map((x, i) => (
+                    <Group key={x.id} justify="space-between" wrap="nowrap" gap="sm">
+                      <Group gap="sm" wrap="nowrap" miw={0}>
+                        <ThemeIcon size={28} radius="xl" variant={i === 0 ? 'filled' : 'light'} color="neutral" aria-label={`${i + 1}º lugar`}>
+                          <Text size="xs" fw={700} c="inherit">{i + 1}º</Text>
+                        </ThemeIcon>
+                        <Text size="sm" fw={600} truncate>{x.name}{x.name === repName ? ' (você)' : ''}</Text>
                       </Group>
-                    </UnstyledButton>
-                  );
-                })}
-              </Stack>
-            </Widget>
+                      <Text size="sm" fw={700} style={{ whiteSpace: 'nowrap' }}>{reais(x.value)}</Text>
+                    </Group>
+                  ))}
+                </Stack>
+              </Widget>
+            </Stack>
           </Grid.Col>
 
-          {/* Linha 3: ranking e pedidos recentes */}
-          <Grid.Col span={{ base: 12, lg: 6 }}>
-            <Widget
-              icon={TrophyIcon}
-              title="Vendedores com mais vendas"
-              subtitle="Você e seus prepostos · maior venda primeiro"
-              footer={<WidgetLink label="Ver vendedores" onClick={() => onCta({ kind: 'sales-team' })} />}
-            >
-              <Stack gap="md">
-                {s.sellers.map((x, i) => {
-                  const share = teamValue > 0 ? Math.round((x.value / teamValue) * 100) : 0;
-                  return (
-                    <Box key={x.id}>
-                      <Group justify="space-between" wrap="nowrap" gap="sm">
-                        <Group gap="xs" wrap="nowrap" miw={0}>
-                          <Text size="sm" ff="monospace" c="dimmed" w={22}>{i + 1}º</Text>
-                          <Text size="sm" fw={600} truncate>{x.name}</Text>
-                          <Badge size="xs" variant="light" color="gray">{x.name === repName ? 'Você' : 'Preposto'}</Badge>
-                        </Group>
-                        <Text size="sm" fw={700} style={{ whiteSpace: 'nowrap' }}>{reais(x.value)}</Text>
-                      </Group>
-                      <Tooltip label={`${x.name}: ${share}% das vendas do time · ${reais(x.value)}`} withArrow>
-                        <Progress value={(x.value / topValue) * 100} color={CURRENT_COLOR} size="sm" radius="xl" mt={6} aria-label={`${share}% das vendas do time`} />
-                      </Tooltip>
-                      <Group justify="space-between" mt={4} gap="xs">
-                        <Text size="xs" c="dimmed">{x.orders} {x.orders === 1 ? 'pedido' : 'pedidos'} · {share}% do time</Text>
-                        <Group gap={6} wrap="nowrap">
-                          <DeltaBadge value={x.delta} />
-                          <Text size="xs" c="dimmed">vs. {reais(x.previous)}</Text>
-                        </Group>
-                      </Group>
-                    </Box>
-                  );
-                })}
-              </Stack>
-            </Widget>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, lg: 6 }}>
+          {/* Linha 3: pedidos recentes em andamento */}
+          <Grid.Col span={12}>
             <Widget
               icon={ClockCounterClockwiseIcon}
               title="Pedidos recentes"
-              subtitle={`Últimos do período · ${int(allOrders)} no total`}
+              subtitle="Em análise e aprovados · mais novos primeiro"
               footer={<WidgetLink label="Ver todos os pedidos" onClick={() => onCta({ kind: 'orders' })} />}
             >
               <Stack gap="sm">
-                {s.recent.length === 0 && <Text size="sm" c="dimmed">Nenhum pedido neste período.</Text>}
+                {s.recent.length === 0 && <Text size="sm" c="dimmed">Nenhum pedido em análise ou aprovado neste período.</Text>}
                 {s.recent.map(o => (
                   <Group key={o.id} justify="space-between" wrap="nowrap" gap="sm">
                     <Box miw={0}>

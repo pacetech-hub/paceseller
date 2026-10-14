@@ -242,7 +242,8 @@ export function getSalesSummary(repName: string, period: SalesPeriod, now = new 
       const list = cur.filter(o => o.status === status);
       return { status, count: list.length, value: list.reduce((a, o) => a + o.value, 0) };
     }),
-    recent: [...cur].sort((a, b) => b.date.getTime() - a.date.getTime() || b.id.localeCompare(a.id)).slice(0, 5),
+    // recentes: só pedidos em andamento (em análise e aprovados)
+    recent: cur.filter(o => o.status === 'em análise' || o.status === 'aprovado').sort((a, b) => b.date.getTime() - a.date.getTime() || b.id.localeCompare(a.id)).slice(0, 5),
     series: buckets.map(b => ({
       label: b.label,
       current: totals(all.filter(o => inRange(o, b.start, b.end))),
