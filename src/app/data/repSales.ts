@@ -137,6 +137,59 @@ export interface SalesSummary {
   sellers: SellerRow[];
   statusCounts: { status: Order['status']; count: number; value: number }[];
   recent: SalesOrder[];
+  /** Evolução dentro do período (ano corrente x mesmo intervalo do ano anterior). */
+  series: SeriesPoint[];
+  /** O que cada ponto da série representa ("por dia", "por semana", "por mês"). */
+  seriesUnit: string;
+}
+
+export interface SeriesPoint {
+  label: string;
+  current: SalesTotals;
+  previous: SalesTotals;
+}
+
+/**
+ * Pontos da série por período. "Dia" não tem granularidade menor que o próprio dia,
+ * então mostra os últimos 7 dias como contexto.
+ */
+function seriesBuckets(period: SalesPeriod, today: Date): { buckets: { label: string; start: Date; end: Date }[]; unit: string } {
+  const day = (d: Date) => ({ start: d, end: d });
+  const ddmm = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const weekday = (d: Date) => d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+  const weeks = (from: Date) => {
+    const out: { label: string; start: Date; end: Date }[] = [];
+    for (let d = from; d <= today; d = addDays(d, 7)) {
+      const end = addDays(d, 6) > today ? today : addDays(d, 6);
+      out.push({ label: ddmm(d), start: d, end });
+    }
+    return out;
+  };
+  switch (period) {
+    case 'dia':
+      return { unit: 'últimos 7 dias', buckets: Array.from({ length: 7 }, (_, i) => addDays(today, i - 6)).map(d => ({ label: weekday(d), ...day(d) })) };
+    case 'semana': {
+      const from = windowStart('semana', today);
+      const n = Math.round((today.getTime() - from.getTime()) / 86_400_000) + 1;
+      return { unit: 'por dia', buckets: Array.from({ length: n }, (_, i) => addDays(from, i)).map(d => ({ label: weekday(d), ...day(d) })) };
+    }
+    case 'mes': {
+      const from = windowStart('mes', today);
+      const n = today.getDate();
+      return { unit: 'por dia', buckets: Array.from({ length: n }, (_, i) => addDays(from, i)).map(d => ({ label: String(d.getDate()), ...day(d) })) };
+    }
+    case 'trimestre':
+      return { unit: 'por semana', buckets: weeks(windowStart('trimestre', today)) };
+    case 'ano':
+      return {
+        unit: 'por mês',
+        buckets: Array.from({ length: today.getMonth() + 1 }, (_, m) => {
+          const start = new Date(today.getFullYear(), m, 1);
+          const last = new Date(today.getFullYear(), m + 1, 0);
+          return { label: start.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''), start, end: last > today ? today : last };
+        }),
+      };
+  }
 }
 
 const ORDER_STATUSES: Order['status'][] = ['em análise', 'aprovado', 'faturado', 'entregue', 'cancelado'];
@@ -170,6 +223,7 @@ export function getSalesSummary(repName: string, period: SalesPeriod, now = new 
   const inRange = (o: SalesOrder, a: Date, b: Date) => o.date >= a && o.date <= b;
   const cur = all.filter(o => inRange(o, start, today));
   const prev = all.filter(o => inRange(o, prevStart, prevEnd));
+  const { buckets, unit } = seriesBuckets(period, today);
 
   const sellers = getRepTeamEntities(repName).map(e => {
     const mine = totals(cur.filter(o => o.sellerId === e.id));
@@ -189,5 +243,11 @@ export function getSalesSummary(repName: string, period: SalesPeriod, now = new 
       return { status, count: list.length, value: list.reduce((a, o) => a + o.value, 0) };
     }),
     recent: [...cur].sort((a, b) => b.date.getTime() - a.date.getTime() || b.id.localeCompare(a.id)).slice(0, 5),
+    series: buckets.map(b => ({
+      label: b.label,
+      current: totals(all.filter(o => inRange(o, b.start, b.end))),
+      previous: totals(all.filter(o => inRange(o, yearBefore(b.start), yearBefore(b.end)))),
+    })),
+    seriesUnit: unit,
   };
 }
