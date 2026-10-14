@@ -5,7 +5,7 @@ import {
 } from "@mantine/core";
 import { CompositeChart, Sparkline } from "@mantine/charts";
 import {
-  ArrowDownRightIcon, ArrowRightIcon, ArrowUpRightIcon, ChartBarIcon, ChartLineUpIcon, ClockCounterClockwiseIcon, CurrencyCircleDollarIcon,
+  ArrowDownRightIcon, ArrowRightIcon, ArrowUpRightIcon, ChartBarIcon, ChartLineUpIcon, CurrencyCircleDollarIcon,
   FootprintsIcon, MinusIcon, ReceiptIcon, ShoppingBagIcon, TrophyIcon, type Icon,
 } from "@phosphor-icons/react";
 import { useMockLoading } from "../lib/useMockLoading";
@@ -13,8 +13,8 @@ import { barDomain } from "../lib/charts";
 import interactive from "./interactive.module.css";
 import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 import { ThemeHeader } from "./ui/ThemeHeader";
-import { OrderStatusBadge, statusIcon } from "./OrderHistory";
-import { formatCurrency, type Order } from "../data/mockData";
+import { statusIcon } from "./OrderHistory";
+import type { Order } from "../data/mockData";
 import { SALES_PERIODS, deltaPct, getSalesSummary, type SalesPeriod, type SalesTotals, type SeriesPoint } from "../data/repSales";
 import type { CtaTarget } from "../data/radar";
 
@@ -146,7 +146,7 @@ function KpiWidget({ icon, label, metric, format, current, previous, series, uni
 // Seção
 // ---------------------------------------------------------------------------
 // Seção complementar do Radar do representante, em widgets: indicadores do período, vendas
-// ano a ano, pedidos por status, ranking dos vendedores e pedidos recentes — sempre comparados
+// ano a ano, pedidos em andamento e top 3 vendedores — sempre comparados
 // com o mesmo período do ano anterior.
 export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (target: CtaTarget) => void }) {
   const [period, setPeriod] = useState<SalesPeriod>('mes');
@@ -278,34 +278,6 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
                 </Stack>
               </Widget>
             </Stack>
-          </Grid.Col>
-
-          {/* Linha 3: pedidos recentes em andamento */}
-          <Grid.Col span={12}>
-            <Widget
-              icon={ClockCounterClockwiseIcon}
-              title="Pedidos recentes"
-              subtitle="Em análise e aprovados · mais novos primeiro"
-              footer={<WidgetLink label="Ver todos os pedidos" onClick={() => onCta({ kind: 'orders' })} />}
-            >
-              <Stack gap="sm">
-                {s.recent.length === 0 && <Text size="sm" c="dimmed">Nenhum pedido em análise ou aprovado neste período.</Text>}
-                {s.recent.map(o => (
-                  <Group key={o.id} justify="space-between" wrap="nowrap" gap="sm">
-                    <Box miw={0}>
-                      <Text size="sm" fw={600} truncate>{o.clientName}</Text>
-                      <Text size="xs" c="dimmed" ff="monospace" truncate>
-                        {o.id} · {o.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · {s.sellers.find(x => x.id === o.sellerId)?.name.split(' ')[0]}
-                      </Text>
-                    </Box>
-                    <Group gap="sm" wrap="nowrap">
-                      <Text size="sm" fw={600} style={{ whiteSpace: 'nowrap' }}>{formatCurrency(o.value)}</Text>
-                      <Box visibleFrom="sm"><OrderStatusBadge status={o.status} /></Box>
-                    </Group>
-                  </Group>
-                ))}
-              </Stack>
-            </Widget>
           </Grid.Col>
         </Grid>
       )}
