@@ -1,16 +1,17 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import {
-  Badge, Box, Button, Grid, Group, Paper, ScrollArea, SegmentedControl, Stack, Text, ThemeIcon, Tooltip,
+  Box, Grid, Group, ScrollArea, SegmentedControl, Stack, Text, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import { LineChart, Sparkline } from "@mantine/charts";
 import {
-  ArrowDownRightIcon, ArrowRightIcon, ArrowUpRightIcon, ChartLineUpIcon, CurrencyCircleDollarIcon,
-  FootprintsIcon, MinusIcon, ReceiptIcon, ShoppingBagIcon, TrophyIcon, type Icon,
+  ChartLineUpIcon, CurrencyCircleDollarIcon,
+  FootprintsIcon, ReceiptIcon, ShoppingBagIcon, TrophyIcon, type Icon,
 } from "@phosphor-icons/react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { barDomain } from "../lib/charts";
 import { ChartSkeleton, KpiSkeleton } from "./ui/Skeletons";
 import { ThemeHeader } from "./ui/ThemeHeader";
+import { DeltaBadge, Widget, WidgetLink } from "./ui/Widget";
 import { statusIcon } from "./OrderHistory";
 import type { Order } from "../data/mockData";
 import { SALES_PERIODS, deltaPct, getSalesSummary, type SalesPeriod, type SalesTotals, type SeriesPoint } from "../data/repSales";
@@ -19,7 +20,6 @@ import type { CtaTarget } from "../data/radar";
 const int = (n: number) => n.toLocaleString('pt-BR');
 /** Indicadores em reais inteiros (centavos só nas listas). */
 const reais = (n: number) => `R$ ${Math.round(n).toLocaleString('pt-BR')}`;
-const pct = (n: number) => `${n > 0 ? '+' : ''}${n.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 // eixo em pt-BR: "1,2 mi", "45 mil"
 const axis = (v: number) =>
   v >= 1e6 ? `${(v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
@@ -33,62 +33,6 @@ const PREVIOUS_COLOR = 'yellow.6';
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 /** Os únicos status mostrados no Radar: pedidos que ainda estão andando. */
 const OPEN_STATUSES: Order['status'][] = ['em análise', 'aprovado'];
-
-// ---------------------------------------------------------------------------
-// Widget: moldura comum (ícone em bloco + sobretítulo mono + ação), corpo e rodapé
-// ---------------------------------------------------------------------------
-function Widget({ icon: WidgetIcon, title, subtitle, action, footer, children }: {
-  icon: Icon; title: string; subtitle?: string; action?: ReactNode; footer?: ReactNode; children: ReactNode;
-}) {
-  return (
-    <Paper withBorder p="lg" h="100%">
-      <Stack gap="md" h="100%">
-        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
-          <Group gap="sm" wrap="nowrap" miw={0}>
-            <ThemeIcon size={32} radius="md" variant="light" color="neutral" aria-hidden>
-              <WidgetIcon size={18} />
-            </ThemeIcon>
-            <Box miw={0}>
-              {/* quebra em vez de cortar: no celular os indicadores ficam em duas colunas estreitas */}
-              <Text size="xs" fw={700} tt="uppercase" ff="monospace" lts={0.5} lineClamp={2}>{title}</Text>
-              {subtitle && <Text size="xs" c="dimmed">{subtitle}</Text>}
-            </Box>
-          </Group>
-          {action}
-        </Group>
-        {children}
-        {footer && <Box mt="auto">{footer}</Box>}
-      </Stack>
-    </Paper>
-  );
-}
-
-function WidgetLink({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
-  return (
-    <Button variant="transparent" color="neutral" px={0} fw={600} rightSection={<ArrowRightIcon size={18} />} onClick={onClick} disabled={disabled}>
-      {label}
-    </Button>
-  );
-}
-
-/** Variação contra o ano anterior em pílula: ícone + texto (nunca só a cor). */
-function DeltaBadge({ value }: { value: number | null }) {
-  if (value === null) return <Badge variant="light" color="gray" size="md">sem base</Badge>;
-  const flat = value === 0;
-  const up = value > 0;
-  const DeltaIcon = flat ? MinusIcon : up ? ArrowUpRightIcon : ArrowDownRightIcon;
-  return (
-    <Badge
-      variant="light"
-      color={flat ? 'gray' : up ? 'teal' : 'red'}
-      size="md"
-      leftSection={<DeltaIcon size={12} weight="bold" aria-hidden />}
-      aria-label={`${pct(value)} sobre o ano anterior`}
-    >
-      {pct(value)}
-    </Badge>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Widgets de indicador: número, variação e acumulado no período (sparkline)
@@ -196,7 +140,7 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
             const row = s.statusCounts.find(x => x.status === st);
             const count = row?.count ?? 0;
             return (
-              <Grid.Col key={st} span={{ base: 6, md: 3 }}>
+              <Grid.Col key={st} span={{ base: 12, xs: 6, md: 3 }}>
                 <Widget
                   icon={statusIcon[st]}
                   title={`Pedidos ${st === 'em análise' ? 'em análise' : 'aprovados'}`}

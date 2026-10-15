@@ -4,6 +4,7 @@ import { KpiSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
 import { ThemeHeader } from "./ui/ThemeHeader";
 import { RepSalesSection } from "./RepSalesSection";
+import { LojistaOrdersSection } from "./LojistaOrdersSection";
 import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
 } from "@mantine/core";
@@ -42,6 +43,8 @@ const PERIODS: { value: Bucket; label: string }[] = [
 ];
 
 const MAX_CARDS = 8;
+/** Loja do lojista logado (mock até existir autenticação real; mesma do motor do Radar). */
+const LOJISTA_CLIENT_ID = 'CLI-001';
 
 const SIGNAL_ICON: Record<SignalType, Icon> = {
   'pedido-atrasado': WarningIcon,
@@ -305,6 +308,9 @@ function BucketTabs({ value, onChange, counts, noun = ['pendência', 'pendência
   );
 }
 
+/** Sinais mostrados na seção de widgets "Pedidos, pagamentos e entregas" em vez de cartões. */
+const WIDGET_SIGNALS = new Set<SignalType>(['pedido-atrasado', 'boleto-a-vencer']);
+
 function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Bucket>('hoje');
   const [showAll, setShowAll] = useState(false);
@@ -313,10 +319,12 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const loading = useMockLoading();
   const radar = useRadar();
 
-  const inBucket = (b: Bucket) => radar.open.filter(s => bucketOf(s.actByDays) === b);
+  // pedidos, pagamentos e entregas aparecem nos widgets abaixo, não como cartões
+  const cards = radar.open.filter(s => !WIDGET_SIGNALS.has(s.type));
+  const inBucket = (b: Bucket) => cards.filter(s => bucketOf(s.actByDays) === b);
   const visible = inBucket(period);
   const shown = showAll ? visible : visible.slice(0, MAX_CARDS);
-  const resolved = radar.resolved.filter(s => (bucketOf(s.actByDays) ?? 'hoje') === period);
+  const resolved = radar.resolved.filter(s => !WIDGET_SIGNALS.has(s.type) && (bucketOf(s.actByDays) ?? 'hoje') === period);
   const health = HEALTH[radar.health];
   const total = radar.open.length;
   // Destaque da semana nunca repete um cartão do balde aberto
@@ -394,6 +402,9 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
           </SimpleGrid>
         </Stack>
       )}
+
+      {/* Widgets: pedidos em análise e aprovados, boletos a vencer e entregas */}
+      <LojistaOrdersSection clientId={LOJISTA_CLIENT_ID} onCta={onCta} />
 
       <Modal opened={!!why} onClose={() => setWhy(null)} centered title={<Text fw={600}>Por que isso aparece</Text>}>
         {why && (
