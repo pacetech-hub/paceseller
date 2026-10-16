@@ -117,8 +117,8 @@ export default function App() {
   const handleLogin = (selectedProfile: Profile) => {
     setProfile(selectedProfile);
     setAuthenticated(true);
-    // Rep entra direto na lista de clientes; indústria e lojista entram no Radar
-    setCurrentView(selectedProfile === 'rep' ? 'clients' : 'radar');
+    // Todos os perfis entram no Radar (a central de informações)
+    setCurrentView('radar');
     setSelectedClient(null);
     setCatalogFilters(defaultFilters);
   };
