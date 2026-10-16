@@ -29,3 +29,20 @@
 .item.item[data-active] {
   border-color: var(--mantine-color-neutral-9);
 }
+
+/* Conta (tipo + usuário): leva ao Meu Perfil */
+.account {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid transparent;
+
+  @mixin hover {
+    background-color: light-dark(var(--mantine-color-body), var(--mantine-color-dark-4));
+  }
+}
+
+.account[data-active] {
+  border-color: var(--mantine-color-neutral-9);
+}

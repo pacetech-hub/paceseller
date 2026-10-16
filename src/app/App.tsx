@@ -43,6 +43,8 @@ type Profile = 'admin' | 'rep' | 'lojista';
 
 // Nome do usuário lojista logado (mock até existir autenticação real).
 const CURRENT_LOJISTA_NAME = 'Juliana';
+/** Usuário da indústria logado (mock até existir autenticação real). */
+const CURRENT_ADMIN_NAME = 'Equipe Comercial';
 
 const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Visão geral do seu negócio' },
@@ -354,6 +356,7 @@ export default function App() {
           title={viewInfo.title}
           subtitle={viewInfo.subtitle}
           profile={profile}
+          userName={profile === 'admin' ? CURRENT_ADMIN_NAME : profile === 'rep' ? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
           currentView={currentView}
           notifications={bellCount}
           onNavigate={navigate}

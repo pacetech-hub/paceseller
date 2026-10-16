@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Group, Button, ActionIcon, Affix, Indicator, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger, CloseButton, Popover,
+  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, CloseButton, Popover,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -30,8 +30,8 @@ import {
   CrosshairIcon,
   ShoppingCartIcon,
   XIcon,
-  UserCircleIcon,
   HeadsetIcon,
+  DotsNineIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -55,7 +55,7 @@ interface NavItem {
 
 // Perfil não é status: ícone sempre neutro (amarelo/verde ficam reservados para atenção/sucesso)
 const profileLabels: Record<Profile, { label: string; icon: Icon; color: string }> = {
-  admin: { label: 'Indústria Admin', icon: BuildingsIcon, color: 'currentColor' },
+  admin: { label: 'Indústria', icon: BuildingsIcon, color: 'currentColor' },
   rep: { label: 'Representante', icon: UsersIcon, color: 'currentColor' },
   lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'currentColor' },
 };
@@ -323,6 +323,8 @@ interface TopBarProps {
   onNavigate: (view: View) => void;
   onLogout: () => void;
   cartCount?: number;
+  /** Usuário logado, mostrado no último segmento do menu. */
+  userName: string;
   /** Mostra o carrinho: só no Catálogo e nas páginas do processo de compra. */
   showCart?: boolean;
   selectedClient?: Client | null;
@@ -330,51 +332,50 @@ interface TopBarProps {
   onOpenCartDrawer?: () => void;
 }
 
-export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
+export function TopBar({ title, subtitle, profile, userName, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
-  // Menu único: todas as páginas do perfil
+  // Menu único: páginas principais, secundárias (depois de um divisor) e, por último, a conta
   const menuItems: AppsGridItem<View>[] =
     profile === 'admin'
       ? [
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: UsersIcon, label: 'Clientes', view: 'clients' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
           { icon: ClockIcon, label: 'Pedidos', view: 'history' },
           { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-          { icon: ShieldIcon, label: 'Administração', view: 'admin' },
-          { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
-          { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
         ]
       : profile === 'rep'
       ? [
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
           { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
+          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
-          { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
-          { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
         ]
       : [
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
           { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
+          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
           { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
           { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
-          { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
-          { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
         ];
+  const secondaryItems: AppsGridItem<View>[] = [
+    profile === 'admin'
+      ? { icon: ShieldIcon, label: 'Administração', view: 'admin' }
+      : { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
+    { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
+  ];
+  const account = { typeLabel: profileInfo.label, icon: ProfileIcon, userName, profileView: 'profile' as View };
 
   const [appsOpened, setAppsOpened] = useState(false);
   const selectPage = (view: View) => {
@@ -399,15 +400,51 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
     >
       <Group h="100%" gap="xs" wrap="nowrap">
         <Group flex={1} miw={0} gap="xs" wrap="nowrap">
-          {/* Abaixo do breakpoint sm todas as páginas ficam no Drawer do Burger */}
-          {menuItems.length > 0 && (
-            <Burger
-              opened={navOpened}
-              onClick={toggleNav}
-              hiddenFrom="sm"
-              aria-label="Abrir Navegação"
-            />
-          )}
+          {/* Menu único com todas as páginas, ao lado do logo: popover a partir de sm, gaveta no celular */}
+          <Popover
+            opened={appsOpened}
+            onChange={setAppsOpened}
+            position="bottom-start"
+            offset={8}
+            shadow="md"
+            width={360}
+            withinPortal
+          >
+            <Popover.Target>
+              <ActionIcon
+                onClick={() => setAppsOpened(o => !o)}
+                visibleFrom="sm"
+                variant={appsOpened ? 'light' : 'subtle'}
+                color="neutral"
+                size="lg"
+                aria-label="Abrir Menu"
+                aria-expanded={appsOpened}
+              >
+                <DotsNineIcon size={22} weight="bold" />
+              </ActionIcon>
+            </Popover.Target>
+            <Popover.Dropdown p={0} bd={0} bg="transparent">
+              <AppsGridMenu
+                items={menuItems}
+                secondaryItems={secondaryItems}
+                account={account}
+                currentView={currentView}
+                onSelect={selectPage}
+                onLogout={logout}
+              />
+            </Popover.Dropdown>
+          </Popover>
+          <ActionIcon
+            onClick={toggleNav}
+            hiddenFrom="sm"
+            variant={navOpened ? 'light' : 'subtle'}
+            color="neutral"
+            size="lg"
+            aria-label="Abrir Menu"
+            aria-expanded={navOpened}
+          >
+            <DotsNineIcon size={22} weight="bold" />
+          </ActionIcon>
           <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
             <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
           </Group>
@@ -488,39 +525,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
             </>
           )}
 
-          {/* Menu único com todas as páginas (a partir de sm; no celular o Burger abre o mesmo menu) */}
-          <Popover
-            opened={appsOpened}
-            onChange={setAppsOpened}
-            position="bottom-end"
-            offset={8}
-            shadow="md"
-            width={360}
-            withinPortal
-          >
-            <Popover.Target>
-              <ActionIcon
-                onClick={() => setAppsOpened(o => !o)}
-                visibleFrom="sm"
-                variant="light"
-                color="neutral"
-                aria-label="Abrir Menu"
-                aria-expanded={appsOpened}
-                className={classes.avatarButton}
-              >
-                <ProfileIcon size={16} color={profileInfo.color} />
-              </ActionIcon>
-            </Popover.Target>
-            <Popover.Dropdown p={0} bd={0} bg="transparent">
-              <AppsGridMenu
-                title={profileInfo.label}
-                items={menuItems}
-                currentView={currentView}
-                onSelect={selectPage}
-                onLogout={logout}
-              />
-            </Popover.Dropdown>
-          </Popover>
         </Group>
       </Group>
 
@@ -528,13 +532,15 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         opened={navOpened}
         onClose={closeNav}
         hiddenFrom="sm"
+        position="left"
         size={340}
         title={<Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />}
       >
         <Stack gap="sm">
           <AppsGridMenu
-            title={profileInfo.label}
             items={menuItems}
+            secondaryItems={secondaryItems}
+            account={account}
             currentView={currentView}
             onSelect={selectPage}
             onLogout={logout}
