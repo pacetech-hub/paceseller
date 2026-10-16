@@ -10,7 +10,7 @@ import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
 import { clients as allClients, type Client } from "../data/mockData";
 
-export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
+export type Period = 'dia' | 'semana' | 'mes' | 'trimestre' | 'ano';
 
 export interface SalesEntity {
   id: string;
@@ -55,6 +55,7 @@ export function getRepMonthlyTotal(repName: string): number {
 
 export const PERIOD_OPTIONS: { id: Period; label: string }[] = [
   { id: 'dia', label: 'Dia' },
+  { id: 'semana', label: 'Semana' },
   { id: 'mes', label: 'Mês' },
   { id: 'trimestre', label: 'Trimestre' },
   { id: 'ano', label: 'Ano' },
@@ -62,6 +63,7 @@ export const PERIOD_OPTIONS: { id: Period; label: string }[] = [
 
 const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
   dia: { multiplier: 1 / 22, labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] },
+  semana: { multiplier: 1 / 4.33, labels: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'] },
   mes: { multiplier: 1, labels: ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'] },
   trimestre: { multiplier: 3, labels: ['T1', 'T2', 'T3', 'T4'] },
   ano: { multiplier: 12, labels: ['2023', '2024', '2025', '2026'] },

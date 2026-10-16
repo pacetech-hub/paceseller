@@ -1,8 +1,8 @@
 import { clients, type Order } from "./mockData";
-import { getRepTeamEntities } from "../components/SalesIndicatorsSection";
+import { getNetworkEntities, getRepTeamEntities, type SalesEntity } from "../components/SalesIndicatorsSection";
 
-// Vendas do representante e do seu time (prepostos) por período, comparadas com o mesmo
-// período do ano anterior. Pedidos são mock gerados de forma determinística (mesma semente,
+// Vendas por período, comparadas com o mesmo período do ano anterior, em três recortes:
+// o representante e seu time (prepostos), a rede inteira (indústria) e uma loja (lojista). Pedidos são mock gerados de forma determinística (mesma semente,
 // mesmos números) a partir de hoje, para que dia/semana/mês/trimestre/ano sejam coerentes entre si.
 
 export type SalesPeriod = 'dia' | 'semana' | 'mes' | 'trimestre' | 'ano';
@@ -60,7 +60,10 @@ function generateOrders(repName: string, today: Date): SalesOrder[] {
   const weight = (e: (typeof team)[number]) => (e.role === 'representante' ? Math.max(0, e.monthlySales - prepostos) : e.monthlySales);
   const totalWeight = team.reduce((a, e) => a + weight(e), 0);
   const portfolio = clients.filter(c => c.rep === repName && c.status === 'ativo');
-  const rand = rng(20260107);
+  // semente por representante: cada carteira tem o seu próprio movimento
+  let seed = 20260107;
+  for (let i = 0; i < repName.length; i++) seed = (seed * 31 + repName.charCodeAt(i)) >>> 0;
+  const rand = rng(seed);
   const out: SalesOrder[] = [];
   const first = new Date(today.getFullYear() - 1, 0, 1);
   let seq = 0;
@@ -80,7 +83,7 @@ function generateOrders(repName: string, today: Date): SalesOrder[] {
       const value = Math.round((2500 + rand() * 12500) * (lastYear ? 0.97 : 1));
       const ageDays = Math.round((today.getTime() - d.getTime()) / 86_400_000);
       out.push({
-        id: `PED-${d.getFullYear()}-${String(++seq).padStart(4, '0')}`,
+        id: `PED-${d.getFullYear()}-${seller.id}-${String(++seq).padStart(4, '0')}`,
         date: d,
         clientId: client.id,
         clientName: client.name,
@@ -123,7 +126,7 @@ function windowLabel(period: SalesPeriod, start: Date, end: Date): string {
 // ---------------------------------------------------------------------------
 export interface SalesTotals { value: number; orders: number; pairs: number; ticket: number }
 export interface SellerRow {
-  id: string; name: string; role: 'representante' | 'preposto';
+  id: string; name: string; role: 'representante' | 'preposto'; parentRep?: string;
   value: number; orders: number; previous: number;
   /** % sobre o ano anterior; null sem base de comparação. */
   delta: number | null;
@@ -204,8 +207,14 @@ function totals(list: SalesOrder[]): SalesTotals {
   return { value, orders: valid.length, pairs: valid.reduce((a, o) => a + o.pairs, 0), ticket: valid.length ? Math.round(value / valid.length) : 0 };
 }
 
+/** De quem são as vendas: um representante e seu time, a rede inteira ou uma loja. */
+export type SalesScope =
+  | { kind: 'rep'; repName: string }
+  | { kind: 'network' }
+  | { kind: 'client'; clientId: string };
+
 const cache = new Map<string, { day: number; orders: SalesOrder[] }>();
-function ordersFor(repName: string, today: Date) {
+function repOrders(repName: string, today: Date) {
   const hit = cache.get(repName);
   if (hit && hit.day === today.getTime()) return hit.orders;
   const orders = generateOrders(repName, today);
@@ -213,9 +222,32 @@ function ordersFor(repName: string, today: Date) {
   return orders;
 }
 
+const reps = () => getNetworkEntities().filter(e => e.role === 'representante').map(e => e.name);
+
+function ordersFor(scope: SalesScope, today: Date): SalesOrder[] {
+  switch (scope.kind) {
+    case 'rep': return repOrders(scope.repName, today);
+    case 'network': return reps().flatMap(r => repOrders(r, today));
+    // a loja compra de um representante só: os pedidos dela saem da carteira dele
+    case 'client': return reps().flatMap(r => repOrders(r, today)).filter(o => o.clientId === scope.clientId);
+  }
+}
+
+function sellersFor(scope: SalesScope): SalesEntity[] {
+  switch (scope.kind) {
+    case 'rep': return getRepTeamEntities(scope.repName);
+    case 'network': return getNetworkEntities();
+    case 'client': return [];
+  }
+}
+
 export function getSalesSummary(repName: string, period: SalesPeriod, now = new Date()): SalesSummary {
+  return getScopeSummary({ kind: 'rep', repName }, period, now);
+}
+
+export function getScopeSummary(scope: SalesScope, period: SalesPeriod, now = new Date()): SalesSummary {
   const today = startOfDay(now);
-  const all = ordersFor(repName, today);
+  const all = ordersFor(scope, today);
   const start = windowStart(period, today);
   const prevStart = yearBefore(start);
   const prevEnd = yearBefore(today);
@@ -224,10 +256,10 @@ export function getSalesSummary(repName: string, period: SalesPeriod, now = new 
   const prev = all.filter(o => inRange(o, prevStart, prevEnd));
   const { buckets, unit } = seriesBuckets(period, today);
 
-  const sellers = getRepTeamEntities(repName).map(e => {
+  const sellers = sellersFor(scope).map(e => {
     const mine = totals(cur.filter(o => o.sellerId === e.id));
     const before = totals(prev.filter(o => o.sellerId === e.id));
-    return { id: e.id, name: e.name, role: e.role, value: mine.value, orders: mine.orders, previous: before.value, delta: deltaPct(mine.value, before.value) };
+    return { id: e.id, name: e.name, role: e.role, parentRep: e.parentRep, value: mine.value, orders: mine.orders, previous: before.value, delta: deltaPct(mine.value, before.value) };
   }).sort((a, b) => b.value - a.value);
 
   return {

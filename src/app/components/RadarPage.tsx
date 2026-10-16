@@ -6,6 +6,7 @@ import { ThemeHeader } from "./ui/ThemeHeader";
 import { RepSalesSection } from "./RepSalesSection";
 import { LojistaOrdersSection } from "./LojistaOrdersSection";
 import { IndustrySalesSection } from "./IndustrySalesSection";
+import { LojistaPurchasesSection } from "./LojistaPurchasesSection";
 import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
 } from "@mantine/core";
@@ -406,6 +407,9 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
 
       {/* Widgets: pedidos em análise e aprovados, boletos a vencer e entregas */}
       <LojistaOrdersSection clientId={LOJISTA_CLIENT_ID} onCta={onCta} />
+
+      {/* Compras da loja no período, com o filtro Dia/Semana/Mês/Trimestre/Ano */}
+      <LojistaPurchasesSection clientId={LOJISTA_CLIENT_ID} />
 
       <Modal opened={!!why} onClose={() => setWhy(null)} centered title={<Text fw={600}>Por que isso aparece</Text>}>
         {why && (
