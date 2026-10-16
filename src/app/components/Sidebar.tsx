@@ -3,7 +3,7 @@ import {
   Group, Button, ActionIcon, Affix, Indicator, Text, Box, Stack, Paper, NavLink, Badge,
   Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, CloseButton, Popover,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   SquaresFourIcon,
   PackageIcon,
@@ -334,6 +334,8 @@ interface TopBarProps {
 
 export function TopBar({ title, subtitle, profile, userName, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
+  // sm (48em): a partir daqui o menu abre em popover; abaixo, na gaveta
+  const isDesktop = useMediaQuery('(min-width: 48em)');
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
@@ -400,54 +402,42 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
     >
       <Group h="100%" gap="xs" wrap="nowrap">
         <Group flex={1} miw={0} gap="xs" wrap="nowrap">
-          {/* Menu único com todas as páginas, ao lado do logo: popover a partir de sm, gaveta no celular */}
-          <Popover
-            opened={appsOpened}
-            onChange={setAppsOpened}
-            position="bottom-start"
-            offset={8}
-            shadow="md"
-            width={360}
-            withinPortal
-          >
-            <Popover.Target>
-              <ActionIcon
-                onClick={() => setAppsOpened(o => !o)}
-                visibleFrom="sm"
-                variant={appsOpened ? 'light' : 'subtle'}
-                color="neutral"
-                size="lg"
-                aria-label="Abrir Menu"
-                aria-expanded={appsOpened}
-              >
-                <DotsNineIcon size={22} weight="bold" />
-              </ActionIcon>
-            </Popover.Target>
-            <Popover.Dropdown p={0} bd={0} bg="transparent">
-              <AppsGridMenu
-                items={menuItems}
-                secondaryItems={secondaryItems}
-                account={account}
-                currentView={currentView}
-                onSelect={selectPage}
-                onLogout={logout}
-              />
-            </Popover.Dropdown>
-          </Popover>
-          <ActionIcon
-            onClick={toggleNav}
-            hiddenFrom="sm"
-            variant={navOpened ? 'light' : 'subtle'}
-            color="neutral"
-            size="lg"
-            aria-label="Abrir Menu"
-            aria-expanded={navOpened}
-          >
-            <DotsNineIcon size={22} weight="bold" />
-          </ActionIcon>
-          <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
-            <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
-          </Group>
+          {/* Menu único com todas as páginas: ícone e logo formam um só botão (área de clique maior).
+              Popover a partir de sm; no celular o mesmo botão abre a gaveta */}
+          <Box pr="sm" mr={4} flex="none" className={classes.headerLogo}>
+            <Popover
+              opened={appsOpened}
+              onChange={setAppsOpened}
+              position="bottom-start"
+              offset={8}
+              shadow="md"
+              width={360}
+              withinPortal
+            >
+              <Popover.Target>
+                <UnstyledButton
+                  onClick={() => (isDesktop ? setAppsOpened(o => !o) : toggleNav())}
+                  className={classes.menuTrigger}
+                  data-open={(isDesktop ? appsOpened : navOpened) || undefined}
+                  aria-label="Abrir Menu"
+                  aria-expanded={isDesktop ? appsOpened : navOpened}
+                >
+                  <DotsNineIcon size={22} weight="bold" aria-hidden />
+                  <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
+                </UnstyledButton>
+              </Popover.Target>
+              <Popover.Dropdown p={0} bd={0} bg="transparent">
+                <AppsGridMenu
+                  items={menuItems}
+                  secondaryItems={secondaryItems}
+                  account={account}
+                  currentView={currentView}
+                  onSelect={selectPage}
+                  onLogout={logout}
+                />
+              </Popover.Dropdown>
+            </Popover>
+          </Box>
           {/* Título da página; a navegação fica toda no menu (sem acessos duplicados no topo) */}
           <Box miw={0}>
             <Text truncate fw={600}>{title}</Text>
