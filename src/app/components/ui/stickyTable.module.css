@@ -14,3 +14,12 @@
 .firstCol thead th:first-child {
   z-index: 3;
 }
+
+/* A 1ª coluna fixa acompanha o destaque da linha (hover e linha selecionada) */
+.firstCol tbody tr:hover td:first-child {
+  background-color: var(--table-hover-color, var(--mantine-color-gray-1));
+}
+
+.firstCol tbody tr[data-selected] td {
+  background-color: var(--mantine-color-gray-0);
+}

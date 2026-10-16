@@ -237,7 +237,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             </Group>
             <Title order={1} fw={700} mb={4}>{client.name}</Title>
             <Group gap={4} c="dimmed">
-              <MapPinIcon size={14} />
+              <MapPinIcon size={16} />
               <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
             </Group>
           </Box>
@@ -252,7 +252,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             ml={-12}
             aria-expanded={expanded}
             rightSection={
-              <CaretDownIcon size={14} className={detail.caret} data-expanded={expanded || undefined} />
+              <CaretDownIcon size={16} className={detail.caret} data-expanded={expanded || undefined} />
             }
           >
             {expanded ? 'Ocultar Dados Cadastrais' : 'Mostrar Dados Cadastrais'}
@@ -500,7 +500,7 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
           <Badge
             variant="light"
             color={cfg.color}
-            leftSection={<StatusIcon size={12} />}
+            leftSection={<StatusIcon size={14} />}
             pos="absolute"
             top={12}
             left={12}

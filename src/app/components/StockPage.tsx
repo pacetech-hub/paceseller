@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  Container, Stack, Paper, Group, Box, Text, Title, ThemeIcon, SegmentedControl, SimpleGrid,
-  UnstyledButton, Badge, Button, Table, NumberInput, Card,
-} from "@mantine/core";
+import { Container, Stack, Paper, Group, Box, Text, Title, ThemeIcon, SegmentedControl, SimpleGrid, UnstyledButton, Badge, Button, Table, NumberInput } from "@mantine/core";
 import {
   WarehouseIcon,
   PlugIcon,
@@ -13,12 +10,12 @@ import {
 import { formatDate, products } from "../data/mockData";
 import type { StockItem } from "../data/stockData";
 import {
-  StockKpis, StockToolbar, StockTableHeader, StockProductCell, StockStatusBadge, StockEmptyFilterRow,
+  StockKpis, StockToolbar, STOCK_NUMERIC_HEADERS, StockProductCell, StockStatusBadge, StockEmptyFilterRow,
   EditActions, EditButton, filterStock, type StockFilter, StockTableSkeleton,
 } from "./StockTable";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
-import sticky from "./ui/stickyTable.module.css";
+import { DataTable } from "./ui/DataTable";
 import interactive from "./interactive.module.css";
 import { toast } from "../lib/toast";
 
@@ -177,52 +174,44 @@ export function StockPage() {
         {loading ? <StockTableSkeleton cols={HEADERS.length} /> : (
         // Tabela densa (8 colunas): mantida também no celular, com rolagem lateral,
         // cabeçalho fixo e a coluna Produto sempre visível.
-        <Card withBorder padding={0}>
-          <Table.ScrollContainer minWidth={900} maxHeight={560}>
-            <Table className={sticky.firstCol} stickyHeader stickyHeaderOffset={0}
-              highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
-              <StockTableHeader labels={HEADERS} />
-              <Table.Tbody>
-                {filtered.map(it => {
-                  const isEditing = editing === it.sku;
-                  return (
-                    <Table.Tr key={it.sku}>
-                      <Table.Td maw={280}><StockProductCell item={it} /></Table.Td>
-                      <Table.Td><Text c="dimmed" size="sm" className="mono">{it.sku}</Text></Table.Td>
-                      <Table.Td><Text>{it.line}</Text></Table.Td>
-                      <Table.Td ta="right">
-                        {isEditing ? (
-                          <NumberInput w={110} ml="auto" aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
-                        ) : (
-                          <Text fw={600} className="mono">{it.stock}</Text>
-                        )}
-                      </Table.Td>
-                      <Table.Td ta="right">
-                        {isEditing ? (
-                          <NumberInput w={110} ml="auto" aria-label="Estoque mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
-                        ) : (
-                          <Text c="dimmed" className="mono">{it.min}</Text>
-                        )}
-                      </Table.Td>
-                      <Table.Td><StockStatusBadge item={it} /></Table.Td>
-                      <Table.Td><Text c="dimmed" size="sm">{formatDate(it.updatedAt)}</Text></Table.Td>
-                      <Table.Td ta="right">
-                        {mode === 'manual' ? (
-                          isEditing
-                            ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
-                            : <EditButton onClick={() => startEdit(it)} />
-                        ) : (
-                          <Text c="dimmed" size="sm">via ERP</Text>
-                        )}
-                      </Table.Td>
-                    </Table.Tr>
-                  );
-                })}
-                {filtered.length === 0 && <StockEmptyFilterRow colSpan={HEADERS.length} onClear={clearFilters} noItems={items.length === 0} />}
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
-        </Card>
+        <DataTable headers={HEADERS} numeric={STOCK_NUMERIC_HEADERS}>
+            {filtered.map(it => {
+              const isEditing = editing === it.sku;
+              return (
+                <Table.Tr key={it.sku}>
+                  <Table.Td maw={280}><StockProductCell item={it} /></Table.Td>
+                  <Table.Td><Text c="dimmed" size="sm" className="mono">{it.sku}</Text></Table.Td>
+                  <Table.Td><Text>{it.line}</Text></Table.Td>
+                  <Table.Td ta="right">
+                    {isEditing ? (
+                      <NumberInput w={110} ml="auto" aria-label="Estoque atual" placeholder="0" min={0} value={draft.stock} onChange={v => setDraft(d => ({ ...d, stock: Number(v) || 0 }))} />
+                    ) : (
+                      <Text fw={600} className="mono">{it.stock}</Text>
+                    )}
+                  </Table.Td>
+                  <Table.Td ta="right">
+                    {isEditing ? (
+                      <NumberInput w={110} ml="auto" aria-label="Estoque mínimo" placeholder="0" min={0} value={draft.min} onChange={v => setDraft(d => ({ ...d, min: Number(v) || 0 }))} />
+                    ) : (
+                      <Text c="dimmed" className="mono">{it.min}</Text>
+                    )}
+                  </Table.Td>
+                  <Table.Td><StockStatusBadge item={it} /></Table.Td>
+                  <Table.Td><Text c="dimmed" size="sm">{formatDate(it.updatedAt)}</Text></Table.Td>
+                  <Table.Td ta="right">
+                    {mode === 'manual' ? (
+                      isEditing
+                        ? <EditActions onSave={() => saveEdit(it.sku)} onCancel={() => setEditing(null)} />
+                        : <EditButton onClick={() => startEdit(it)} />
+                    ) : (
+                      <Text c="dimmed" size="sm">via ERP</Text>
+                    )}
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
+            {filtered.length === 0 && <StockEmptyFilterRow colSpan={HEADERS.length} onClear={clearFilters} noItems={items.length === 0} />}
+        </DataTable>
         )}
       </Stack>
     </Container>

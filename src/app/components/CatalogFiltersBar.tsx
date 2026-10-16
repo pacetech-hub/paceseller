@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Badge, Box, Button, Chip, ColorSwatch, Group, Paper, Popover, Radio, SimpleGrid, Slider, Stack, Text, TextInput, Tooltip,
+  ActionIcon, Badge, Box, Button, Chip, ColorSwatch, Select, Group, Paper, Popover, Radio, SimpleGrid, Stack, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
   FunnelIcon,
@@ -12,9 +12,13 @@ import {
   CaretDownIcon,
   CheckIcon,
   MagnifyingGlassIcon,
+  CrosshairIcon,
+  RulerIcon,
+  SortAscendingIcon,
   type Icon,
 } from "@phosphor-icons/react";
-import { products, formatCurrency } from "../data/mockData";
+import { products } from "../data/mockData";
+import { RADAR_FILTERS, goodMarginFilterVisible, type RadarFilter } from "../data/radar";
 import classes from "./CatalogFiltersBar.module.css";
 import interactive from "./interactive.module.css";
 import { EmptyState } from "./ui/EmptyState";
@@ -24,9 +28,26 @@ export type CatalogFilters = {
   line: string;
   category: string;
   colors: string[];
-  priceRange: [number, number];
+  /** Faixa de preço sobre o Seu custo, sem sobreposição (FR-202). '' = todas. */
+  priceBand: string;
+  /** Sinais do Radar (várias ao mesmo tempo). */
+  radar: RadarFilter[];
+  collection: string;
+  /** Numeração com pares disponíveis. '' = todas. */
+  size: string;
   priceTable: string;
 };
+
+// Faixas de preço sobre o Seu custo, sem sobreposição (FR-202)
+export const PRICE_BANDS = [
+  { value: 'ate-250', label: 'Até R$ 249,99', min: 0, max: 249.99 },
+  { value: '250-320', label: 'R$ 250 a R$ 319,99', min: 250, max: 319.99 },
+  { value: '320-mais', label: 'R$ 320 ou mais', min: 320, max: Infinity },
+];
+export const priceBandOf = (v: string) => PRICE_BANDS.find(b => b.value === v);
+export const allCollections = Array.from(new Set(products.map(p => p.collection))).sort();
+export const allSizes = Array.from(new Set(products.flatMap(p => Object.keys(p.grades)))).sort();
+export const radarFilterOptions = RADAR_FILTERS.filter(f => f.value !== 'boa-margem' || goodMarginFilterVisible);
 
 export const priceTables = [
   { id: 'padrao', label: 'Tabela Padrão', desc: '30/60/90 dias' },
@@ -67,27 +88,39 @@ const colorSwatch: Record<string, string> = {
   Rosa: '#ec4899', Bege: '#d6c2a3',
 };
 
-const priceMin = Math.floor(Math.min(...products.map(p => p.price)));
-const priceMax = Math.ceil(Math.max(...products.map(p => p.price)));
-
 export const defaultFilters: CatalogFilters = {
   search: '',
   line: 'Todos',
   category: 'Todos',
   colors: [],
-  priceRange: [priceMin, priceMax],
+  priceBand: '',
+  radar: [],
+  collection: 'Todas',
+  size: '',
   priceTable: 'padrao',
 };
 
 const BORDER_COLOR = 'var(--mantine-color-default-border)';
 
+/** Ordenação do catálogo (lista suspensa "Ordenar", à direita dos filtros). */
+export const SORT_OPTIONS = [
+  { value: 'lancamento', label: 'Lançamento' },
+  { value: 'menor-preco', label: 'Menor preço' },
+  { value: 'maior-preco', label: 'Maior preço' },
+  // diferença entre o PDV sugerido e o Seu custo (a margem do lojista)
+  { value: 'maior-desconto', label: 'Maior desconto' },
+];
+export type CatalogSort = (typeof SORT_OPTIONS)[number]['value'];
+
 interface Props {
   filters: CatalogFilters;
   onChange: (f: CatalogFilters) => void;
+  sortBy: string;
+  onSortChange: (v: string) => void;
 }
 
-// Barra de filtros no topo do catálogo: tabela de preço + filtros em popovers.
-export function CatalogFiltersBar({ filters, onChange }: Props) {
+// Barra do topo do catálogo: linha 1 = tabela de preço + busca; linha 2 = filtros em popovers + ordenar.
+export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: Props) {
   const [colorQuery, setColorQuery] = useState('');
   const visibleColors = allColors.filter(c => normalize(c).includes(normalize(colorQuery.trim())));
   const visiblePopularColors = popularColors.filter(c => visibleColors.includes(c));
@@ -137,15 +170,15 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
   );
 
   const currentTable = priceTables.find(t => t.id === filters.priceTable);
-  const priceActive = filters.priceRange[0] !== priceMin || filters.priceRange[1] !== priceMax;
-  const activeCount =
-    (filters.line !== 'Todos' ? 1 : 0) +
-    (filters.category !== 'Todos' ? 1 : 0) +
-    filters.colors.length +
-    (priceActive ? 1 : 0);
+  const activeCount = countActiveFilters(filters);
+  const toggleRadar = (v: RadarFilter) => onChange({
+    ...filters,
+    radar: filters.radar.includes(v) ? filters.radar.filter(x => x !== v) : [...filters.radar, v],
+  });
 
   return (
     <Paper withBorder p="sm">
+      <Stack gap="sm">
       <Group gap="sm" wrap="wrap" align="center">
         {/* Tabela de Preço — 4 opções fixas com descrição: cartões de opção (radio) em vez de lista suspensa */}
         <FilterPopover
@@ -176,7 +209,25 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
           </Radio.Group>
         </FilterPopover>
 
-        <Group gap="xs" wrap="nowrap" ml={{ sm: 'xs' }}>
+        {/* Busca no topo, à direita da tabela de preço */}
+        <TextInput
+          flex={{ base: '1 1 100%', xs: 1 }}
+          miw={{ xs: 200 }}
+          placeholder="Buscar por nome, linha ou código"
+          aria-label="Buscar produtos"
+          value={filters.search}
+          onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
+          leftSection={<MagnifyingGlassIcon size={18} />}
+          rightSection={filters.search ? (
+            <ActionIcon onClick={() => onChange({ ...filters, search: '' })} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
+              <XIcon size={16} />
+            </ActionIcon>
+          ) : null}
+        />
+      </Group>
+
+      <Group gap="sm" wrap="wrap" align="center">
+        <Group gap="xs" wrap="nowrap">
           <FunnelIcon size={18} />
           <Text lh={1.5} fw={600}>Filtros</Text>
           {activeCount > 0 && (
@@ -185,6 +236,22 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             </Badge>
           )}
         </Group>
+
+        {/* Sinais do Radar: os mesmos sinais do Radar e da página do produto */}
+        <FilterPopover
+          icon={CrosshairIcon}
+          label={filters.radar.length > 0 ? `Sinais do Radar (${filters.radar.length})` : 'Sinais do Radar'}
+          active={filters.radar.length > 0}
+        >
+          <Text lh={1.5} fw={600} mb="xs">Sinais do Radar</Text>
+          <Group gap="sm">
+            {radarFilterOptions.map(f => (
+              <Chip key={f.value} checked={filters.radar.includes(f.value)} onChange={() => toggleRadar(f.value)} variant="filled">
+                {f.label}
+              </Chip>
+            ))}
+          </Group>
+        </FilterPopover>
 
         <FilterPopover
           icon={TagIcon}
@@ -267,24 +334,36 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
         </FilterPopover>
 
         <FilterPopover
-          icon={CurrencyDollarIcon}
-          label={priceActive ? `Até ${formatCurrency(filters.priceRange[1])}` : 'Faixa de preço'}
-          active={priceActive}
+          icon={StackIcon}
+          label={filters.collection !== 'Todas' ? `Coleção: ${filters.collection}` : 'Coleção'}
+          active={filters.collection !== 'Todas'}
         >
-          <Stack gap="xs">
-            <Group justify="space-between">
-              <Text lh={1.5} c="dimmed" size="sm">{formatCurrency(priceMin)}</Text>
-              <Text lh={1.5} c="dimmed" size="sm">{formatCurrency(filters.priceRange[1])}</Text>
-            </Group>
-            <Slider
-              min={priceMin}
-              max={priceMax}
-              value={filters.priceRange[1]}
-              onChange={v => onChange({ ...filters, priceRange: [priceMin, v] })}
-              label={v => formatCurrency(v)}
-              mb={4}
-            />
-          </Stack>
+          <Text lh={1.5} fw={600} mb="xs">Coleção</Text>
+          <ChoiceChips options={['Todas', ...allCollections]} value={filters.collection} onSelect={v => onChange({ ...filters, collection: v })} />
+        </FilterPopover>
+
+        <FilterPopover
+          icon={CurrencyDollarIcon}
+          label={priceBandOf(filters.priceBand)?.label ?? 'Faixa de preço'}
+          active={!!filters.priceBand}
+        >
+          <Text lh={1.5} fw={600}>Faixa de preço</Text>
+          <Text lh={1.5} c="dimmed" size="sm" mb="xs">Sobre o Seu custo por par</Text>
+          <ChoiceChips
+            options={['Todas', ...PRICE_BANDS.map(b => b.label)]}
+            value={priceBandOf(filters.priceBand)?.label ?? 'Todas'}
+            onSelect={v => onChange({ ...filters, priceBand: PRICE_BANDS.find(b => b.label === v)?.value ?? '' })}
+          />
+        </FilterPopover>
+
+        <FilterPopover
+          icon={RulerIcon}
+          label={filters.size ? `Numeração: ${filters.size}` : 'Numeração'}
+          active={!!filters.size}
+        >
+          <Text lh={1.5} fw={600}>Numeração</Text>
+          <Text lh={1.5} c="dimmed" size="sm" mb="xs">Só produtos com pares disponíveis nesta numeração</Text>
+          <ChoiceChips options={['Todas', ...allSizes]} value={filters.size || 'Todas'} onSelect={v => onChange({ ...filters, size: v === 'Todas' ? '' : v })} />
         </FilterPopover>
 
         {activeCount > 0 && (
@@ -297,9 +376,36 @@ export function CatalogFiltersBar({ filters, onChange }: Props) {
             Limpar Filtros
           </Button>
         )}
+
+        {/* Ordenar: à direita dos filtros */}
+        <Select
+          ml={{ md: 'auto' }}
+          w={{ base: '100%', xs: 220 }}
+          aria-label="Ordenar"
+          leftSection={<SortAscendingIcon size={18} />}
+          data={SORT_OPTIONS}
+          value={sortBy}
+          onChange={v => v && onSortChange(v)}
+          allowDeselect={false}
+          comboboxProps={{ withinPortal: true }}
+          renderOption={({ option, checked }) => (
+            <Group gap="xs" wrap="nowrap">
+              {checked ? <CheckIcon size={16} /> : <Box w={16} />}
+              <Text inherit>{option.label}</Text>
+            </Group>
+          )}
+          styles={{ input: { fontWeight: 600 } }}
+        />
       </Group>
+      </Stack>
     </Paper>
   );
+}
+
+/** Quantos filtros estão ativos (busca e tabela de preço não contam). */
+export function countActiveFilters(f: CatalogFilters): number {
+  return (f.line !== 'Todos' ? 1 : 0) + (f.category !== 'Todos' ? 1 : 0) + f.colors.length + (f.priceBand ? 1 : 0)
+    + f.radar.length + (f.collection !== 'Todas' ? 1 : 0) + (f.size ? 1 : 0);
 }
 
 // busca sem diferenciar maiúsculas nem acentos
@@ -406,7 +512,7 @@ function FilterPopover({
           variant={active ? 'light' : 'default'}
           color="neutral"
           leftSection={<SectionIcon size={16} />}
-          rightSection={<CaretDownIcon size={14} />}
+          rightSection={<CaretDownIcon size={16} />}
           aria-label={ariaLabel}
         >
           {label}

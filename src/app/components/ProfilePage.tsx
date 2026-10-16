@@ -215,7 +215,7 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
     <Badge
       color={ok ? 'teal' : 'red'}
       variant="light"
-      leftSection={ok ? <CheckCircleIcon size={12} /> : <XCircleIcon size={12} />}
+      leftSection={ok ? <CheckCircleIcon size={16} /> : <XCircleIcon size={16} />}
     >
       {label}
     </Badge>
@@ -257,8 +257,8 @@ function LojistaProfile() {
       <Section icon={UserCheckIcon} title="Representante responsável">
         <Field label="Nome" value="Marina Costa" />
         <Field label="Região" value="Sudeste — SP Capital" />
-        <Field label="E-mail" value={<Group gap="xs" wrap="nowrap"><EnvelopeIcon size={14} color="var(--mantine-color-dimmed)" />marina.costa@tesla.com.br</Group>} />
-        <Field label="Telefone" value={<Group gap="xs" wrap="nowrap"><PhoneIcon size={14} color="var(--mantine-color-dimmed)" />(11) 98765-4321</Group>} />
+        <Field label="E-mail" value={<Group gap="xs" wrap="nowrap"><EnvelopeIcon size={16} color="var(--mantine-color-dimmed)" />marina.costa@tesla.com.br</Group>} />
+        <Field label="Telefone" value={<Group gap="xs" wrap="nowrap"><PhoneIcon size={16} color="var(--mantine-color-dimmed)" />(11) 98765-4321</Group>} />
       </Section>
 
       <Section icon={BellIcon} title="Preferências de notificação">
@@ -351,14 +351,14 @@ function AdminProfile() {
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
         <Field label="Plano" value={<Badge color="neutral" variant="light">Enterprise</Badge>} />
-        <Field label="Nível de acesso" value={<Group gap="xs" wrap="nowrap"><ShieldCheckIcon size={14} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
+        <Field label="Nível de acesso" value={<Group gap="xs" wrap="nowrap"><ShieldCheckIcon size={16} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
       </Section>
 
       <Section icon={PackageIcon} title="Configurações de catálogo">
         <Field label="Linhas ativas" value="Feminino · Masculino · Infantil" />
         <Field label="SKUs publicados" value="1.284" />
         <Field label="Coleção corrente" value="Verão 26" />
-        <Field label="Tabelas vigentes" value={<Group gap="xs" wrap="nowrap"><TagIcon size={14} color="var(--mantine-color-dimmed)" />A · B · C</Group>} />
+        <Field label="Tabelas vigentes" value={<Group gap="xs" wrap="nowrap"><TagIcon size={16} color="var(--mantine-color-dimmed)" />A · B · C</Group>} />
       </Section>
 
       <Section icon={UsersIcon} title="Usuários cadastrados">

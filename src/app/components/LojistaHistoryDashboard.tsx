@@ -163,7 +163,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                 </Group>
                 <Text fz={{ base: 'lg', sm: 'xl' }} fw={700} className="mono">{k.value}</Text>
                 <Group gap={4} c={k.up ? 'teal.7' : 'red.7'} wrap="nowrap" mt={4}>
-                  <TrendIcon size={12} />
+                  <TrendIcon size={16} />
                   <Text size="sm" fw={600} c="inherit">{k.trend}</Text>
                   <Text size="sm" c="dimmed" truncate>vs. período anterior</Text>
                 </Group>

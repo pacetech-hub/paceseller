@@ -64,7 +64,3 @@
 .zoomTabs {
   flex-wrap: wrap;
 }
-
-.nowrap {
-  white-space: nowrap;
-}

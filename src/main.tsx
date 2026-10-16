@@ -19,8 +19,9 @@
   createRoot(document.getElementById("root")!).render(
     <MantineProvider theme={mantineTheme}>
       <DatesProvider settings={{ locale: "pt-br" }}>
-        {/* Ícones Phosphor no estilo regular em todo o app; tamanho padrão 24px */}
-        <IconContext.Provider value={{ size: 24, weight: "regular" }}>
+        {/* Ícones Phosphor no peso "bold" (traço ~2px) em todo o app: o "regular" ficava fino demais
+            ao lado do texto. Tamanho padrão 24px; ícones de interface usam no mínimo 16px. */}
+        <IconContext.Provider value={{ size: 24, weight: "bold" }}>
           <Notifications position="top-center" autoClose={6000} />
           <App />
         </IconContext.Provider>

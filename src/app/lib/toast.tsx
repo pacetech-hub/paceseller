@@ -1,3 +1,4 @@
+import { Anchor } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { CheckIcon, XIcon } from "@phosphor-icons/react";
 
@@ -13,6 +14,24 @@ export const toast = {
       color: "teal",
       icon: <CheckIcon size={16} />,
     }),
+  /** Sucesso com um link de próximo passo dentro do aviso (ex.: "Ver carrinho"). */
+  successWithAction: (message: string, next: string, action: { label: string; onClick: () => void }) => {
+    const id = `toast-${Date.now()}`;
+    notifications.show({
+      id,
+      title: message,
+      message: (
+        <>
+          {next}{' '}
+          <Anchor component="button" type="button" fw={600} inherit onClick={() => { notifications.hide(id); action.onClick(); }}>
+            {action.label}
+          </Anchor>
+        </>
+      ),
+      color: "teal",
+      icon: <CheckIcon size={16} />,
+    });
+  },
   error: (message: string, next?: string) =>
     notifications.show({
       title: next ? message : undefined,

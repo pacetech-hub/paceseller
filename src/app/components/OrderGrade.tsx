@@ -327,7 +327,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             if (target < step && target >= firstStep) setStep(target);
           }}
           radius="md"
-          completedIcon={<CheckIcon size={14} />}
+          completedIcon={<CheckIcon size={16} />}
         >
           {steps.map(st => (
             <Stepper.Step
@@ -376,7 +376,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
             <Paper withBorder p="sm" bg={highlightBg}>
               <Group justify="space-between" mb="sm">
                 <Group gap="xs">
-                  <TagIcon size={14} />
+                  <TagIcon size={16} />
                   <Text c="dimmed" size="sm" fw={600}>Política comercial aplicada</Text>
                 </Group>
                 <Badge variant="light" color="neutral">
@@ -413,13 +413,13 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 <Title order={3} fw={600}>{selectedProduct.name}</Title>
                 <Text c="dimmed" size="sm">{selectedProduct.reference} · {formatCurrency(selectedProduct.price)}/par</Text>
               </Box>
-              <Button onClick={handleAutoFill} variant="default" leftSection={<LightningIcon size={14} />} flex="none">
+              <Button onClick={handleAutoFill} variant="default" leftSection={<LightningIcon size={16} />} flex="none">
                 Sugerir Quantidades
               </Button>
             </Group>
 
             {autoFill && (
-              <Alert variant="light" color="yellow" icon={<LightningIcon size={14} />} py="xs">
+              <Alert variant="light" color="yellow" icon={<LightningIcon size={16} />} py="xs">
                 <Text c="yellow.8">Quantidades sugeridas com base no histórico de giro desta loja. Ajuste qualquer numeração antes de revisar.</Text>
               </Alert>
             )}
@@ -584,7 +584,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
 
             {/* Aviso pedido mínimo */}
             {allGrades.length > 0 && finalTotal < clientPolicy.minOrderValue && (
-              <Alert variant="light" color="yellow" icon={<WarningCircleIcon size={14} />} py="xs">
+              <Alert variant="light" color="yellow" icon={<WarningCircleIcon size={16} />} py="xs">
                 <Text c="yellow.8">
                   Pedido abaixo do mínimo de {formatCurrency(clientPolicy.minOrderValue)} para {clientPolicy.name}. Adicione {formatCurrency(clientPolicy.minOrderValue - finalTotal)} em produtos para enviar sem ajuste.
                 </Text>

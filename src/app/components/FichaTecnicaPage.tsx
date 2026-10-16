@@ -6,7 +6,7 @@ import {
 } from "@mantine/core";
 import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton, TableSkeleton } from "./ui/Skeletons";
-import { CellList, CellCard, CellField } from "./ui/CellView";
+import { DataTable } from "./ui/DataTable";
 import { EmptyState } from "./ui/EmptyState";
 import { useSmallerThan } from "../lib/responsive";
 import { toast } from "../lib/toast";
@@ -512,7 +512,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
               <Skeleton height={14} width="70%" />
             </Stack>
           </Paper>
-          <TableSkeleton rows={sizes.length} cols={profile === 'lojista' ? 3 : 2} />
+          <TableSkeleton rows={sizes.length} cols={profile === 'lojista' ? 4 : 2} />
         </>
       ) : (
       <>
@@ -580,83 +580,47 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
         <SectionLabel>
           {profile === 'lojista' ? 'Estoque por tamanho (fábrica e loja)' : 'Estoque fábrica por tamanho'}
         </SectionLabel>
-        {/* Até 3 colunas: tabela a partir de sm; no celular vira lista de cartões (sem rolagem lateral) */}
-        <Box visibleFrom="sm">
-          <Table verticalSpacing="sm" horizontalSpacing="md">
-            <Table.Thead>
-              <Table.Tr c="dimmed" fz="sm">
-                <Table.Th fw={400} pl={0}>Tamanho</Table.Th>
-                <Table.Th fw={400} ta="right">Estoque fábrica (pares)</Table.Th>
-                {profile === 'lojista' && <Table.Th fw={400} ta="right">Estoque loja (pares)</Table.Th>}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {sizes.map(s => {
-                const factoryStock = product.grades[s] ?? 0;
-                const storeQty = storeStock[s] ?? 0;
-                const storeLow = storeQty < 3;
-                return (
-                  <Table.Tr key={s}>
-                    <Table.Td pl={0} fw={600} className={classes.nowrap}>Nº {s}</Table.Td>
-                    <Table.Td ta="right">
-                      <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
-                    </Table.Td>
-                    {profile === 'lojista' && (
-                      <Table.Td ta="right">
-                        {/* número na borda direita (alinhado aos demais); reposição à esquerda dele */}
-                        <Group gap="sm" wrap="nowrap" justify="flex-end">
-                          {storeLow && (
-                            <Button
-                              onClick={() => requestRestock(s)}
-                              size="sm"
-                              variant="light"
-                              leftSection={<ArrowsClockwiseIcon size={16} />}
-                              flex="none"
-                            >
-                              Solicitar Reposição
-                            </Button>
-                          )}
-                          <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
-                        </Group>
-                      </Table.Td>
-                    )}
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
-        </Box>
-        <CellList>
+        {/* mesma tabela em todas as larguras; no celular rola para o lado */}
+        <DataTable
+          headers={profile === 'lojista'
+            ? ['Tamanho', 'Estoque fábrica (pares)', 'Estoque loja (pares)', 'Ações']
+            : ['Tamanho', 'Estoque fábrica (pares)']}
+          numeric={['Estoque fábrica (pares)', 'Estoque loja (pares)']}
+          minWidth={profile === 'lojista' ? 560 : 320}
+        >
           {sizes.map(s => {
             const factoryStock = product.grades[s] ?? 0;
             const storeQty = storeStock[s] ?? 0;
-            const storeLow = profile === 'lojista' && storeQty < 3;
+            const storeLow = storeQty < 3;
             return (
-              <CellCard
-                key={s}
-                title={`Nº ${s}`}
-                actions={storeLow ? (
-                  <Button
-                    onClick={() => requestRestock(s)}
-                    variant="light"
-                    leftSection={<ArrowsClockwiseIcon size={16} />}
-                  >
-                    Solicitar Reposição
-                  </Button>
-                ) : undefined}
-              >
-                <CellField label="Estoque fábrica (pares)">
+              <Table.Tr key={s}>
+                <Table.Td><Text fw={600}>Nº {s}</Text></Table.Td>
+                <Table.Td ta="right">
                   <Text span className="mono" fw={600} c={stockColor(factoryStock, 20)}>{factoryStock}</Text>
-                </CellField>
+                </Table.Td>
                 {profile === 'lojista' && (
-                  <CellField label="Estoque loja (pares)">
-                    <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
-                  </CellField>
+                  <>
+                    <Table.Td ta="right">
+                      <Text span className="mono" fw={600} c={stockColor(storeQty, 3)}>{storeQty}</Text>
+                    </Table.Td>
+                    <Table.Td ta="right">
+                      {storeLow && (
+                        <Button
+                          onClick={() => requestRestock(s)}
+                          variant="default"
+                          size="sm"
+                          leftSection={<ArrowsClockwiseIcon size={16} />}
+                        >
+                          Solicitar Reposição
+                        </Button>
+                      )}
+                    </Table.Td>
+                  </>
                 )}
-              </CellCard>
+              </Table.Tr>
             );
           })}
-        </CellList>
+        </DataTable>
       </Paper>
 
       {/* Produtos relacionados */}
