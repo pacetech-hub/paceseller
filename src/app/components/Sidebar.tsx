@@ -3,12 +3,11 @@ import {
   Group, Button, ActionIcon, Affix, Indicator, Text, Box, Stack, Paper, NavLink, Badge,
   Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, Burger, CloseButton, Popover,
 } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
   SquaresFourIcon,
   PackageIcon,
   ShoppingBagIcon,
-  BasketIcon,
   ClockIcon,
   SparkleIcon,
   GearIcon,
@@ -324,47 +323,19 @@ interface TopBarProps {
   onNavigate: (view: View) => void;
   onLogout: () => void;
   cartCount?: number;
+  /** Mostra o carrinho: só no Catálogo e nas páginas do processo de compra. */
+  showCart?: boolean;
   selectedClient?: Client | null;
   /** Abre a gaveta do carrinho (FR-401); sem ela, o ícone leva à lista de carrinhos. */
   onOpenCartDrawer?: () => void;
 }
 
-export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, selectedClient, onOpenCartDrawer }: TopBarProps) {
+export function TopBar({ title, subtitle, profile, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
-  // Entre sm e md os itens do topo ficam só com ícone: aí o tooltip serve de rótulo
-  const headerLabelsVisible = useMediaQuery('(min-width: 62em)');
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
 
-  type HeaderItem = { label: string; icon: Icon; view: View };
-
-  const headerItems: HeaderItem[] =
-    profile === 'admin'
-      ? [
-          { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
-          { icon: UsersIcon, label: 'Clientes', view: 'clients' as View },
-          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
-          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
-          { icon: ShieldIcon, label: 'Administração', view: 'admin' as View },
-        ]
-      : profile === 'rep'
-      ? [
-          { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
-          { icon: StorefrontIcon, label: 'Clientes', view: 'clients' as View },
-          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
-          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' as View },
-          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' as View },
-          { icon: ShieldIcon, label: 'Permissões', view: 'permissions' as View },
-        ]
-      : [
-          // BR-70: navegação principal do lojista — todos habilitados e no mesmo estilo
-          { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
-          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: BasketIcon, label: 'Meus carrinhos', view: 'carts' },
-          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
-        ];
-
-  // Menu único: todas as páginas do perfil (inclusive as que não cabem na barra do topo)
+  // Menu único: todas as páginas do perfil
   const menuItems: AppsGridItem<View>[] =
     profile === 'admin'
       ? [
@@ -395,7 +366,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
       : [
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: BasketIcon, label: 'Meus carrinhos', view: 'carts' },
           { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
           { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
           { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
@@ -441,56 +411,37 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           <Group pr="sm" mr={4} h={32} flex="none" wrap="nowrap" className={classes.headerLogo}>
             <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
           </Group>
-          {/* Nav items à esquerda quando existem, caso contrário título */}
-          {headerItems.length > 0 ? (
-            <Group gap="sm" wrap="nowrap" visibleFrom="sm">
-              {headerItems.map(item => {
-                const Icon = item.icon;
-                const active = currentView === item.view;
-                return (
-                  <Tooltip key={item.label} label={item.label} withArrow disabled={headerLabelsVisible}>
-                    <Button
-                      onClick={() => onNavigate(item.view)}
-                      variant={active ? 'light' : 'subtle'}
-                      color="neutral"
-                      leftSection={<Icon size={16} />}
-                      aria-label={item.label}
-                      styles={{ label: { fontWeight: active ? 600 : 400 } }}
-                    >
-                      <Text span visibleFrom="md" inherit>{item.label}</Text>
-                    </Button>
-                  </Tooltip>
-                );
-              })}
-            </Group>
-          ) : (
-            <Box miw={0}>
-              <Text truncate fw={600}>{title}</Text>
-              {subtitle && <Text truncate c="dimmed" size="sm" visibleFrom="sm">{subtitle}</Text>}
-            </Box>
-          )}
+          {/* Título da página; a navegação fica toda no menu (sem acessos duplicados no topo) */}
+          <Box miw={0}>
+            <Text truncate fw={600}>{title}</Text>
+            {subtitle && <Text truncate c="dimmed" size="sm" visibleFrom="sm">{subtitle}</Text>}
+          </Box>
         </Group>
 
         <Group gap="sm" wrap="nowrap" flex="none">
           {actions}
 
-          {/* Cart(s) — todos os perfis usam multi-carrinhos.
-              Ícone + texto a partir de 1600px; abaixo disso a barra (com os itens de navegação) fica apertada e vira só ícone com tooltip */}
-          {/* FR-401: o ícone abre a gaveta do carrinho e mostra quantos carrinhos estão abertos */}
-          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.wideOnly}>
-            <Button onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" px="sm" leftSection={<ShoppingCartIcon size={16} />} aria-label={`Carrinho · ${cartCount} abertos`}>
-              Carrinho
-            </Button>
-          </Indicator>
-          <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.narrowOnly}>
-            <Tooltip label="Ver Carrinho" withArrow>
-              <ActionIcon onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
-                <ShoppingCartIcon size={16} />
-              </ActionIcon>
-            </Tooltip>
-          </Indicator>
+          {/* Carrinho só no Catálogo e no processo de compra (carrinho, carrinhos e grade).
+              FR-401: o ícone abre a gaveta do carrinho e mostra quantos carrinhos estão abertos.
+              Ícone + texto em telas largas; abaixo disso, só ícone com tooltip */}
+          {showCart && (
+            <>
+            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.wideOnly}>
+              <Button onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" px="sm" leftSection={<ShoppingCartIcon size={16} />} aria-label={`Carrinho · ${cartCount} abertos`}>
+                Carrinho
+              </Button>
+            </Indicator>
+            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.narrowOnly}>
+              <Tooltip label="Ver Carrinho" withArrow>
+                <ActionIcon onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
+                  <ShoppingCartIcon size={16} />
+                </ActionIcon>
+              </Tooltip>
+            </Indicator>
+            </>
+          )}
 
-          {/* Notifications — mesma regra do carrinho */}
+          {/* Notifications: ícone + texto em telas largas, só ícone abaixo */}
           <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4} className={classes.wideOnly}>
             <Button variant="subtle" color="neutral" px="sm" leftSection={<BellIcon size={16} />}>
               Notificações

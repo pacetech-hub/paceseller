@@ -216,6 +216,9 @@ export default function App() {
     );
   }
 
+  // Páginas do processo de compra: só nelas o topo mostra o carrinho e o cliente selecionado
+  const commerceView = (['catalog', 'order-grade', 'cart', 'carts'] as View[]).includes(currentView);
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard': {
@@ -357,7 +360,8 @@ export default function App() {
           onLogout={handleLogout}
           onOpenCartDrawer={() => setDrawerOpen(true)}
           cartCount={cartsClient ? clientCarts.length : carts.filter(isOpen).length}
-          selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
+          showCart={commerceView}
+          selectedClient={commerceView ? selectedClient : null}
         />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
