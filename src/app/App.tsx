@@ -71,7 +71,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const [profile, setProfile] = useState<Profile>('admin');
-  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [currentView, setCurrentView] = useState<View>('radar');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
@@ -115,17 +115,15 @@ export default function App() {
   const handleLogin = (selectedProfile: Profile) => {
     setProfile(selectedProfile);
     setAuthenticated(true);
-    // Lojista entra no Radar (a home da loja); Rep entra direto na lista de clientes
-    if (selectedProfile === 'lojista') setCurrentView('radar');
-    else if (selectedProfile === 'rep') setCurrentView('clients');
-    else setCurrentView('dashboard');
+    // Rep entra direto na lista de clientes; indústria e lojista entram no Radar
+    setCurrentView(selectedProfile === 'rep' ? 'clients' : 'radar');
     setSelectedClient(null);
     setCatalogFilters(defaultFilters);
   };
 
   const handleLogout = () => {
     setAuthenticated(false);
-    setCurrentView('dashboard');
+    setCurrentView('radar');
     setSelectedClient(null);
     setSelectedOrder(null);
   };
@@ -135,9 +133,9 @@ export default function App() {
     setCurrentView('order-detail');
   };
 
-  // Indicadores ficam só para o admin por enquanto; lojista e rep têm o Radar como central de informações
+  // Indicadores ocultos para todos os perfis por enquanto: o Radar é a central de informações
   const navigate = (view: View) => {
-    if (view === 'dashboard' && profile !== 'admin') view = 'radar';
+    if (view === 'dashboard') view = 'radar';
     setCatalogEntry(undefined);
     setCatalogSortBy(null);
     setDrawerOpen(false);
@@ -297,8 +295,8 @@ export default function App() {
           <SalesTeamPage
             scope={profile === 'admin' ? 'network' : 'own'}
             entities={profile === 'admin' ? getNetworkEntities() : getRepTeamEntities(CURRENT_REP_NAME)}
-            onBack={() => navigate(profile === 'admin' ? 'dashboard' : 'radar')}
-            backLabel={profile === 'admin' ? 'Indicadores' : 'Radar'}
+            onBack={() => navigate('radar')}
+            backLabel="Radar"
           />
         );
       case 'profile':

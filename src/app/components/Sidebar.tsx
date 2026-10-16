@@ -11,7 +11,6 @@ import {
   BasketIcon,
   ClockIcon,
   SparkleIcon,
-  ChartBarIcon,
   GearIcon,
   UsersIcon,
   StorefrontIcon,
@@ -342,7 +341,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const headerItems: HeaderItem[] =
     profile === 'admin'
       ? [
-          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
           { icon: UsersIcon, label: 'Clientes', view: 'clients' as View },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
@@ -351,7 +349,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         ]
       : profile === 'rep'
       ? [
-          // Indicadores ocultos no rep por enquanto: as informações ficam nos widgets do Radar
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
           { icon: StorefrontIcon, label: 'Clientes', view: 'clients' as View },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
@@ -371,7 +368,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
   const menuItems: AppsGridItem<View>[] =
     profile === 'admin'
       ? [
-          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' },
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: UsersIcon, label: 'Clientes', view: 'clients' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
