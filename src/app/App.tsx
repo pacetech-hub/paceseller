@@ -135,7 +135,9 @@ export default function App() {
     setCurrentView('order-detail');
   };
 
+  // Indicadores ficam só para o admin por enquanto; lojista e rep têm o Radar como central de informações
   const navigate = (view: View) => {
+    if (view === 'dashboard' && profile !== 'admin') view = 'radar';
     setCatalogEntry(undefined);
     setCatalogSortBy(null);
     setDrawerOpen(false);
@@ -292,7 +294,8 @@ export default function App() {
           <SalesTeamPage
             scope={profile === 'admin' ? 'network' : 'own'}
             entities={profile === 'admin' ? getNetworkEntities() : getRepTeamEntities(CURRENT_REP_NAME)}
-            onBack={() => navigate('dashboard')}
+            onBack={() => navigate(profile === 'admin' ? 'dashboard' : 'radar')}
+            backLabel={profile === 'admin' ? 'Indicadores' : 'Radar'}
           />
         );
       case 'profile':

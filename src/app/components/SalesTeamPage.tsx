@@ -11,9 +11,11 @@ interface SalesTeamPageProps {
   scope: 'network' | 'own';
   entities: SalesEntity[];
   onBack: () => void;
+  /** Nome da página de origem, usado no link de voltar. */
+  backLabel?: string;
 }
 
-export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
+export function SalesTeamPage({ scope, entities, onBack, backLabel = 'Indicadores' }: SalesTeamPageProps) {
   const [period, setPeriod] = useState<Period>('dia');
   const loading = useMockLoading();
 
@@ -25,7 +27,7 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
     <Stack gap="xl" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       {/* Link de voltar: margem negativa só para alinhar o texto ao conteúdo */}
       <Button onClick={onBack} variant="subtle" color="neutral" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
-        Voltar para Indicadores
+        Voltar para {backLabel}
       </Button>
 
       <Group justify="space-between" wrap="wrap" gap="sm">
@@ -46,8 +48,8 @@ export function SalesTeamPage({ scope, entities, onBack }: SalesTeamPageProps) {
         <EmptyState
           icon={UsersIcon}
           title="Nenhum vendedor com vendas registradas"
-          description="Ainda não há representantes ou prepostos com vendas neste período. Escolha outro período acima ou volte para os indicadores."
-          action={{ label: 'Voltar para Indicadores', onClick: onBack, forward: false }}
+          description="Ainda não há representantes ou prepostos com vendas neste período. Escolha outro período acima ou volte para a página anterior."
+          action={{ label: `Voltar para ${backLabel}`, onClick: onBack, forward: false }}
         />
       ) : (
       // Ranking no padrão de tabela; a posição fica dentro da coluna Vendedor (1ª coluna fixa)

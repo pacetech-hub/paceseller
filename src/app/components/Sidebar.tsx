@@ -351,7 +351,7 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         ]
       : profile === 'rep'
       ? [
-          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' as View },
+          // Indicadores ocultos no rep por enquanto: as informações ficam nos widgets do Radar
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' as View },
           { icon: StorefrontIcon, label: 'Clientes', view: 'clients' as View },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' as View },
@@ -385,7 +385,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
         ]
       : profile === 'rep'
       ? [
-          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' },
           { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
           { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
@@ -402,7 +401,6 @@ export function TopBar({ title, subtitle, profile, currentView, notifications = 
           { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
           { icon: BasketIcon, label: 'Meus carrinhos', view: 'carts' },
           { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
-          { icon: ChartBarIcon, label: 'Indicadores', view: 'dashboard' },
           { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
           { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
           { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
