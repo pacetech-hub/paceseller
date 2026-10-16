@@ -43,6 +43,8 @@ type Profile = 'admin' | 'rep' | 'lojista';
 
 // Nome do usuário lojista logado (mock até existir autenticação real).
 const CURRENT_LOJISTA_NAME = 'Juliana';
+/** Usuário da indústria logado (mock até existir autenticação real). */
+const CURRENT_ADMIN_NAME = 'Equipe Comercial';
 
 const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Visão geral do seu negócio' },
@@ -71,7 +73,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const [profile, setProfile] = useState<Profile>('admin');
-  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [currentView, setCurrentView] = useState<View>('radar');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
@@ -115,17 +117,15 @@ export default function App() {
   const handleLogin = (selectedProfile: Profile) => {
     setProfile(selectedProfile);
     setAuthenticated(true);
-    // Lojista entra no Radar (a home da loja); Rep entra direto na lista de clientes
-    if (selectedProfile === 'lojista') setCurrentView('radar');
-    else if (selectedProfile === 'rep') setCurrentView('clients');
-    else setCurrentView('dashboard');
+    // Todos os perfis entram no Radar (a central de informações)
+    setCurrentView('radar');
     setSelectedClient(null);
     setCatalogFilters(defaultFilters);
   };
 
   const handleLogout = () => {
     setAuthenticated(false);
-    setCurrentView('dashboard');
+    setCurrentView('radar');
     setSelectedClient(null);
     setSelectedOrder(null);
   };
@@ -135,9 +135,9 @@ export default function App() {
     setCurrentView('order-detail');
   };
 
-  // Indicadores ficam só para o admin por enquanto; lojista e rep têm o Radar como central de informações
+  // Indicadores ocultos para todos os perfis por enquanto: o Radar é a central de informações
   const navigate = (view: View) => {
-    if (view === 'dashboard' && profile !== 'admin') view = 'radar';
+    if (view === 'dashboard') view = 'radar';
     setCatalogEntry(undefined);
     setCatalogSortBy(null);
     setDrawerOpen(false);
@@ -159,6 +159,7 @@ export default function App() {
       case 'cart': openCart(target.cartId); return;
       case 'orders': setOrderStatusFilter(target.status ?? 'todos'); navigate('history'); return;
       case 'sales-team': navigate('sales-team'); return;
+      case 'clients': navigate('clients'); return;
       case 'client': {
         const client = clientsList.find(c => c.id === target.clientId);
         if (client) { setSelectedClient(client); navigate('client-detail'); }
@@ -200,6 +201,8 @@ export default function App() {
       }
     : currentView === 'radar' && profile === 'rep'
     ? { title: 'Radar', subtitle: 'Quem da sua carteira precisa de contato e por quê' }
+    : currentView === 'radar' && profile === 'admin'
+    ? { title: 'Radar', subtitle: 'Visão geral da rede, em widgets' }
     : currentView === 'order-detail' && selectedOrder
     ? { title: selectedOrder.id, subtitle: 'Detalhes do pedido' }
     : currentView === 'client-detail' && selectedClient
@@ -214,6 +217,9 @@ export default function App() {
       </div>
     );
   }
+
+  // Páginas do processo de compra: só nelas o topo mostra o carrinho e o cliente selecionado
+  const commerceView = (['catalog', 'order-grade', 'cart', 'carts'] as View[]).includes(currentView);
 
   const renderView = () => {
     switch (currentView) {
@@ -294,8 +300,8 @@ export default function App() {
           <SalesTeamPage
             scope={profile === 'admin' ? 'network' : 'own'}
             entities={profile === 'admin' ? getNetworkEntities() : getRepTeamEntities(CURRENT_REP_NAME)}
-            onBack={() => navigate(profile === 'admin' ? 'dashboard' : 'radar')}
-            backLabel={profile === 'admin' ? 'Indicadores' : 'Radar'}
+            onBack={() => navigate('radar')}
+            backLabel="Radar"
           />
         );
       case 'profile':
@@ -350,13 +356,15 @@ export default function App() {
           title={viewInfo.title}
           subtitle={viewInfo.subtitle}
           profile={profile}
+          userName={profile === 'admin' ? CURRENT_ADMIN_NAME : profile === 'rep' ? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
           currentView={currentView}
           notifications={bellCount}
           onNavigate={navigate}
           onLogout={handleLogout}
           onOpenCartDrawer={() => setDrawerOpen(true)}
           cartCount={cartsClient ? clientCarts.length : carts.filter(isOpen).length}
-          selectedClient={['catalog', 'order-grade', 'cart', 'carts'].includes(currentView) ? selectedClient : null}
+          showCart={commerceView}
+          selectedClient={commerceView ? selectedClient : null}
         />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}

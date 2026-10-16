@@ -267,7 +267,8 @@ export type CtaTarget =
   | { kind: 'boletos' }
   | { kind: 'client'; clientId: string }
   | { kind: 'orders'; status?: string }
-  | { kind: 'sales-team' };
+  | { kind: 'sales-team' }
+  | { kind: 'clients' };
 
 export interface RadarSignal {
   id: string;

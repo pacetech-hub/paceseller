@@ -10,7 +10,7 @@ import { ChartSkeleton, KpiSkeleton, ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
 import { clients as allClients, type Client } from "../data/mockData";
 
-export type Period = 'dia' | 'mes' | 'trimestre' | 'ano';
+export type Period = 'dia' | 'semana' | 'mes' | 'trimestre' | 'ano';
 
 export interface SalesEntity {
   id: string;
@@ -55,6 +55,7 @@ export function getRepMonthlyTotal(repName: string): number {
 
 export const PERIOD_OPTIONS: { id: Period; label: string }[] = [
   { id: 'dia', label: 'Dia' },
+  { id: 'semana', label: 'Semana' },
   { id: 'mes', label: 'Mês' },
   { id: 'trimestre', label: 'Trimestre' },
   { id: 'ano', label: 'Ano' },
@@ -62,6 +63,7 @@ export const PERIOD_OPTIONS: { id: Period; label: string }[] = [
 
 const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
   dia: { multiplier: 1 / 22, labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] },
+  semana: { multiplier: 1 / 4.33, labels: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'] },
   mes: { multiplier: 1, labels: ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'] },
   trimestre: { multiplier: 3, labels: ['T1', 'T2', 'T3', 'T4'] },
   ano: { multiplier: 12, labels: ['2023', '2024', '2025', '2026'] },
@@ -70,7 +72,7 @@ const periodConfig: Record<Period, { multiplier: number; labels: string[] }> = {
 export const brl = (n: number) => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
 
 // eixo em pt-BR: "1,2 mi", "450 mil"
-function formatAxisValue(v: number): string {
+export function formatAxisValue(v: number): string {
   if (v >= 1e6) return `${(v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`;
   if (v >= 1e3) return `${Math.round(v / 1e3).toLocaleString('pt-BR')} mil`;
   return v.toLocaleString('pt-BR');
@@ -81,7 +83,7 @@ export function scaleValue(monthlyBase: number, period: Period): number {
 }
 
 // série de evolução na granularidade do período: barras do ano corrente x linha do mesmo ciclo no ano anterior
-function buildSeries(monthlyBase: number, period: Period) {
+export function buildSeries(monthlyBase: number, period: Period) {
   const { multiplier, labels } = periodConfig[period];
   const base = monthlyBase * multiplier;
   return labels.map((label, i) => {
@@ -95,7 +97,7 @@ function buildSeries(monthlyBase: number, period: Period) {
 }
 
 // `color` é uma cor do tema Mantine (nome.tom) — só neutro + cores de status da paleta
-const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
+export const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
   { key: 'analise', label: 'Em análise', color: 'yellow.6', ratio: 0.10, orderStatus: 'em análise' },
   { key: 'aprovado', label: 'Aprovado', color: 'neutral.9', ratio: 0.40, orderStatus: 'aprovado' },
   { key: 'faturado', label: 'Faturado', color: 'neutral.5', ratio: 0.27, orderStatus: 'faturado' },
@@ -133,11 +135,11 @@ function formatCompactCurrency(v: number): string {
   return brl(v);
 }
 
-interface PriorityClient extends Client {
+export interface PriorityClient extends Client {
   reason: string;
 }
 
-function buildPriorityClients(pool: Client[]): PriorityClient[] {
+export function buildPriorityClients(pool: Client[]): PriorityClient[] {
   return pool
     .map(c => {
       const days = daysSince(c.lastOrder);
