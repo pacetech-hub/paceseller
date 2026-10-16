@@ -5,11 +5,12 @@ import { EmptyState } from "./ui/EmptyState";
 import { ThemeHeader } from "./ui/ThemeHeader";
 import { RepSalesSection } from "./RepSalesSection";
 import { LojistaOrdersSection } from "./LojistaOrdersSection";
+import { IndustrySalesSection } from "./IndustrySalesSection";
 import {
   Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
 } from "@mantine/core";
 import {
-  CrosshairIcon, TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
+  TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
   RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, DotsThreeVerticalIcon, InfoIcon, ClockIcon, XIcon,
   ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon, PhoneCallIcon, CurrencyCircleDollarIcon, HourglassIcon,
   ArrowCounterClockwiseIcon, CalendarCheckIcon, PaperPlaneTiltIcon, HandshakeIcon, ChatCircleDotsIcon,
@@ -580,6 +581,19 @@ function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   );
 }
 
+// Radar da indústria: a central de informações da rede, em widgets
+function IndustryRadar({ onCta }: Omit<RadarPageProps, 'profile'>) {
+  return (
+    <Stack gap="xl">
+      <Box>
+        <Title order={1}>{getGreeting()}</Title>
+        <Text c="dimmed" mt={4}>Como está a rede: pedidos, faturamento, vendedores e clientes para contatar</Text>
+      </Box>
+      <IndustrySalesSection onCta={onCta} />
+    </Stack>
+  );
+}
+
 // Radar: motor de decisão da loja — o que precisa de ação, agrupado por quando agir.
 export function RadarPage({ profile, ...rest }: RadarPageProps) {
   return (
@@ -589,15 +603,7 @@ export function RadarPage({ profile, ...rest }: RadarPageProps) {
       ) : profile === 'rep' ? (
         <RepRadar {...rest} />
       ) : (
-        <EmptyState
-          icon={CrosshairIcon}
-          title="Radar em breve para o seu perfil"
-          description="Em breve: ações recomendadas para reposição de produtos e cobertura de estoque. Enquanto isso, acompanhe o catálogo."
-          action={{ label: 'Ir para o Catálogo', onClick: () => rest.onCta({ kind: 'catalog' }) }}
-          suggestions={[
-            { label: 'Ver produtos em alta', description: 'Produtos com maior giro na região', icon: StorefrontIcon, onClick: () => rest.onCta({ kind: 'catalog', radarFilter: 'alto-giro' }) },
-          ]}
-        />
+        <IndustryRadar {...rest} />
       )}
     </Box>
   );

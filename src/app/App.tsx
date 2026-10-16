@@ -159,6 +159,7 @@ export default function App() {
       case 'cart': openCart(target.cartId); return;
       case 'orders': setOrderStatusFilter(target.status ?? 'todos'); navigate('history'); return;
       case 'sales-team': navigate('sales-team'); return;
+      case 'clients': navigate('clients'); return;
       case 'client': {
         const client = clientsList.find(c => c.id === target.clientId);
         if (client) { setSelectedClient(client); navigate('client-detail'); }
@@ -200,6 +201,8 @@ export default function App() {
       }
     : currentView === 'radar' && profile === 'rep'
     ? { title: 'Radar', subtitle: 'Quem da sua carteira precisa de contato e por quê' }
+    : currentView === 'radar' && profile === 'admin'
+    ? { title: 'Radar', subtitle: 'Visão geral da rede, em widgets' }
     : currentView === 'order-detail' && selectedOrder
     ? { title: selectedOrder.id, subtitle: 'Detalhes do pedido' }
     : currentView === 'client-detail' && selectedClient
