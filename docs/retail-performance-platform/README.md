@@ -25,7 +25,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 
 | # | Tela proposta | Status | Onde está hoje | O que falta |
 |---|---|---|---|---|
-| 0.1 | Seleção de perfil ("Sou lojista" / "Sou representante") | Falta | `LoginPage.tsx` tem um login só; o perfil vem do e-mail | Decidir se a escolha de perfil volta a ser do usuário (ver conflito C1) |
+| 0.1 | Seleção de perfil ("Sou lojista" / "Sou representante") | Não adotado | `LoginPage.tsx` tem um login só; o perfil vem do e-mail | Fica assim (C1) |
 | 0.2 | Login do lojista | Parcial | `LoginPage.tsx` | "Esqueci minha senha" (0.2a/0.2b), "Entrar com Google", link para o login do representante |
 | 1–3 | Perfil da loja em 3 etapas + Objetivo do momento | Falta | Os dados da loja aparecem só em leitura em `ProfilePage.tsx` | Wizard inteiro, flag `perfil_completo`, progresso salvo a cada etapa |
 | 4 | Radar do lojista | Existe | `RadarPage.tsx`, `data/radar.ts` | Nada: segue o spec (C2) e mantém o fundo por status (C3) |
