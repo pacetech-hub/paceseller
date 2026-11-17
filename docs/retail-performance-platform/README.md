@@ -62,7 +62,7 @@ Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas op
 
 | # | Tema | Proposta | Hoje no app / spec | Recomendação |
 |---|---|---|---|---|
-| C1 | Entrada | O usuário escolhe "Sou lojista" ou "Sou representante" antes do login | Um login só; o servidor sabe o perfil (`e72572c`: todo perfil cai no Radar) | Manter um login só e usar o e-mail para rotear. A escolha manual vira um passo a mais sem ganho |
+| C1 | Entrada | O usuário escolhe "Sou lojista" ou "Sou representante" antes do login | Um login só; o servidor sabe o perfil (`e72572c`: todo perfil cai no Radar) | **Decidido: um login só.** O e-mail define o perfil; a tela 0.1 não será construída. "Esqueci minha senha" e "Entrar com Google" (lojista) entram no formulário único |
 | C2 | Radar do lojista | Carrossel de insight cards e "Painel do dia" com 4 categorias | Abas por prazo (Hoje / 15 / 30 dias), grade ordenada por severidade, "Destaque da semana" em preto (FR-103 a FR-107) | Manter as abas, que respondem "quando agir". Levar da proposta só o "Ajustar foco" como reordenação |
 | C3 | Cor no card | Contorno + tag pequena; preenchimento colorido "testado e descartado" | Fundo do card na cor do status (`f29cf37`) | Decidir. A proposta diz explicitamente que já testou e descartou o fundo colorido |
 | C4 | Adicionar sem grade | "Repor agora" e "Adicionar ao carrinho" no card adicionam direto, com grade padrão | BR-20: todo caminho de compra passa pela grade de numeração | Manter BR-20, abrindo a grade já preenchida (BR-21). Assim o toque segue curto sem pular numerações |
