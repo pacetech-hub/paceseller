@@ -28,7 +28,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 0.1 | Seleção de perfil ("Sou lojista" / "Sou representante") | Falta | `LoginPage.tsx` tem um login só; o perfil vem do e-mail | Decidir se a escolha de perfil volta a ser do usuário (ver conflito C1) |
 | 0.2 | Login do lojista | Parcial | `LoginPage.tsx` | "Esqueci minha senha" (0.2a/0.2b), "Entrar com Google", link para o login do representante |
 | 1–3 | Perfil da loja em 3 etapas + Objetivo do momento | Falta | Os dados da loja aparecem só em leitura em `ProfilePage.tsx` | Wizard inteiro, flag `perfil_completo`, progresso salvo a cada etapa |
-| 4 | Radar do lojista | Existe | `RadarPage.tsx`, `data/radar.ts` | Nada: segue o spec (C2). Só a cor do card está em aberto (C3) |
+| 4 | Radar do lojista | Existe | `RadarPage.tsx`, `data/radar.ts` | Nada: segue o spec (C2) e mantém o fundo por status (C3) |
 | 4.1 | Ajustar foco | Não adotado | — | Mudaria a ordem do Radar definida no spec (C2) |
 | — | Estado vazio do Radar com % do perfil | Parcial | `ui/EmptyState.tsx` existe; o Radar mostra "Nada pra hoje" por aba | Barra de progresso do perfil e "Enquanto isso" |
 | 6 | Catálogo | Existe | `CatalogPage.tsx`, `CatalogFiltersBar.tsx` | Filtros já são os sinais do Radar (FR-202); falta só o chip "Recomendado p/ você" como ordenação padrão |
@@ -66,7 +66,7 @@ Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas op
 |---|---|---|---|---|
 | C1 | Entrada | O usuário escolhe "Sou lojista" ou "Sou representante" antes do login | Um login só; o servidor sabe o perfil (`e72572c`: todo perfil cai no Radar) | **Decidido: um login só.** O e-mail define o perfil; a tela 0.1 não será construída. "Esqueci minha senha" e "Entrar com Google" (lojista) entram no formulário único |
 | C2 | Radar do lojista | Carrossel de insight cards e "Painel do dia" com 4 categorias | Abas por prazo (Hoje / 15 / 30 dias), grade ordenada por severidade, "Destaque da semana" em preto (FR-103 a FR-107) | **Decidido: o spec vale.** Abas por prazo, grade por severidade e Destaque da semana ficam como estão. Sem carrossel, sem Painel do dia e sem "Ajustar foco" no Radar |
-| C3 | Cor no card | Contorno + tag pequena; preenchimento colorido "testado e descartado" | Fundo do card na cor do status (`f29cf37`) | Decidir. A proposta diz explicitamente que já testou e descartou o fundo colorido |
+| C3 | Cor no card | Contorno + tag pequena; preenchimento colorido "testado e descartado" | Fundo do card na cor do status (`f29cf37`) | **Decidido: fica o fundo na cor do status**, como hoje. O estilo de contorno da proposta não é adotado |
 | C4 | Adicionar sem grade | "Repor agora" e "Adicionar ao carrinho" no card adicionam direto, com grade padrão | BR-20: todo caminho de compra passa pela grade de numeração | **Decidido: o spec vale.** Todo caminho de compra passa pela grade (BR-20), já preenchida quando há sinal (BR-21) |
 | C5 | Fechar o pedido | "Enviar para aprovação" e "Confirmar" lado a lado | Uma ação por status: envia ao rep → rep confirma condições → lojista paga (FR-603) | **Decidido: o spec vale.** Uma ação por status: envia ao rep → rep confirma condições → lojista paga |
 | C6 | Margem | Vários números ("Margem estimada 42%", "38%", "39%") | Uma métrica: "Margem 39% no PDV sugerido" (BR-03) | **Decidido: o spec vale.** Uma margem só, "Margem X% no PDV sugerido" (BR-03), também nas telas novas |
