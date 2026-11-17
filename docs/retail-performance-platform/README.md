@@ -32,8 +32,8 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 4.1 | Ajustar foco | Não adotado | — | Mudaria a ordem do Radar definida no spec (C2) |
 | — | Estado vazio do Radar com % do perfil | Parcial | `ui/EmptyState.tsx` existe; o Radar mostra "Nada pra hoje" por aba | Barra de progresso do perfil e "Enquanto isso" |
 | 6 | Catálogo | Existe | `CatalogPage.tsx`, `CatalogFiltersBar.tsx` | Filtros já são os sinais do Radar (FR-202); falta só o chip "Recomendado p/ você" como ordenação padrão |
-| 7 | Ficha de Decisão | Existe | Página de produto dentro de `CatalogPage.tsx`; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Só o CTA "Planejar" falta, e depende do Planejamento (8) |
-| 8 | Planejamento da Compra (mix sugerido) | Falta | Só o aviso de mix em `CartDrawer.tsx` e `CartPage.tsx` (`mixCheck`) | Módulo inteiro: tela inicial, mix por categoria, giro, margem, cobertura e quantidade por item |
+| 7 | Ficha de Decisão | Existe | Página de produto dentro de `CatalogPage.tsx`; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Nada a fazer: o CTA "Planejar" sai junto com o Planejamento (8) |
+| 8 | Planejamento da Compra (mix sugerido) | Não adotado | O aviso de mix em `CartDrawer.tsx` e `CartPage.tsx` (`mixCheck`) continua | **Decidido: fora do escopo.** A compra segue Catálogo → grade → carrinho ativo |
 | 9 | Meus Pedidos (lista de carrinhos) | Existe | `CartsListPage.tsx` | — |
 | 10 | Carrinho compartilhado | Existe | `CartPage.tsx`, `data/cartStore.ts`: abas por carrinho, comentários, "Antes de fechar", ação por status | Ver conflito C4 sobre a ordem enviar / confirmar / pagar |
 | 11 | Pagamento e Entrega | Parcial | Bloco de pagamento dentro de `CartPage.tsx` | Tela própria com endereço, prazo, nota fiscal e contrato |
@@ -50,7 +50,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 0.5 | PIN do auxiliar | Falta | — | PIN de 4 dígitos por preposto, separado da senha da conta |
 | 5 | Radar do representante | Existe | `RadarPage.tsx`, `data/repRadar.ts`: prioridades de contato C-01 a C-09, já com "Pós-venda" (C-08) | Fica como está ("Ver cliente" / "Revisar carrinho"); o Radar não muda |
 | 5a | Carteira de clientes | Existe | `ClientsPage.tsx`, `ClientDetailPage.tsx` | Mostrar o score de recompra na lista |
-| 5b | Montar pedido sugerido | Falta | O rep já cria carrinho para o cliente | Pré-montagem a partir do histórico do cliente; depende do Planejamento (8) |
+| 5b | Montar pedido sugerido | Falta | O rep já cria carrinho para o cliente | Sem o Planejamento, seria um carrinho já preenchido a partir do histórico do cliente. Decidir se entra |
 | 10 | Revisar / aprovar pedido | Existe | `CartPage.tsx` com `viewerRole` 'rep' ("Confirmar condições") | — |
 | 13 | Acompanhar pedido | Parcial | `OrderDetailPage.tsx` | Mesma linha do tempo do lojista |
 
@@ -79,12 +79,13 @@ Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas op
 
 Pelas telas que faltam e pelo que cada uma destrava:
 
-1. **Planejamento da Compra (8)**. É o módulo central da proposta e o único inteiramente novo da jornada de compra. Destrava o "Montar pedido sugerido" do representante (5b) e o CTA "Planejar" da Ficha.
-2. **Ficha de Decisão (7)**: subir "Por que comprar" e adicionar o CTA "Planejar".
-3. **Onboarding + Objetivo do momento + Ajustar foco (1–3, 4.1)**, um só componente `GoalCard`.
-4. **Acompanhamento com linha do tempo (13)**, compartilhado entre lojista e representante.
-5. **Quem está usando + PIN (0.4, 0.5)**, sobre os `linkedUsers` que já existem.
-6. **Pós-venda (14)**, depois de decidir a fonte de dados dos clientes finais.
+O Planejamento da Compra (8) e o CTA "Planejar" da Ficha (7) não entram. O "Ajustar foco" (4.1) também não, pelo C2.
+
+1. **Acompanhamento com linha do tempo (13)**, compartilhado entre lojista e representante.
+2. **Quem está usando + PIN (0.4, 0.5)**, sobre os `linkedUsers` que já existem.
+3. **Onboarding (1–3)**. O passo "Objetivo do momento" servia para reordenar o Radar, que o spec fixa; decidir se ele fica.
+4. **Pós-venda (14)**, depois de decidir a fonte de dados dos clientes finais.
+5. **Montar pedido sugerido (5b)**, se for adotado.
 
 ## Pendências herdadas da proposta
 
