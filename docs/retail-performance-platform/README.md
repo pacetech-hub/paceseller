@@ -28,11 +28,11 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 0.1 | Seleção de perfil ("Sou lojista" / "Sou representante") | Falta | `LoginPage.tsx` tem um login só; o perfil vem do e-mail | Decidir se a escolha de perfil volta a ser do usuário (ver conflito C1) |
 | 0.2 | Login do lojista | Parcial | `LoginPage.tsx` | "Esqueci minha senha" (0.2a/0.2b), "Entrar com Google", link para o login do representante |
 | 1–3 | Perfil da loja em 3 etapas + Objetivo do momento | Falta | Os dados da loja aparecem só em leitura em `ProfilePage.tsx` | Wizard inteiro, flag `perfil_completo`, progresso salvo a cada etapa |
-| 4 | Radar do lojista | Existe | `RadarPage.tsx`, `data/radar.ts` | Ver conflitos C2 e C3: hoje são abas Hoje / 15 dias / 30 dias, não carrossel; o fundo do card segue o status |
-| 4.1 | Ajustar foco | Falta | — | Depende do objetivo do momento (1–3) |
+| 4 | Radar do lojista | Existe | `RadarPage.tsx`, `data/radar.ts` | Nada: segue o spec (C2). Só a cor do card está em aberto (C3) |
+| 4.1 | Ajustar foco | Não adotado | — | Mudaria a ordem do Radar definida no spec (C2) |
 | — | Estado vazio do Radar com % do perfil | Parcial | `ui/EmptyState.tsx` existe; o Radar mostra "Nada pra hoje" por aba | Barra de progresso do perfil e "Enquanto isso" |
 | 6 | Catálogo | Existe | `CatalogPage.tsx`, `CatalogFiltersBar.tsx` | Filtros já são os sinais do Radar (FR-202); falta só o chip "Recomendado p/ você" como ordenação padrão |
-| 7 | Ficha de Decisão | Parcial | Página de produto dentro de `CatalogPage.tsx`; `FichaTecnicaPage.tsx` é a ficha técnica | Hoje "Por que comprar" (FR-303) vem depois do preço. A proposta quer o bloco no topo, antes da grade, e dois CTAs: Planejar / Adicionar ao carrinho |
+| 7 | Ficha de Decisão | Existe | Página de produto dentro de `CatalogPage.tsx`; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Só o CTA "Planejar" falta, e depende do Planejamento (8) |
 | 8 | Planejamento da Compra (mix sugerido) | Falta | Só o aviso de mix em `CartDrawer.tsx` e `CartPage.tsx` (`mixCheck`) | Módulo inteiro: tela inicial, mix por categoria, giro, margem, cobertura e quantidade por item |
 | 9 | Meus Pedidos (lista de carrinhos) | Existe | `CartsListPage.tsx` | — |
 | 10 | Carrinho compartilhado | Existe | `CartPage.tsx`, `data/cartStore.ts`: abas por carrinho, comentários, "Antes de fechar", ação por status | Ver conflito C4 sobre a ordem enviar / confirmar / pagar |
@@ -48,7 +48,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 0.3 | Login do representante | Parcial | Mesmo `LoginPage.tsx` | Mesmas pendências do 0.2, sem login social |
 | 0.4 | Quem está usando agora | Falta | Os usuários vinculados existem em `data/linkedUsers.ts` (titular + prepostos) e são geridos em `AccessPermissionsPage.tsx` | Tela de escolha após o login e registro da pessoa em cada ação |
 | 0.5 | PIN do auxiliar | Falta | — | PIN de 4 dígitos por preposto, separado da senha da conta |
-| 5 | Radar do representante | Existe | `RadarPage.tsx`, `data/repRadar.ts`: prioridades de contato C-01 a C-09, já com "Pós-venda" (C-08) | Os CTAs hoje são "Ver cliente" / "Revisar carrinho". A proposta quer ações diretas: "Montar pedido sugerido", "Ligar agora", "Enviar coleção" |
+| 5 | Radar do representante | Existe | `RadarPage.tsx`, `data/repRadar.ts`: prioridades de contato C-01 a C-09, já com "Pós-venda" (C-08) | Fica como está ("Ver cliente" / "Revisar carrinho"); o Radar não muda |
 | 5a | Carteira de clientes | Existe | `ClientsPage.tsx`, `ClientDetailPage.tsx` | Mostrar o score de recompra na lista |
 | 5b | Montar pedido sugerido | Falta | O rep já cria carrinho para o cliente | Pré-montagem a partir do histórico do cliente; depende do Planejamento (8) |
 | 10 | Revisar / aprovar pedido | Existe | `CartPage.tsx` com `viewerRole` 'rep' ("Confirmar condições") | — |
@@ -58,20 +58,22 @@ O spec atual também tem Radar da **indústria**, Estúdio de Marketing, Sell-ou
 
 ## Conflitos a decidir
 
-Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas opostas. Precisa de decisão antes de codar.
+Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas opostas.
+
+**Regra geral (decidida): o [`radar-spec.md`](../../src/imports/pasted_text/radar-spec.md) não muda.** Onde ele já define a regra, a proposta se adapta a ele. A proposta só entra onde o spec não fala nada.
 
 | # | Tema | Proposta | Hoje no app / spec | Recomendação |
 |---|---|---|---|---|
 | C1 | Entrada | O usuário escolhe "Sou lojista" ou "Sou representante" antes do login | Um login só; o servidor sabe o perfil (`e72572c`: todo perfil cai no Radar) | **Decidido: um login só.** O e-mail define o perfil; a tela 0.1 não será construída. "Esqueci minha senha" e "Entrar com Google" (lojista) entram no formulário único |
-| C2 | Radar do lojista | Carrossel de insight cards e "Painel do dia" com 4 categorias | Abas por prazo (Hoje / 15 / 30 dias), grade ordenada por severidade, "Destaque da semana" em preto (FR-103 a FR-107) | Manter as abas, que respondem "quando agir". Levar da proposta só o "Ajustar foco" como reordenação |
+| C2 | Radar do lojista | Carrossel de insight cards e "Painel do dia" com 4 categorias | Abas por prazo (Hoje / 15 / 30 dias), grade ordenada por severidade, "Destaque da semana" em preto (FR-103 a FR-107) | **Decidido: o spec vale.** Abas por prazo, grade por severidade e Destaque da semana ficam como estão. Sem carrossel, sem Painel do dia e sem "Ajustar foco" no Radar |
 | C3 | Cor no card | Contorno + tag pequena; preenchimento colorido "testado e descartado" | Fundo do card na cor do status (`f29cf37`) | Decidir. A proposta diz explicitamente que já testou e descartou o fundo colorido |
-| C4 | Adicionar sem grade | "Repor agora" e "Adicionar ao carrinho" no card adicionam direto, com grade padrão | BR-20: todo caminho de compra passa pela grade de numeração | Manter BR-20, abrindo a grade já preenchida (BR-21). Assim o toque segue curto sem pular numerações |
-| C5 | Fechar o pedido | "Enviar para aprovação" e "Confirmar" lado a lado | Uma ação por status: envia ao rep → rep confirma condições → lojista paga (FR-603) | Manter o fluxo por status. O spec atual foi escrito para corrigir exatamente esses botões lado a lado |
-| C6 | Margem | Vários números ("Margem estimada 42%", "38%", "39%") | Uma métrica: "Margem 39% no PDV sugerido" (BR-03) | Manter BR-03 em todas as telas novas, inclusive no Planejamento |
-| C7 | Preço | Duas linhas, com e sem imposto (IBS/CBS) | "Seu custo" e "PDV sugerido" (BR-01, BR-02) | Somar a linha sem imposto ao "Seu custo" quando a API mandar os dois valores |
+| C4 | Adicionar sem grade | "Repor agora" e "Adicionar ao carrinho" no card adicionam direto, com grade padrão | BR-20: todo caminho de compra passa pela grade de numeração | **Decidido: o spec vale.** Todo caminho de compra passa pela grade (BR-20), já preenchida quando há sinal (BR-21) |
+| C5 | Fechar o pedido | "Enviar para aprovação" e "Confirmar" lado a lado | Uma ação por status: envia ao rep → rep confirma condições → lojista paga (FR-603) | **Decidido: o spec vale.** Uma ação por status: envia ao rep → rep confirma condições → lojista paga |
+| C6 | Margem | Vários números ("Margem estimada 42%", "38%", "39%") | Uma métrica: "Margem 39% no PDV sugerido" (BR-03) | **Decidido: o spec vale.** Uma margem só, "Margem X% no PDV sugerido" (BR-03), também nas telas novas |
+| C7 | Preço | Duas linhas, com e sem imposto (IBS/CBS) | "Seu custo" e "PDV sugerido" (BR-01, BR-02) | **Decidido: o spec vale.** "Seu custo" e "PDV sugerido"; o "Seu custo" informa se inclui impostos e frete (BR-01). Sem segunda linha de preço |
 | C8 | Visual | Space Grotesk / IBM Plex, preto e branco 60/30/10, cantos de 4px | Mantine + Roboto, tema em `src/mantine/theme.ts` (fases 6 e 7 de revisão de UI) | Não trocar até os mockups chegarem. Se adotar, trocar só os tokens do tema Mantine, sem reescrever componentes |
 | C9 | Marca | Logo só no rodapé do login | Logo no menu do header (`2bfdec1`) | Decidir |
-| C10 | Navegação | Barra inferior no mobile, rail lateral no tablet | Menu em grade de apps (`AppsGridMenu.tsx`) em todos os tamanhos | Decidir junto com C8 |
+| C10 | Navegação | Barra inferior no mobile, rail lateral no tablet | Menu em grade de apps (`AppsGridMenu.tsx`) em todos os tamanhos | Decidir junto com C8. Os itens de topo seguem BR-70: Radar, Catálogo, Meus carrinhos, Pedidos |
 
 ## Ordem sugerida para construir
 
