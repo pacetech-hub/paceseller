@@ -71,9 +71,9 @@ Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas op
 | C5 | Fechar o pedido | "Enviar para aprovação" e "Confirmar" lado a lado | Uma ação por status: envia ao rep → rep confirma condições → lojista paga (FR-603) | **Decidido: o spec vale.** Uma ação por status: envia ao rep → rep confirma condições → lojista paga |
 | C6 | Margem | Vários números ("Margem estimada 42%", "38%", "39%") | Uma métrica: "Margem 39% no PDV sugerido" (BR-03) | **Decidido: o spec vale.** Uma margem só, "Margem X% no PDV sugerido" (BR-03), também nas telas novas |
 | C7 | Preço | Duas linhas, com e sem imposto (IBS/CBS) | "Seu custo" e "PDV sugerido" (BR-01, BR-02) | **Decidido: o spec vale.** "Seu custo" e "PDV sugerido"; o "Seu custo" informa se inclui impostos e frete (BR-01). Sem segunda linha de preço |
-| C8 | Visual | Space Grotesk / IBM Plex, preto e branco 60/30/10, cantos de 4px | Mantine + Roboto, tema em `src/mantine/theme.ts` (fases 6 e 7 de revisão de UI) | Não trocar até os mockups chegarem. Se adotar, trocar só os tokens do tema Mantine, sem reescrever componentes |
-| C9 | Marca | Logo só no rodapé do login | Logo no menu do header (`2bfdec1`) | Decidir |
-| C10 | Navegação | Barra inferior no mobile, rail lateral no tablet | Menu em grade de apps (`AppsGridMenu.tsx`) em todos os tamanhos | Decidir junto com C8. Os itens de topo seguem BR-70: Radar, Catálogo, Meus carrinhos, Pedidos |
+| C8 | Visual | Space Grotesk / IBM Plex, preto e branco 60/30/10, cantos de 4px | Mantine + Roboto, tema em `src/mantine/theme.ts` (fases 6 e 7 de revisão de UI) | **Decidido: fica o visual atual** (Mantine + Roboto). As telas novas seguem o tema existente |
+| C9 | Marca | Logo só no rodapé do login | Logo no menu do header (`2bfdec1`) | **Decidido: logo no cabeçalho**, à esquerda do menu, levando ao Radar |
+| C10 | Navegação | Barra inferior no mobile, rail lateral no tablet | Menu em grade de apps (`AppsGridMenu.tsx`) em todos os tamanhos | **Decidido: menu clássico, nem grade de apps nem barra inferior.** Páginas em linha no cabeçalho; as que não cabem vão para "Mais". Perfil, Permissões/Administração, Suporte e Sair ficam no menu da conta. No celular, tudo fica numa gaveta aberta pelo ícone ☰. O título da página desce para uma faixa abaixo do menu |
 
 ## Ordem sugerida para construir
 

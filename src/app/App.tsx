@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, Stack } from "@mantine/core";
 import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
-import { TopBar } from "./components/Sidebar";
+import { TopBar, PageTitle } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
 import { clients as clientsList, orders as ordersList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
@@ -353,8 +353,6 @@ export default function App() {
     <Box h="100dvh" display="flex" className={classes.shell}>
       <Stack gap={0} flex={1} miw={0}>
         <TopBar
-          title={viewInfo.title}
-          subtitle={viewInfo.subtitle}
           profile={profile}
           userName={profile === 'admin' ? CURRENT_ADMIN_NAME : profile === 'rep' ? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
           currentView={currentView}
@@ -366,6 +364,7 @@ export default function App() {
           showCart={commerceView}
           selectedClient={commerceView ? selectedClient : null}
         />
+        <PageTitle title={viewInfo.title} subtitle={viewInfo.subtitle} />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>
