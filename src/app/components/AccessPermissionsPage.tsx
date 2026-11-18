@@ -135,7 +135,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
   return (
     <Stack gap="xl" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       <Group gap="sm" wrap="nowrap">
-        <ThemeIcon size={40} variant="light" color="neutral">
+        <ThemeIcon size={40} variant="light" color="brand">
           <Icon size={20} />
         </ThemeIcon>
         <Box>
@@ -144,7 +144,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
         </Box>
       </Group>
 
-      <Alert icon={<InfoIcon size={16} />} color="neutral" variant="light">
+      <Alert icon={<InfoIcon size={16} />} color="brand" variant="light">
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
       </Alert>
 
@@ -189,7 +189,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               </Text>
               <Group justify="flex-end" gap="sm">
                 <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default">Cancelar</Button>
-                <Button onClick={inviteUser} color="neutral">Enviar Convite</Button>
+                <Button onClick={inviteUser} color="brand">Enviar Convite</Button>
               </Group>
             </Stack>
           </Paper>
@@ -203,7 +203,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               <Table.Tr key={u.id}>
                 <Table.Td maw={280}>
                   <Group gap="sm" wrap="nowrap">
-                    <Avatar size={28} color="neutral">{initials(u.name)}</Avatar>
+                    <Avatar size={28} color="brand">{initials(u.name)}</Avatar>
                     <Box miw={0}>
                       <Text fw={600} truncate>{u.name}</Text>
                       <Text c="dimmed" size="sm" truncate>{u.email}</Text>
@@ -216,7 +216,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                     value={u.profile}
                     onChange={v => changeUserProfile(u.id, v)}
                     data={availableProfiles}
-                    color="neutral"
+                    color="brand"
                     aria-label={`Perfil de acesso de ${u.name}`}
                   />
                 </Table.Td>

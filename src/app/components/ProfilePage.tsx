@@ -40,7 +40,7 @@ function Section({ icon: Icon, title, description, children }: { icon: PhosphorI
   return (
     <Paper component="section" withBorder p={{ base: 'md', sm: 'lg' }}>
       <Group align="flex-start" gap="sm" mb="md" wrap="nowrap">
-        <ThemeIcon size={36} variant="light" color="neutral" flex="none">
+        <ThemeIcon size={36} variant="light" color="brand" flex="none">
           <Icon size={20} />
         </ThemeIcon>
         <Box flex={1} miw={0}>
@@ -200,7 +200,7 @@ function PreferenceRow({ label, description, defaultChecked = false }: { label: 
       className={`${interactive.rowDivider} ${interactive.hoverable}`}
     >
       <Group align="flex-start" wrap="nowrap" gap="sm">
-        <Checkbox.Indicator color="neutral" flex="none" />
+        <Checkbox.Indicator color="brand" flex="none" />
         <Box flex={1} miw={0}>
           <Text fw={600}>{label}</Text>
           {description && <Text size="sm" c="dimmed">{description}</Text>}
@@ -241,7 +241,7 @@ function LojistaProfile() {
       </Section>
 
       <Section icon={FileTextIcon} title="Tabela comercial vigente" description="Definida pela indústria para sua conta">
-        <Field label="Tabela" value={<Badge color="neutral" variant="light">Tabela B — Verão 26</Badge>} />
+        <Field label="Tabela" value={<Badge color="brand" variant="light">Tabela B — Verão 26</Badge>} />
         <Field label="Condição de pagamento" value="30/60/90 dias" />
         <Field label="Pedido mínimo" value="R$ 3.000,00" />
         <Field label="Frete" value="CIF acima de R$ 5.000,00" />
@@ -350,7 +350,7 @@ function AdminProfile() {
       <Section icon={BuildingsIcon} title="Dados da conta">
         <Field label="Indústria" value="Tesla Footwear" />
         <Field label="CNPJ" value="98.765.432/0001-10" mono />
-        <Field label="Plano" value={<Badge color="neutral" variant="light">Enterprise</Badge>} />
+        <Field label="Plano" value={<Badge color="brand" variant="light">Enterprise</Badge>} />
         <Field label="Nível de acesso" value={<Group gap="xs" wrap="nowrap"><ShieldCheckIcon size={16} color="var(--mantine-color-teal-6)" />Administrador master</Group>} />
       </Section>
 

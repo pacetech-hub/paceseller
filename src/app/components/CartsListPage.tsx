@@ -95,7 +95,7 @@ function CartCard({ cart, viewerRole, onOpen, isOther }: { cart: Cart; viewerRol
         </Group>
         <Group gap="xs" mt="xs">
           <Badge variant="light" color={statusColor[status]}>{statusLabel(status, cart.rep)}</Badge>
-          {cart.createdBy === 'rep' && <Badge variant="light" color="neutral" leftSection={<UserCheckIcon size={14} />}>Montado por {repFirstName(cart.rep)}</Badge>}
+          {cart.createdBy === 'rep' && <Badge variant="light" color="brand" leftSection={<UserCheckIcon size={14} />}>Montado por {repFirstName(cart.rep)}</Badge>}
           {isOther && <Badge variant="light" color="yellow" leftSection={<ArrowsLeftRightIcon size={14} />}>troca cliente</Badge>}
         </Group>
         {/* miniaturas dos produtos */}
@@ -216,7 +216,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
             <Text c="dimmed">{scopedCarts.length} {scopedCarts.length === 1 ? 'carrinho aberto' : 'carrinhos abertos'}</Text>
             {lockClient && (
               <Group gap={6}>
-                <Avatar size={20} color="neutral" variant="light">{repFirstName(repName)[0]}</Avatar>
+                <Avatar size={20} color="brand" variant="light">{repFirstName(repName)[0]}</Avatar>
                 <Text c="dimmed">Representante: {repName}</Text>
               </Group>
             )}
@@ -233,9 +233,9 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
       </Group>
 
       {!lockClient && !selectedClient && (
-        <Paper withBorder p="md" mb="lg" bg="var(--mantine-color-neutral-0)">
+        <Paper withBorder p="md" mb="lg" bg="var(--mantine-color-brand-0)">
           <Group gap="sm" mb="sm" wrap="nowrap">
-            <ThemeIcon variant="light" color="neutral" size={32}><UsersIcon size={16} /></ThemeIcon>
+            <ThemeIcon variant="light" color="brand" size={32}><UsersIcon size={16} /></ThemeIcon>
             <Box miw={0}>
               <Text fw={600}>Selecione um cliente para criar um carrinho</Text>
               <Text c="dimmed" size="sm">Busque pelo nome ou abra sua carteira de clientes.</Text>
@@ -351,7 +351,7 @@ export function CartsListPage({ onOpenCart, onNavigateClients, selectedClient, o
           {STATUS_FILTERS.map(f => {
             const n = f.value === 'todos' ? scopedCarts.length : count(f.value);
             return (
-              <Tabs.Tab key={f.value} value={f.value} rightSection={<Badge size="sm" circle variant="light" color="neutral">{n}</Badge>}>
+              <Tabs.Tab key={f.value} value={f.value} rightSection={<Badge size="sm" circle variant="light" color="brand">{n}</Badge>}>
                 {f.label(repName)}
               </Tabs.Tab>
             );

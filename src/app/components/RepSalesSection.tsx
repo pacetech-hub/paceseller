@@ -98,7 +98,7 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
                 {s.sellers.slice(0, 3).map((x, i) => (
                   <Group key={x.id} justify="space-between" wrap="nowrap" gap="sm">
                     <Group gap="sm" wrap="nowrap" miw={0}>
-                      <ThemeIcon size={26} radius="xl" variant={i === 0 ? 'filled' : 'light'} color="neutral" aria-label={`${i + 1}º lugar`}>
+                      <ThemeIcon size={26} radius="xl" variant={i === 0 ? 'filled' : 'light'} color="brand" aria-label={`${i + 1}º lugar`}>
                         <Text size="xs" fw={700} c="inherit">{i + 1}º</Text>
                       </ThemeIcon>
                       <Text size="sm" fw={600} truncate>{x.name}{x.name === repName ? ' (você)' : ''}</Text>

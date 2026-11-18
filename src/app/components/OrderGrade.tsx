@@ -72,7 +72,7 @@ const CLIENT_DATA = [
 const stockColor = (stock: number) => (stock === 0 ? 'red.6' : stock < 5 ? 'yellow.7' : 'teal.6');
 
 // fundo levemente tingido usado nos blocos de destaque (política, subtotal, total)
-const highlightBg = 'var(--mantine-color-neutral-0)';
+const highlightBg = 'var(--mantine-color-brand-0)';
 
 // Par rótulo/valor em uma coluna: rótulo discreto acima, valor abaixo, alinhados à esquerda
 function InfoField({ label, children }: { label: string; children: React.ReactNode }) {
@@ -166,7 +166,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
                 onClick={() => onSelect(p)}
                 className={isSelected ? classes.cardButton : `${classes.cardButton} ${classes.hoverable}`}
                 p="xs"
-                bd={`1px solid ${isSelected ? 'var(--mantine-color-neutral-3)' : 'transparent'}`}
+                bd={`1px solid ${isSelected ? 'var(--mantine-color-brand-3)' : 'transparent'}`}
                 bg={isSelected ? highlightBg : undefined}
               >
                 <Group gap="sm" wrap="nowrap">
@@ -319,7 +319,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
       <Paper withBorder p="md">
         <Stepper
           active={step - 1}
-          color="neutral"
+          color="brand"
           allowNextStepsSelect={false}
           onStepClick={i => {
             // só volta para etapas já concluídas (e nunca antes da primeira etapa disponível)
@@ -379,7 +379,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   <TagIcon size={16} />
                   <Text c="dimmed" size="sm" fw={600}>Política comercial aplicada</Text>
                 </Group>
-                <Badge variant="light" color="neutral">
+                <Badge variant="light" color="brand">
                   {clientPolicy.name}
                 </Badge>
               </Group>
@@ -479,7 +479,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                                 input: {
                                   textAlign: 'right',
                                   paddingInline: 4,
-                                  borderColor: over ? undefined : qty > 0 ? 'var(--mantine-color-neutral-5)' : undefined,
+                                  borderColor: over ? undefined : qty > 0 ? 'var(--mantine-color-brand-5)' : undefined,
                                 },
                               }}
                             />
@@ -518,7 +518,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   setStep(2);
                 }}
                 variant="subtle"
-                color="neutral"
+                color="brand"
                 ml={-12}
                 leftSection={<PlusIcon size={16} />}
               >
@@ -562,7 +562,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                     </Group>
                     <Group gap="xs">
                       {SIZES.map(sz => sizes[sz] > 0 && (
-                        <Badge key={sz} variant="light" color="neutral" className="mono">
+                        <Badge key={sz} variant="light" color="brand" className="mono">
                           Nº {sz}: {sizes[sz]}
                         </Badge>
                       ))}

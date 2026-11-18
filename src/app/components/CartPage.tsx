@@ -262,8 +262,8 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                   <Title order={2}>{cart.cartName}</Title>
                   <Group gap="xs" mt={4} wrap="wrap">
                     <Badge variant="light" color={statusColor[status]}>{statusLabel(status, cart.rep)}</Badge>
-                    {cart.createdBy === 'rep' && <Badge variant="light" color="neutral">Montado por {repName}</Badge>}
-                    {cart.exception && <Badge variant="light" color="neutral">Exceção aprovada por {repFirstName(cart.exception.by)}</Badge>}
+                    {cart.createdBy === 'rep' && <Badge variant="light" color="brand">Montado por {repName}</Badge>}
+                    {cart.exception && <Badge variant="light" color="brand">Exceção aprovada por {repFirstName(cart.exception.by)}</Badge>}
                   </Group>
                   <Group gap="md" mt="xs">
                     <Text size="sm" c="dimmed">Condição: {status === 'aguardando-pagamento' || status === 'confirmado' ? `30/60/90 dias ou à vista com ${CART_PARAMS.cashDiscountPct}%` : `a confirmar com ${repName}`}</Text>

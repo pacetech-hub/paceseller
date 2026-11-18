@@ -87,7 +87,7 @@ const productMeta: Record<string, { tag: ProductTag; stock: number }> = {
 
 
 const tagColors: Record<ProductTag, string> = {
-  'lançamento': 'neutral',
+  'lançamento': 'brand',
   'alto giro': 'teal',
   'estoque parado': 'yellow',
 };
@@ -222,7 +222,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
       <Paper withBorder p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
         <Group justify="space-between" wrap="wrap" gap="md">
           <Group gap="sm" wrap="nowrap">
-            <ThemeIcon variant="light" color="neutral" size={40}>
+            <ThemeIcon variant="light" color="brand" size={40}>
               <SparkleIcon size={20} />
             </ThemeIcon>
             <Box>
@@ -688,7 +688,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                         disabled={generating}
                         size="input-sm"
                         variant="light"
-                        color="neutral"
+                        color="brand"
                         aria-label={`Voltar para a etapa ${s.n}: ${s.label}`}
                         flex="none"
                       >
@@ -698,7 +698,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                       <ThemeIcon
                         size={36}
                         variant={current ? 'filled' : 'light'}
-                        color={current ? 'neutral' : 'gray'}
+                        color={current ? 'brand' : 'gray'}
                         flex="none"
                         fz="md"
                         fw={700}
@@ -728,7 +728,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                     </Box>
                   </Group>
                   {i < WIZARD_STEPS.length - 1 && (
-                    <Divider mx="xs" flex={1} color={done ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR} />
+                    <Divider mx="xs" flex={1} color={done ? 'var(--mantine-color-brand-9)' : BORDER_COLOR} />
                   )}
                 </Group>
               );
@@ -827,10 +827,10 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                           >
                             {/* Seleção múltipla: caixa de seleção (quadrada) no canto, sempre visível */}
                             <Group justify="space-between" align="flex-start" wrap="nowrap" gap="xs">
-                              <ThemeIcon variant="light" color="neutral" size={36}>
+                              <ThemeIcon variant="light" color="brand" size={36}>
                                 <Icon size={20} />
                               </ThemeIcon>
-                              <Checkbox.Indicator checked={isSelected} color="neutral" aria-hidden />
+                              <Checkbox.Indicator checked={isSelected} color="brand" aria-hidden />
                             </Group>
                             <Text fw={600} mt="xs">{f.label}</Text>
                             <Text c="dimmed" size="sm">{f.description}</Text>
@@ -901,7 +901,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                               {/* Seleção múltipla (até 3): caixa de seleção quadrada sobre a foto */}
                               <Checkbox.Indicator
                                 checked={isSelected}
-                                color="neutral"
+                                color="brand"
                                 pos="absolute"
                                 top={8}
                                 right={8}

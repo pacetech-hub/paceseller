@@ -22,7 +22,7 @@
 }
 
 .campaignRow[data-active] {
-  background-color: light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5));
+  background-color: light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-5));
 }
 
 /* Cartão selecionável do assistente */
@@ -36,13 +36,13 @@
 }
 
 .option[data-selected] {
-  border-color: light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-3));
-  box-shadow: 0 0 0 1px light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-3));
+  border-color: light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-3));
+  box-shadow: 0 0 0 1px light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-3));
 }
 
 /* Fundo do selecionado: claro no tema claro, um degrau acima da superfície no escuro */
 .optionTinted[data-selected] {
-  background-color: light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5));
+  background-color: light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-5));
   box-shadow: none;
 }
 
@@ -59,13 +59,13 @@
 
 .suggestion[data-selected] {
   color: var(--mantine-color-text);
-  border-color: light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-3));
-  background-color: light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5));
+  border-color: light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-3));
+  background-color: light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-5));
 }
 
 /* Etapa atual do assistente: anel ao redor do número */
 .stepDot[data-current] {
-  box-shadow: 0 0 0 2px var(--mantine-color-body), 0 0 0 4px var(--mantine-color-neutral-3);
+  box-shadow: 0 0 0 2px var(--mantine-color-body), 0 0 0 4px var(--mantine-color-brand-3);
 }
 
 /* Ícone alinhado ao texto corrido */

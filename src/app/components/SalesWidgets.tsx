@@ -18,7 +18,7 @@ const axis = (v: number) =>
   : int(v);
 
 // Mesmas cores do Indicadores: período atual em neutro escuro, ano anterior em amarelo
-const CURRENT_COLOR = 'neutral.9';
+const CURRENT_COLOR = 'brand.9';
 const PREVIOUS_COLOR = 'yellow.6';
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

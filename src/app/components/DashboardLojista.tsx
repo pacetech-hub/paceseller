@@ -63,7 +63,7 @@ function ListItem({ title, meta, right }: { title: string; meta: string; right?:
   return (
     <Paper withBorder p="sm">
       <Group align="flex-start" gap="xs" wrap="nowrap">
-        <ColorSwatch color="var(--mantine-color-neutral-9)" size={8} mt="xs" withShadow={false} />
+        <ColorSwatch color="var(--mantine-color-brand-9)" size={8} mt="xs" withShadow={false} />
         <Box flex={1}>
           <Text fw={600}>{title}</Text>
           <Text c="dimmed" size="sm">{meta}</Text>
@@ -186,8 +186,8 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
 
           <Card title="Carteira de pedidos por status" hint="Situação dos 7 pedidos do período · barra 100% empilhada" span={8}>
             <StatusStack segs={[
-              { n: 'Aprovado', q: 3, color: 'neutral.9' },
-              { n: 'Faturado', q: 2, color: 'neutral.6' },
+              { n: 'Aprovado', q: 3, color: 'brand.9' },
+              { n: 'Faturado', q: 2, color: 'brand.6' },
               { n: 'Em transporte', q: 1, color: 'teal.6' },
               { n: 'Aguardando aprovação', q: 1, color: 'yellow.6', action: true },
             ]} />
@@ -203,7 +203,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
               h={190}
               data={histData}
               dataKey="m"
-              series={[{ name: 'v', label: 'Compras', color: 'neutral.9' }]}
+              series={[{ name: 'v', label: 'Compras', color: 'brand.9' }]}
               curveType="monotone"
               gridAxis="y"
               tickLine="none"

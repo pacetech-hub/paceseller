@@ -156,7 +156,7 @@ export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: P
               color={bg}
               size={32}
               withShadow={false}
-              bd={`2px solid ${active ? 'var(--mantine-color-neutral-9)' : BORDER_COLOR}`}
+              bd={`2px solid ${active ? 'var(--mantine-color-brand-9)' : BORDER_COLOR}`}
               c={bg === '#fff' ? 'black' : 'white'}
               className={classes.swatch}
               data-active={active || undefined}
@@ -197,7 +197,7 @@ export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: P
               {priceTables.map(t => (
                 <Radio.Card key={t.id} value={t.id} p="sm" className={interactive.choiceCard}>
                   <Group align="flex-start" gap="sm" wrap="nowrap">
-                    <Radio.Indicator color="neutral" mt={2} />
+                    <Radio.Indicator color="brand" mt={2} />
                     <Box flex={1} miw={0}>
                       <Text lh={1.5} fw={600}>{t.label}</Text>
                       <Text lh={1.5} c="dimmed" size="sm">{t.desc}</Text>
@@ -231,7 +231,7 @@ export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: P
           <FunnelIcon size={18} />
           <Text lh={1.5} fw={600}>Filtros</Text>
           {activeCount > 0 && (
-            <Badge variant="light" color="neutral" circle aria-label={`${activeCount} filtros ativos`}>
+            <Badge variant="light" color="brand" circle aria-label={`${activeCount} filtros ativos`}>
               {activeCount}
             </Badge>
           )}
@@ -370,7 +370,7 @@ export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: P
           <Button
             onClick={reset}
             variant="subtle"
-            color="neutral"
+            color="brand"
             leftSection={<XIcon size={16} />}
           >
             Limpar Filtros
@@ -510,7 +510,7 @@ function FilterPopover({
       <Popover.Target>
         <Button
           variant={active ? 'light' : 'default'}
-          color="neutral"
+          color="brand"
           leftSection={<SectionIcon size={16} />}
           rightSection={<CaretDownIcon size={16} />}
           aria-label={ariaLabel}

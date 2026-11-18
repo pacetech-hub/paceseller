@@ -502,7 +502,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
           <Group gap="sm">
             {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral">
+              <Chip key={s} value={s} variant="filled" color="brand">
                 {s === 'todos' ? 'Todos' : statusLabel[s]}
               </Chip>
             ))}
