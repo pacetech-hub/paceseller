@@ -76,7 +76,7 @@ export const orderProductNames: Record<string, string> = {
   'PED-2026-0405': 'Sandálias Rasteiras — Coleção Verão 26',
 };
 
-function shiftDate(dateStr: string, days: number): string {
+export function shiftDate(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);

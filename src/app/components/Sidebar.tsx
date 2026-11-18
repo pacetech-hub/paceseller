@@ -1,43 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import {
-  Group, Button, ActionIcon, Affix, Indicator, Text, Box, Stack, Paper, NavLink, Badge,
-  Avatar, Kbd, Tooltip, Drawer, Image, ScrollArea, UnstyledButton, Divider, CloseButton, Popover,
+  Group, Button, ActionIcon, Indicator, Text, Box, Stack, NavLink, Tooltip, Drawer, Image, UnstyledButton, Divider, Menu, ThemeIcon, Title,
 } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
-  SquaresFourIcon,
   PackageIcon,
   ShoppingBagIcon,
   ClockIcon,
   SparkleIcon,
-  GearIcon,
   UsersIcon,
   StorefrontIcon,
   CaretDownIcon,
-  CaretRightIcon,
   BellIcon,
-  MagnifyingGlassIcon,
   ListIcon,
   BuildingsIcon,
   SignOutIcon,
-  CaretLeftIcon,
-  UserCheckIcon,
-  TagIcon,
   ShieldIcon,
   WarehouseIcon,
   ReceiptIcon,
   FileTextIcon,
   CrosshairIcon,
   ShoppingCartIcon,
-  XIcon,
   HeadsetIcon,
-  DotsNineIcon,
+  UserCircleIcon,
+  UsersThreeIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 import classes from "./Sidebar.module.css";
-import { AppsGridMenu, type AppsGridItem } from "./AppsGridMenu";
 
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
@@ -46,12 +37,6 @@ export type View =
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
-interface NavItem {
-  id: View;
-  label: string;
-  icon: Icon;
-  badge?: number;
-}
 
 // Perfil não é status: ícone sempre neutro (amarelo/verde ficam reservados para atenção/sucesso)
 const profileLabels: Record<Profile, { label: string; icon: Icon; color: string }> = {
@@ -60,262 +45,8 @@ const profileLabels: Record<Profile, { label: string; icon: Icon; color: string 
   lojista: { label: 'Lojista', icon: StorefrontIcon, color: 'currentColor' },
 };
 
-const BORDER_COLOR = 'var(--mantine-color-default-border)';
-
-interface SidebarProps {
-  currentView: View;
-  onNavigate: (view: View) => void;
-  profile: Profile;
-  onLogout: () => void;
-  notifications?: number;
-  selectedClient?: Client | null;
-}
-
-export function Sidebar({ currentView, onNavigate, profile, onLogout, notifications = 4, selectedClient }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  // Auto-collapse sidebar when lojista enters the cart
-  useEffect(() => {
-    if (profile === 'lojista' && currentView === 'cart') {
-      setCollapsed(true);
-    }
-  }, [profile, currentView]);
-
-  const profileInfo = profileLabels[profile];
-  const ProfileIcon = profileInfo.icon;
-
-  const getVisibleItems = (): NavItem[] => {
-    if (profile === 'rep') {
-      if (!selectedClient) {
-        return [
-          { id: 'dashboard', label: 'Dashboard', icon: SquaresFourIcon },
-          { id: 'clients', label: 'Selecionar Cliente', icon: StorefrontIcon },
-        ];
-      }
-      return [
-        { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
-        { id: 'order-grade', label: 'Novo Pedido', icon: ShoppingBagIcon },
-      ];
-    }
-    if (profile === 'lojista') {
-      return [
-        { id: 'dashboard', label: 'Indicadores', icon: SquaresFourIcon },
-        { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
-      ];
-    }
-    return [
-      { id: 'catalog', label: 'Catálogo', icon: PackageIcon },
-      { id: 'history', label: 'Pedidos', icon: ShoppingBagIcon },
-      { id: 'clients', label: 'Clientes', icon: UsersIcon },
-      { id: 'admin', label: 'Representantes', icon: UserCheckIcon },
-      { id: 'admin', label: 'Política Comercial', icon: TagIcon },
-    ];
-  };
-
-  const visibleItems = getVisibleItems();
-
-  // No drawer mobile o menu sempre aparece expandido e ganha o X e o botão "Fechar Menu"
-  const renderContent = (isCollapsed: boolean, inDrawer = false) => (
-    <Stack gap={0} h="100%">
-      {/* Logo */}
-      {/* 55px + divisória de 1px = 56px, alinhado ao cabeçalho.
-          No drawer, 60px para o X de 44px ter 8px de folga em volta */}
-      <Group
-        h={inDrawer ? 60 : 55}
-        px="md"
-        gap="sm"
-        wrap="nowrap"
-        justify={isCollapsed ? 'center' : inDrawer ? 'space-between' : 'flex-start'}
-        flex="none"
-      >
-        <Image src={teslaLogo} alt="Tesla Footwear" h={isCollapsed ? 24 : 28} w="auto" fit="contain" />
-        {inDrawer && <CloseButton onClick={() => setMobileOpen(false)} aria-label="Fechar" />}
-      </Group>
-      <Divider color={BORDER_COLOR} />
-
-      {/* Profile pill */}
-      {!isCollapsed && (
-        <Paper withBorder mx="sm" mt="sm" px="sm" py="xs" bg="var(--mantine-color-default-hover)">
-          <Group gap="xs" wrap="nowrap">
-            <ProfileIcon size={16} color={profileInfo.color} />
-            <Text size="sm" fw={600} truncate>{profileInfo.label}</Text>
-          </Group>
-        </Paper>
-      )}
-
-      {/* Selected client chip — rep only */}
-      {!isCollapsed && profile === 'rep' && selectedClient && (
-        <Paper withBorder mx="sm" mt="xs" px="sm" py="xs">
-          <Text c="dimmed" size="sm">Pedindo para</Text>
-          <Text fw={600} truncate mt={4}>{selectedClient.name}</Text>
-        </Paper>
-      )}
-
-      {/* Search */}
-      {!isCollapsed && (
-        <UnstyledButton mx="sm" mt="sm">
-          <Paper withBorder px="sm" mih={42} display="flex" style={{ alignItems: 'center' }}>
-            <Group gap="xs" wrap="nowrap" c="dimmed" w="100%">
-              <MagnifyingGlassIcon size={16} />
-              <Text c="dimmed" truncate>Buscar por produto ou cliente</Text>
-              <Kbd ml="auto">⌘K</Kbd>
-            </Group>
-          </Paper>
-        </UnstyledButton>
-      )}
-
-      {/* Nav */}
-      <ScrollArea component="nav" flex={1} px="xs" py="sm">
-        <Stack gap={4} align={isCollapsed ? 'center' : 'stretch'}>
-          {visibleItems.map(item => {
-            const ItemIcon = item.icon;
-            const active = currentView === item.id;
-            const handleClick = () => { onNavigate(item.id); setMobileOpen(false); };
-
-            if (isCollapsed) {
-              return (
-                <Tooltip key={item.label} label={item.label} position="right" withArrow>
-                  <ActionIcon
-                    onClick={handleClick}
-                    variant={active ? 'light' : 'subtle'}
-                    color={active ? 'neutral' : 'gray'}
-                    aria-label={item.label}
-                  >
-                    <ItemIcon size={16} />
-                  </ActionIcon>
-                </Tooltip>
-              );
-            }
-
-            return (
-              <NavLink
-                key={item.label}
-                onClick={handleClick}
-                active={active}
-                color="neutral"
-                variant="light"
-                label={item.label}
-                leftSection={<ItemIcon size={16} />}
-                rightSection={item.badge ? <Badge variant="light" color="neutral">{item.badge}</Badge> : undefined}
-                classNames={{ root: classes.navLink, label: classes.navLabel }}
-                styles={{ label: { fontWeight: active ? 600 : 400 } }}
-              />
-            );
-          })}
-        </Stack>
-      </ScrollArea>
-
-      {/* Bottom */}
-      <Divider color={BORDER_COLOR} />
-      <Box p="xs" flex="none">
-        {isCollapsed ? (
-          <Group justify="center">
-            <Tooltip label="Expandir Menu" position="right" withArrow>
-              <ActionIcon onClick={() => setCollapsed(false)} variant="subtle" color="gray" aria-label="Expandir Menu">
-                <CaretRightIcon size={16} />
-              </ActionIcon>
-            </Tooltip>
-          </Group>
-        ) : (
-          <>
-          {/* Recolher fica embaixo, no mesmo lugar do "Expandir menu" do modo recolhido
-              (no topo não cabe ícone + texto ao lado do logo) */}
-          <Button
-            onClick={() => setCollapsed(true)}
-            variant="subtle"
-            color="gray"
-            fullWidth
-            justify="flex-start"
-            px="sm"
-            visibleFrom="lg"
-            leftSection={<CaretLeftIcon size={16} />}
-          >
-            Recolher Menu
-          </Button>
-          {/* No drawer, fechar fica no mesmo lugar do "Recolher Menu" (além do X e do clique fora) */}
-          {inDrawer && (
-            <Button
-              onClick={() => setMobileOpen(false)}
-              variant="subtle"
-              color="gray"
-              fullWidth
-              justify="flex-start"
-              px="sm"
-              leftSection={<XIcon size={16} />}
-            >
-              Fechar Menu
-            </Button>
-          )}
-          <Group gap="xs" px="sm" py="xs" wrap="nowrap">
-            <Avatar size={32} color="neutral" variant="light">
-              TF
-            </Avatar>
-            <Box flex={1} miw={0}>
-              <Text size="sm" fw={600} truncate>Tesla Footwear</Text>
-              <Text size="sm" c="dimmed" truncate>admin@tesla.com.br</Text>
-            </Box>
-            <Button
-              onClick={onLogout}
-              variant="subtle"
-              color="red"
-              px="sm"
-              flex="none"
-              leftSection={<SignOutIcon size={16} />}
-              aria-label="Sair da conta"
-            >
-              Sair
-            </Button>
-          </Group>
-          </>
-        )}
-      </Box>
-    </Stack>
-  );
-
-  return (
-    <>
-      <Affix position={{ top: 16, left: 16 }} zIndex={50} hiddenFrom="lg">
-        <ActionIcon
-          onClick={() => setMobileOpen(true)}
-          variant="default"
-          aria-label="Abrir Menu"
-        >
-          <ListIcon size={16} />
-        </ActionIcon>
-      </Affix>
-
-      <Drawer
-        opened={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        hiddenFrom="lg"
-        size={256}
-        padding={0}
-        // Cabeçalho próprio (logo + X); fecha também com clique fora e Esc (padrão do tema)
-        withCloseButton={false}
-        styles={{ body: { height: '100%' } }}
-      >
-        {renderContent(false, true)}
-      </Drawer>
-
-      <Box
-        component="aside"
-        visibleFrom="lg"
-        h="100%"
-        w={collapsed ? 60 : 260}
-        bg="var(--mantine-color-body)"
-        flex="none"
-        className={classes.aside}
-      >
-        {renderContent(collapsed)}
-      </Box>
-    </>
-  );
-}
 
 interface TopBarProps {
-  title: string;
-  subtitle?: string;
   profile: Profile;
   currentView: View;
   notifications?: number;
@@ -323,72 +54,211 @@ interface TopBarProps {
   onNavigate: (view: View) => void;
   onLogout: () => void;
   cartCount?: number;
-  /** Usuário logado, mostrado no último segmento do menu. */
+  /** Usuário logado, mostrado no menu da conta. */
   userName: string;
   /** Mostra o carrinho: só no Catálogo e nas páginas do processo de compra. */
   showCart?: boolean;
   selectedClient?: Client | null;
   /** Abre a gaveta do carrinho (FR-401); sem ela, o ícone leva à lista de carrinhos. */
   onOpenCartDrawer?: () => void;
+  /** Titular da conta, quando quem opera é um preposto ("Conta de Marcos Andrade"). */
+  accountOwner?: string;
+  /** Conta compartilhada (representante): volta para "Quem está usando agora". */
+  onSwitchUser?: () => void;
 }
 
-export function TopBar({ title, subtitle, profile, userName, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
-  const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
-  // sm (48em): a partir daqui o menu abre em popover; abaixo, na gaveta
-  const isDesktop = useMediaQuery('(min-width: 48em)');
-  const profileInfo = profileLabels[profile];
-  const ProfileIcon = profileInfo.icon;
+interface MenuPage {
+  label: string;
+  icon: Icon;
+  view: View;
+}
 
-  // Menu único: páginas principais, secundárias (depois de um divisor) e, por último, a conta
-  const menuItems: AppsGridItem<View>[] =
-    profile === 'admin'
-      ? [
-          { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
-          { icon: UsersIcon, label: 'Clientes', view: 'clients' },
-          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
-          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
-          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-        ]
-      : profile === 'rep'
-      ? [
-          { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
-          { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
-          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
-          { icon: ClockIcon, label: 'Pedidos', view: 'history' },
-          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-        ]
-      : [
-          { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
-          { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-          { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
-          { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
-          { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-          { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-          { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-        ];
-  const secondaryItems: AppsGridItem<View>[] = [
+/** Páginas do menu principal, na ordem de prioridade (as últimas vão primeiro para o "Mais"). */
+function mainPages(profile: Profile): MenuPage[] {
+  if (profile === 'admin') return [
+    { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
+    { icon: UsersIcon, label: 'Clientes', view: 'clients' },
+    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+    { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
+    { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+    { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
+    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+    { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+  ];
+  if (profile === 'rep') return [
+    { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
+    { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
+    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+    { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
+    { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+    { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+  ];
+  return [
+    { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
+    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+    { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
+    { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
+    { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
+    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
+    { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+  ];
+}
+
+/** Páginas da conta: ficam no menu do usuário, não na barra. */
+function accountPages(profile: Profile): MenuPage[] {
+  return [
+    { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
     profile === 'admin'
       ? { icon: ShieldIcon, label: 'Administração', view: 'admin' }
       : { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
     { icon: HeadsetIcon, label: 'Suporte', view: 'support' },
   ];
-  const account = { typeLabel: profileInfo.label, icon: ProfileIcon, userName, profileView: 'profile' as View };
+}
 
-  const [appsOpened, setAppsOpened] = useState(false);
+const NAV_GAP = 4;
+
+/**
+ * Menu horizontal clássico. Mostra quantas páginas couberem na largura disponível;
+ * as que não cabem vão, da última para a primeira, para o menu "Mais".
+ */
+function PriorityNav({ pages, currentView, onSelect }: { pages: MenuPage[]; currentView: View; onSelect: (view: View) => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(pages.length);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const measure = measureRef.current;
+    if (!container || !measure) return;
+    const compute = () => {
+      const available = container.clientWidth;
+      const widths = Array.from(measure.children).map(c => (c as HTMLElement).offsetWidth);
+      const moreWidth = widths.pop() ?? 0; // o último item medido é o botão "Mais"
+      const all = widths.reduce((sum, w) => sum + w + NAV_GAP, 0) - NAV_GAP;
+      if (all <= available) { setVisibleCount(widths.length); return; }
+      let used = moreWidth;
+      let count = 0;
+      for (const w of widths) {
+        if (used + w + NAV_GAP > available) break;
+        used += w + NAV_GAP;
+        count++;
+      }
+      setVisibleCount(count);
+    };
+    compute();
+    const observer = new ResizeObserver(compute);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [pages]);
+
+  const visible = pages.slice(0, visibleCount);
+  const hidden = pages.slice(visibleCount);
+  const hiddenActive = hidden.some(p => p.view === currentView);
+
+  return (
+    <Box ref={containerRef} component="nav" aria-label="Páginas" className={classes.nav}>
+      {/* Cópia invisível de todos os itens, só para medir a largura de cada um */}
+      <div ref={measureRef} className={classes.navMeasure} aria-hidden>
+        {pages.map(p => <span key={p.view} className={classes.navLink}>{p.label}</span>)}
+        <span className={classes.navLink}>Mais <CaretDownIcon size={14} /></span>
+      </div>
+
+      {visible.map(p => {
+        const active = p.view === currentView;
+        return (
+          <UnstyledButton
+            key={p.view}
+            className={classes.navLink}
+            data-active={active || undefined}
+            aria-current={active ? 'page' : undefined}
+            onClick={() => onSelect(p.view)}
+          >
+            {p.label}
+          </UnstyledButton>
+        );
+      })}
+
+      {hidden.length > 0 && (
+        <Menu position="bottom-start" offset={4} shadow="md" withinPortal>
+          <Menu.Target>
+            <UnstyledButton className={classes.navLink} data-active={hiddenActive || undefined} aria-label="Mais páginas">
+              Mais <CaretDownIcon size={14} />
+            </UnstyledButton>
+          </Menu.Target>
+          <Menu.Dropdown>
+            {hidden.map(p => {
+              const ItemIcon = p.icon;
+              const active = p.view === currentView;
+              return (
+                <Menu.Item
+                  key={p.view}
+                  leftSection={<ItemIcon size={16} />}
+                  onClick={() => onSelect(p.view)}
+                  fw={active ? 600 : undefined}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {p.label}
+                </Menu.Item>
+              );
+            })}
+          </Menu.Dropdown>
+        </Menu>
+      )}
+    </Box>
+  );
+}
+
+/** Título da página, numa faixa logo abaixo do menu. */
+export function PageTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <Box flex="none" className={classes.pageTitle}>
+      <Box maw={1400} mx="auto" px={{ base: 'md', sm: 'lg' }} py="sm">
+        <Title order={1} size="h3" lh={1.3}>{title}</Title>
+        {subtitle && <Text c="dimmed" size="sm" mt={2}>{subtitle}</Text>}
+      </Box>
+    </Box>
+  );
+}
+
+/** Páginas de detalhe marcam no menu a seção de onde vieram. */
+const PARENT_VIEW: Partial<Record<View, View>> = { 'order-detail': 'history', 'client-detail': 'clients' };
+
+export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer, accountOwner, onSwitchUser }: TopBarProps) {
+  const [navOpened, { open: openNav, close: closeNav }] = useDisclosure(false);
+  const currentView = PARENT_VIEW[view] ?? view;
+  const profileInfo = profileLabels[profile];
+  const ProfileIcon = profileInfo.icon;
+  const pages = mainPages(profile);
+  const account = accountPages(profile);
+
   const selectPage = (view: View) => {
     onNavigate(view);
-    setAppsOpened(false);
     closeNav();
   };
   const logout = () => {
-    setAppsOpened(false);
     closeNav();
     onLogout();
+  };
+  const openCart = () => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'));
+
+  const drawerLink = (p: MenuPage) => {
+    const ItemIcon = p.icon;
+    const active = p.view === currentView;
+    return (
+      <NavLink
+        key={p.view}
+        onClick={() => selectPage(p.view)}
+        active={active}
+        color="neutral"
+        variant="light"
+        label={p.label}
+        leftSection={<ItemIcon size={18} />}
+        aria-current={active ? 'page' : undefined}
+        classNames={{ root: classes.drawerLink, label: classes.drawerLabel }}
+        styles={{ label: { fontWeight: active ? 600 : 400 } }}
+      />
+    );
   };
 
   return (
@@ -400,121 +270,101 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
       bg="color-mix(in srgb, var(--mantine-color-body) 80%, transparent)"
       className={classes.header}
     >
-      <Group h="100%" gap="xs" wrap="nowrap">
-        <Group flex={1} miw={0} gap="xs" wrap="nowrap">
-          {/* Menu único com todas as páginas: ícone e logo formam um só botão (área de clique maior).
-              Popover a partir de sm; no celular o mesmo botão abre a gaveta */}
-          <Box pr="sm" mr={4} flex="none" className={classes.headerLogo}>
-            <Popover
-              opened={appsOpened}
-              onChange={setAppsOpened}
-              position="bottom-start"
-              offset={8}
-              shadow="md"
-              width={360}
-              withinPortal
-            >
-              <Popover.Target>
-                <UnstyledButton
-                  onClick={() => (isDesktop ? setAppsOpened(o => !o) : toggleNav())}
-                  className={classes.menuTrigger}
-                  data-open={(isDesktop ? appsOpened : navOpened) || undefined}
-                  aria-label="Abrir Menu"
-                  aria-expanded={isDesktop ? appsOpened : navOpened}
-                >
-                  <DotsNineIcon size={22} weight="bold" aria-hidden />
-                  <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
-                </UnstyledButton>
-              </Popover.Target>
-              <Popover.Dropdown p={0} bd={0} bg="transparent">
-                <AppsGridMenu
-                  items={menuItems}
-                  secondaryItems={secondaryItems}
-                  account={account}
-                  currentView={currentView}
-                  onSelect={selectPage}
-                  onLogout={logout}
-                />
-              </Popover.Dropdown>
-            </Popover>
-          </Box>
-          {/* Título da página; a navegação fica toda no menu (sem acessos duplicados no topo) */}
-          <Box miw={0}>
-            <Text truncate fw={600}>{title}</Text>
-            {subtitle && <Text truncate c="dimmed" size="sm" visibleFrom="sm">{subtitle}</Text>}
-          </Box>
-        </Group>
+      <Group h="100%" gap="sm" wrap="nowrap">
+        {/* Celular: o menu inteiro fica na gaveta */}
+        <ActionIcon onClick={openNav} hiddenFrom="sm" variant="subtle" color="neutral" size="lg" aria-label="Abrir Menu" aria-expanded={navOpened}>
+          <ListIcon size={20} weight="bold" />
+        </ActionIcon>
 
-        <Group gap="sm" wrap="nowrap" flex="none">
+        <UnstyledButton onClick={() => onNavigate('radar')} className={classes.logo} aria-label="Ir para o Radar">
+          <Image src={teslaLogo} alt="Tesla Footwear" h={{ base: 20, sm: 24 }} w="auto" fit="contain" />
+        </UnstyledButton>
+
+        {/* A partir de sm: menu horizontal, com o que não couber em "Mais" */}
+        <Box flex={1} miw={0} h="100%" visibleFrom="sm">
+          <PriorityNav pages={pages} currentView={currentView} onSelect={selectPage} />
+        </Box>
+        <Box flex={1} hiddenFrom="sm" />
+
+        <Group gap="xs" wrap="nowrap" flex="none">
           {actions}
 
-          {/* Carrinho só no Catálogo e no processo de compra (carrinho, carrinhos e grade).
-              FR-401: o ícone abre a gaveta do carrinho e mostra quantos carrinhos estão abertos.
-              Ícone + texto em telas largas; abaixo disso, só ícone com tooltip */}
+          {/* Carrinho só no Catálogo e no processo de compra (FR-401: abre a gaveta e mostra os carrinhos abertos) */}
           {showCart && (
-            <>
-            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.wideOnly}>
-              <Button onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" px="sm" leftSection={<ShoppingCartIcon size={16} />} aria-label={`Carrinho · ${cartCount} abertos`}>
-                Carrinho
-              </Button>
-            </Indicator>
-            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.narrowOnly}>
+            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
               <Tooltip label="Ver Carrinho" withArrow>
-                <ActionIcon onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
-                  <ShoppingCartIcon size={16} />
+                <ActionIcon onClick={openCart} variant="subtle" color="neutral" size="lg" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
+                  <ShoppingCartIcon size={18} />
                 </ActionIcon>
               </Tooltip>
             </Indicator>
-            </>
           )}
 
-          {/* Notifications: ícone + texto em telas largas, só ícone abaixo */}
-          <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4} className={classes.wideOnly}>
-            <Button variant="subtle" color="neutral" px="sm" leftSection={<BellIcon size={16} />}>
-              Notificações
-            </Button>
-          </Indicator>
-          <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4} className={classes.narrowOnly}>
+          <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4}>
             <Tooltip label="Ver Notificações" withArrow>
-              <ActionIcon variant="subtle" color="neutral" aria-label="Ver Notificações">
-                <BellIcon size={16} />
+              <ActionIcon variant="subtle" color="neutral" size="lg" aria-label={`Ver Notificações · ${notifications}`}>
+                <BellIcon size={18} />
               </ActionIcon>
             </Tooltip>
           </Indicator>
 
-          {/* Client chip — before avatar */}
+          {/* Cliente em atendimento (rep), leva aos pedidos dele */}
           {selectedClient && (
-            <>
-              <Button
-                onClick={() => onNavigate('history')}
-                variant="default"
-                color="neutral"
-                maw={{ sm: 180, lg: 260 }}
-                visibleFrom="sm"
-                leftSection={<StorefrontIcon size={16} />}
-                aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
-                styles={{ label: { overflow: 'hidden' } }}
-              >
-                {/* O que o botão faz fica visível (antes estava só num title) */}
-                <Stack gap={0} miw={0} align="flex-start">
-                  <Text span size="sm" c="dimmed" lh={1.2}>Ver pedidos de</Text>
-                  <Text span fw={600} lh={1.2} truncate maw="100%">{selectedClient.name}</Text>
-                </Stack>
-              </Button>
-              <Tooltip label="Ver Histórico de Pedidos" withArrow>
-                <ActionIcon
-                  onClick={() => onNavigate('history')}
-                  hiddenFrom="sm"
-                  variant="default"
-                  color="neutral"
-                  aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
-                >
-                  <StorefrontIcon size={16} />
-                </ActionIcon>
-              </Tooltip>
-            </>
+            <Button
+              onClick={() => onNavigate('history')}
+              variant="default"
+              maw={{ sm: 180, lg: 260 }}
+              visibleFrom="md"
+              leftSection={<StorefrontIcon size={16} />}
+              aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
+              styles={{ label: { overflow: 'hidden' } }}
+            >
+              <Stack gap={0} miw={0} align="flex-start">
+                <Text span size="sm" c="dimmed" lh={1.2}>Ver pedidos de</Text>
+                <Text span fw={600} lh={1.2} truncate maw="100%">{selectedClient.name}</Text>
+              </Stack>
+            </Button>
           )}
 
+          {/* Menu da conta: perfil, permissões/administração, suporte e sair */}
+          <Box visibleFrom="sm">
+            <Menu position="bottom-end" offset={6} shadow="md" width={240} withinPortal>
+              <Menu.Target>
+                <UnstyledButton className={classes.accountButton} aria-label={`Menu da conta · ${userName}`}>
+                  <ThemeIcon size={32} radius="xl" variant="light" color="neutral" aria-hidden>
+                    <ProfileIcon size={16} />
+                  </ThemeIcon>
+                  <Text size="sm" fw={600} truncate maw={140} visibleFrom="lg">{userName}</Text>
+                  <CaretDownIcon size={14} aria-hidden />
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Box px="sm" py="xs">
+                  <Text size="xs" c="dimmed">{profileInfo.label}</Text>
+                  <Text size="sm" fw={600} truncate>{userName}</Text>
+                  {accountOwner && <Text size="xs" c="dimmed">Preposto · conta de {accountOwner}</Text>}
+                </Box>
+                <Menu.Divider />
+                {account.map(p => {
+                  const ItemIcon = p.icon;
+                  return (
+                    <Menu.Item key={p.view} leftSection={<ItemIcon size={16} />} onClick={() => onNavigate(p.view)} fw={p.view === currentView ? 600 : undefined}>
+                      {p.label}
+                    </Menu.Item>
+                  );
+                })}
+                <Menu.Divider />
+                {onSwitchUser && (
+                  <Menu.Item leftSection={<UsersThreeIcon size={16} />} onClick={onSwitchUser}>
+                    Trocar usuário
+                  </Menu.Item>
+                )}
+                <Menu.Item color="red" leftSection={<SignOutIcon size={16} />} onClick={onLogout}>
+                  Sair
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Box>
         </Group>
       </Group>
 
@@ -523,22 +373,35 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
         onClose={closeNav}
         hiddenFrom="sm"
         position="left"
-        size={340}
+        size={300}
         title={<Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />}
       >
-        <Stack gap="sm">
-          <AppsGridMenu
-            items={menuItems}
-            secondaryItems={secondaryItems}
-            account={account}
-            currentView={currentView}
-            onSelect={selectPage}
-            onLogout={logout}
-          />
-          {/* Terceira forma de fechar, além do X e do clique fora */}
-          <Button onClick={closeNav} variant="default" fullWidth leftSection={<XIcon size={16} />}>
-            Fechar Menu
-          </Button>
+        <Stack gap={0} component="nav" aria-label="Páginas">
+          {pages.map(drawerLink)}
+          <Divider my="sm" />
+          {account.map(drawerLink)}
+          {onSwitchUser && (
+            <NavLink
+              onClick={() => { closeNav(); onSwitchUser(); }}
+              label="Trocar usuário"
+              leftSection={<UsersThreeIcon size={18} />}
+              classNames={{ root: classes.drawerLink, label: classes.drawerLabel }}
+            />
+          )}
+          <Divider my="sm" />
+          <Group gap="sm" wrap="nowrap" px="sm" py="xs">
+            <ThemeIcon size={32} radius="xl" variant="light" color="neutral" aria-hidden>
+              <ProfileIcon size={16} />
+            </ThemeIcon>
+            <Box flex={1} miw={0}>
+              <Text size="xs" c="dimmed">{profileInfo.label}</Text>
+              <Text size="sm" fw={600} truncate>{userName}</Text>
+              {accountOwner && <Text size="xs" c="dimmed">Preposto · conta de {accountOwner}</Text>}
+            </Box>
+            <Button variant="subtle" color="red" px="sm" leftSection={<SignOutIcon size={16} />} onClick={logout}>
+              Sair
+            </Button>
+          </Group>
         </Stack>
       </Drawer>
     </Box>
