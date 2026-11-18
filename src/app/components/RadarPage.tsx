@@ -34,6 +34,8 @@ type Profile = 'admin' | 'rep' | 'lojista';
 interface RadarPageProps {
   profile: Profile;
   userName: string;
+  /** Quem está operando a conta (preposto do representante); só muda a saudação. */
+  greetName?: string;
   /** Todo CTA abre o destino com o contexto aplicado (FR-108). */
   onCta: (target: CtaTarget) => void;
 }
@@ -482,7 +484,7 @@ function ContactCard({ contact, onCta, onWhy, resolved }: {
   );
 }
 
-function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
+function RepRadar({ userName, greetName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Bucket>('hoje');
   const [showAll, setShowAll] = useState(false);
   const [why, setWhy] = useState<ContactPriority | null>(null);
@@ -495,7 +497,7 @@ function RepRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const shown = showAll ? visible : visible.slice(0, MAX_CARDS);
   const contacted = radar.contacted.filter(c => (bucketOf(c.actByDays) ?? 'hoje') === period);
   const nextWithItems = PERIODS.find(p => p.value !== period && inBucket(p.value).length > 0);
-  const firstName = userName.split(' ')[0];
+  const firstName = (greetName ?? userName).split(' ')[0];
 
   return (
     <Stack gap="xl">

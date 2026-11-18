@@ -22,6 +22,8 @@ export interface ShopContextValue {
   openGrade: (req: GradeRequest) => void;
   openCart: (cartId: string) => void;
   openDrawer: () => void;
+  /** Pessoa que opera a conta do representante (titular ou preposto); assina comentários e edições. */
+  actorName?: string;
 }
 
 export const ShopContext = createContext<ShopContextValue>({

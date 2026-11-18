@@ -27,7 +27,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 |---|---|---|---|---|
 | 0.1 | Seleção de perfil ("Sou lojista" / "Sou representante") | Não adotado | `LoginPage.tsx` tem um login só; o perfil vem do e-mail | Fica assim (C1) |
 | 0.2 | Login do lojista | Parcial | `LoginPage.tsx` | "Esqueci minha senha" (0.2a/0.2b), "Entrar com Google", link para o login do representante |
-| 1–3 | Perfil da loja em 3 etapas + Objetivo do momento | Falta | Os dados da loja aparecem só em leitura em `ProfilePage.tsx` | Wizard inteiro, flag `perfil_completo`, progresso salvo a cada etapa |
+| 1–3 | Perfil da loja em 3 etapas + Objetivo do momento | Em espera | Os dados da loja aparecem só em leitura em `ProfilePage.tsx` | Wizard inteiro, flag `perfil_completo`, progresso salvo a cada etapa |
 | 4 | Radar do lojista | Existe | `RadarPage.tsx`, `data/radar.ts` | Nada: segue o spec (C2) e mantém o fundo por status (C3) |
 | 4.1 | Ajustar foco | Não adotado | — | Mudaria a ordem do Radar definida no spec (C2) |
 | — | Estado vazio do Radar com % do perfil | Parcial | `ui/EmptyState.tsx` existe; o Radar mostra "Nada pra hoje" por aba | Barra de progresso do perfil e "Enquanto isso" |
@@ -46,11 +46,11 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | # | Tela proposta | Status | Onde está hoje | O que falta |
 |---|---|---|---|---|
 | 0.3 | Login do representante | Parcial | Mesmo `LoginPage.tsx` | Mesmas pendências do 0.2, sem login social |
-| 0.4 | Quem está usando agora | Falta | Os usuários vinculados existem em `data/linkedUsers.ts` (titular + prepostos) e são geridos em `AccessPermissionsPage.tsx` | Tela de escolha após o login e registro da pessoa em cada ação |
-| 0.5 | PIN do auxiliar | Falta | — | PIN de 4 dígitos por preposto, separado da senha da conta |
+| 0.4 | Quem está usando agora | Existe | `WhoIsUsingPage.tsx`, depois do login do representante: titular (entra direto) e prepostos ativos de `data/linkedUsers.ts`; "Adicionar preposto" abre Permissões como titular; "Trocar usuário" no menu da conta volta para cá | Comentários do carrinho já saem no nome de quem opera. Outras ações (edições, aprovações) ainda saem no nome do titular |
+| 0.5 | PIN do auxiliar | Existe | Mesmo componente: teclado numérico e teclado físico, erro ao errar, "Esqueceu o PIN? Entrar como [titular]" | PIN de demonstração 1234 para todos; falta o cadastro de PIN por preposto em Permissões |
 | 5 | Radar do representante | Existe | `RadarPage.tsx`, `data/repRadar.ts`: prioridades de contato C-01 a C-09, já com "Pós-venda" (C-08) | Fica como está ("Ver cliente" / "Revisar carrinho"); o Radar não muda |
 | 5a | Carteira de clientes | Existe | `ClientsPage.tsx`, `ClientDetailPage.tsx` | Mostrar o score de recompra na lista |
-| 5b | Montar pedido sugerido | Falta | O rep já cria carrinho para o cliente | Sem o Planejamento, seria um carrinho já preenchido a partir do histórico do cliente. Decidir se entra |
+| 5b | Montar pedido sugerido | Em espera | O rep já cria carrinho para o cliente | Sem o Planejamento, seria um carrinho já preenchido a partir do histórico do cliente. Decidir se entra |
 | 10 | Revisar / aprovar pedido | Existe | `CartPage.tsx` com `viewerRole` 'rep' ("Confirmar condições") | — |
 | 13 | Acompanhar pedido | Existe | `OrderDetailPage.tsx` | Mesma linha do tempo do lojista |
 
@@ -82,10 +82,10 @@ Pelas telas que faltam e pelo que cada uma destrava:
 O Planejamento da Compra (8) e o CTA "Planejar" da Ficha (7) não entram. O "Ajustar foco" (4.1) também não, pelo C2.
 
 1. ~~**Acompanhamento com linha do tempo (13)**~~ — feito.
-2. **Quem está usando + PIN (0.4, 0.5)**, sobre os `linkedUsers` que já existem.
-3. **Onboarding (1–3)**. O passo "Objetivo do momento" servia para reordenar o Radar, que o spec fixa; decidir se ele fica.
+2. ~~**Quem está usando + PIN (0.4, 0.5)**~~ — feito.
+3. **Onboarding (1–3)** — em espera.
 4. **Pós-venda (14)**, depois de decidir a fonte de dados dos clientes finais.
-5. **Montar pedido sugerido (5b)**, se for adotado.
+5. **Montar pedido sugerido (5b)** — em espera.
 
 ## Pendências herdadas da proposta
 

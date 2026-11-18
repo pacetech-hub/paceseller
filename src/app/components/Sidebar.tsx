@@ -23,6 +23,7 @@ import {
   ShoppingCartIcon,
   HeadsetIcon,
   UserCircleIcon,
+  UsersThreeIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -60,6 +61,10 @@ interface TopBarProps {
   selectedClient?: Client | null;
   /** Abre a gaveta do carrinho (FR-401); sem ela, o ícone leva à lista de carrinhos. */
   onOpenCartDrawer?: () => void;
+  /** Titular da conta, quando quem opera é um preposto ("Conta de Marcos Andrade"). */
+  accountOwner?: string;
+  /** Conta compartilhada (representante): volta para "Quem está usando agora". */
+  onSwitchUser?: () => void;
 }
 
 interface MenuPage {
@@ -219,7 +224,7 @@ export function PageTitle({ title, subtitle }: { title: string; subtitle?: strin
 /** Páginas de detalhe marcam no menu a seção de onde vieram. */
 const PARENT_VIEW: Partial<Record<View, View>> = { 'order-detail': 'history', 'client-detail': 'clients' };
 
-export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
+export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer, accountOwner, onSwitchUser }: TopBarProps) {
   const [navOpened, { open: openNav, close: closeNav }] = useDisclosure(false);
   const currentView = PARENT_VIEW[view] ?? view;
   const profileInfo = profileLabels[profile];
@@ -337,6 +342,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
                 <Box px="sm" py="xs">
                   <Text size="xs" c="dimmed">{profileInfo.label}</Text>
                   <Text size="sm" fw={600} truncate>{userName}</Text>
+                  {accountOwner && <Text size="xs" c="dimmed">Preposto · conta de {accountOwner}</Text>}
                 </Box>
                 <Menu.Divider />
                 {account.map(p => {
@@ -348,6 +354,11 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
                   );
                 })}
                 <Menu.Divider />
+                {onSwitchUser && (
+                  <Menu.Item leftSection={<UsersThreeIcon size={16} />} onClick={onSwitchUser}>
+                    Trocar usuário
+                  </Menu.Item>
+                )}
                 <Menu.Item color="red" leftSection={<SignOutIcon size={16} />} onClick={onLogout}>
                   Sair
                 </Menu.Item>
@@ -369,6 +380,14 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
           {pages.map(drawerLink)}
           <Divider my="sm" />
           {account.map(drawerLink)}
+          {onSwitchUser && (
+            <NavLink
+              onClick={() => { closeNav(); onSwitchUser(); }}
+              label="Trocar usuário"
+              leftSection={<UsersThreeIcon size={18} />}
+              classNames={{ root: classes.drawerLink, label: classes.drawerLabel }}
+            />
+          )}
           <Divider my="sm" />
           <Group gap="sm" wrap="nowrap" px="sm" py="xs">
             <ThemeIcon size={32} radius="xl" variant="light" color="neutral" aria-hidden>
@@ -377,6 +396,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
             <Box flex={1} miw={0}>
               <Text size="xs" c="dimmed">{profileInfo.label}</Text>
               <Text size="sm" fw={600} truncate>{userName}</Text>
+              {accountOwner && <Text size="xs" c="dimmed">Preposto · conta de {accountOwner}</Text>}
             </Box>
             <Button variant="subtle" color="red" px="sm" leftSection={<SignOutIcon size={16} />} onClick={logout}>
               Sair
