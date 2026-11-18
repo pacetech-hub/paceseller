@@ -216,8 +216,12 @@ export function PageTitle({ title, subtitle }: { title: string; subtitle?: strin
   );
 }
 
-export function TopBar({ profile, userName, currentView, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
+/** Páginas de detalhe marcam no menu a seção de onde vieram. */
+const PARENT_VIEW: Partial<Record<View, View>> = { 'order-detail': 'history', 'client-detail': 'clients' };
+
+export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer }: TopBarProps) {
   const [navOpened, { open: openNav, close: closeNav }] = useDisclosure(false);
+  const currentView = PARENT_VIEW[view] ?? view;
   const profileInfo = profileLabels[profile];
   const ProfileIcon = profileInfo.icon;
   const pages = mainPages(profile);

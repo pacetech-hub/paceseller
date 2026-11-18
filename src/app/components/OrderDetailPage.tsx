@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Stack, Group, Box, Paper, Text, Title, Button, Anchor, Badge, Image, ThemeIcon, Skeleton } from "@mantine/core";
+import { Stack, Group, Box, Paper, Text, Title, Button, Anchor, Badge, Image, ThemeIcon, Skeleton, Collapse, Timeline } from "@mantine/core";
 import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
-import { CaretLeftIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon } from "@phosphor-icons/react";
-import { products, clients, formatCurrency, type Order, type Product } from "../data/mockData";
-import { OrderStatusBadge, statusSupportText, orderProductNames } from "./OrderHistory";
+import { CaretLeftIcon, CaretDownIcon, DownloadSimpleIcon, ArrowRightIcon, PackageIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
+import { products, clients, formatCurrency, formatDate, type Order, type Product } from "../data/mockData";
+import { OrderStatusBadge, statusSupportText, orderProductNames, shiftDate } from "./OrderHistory";
 
 type View = 'history' | 'boletos';
 
@@ -93,6 +93,95 @@ function DetailsSkeleton({ fields = 5 }: { fields?: number }) {
   );
 }
 
+interface TrackingStep {
+  title: string;
+  /** Data realizada ou prevista (dias a partir da emissão). */
+  day: number;
+  detail?: React.ReactNode;
+}
+
+/** Transportadora e código de rastreio do pedido (mock até existir integração). */
+function shipmentOf(order: Order) {
+  const digits = order.id.replace(/\D/g, '').padStart(8, '0').slice(-8);
+  return { carrier: 'Jadlog', code: `JD${digits}BR` };
+}
+
+/**
+ * Etapas do pedido: recebido → aprovado → em produção → faturado e enviado → entregue.
+ * As datas seguem as que a lista de Pedidos já mostra (entrega prevista em +10 dias, entregue em +6).
+ */
+function trackingSteps(order: Order): { steps: TrackingStep[]; current: number } {
+  const shipment = shipmentOf(order);
+  const delivered = order.status === 'entregue';
+  const shipped = order.status === 'faturado' || delivered;
+  const steps: TrackingStep[] = [
+    { title: 'Pedido recebido', day: 0 },
+    { title: 'Aprovado pela indústria', day: 1, detail: order.status === 'em análise' ? 'Em análise: condições e crédito em conferência' : undefined },
+    { title: 'Em produção', day: 2, detail: order.status === 'aprovado' ? 'Separação e produção dos pares do pedido' : undefined },
+    {
+      title: 'Faturado e enviado',
+      day: delivered ? 4 : 3,
+      detail: shipped ? (
+        <>
+          Transportadora {shipment.carrier} · rastreio <Text span inherit className="mono" c="var(--mantine-color-text)">{shipment.code}</Text>
+        </>
+      ) : undefined,
+    },
+    { title: 'Entregue', day: delivered ? 6 : 10 },
+  ];
+  // Índice da etapa em andamento; com o pedido entregue, todas estão concluídas
+  const current = { 'em análise': 1, aprovado: 2, faturado: 4, entregue: steps.length, cancelado: 1 }[order.status];
+  return { steps, current };
+}
+
+/** Linha do tempo do pedido, igual para lojista, representante e indústria. */
+function OrderTimeline({ order, profile }: { order: Order; profile: Profile }) {
+  if (order.status === 'cancelado') {
+    return (
+      <Timeline active={1} bulletSize={24} lineWidth={2} color="neutral">
+        <Timeline.Item bullet={<CheckIcon size={14} weight="bold" />} title="Pedido recebido">
+          <Text c="dimmed" size="sm">{formatDate(order.date)}</Text>
+        </Timeline.Item>
+        <Timeline.Item bullet={<XIcon size={14} weight="bold" />} color="red" title="Cancelado">
+          <Text c="dimmed" size="sm">{formatDate(order.date)}</Text>
+        </Timeline.Item>
+      </Timeline>
+    );
+  }
+
+  const { steps, current } = trackingSteps(order);
+  return (
+    <Stack gap="md">
+      <Timeline active={Math.min(current, steps.length - 1)} bulletSize={24} lineWidth={2} color="neutral">
+        {steps.map((step, i) => {
+          const done = i < current;
+          const isCurrent = i === current;
+          const date = formatDate(shiftDate(order.date, step.day));
+          return (
+            <Timeline.Item
+              key={step.title}
+              bullet={done ? <CheckIcon size={14} weight="bold" /> : undefined}
+              title={<Text fw={done || isCurrent ? 600 : 400} c={done || isCurrent ? undefined : 'dimmed'}>{step.title}</Text>}
+              aria-current={isCurrent ? 'step' : undefined}
+            >
+              <Text c="dimmed" size="sm">
+                {done ? date : `Previsto para ${date}`}
+                {isCurrent && ' · em andamento'}
+              </Text>
+              {step.detail && <Text c="dimmed" size="sm" mt={2}>{step.detail}</Text>}
+            </Timeline.Item>
+          );
+        })}
+      </Timeline>
+      <Text c="dimmed" size="sm">
+        {profile === 'lojista'
+          ? `${order.rep} acompanha este pedido com você, em tempo real.`
+          : 'O lojista acompanha a mesma linha do tempo, em tempo real.'}
+      </Text>
+    </Stack>
+  );
+}
+
 // deterministic line-item breakdown per order — quantities sum to order.items
 const orderLineItems: Record<string, Array<{ productId: string; quantity: number }>> = {
   '4790-1': [{ productId: 'P009', quantity: 48 }],
@@ -119,6 +208,7 @@ function getOrderLineItems(order: Order): Array<{ product: Product; quantity: nu
 
 export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageProps) {
   const loading = useMockLoading();
+  const [trackingOpen, setTrackingOpen] = useState(false);
   if (!order) {
     return (
       <Box p={{ base: 'md', sm: 'lg' }} maw={1000} mx="auto" w="100%">
@@ -216,7 +306,31 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             <Group gap="xs">
               <OrderStatusBadge status={order.status} />
               <Text c="dimmed" size="sm">{support}</Text>
+              {/* Botão terciário: abre a linha do tempo do pedido logo abaixo do status */}
+              <Button
+                variant="transparent"
+                color="neutral"
+                px={0}
+                ml="xs"
+                fw={600}
+                onClick={() => setTrackingOpen(o => !o)}
+                aria-expanded={trackingOpen}
+                aria-controls="order-tracking"
+                rightSection={
+                  <CaretDownIcon
+                    size={16}
+                    style={{ transform: trackingOpen ? 'rotate(180deg)' : undefined, transition: 'transform 150ms ease' }}
+                  />
+                }
+              >
+                {trackingOpen ? 'Ocultar detalhes' : 'Ver detalhes'}
+              </Button>
             </Group>
+            <Collapse in={trackingOpen} id="order-tracking">
+              <Box pt="md" pl={4}>
+                <OrderTimeline order={order} profile={profile} />
+              </Box>
+            </Collapse>
           </DetailField>
           <DetailField label="Pedido">
             <Text fw={600}>
