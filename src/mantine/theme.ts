@@ -1,26 +1,33 @@
 import { createTheme, type MantineColorsTuple } from "@mantine/core";
+import { tokens } from "./tokens";
 
-// Escala neutra (preto/cinza) equivalente ao --primary do design atual (oklch(0 0 0)),
-// já que o app usa preto como cor de ação principal em vez de uma cor de marca saturada.
+// Todos os valores visuais vêm dos design tokens (design-tokens/design-tokens.tokens.json),
+// convertidos por scripts/build-tokens.mjs em ./tokens.ts. Rode `bun run tokens` ao atualizar o JSON.
+
+// O Mantine usa 10 tons por cor; os tokens têm 11 (50–950). Usamos 50–900 → índices 0–9,
+// então o índice 5 do Mantine = tom 500 do token, 6 = 600 e assim por diante.
+type Palette = keyof typeof tokens.palettes;
+const tuple = (name: Palette): MantineColorsTuple => {
+  const p = tokens.palettes[name];
+  return [p["50"], p["100"], p["200"], p["300"], p["400"], p["500"], p["600"], p["700"], p["800"], p["900"]];
+};
+const px = (n: number) => `${n / 16}rem`;
+
 // Paleta do app (evita cores que brigam entre si):
 // - neutral: ações, navegação e seleção (preto/cinza);
-// - blue: somente links;
+// - brand: links e anel de foco (azul da marca, #0e69f2);
 // - teal: sucesso / disponível; yellow: atenção / baixo estoque; red: erro / esgotado / excluir.
 // Cores de produto (swatches de cor do calçado) são dados, não parte da paleta de interface.
-// Cinzas com um toque frio (azulado, matiz ~215°) em vez de cinza puro: fundos e superfícies
-// ficam menos "mortos" e combinam com o gray do Mantine usado nos fundos de cartões.
-const neutral: MantineColorsTuple = [
-  "#f4f6f8",
-  "#e6e9ed",
-  "#cfd4da",
-  "#adb4bc",
-  "#868e98",
-  "#6b737c",
-  "#484f57",
-  "#2d3238",
-  "#1a1d21",
-  "#0b0d0f",
-];
+// Todas as famílias dos tokens ficam registradas; as que têm o mesmo nome de uma cor do
+// Mantine (gray, red, blue, teal…) substituem a padrão. "grape" do Mantine vira o "purple" dos tokens.
+const colors = Object.fromEntries(
+  (Object.keys(tokens.palettes) as Palette[]).map((name) => [name, tuple(name)]),
+) as Record<Palette, MantineColorsTuple>;
+
+const FONT_FAMILY = `${tokens.fontFamily.body}, system-ui, sans-serif`;
+const FONT_FAMILY_DISPLAY = `${tokens.fontFamily.display}, system-ui, sans-serif`;
+const fs = tokens.fontSize;
+const lh = tokens.lineHeight;
 
 // Tipografia: apenas três pesos — regular (400), semibold (600) e bold (700).
 // O Mantine usa 500 em alguns rótulos internos; aqui eles passam para semibold.
@@ -37,7 +44,8 @@ const inputStyles = {
   error: { marginTop: 6 },
 };
 
-const RADIUS = "0.5rem";
+// Raio único do app = radius-md dos tokens (8px).
+const RADIUS = px(tokens.radius.md);
 
 // Controles grandes também no desktop: campos e botões com 42px de altura e fonte de 16px.
 const CONTROL_SIZE = "md";
@@ -54,8 +62,10 @@ const inputDefaults = {
 export const mantineTheme = createTheme({
   primaryColor: "neutral",
   primaryShade: 9,
-  colors: { neutral },
-  fontFamily: "Roboto, system-ui, sans-serif",
+  colors: { ...colors, grape: colors.purple },
+  white: tokens.base.white,
+  black: tokens.base.black,
+  fontFamily: FONT_FAMILY,
   // Breakpoints padrão do Mantine, declarados explicitamente.
   breakpoints: {
     xs: "36em",
@@ -66,15 +76,18 @@ export const mantineTheme = createTheme({
   },
   // Um único arredondamento (8px) para botões, campos, cartões e modais: valores parecidos
   // mas diferentes (6/8/12/16px) quebram o "caminho previsível" do olhar.
+  // (A escala completa dos tokens — 2, 4, 6, 8, 10, 12, 16, 20, 24px — está em --ps-radius-*.)
   defaultRadius: "md",
   // Espaçamento em degraus bem distintos: gaps maiores separam grupos grandes (seções),
-  // menores separam itens dentro de um grupo. xs 8 · sm 12 · md 16 · lg 24 · xl 32.
+  // menores separam itens dentro de um grupo. Cada degrau é um token de espaçamento:
+  // xs 8 (spacing-md) · sm 12 (spacing-lg) · md 16 (spacing-xl) · lg 24 (spacing-3xl) · xl 32 (spacing-4xl).
+  // A escala completa (2 a 160px) está em --ps-spacing-*.
   spacing: {
-    xs: "0.5rem",
-    sm: "0.75rem",
-    md: "1rem",
-    lg: "1.5rem",
-    xl: "2rem",
+    xs: px(tokens.spacing.md),
+    sm: px(tokens.spacing.lg),
+    md: px(tokens.spacing.xl),
+    lg: px(tokens.spacing["3xl"]),
+    xl: px(tokens.spacing["4xl"]),
   },
   radius: {
     xs: RADIUS,
@@ -83,31 +96,48 @@ export const mantineTheme = createTheme({
     lg: RADIUS,
     xl: RADIUS,
   },
-  // Base de 16px e poucos tamanhos: 14 (apoio/metadados), 16 (texto, campos e ações),
-  // 20 (títulos de seção) e 28 (título de página / números de destaque).
+  // Base de 16px e poucos tamanhos, todos da escala dos tokens: 14 (text-sm, apoio/metadados),
+  // 16 (text-md, texto, campos e ações), 20 (text-xl, títulos de seção) e
+  // 30 (display-sm, título de página / números de destaque).
   // xs é igual a sm para que nenhum texto interno do Mantine fique abaixo de 14px.
   fontSizes: {
-    xs: "0.875rem",
-    sm: "0.875rem",
-    md: "1rem",
-    lg: "1.25rem",
-    xl: "1.75rem",
+    xs: px(fs["text-sm"]),
+    sm: px(fs["text-sm"]),
+    md: px(fs["text-md"]),
+    lg: px(fs["text-xl"]),
+    xl: px(fs["display-sm"]),
+  },
+  // Entrelinhas dos tokens, como proporção do tamanho (20/14, 24/16, 30/20, 38/30).
+  lineHeights: {
+    xs: String(lh["text-sm"] / fs["text-sm"]),
+    sm: String(lh["text-sm"] / fs["text-sm"]),
+    md: String(lh["text-md"] / fs["text-md"]),
+    lg: String(lh["text-xl"] / fs["text-xl"]),
+    xl: String(lh["display-sm"] / fs["display-sm"]),
+  },
+  shadows: {
+    xs: tokens.shadows.xs,
+    sm: tokens.shadows.sm,
+    md: tokens.shadows.md,
+    lg: tokens.shadows.lg,
+    xl: tokens.shadows.xl,
   },
   headings: {
-    fontFamily: "Roboto, system-ui, sans-serif",
+    fontFamily: FONT_FAMILY_DISPLAY,
     fontWeight: "700",
     sizes: {
-      h1: { fontSize: "1.75rem", lineHeight: "1.3" },
-      h2: { fontSize: "1.25rem", lineHeight: "1.35" },
-      h3: { fontSize: "1.25rem", lineHeight: "1.35" },
-      h4: { fontSize: "1rem", lineHeight: "1.5" },
-      h5: { fontSize: "1rem", lineHeight: "1.5" },
-      h6: { fontSize: "1rem", lineHeight: "1.5" },
+      h1: { fontSize: px(fs["display-sm"]), lineHeight: String(lh["display-sm"] / fs["display-sm"]) },
+      h2: { fontSize: px(fs["text-xl"]), lineHeight: String(lh["text-xl"] / fs["text-xl"]) },
+      h3: { fontSize: px(fs["text-xl"]), lineHeight: String(lh["text-xl"] / fs["text-xl"]) },
+      h4: { fontSize: px(fs["text-md"]), lineHeight: String(lh["text-md"] / fs["text-md"]) },
+      h5: { fontSize: px(fs["text-md"]), lineHeight: String(lh["text-md"] / fs["text-md"]) },
+      h6: { fontSize: px(fs["text-md"]), lineHeight: String(lh["text-md"] / fs["text-md"]) },
     },
   },
   components: {
-    // Links sempre reconhecíveis: azul e sublinhados (nunca parecem texto comum).
-    Anchor: { defaultProps: { underline: "always", c: "blue.7" } },
+    // Links sempre reconhecíveis: azul da marca e sublinhados (nunca parecem texto comum).
+    // brand.6 (#0d5acc) em vez do 500 para manter contraste AA com texto de 14px.
+    Anchor: { defaultProps: { underline: "always", c: "brand.6" } },
     Button: {
       defaultProps: { size: CONTROL_SIZE },
       styles: { label: { fontWeight: SEMIBOLD } },

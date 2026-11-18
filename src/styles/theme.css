@@ -1,5 +1,6 @@
 /*
  * Estilos globais além do Mantine (a tipografia e as cores vêm de src/mantine/theme.ts).
+ * Valores visuais saem dos design tokens: use as variáveis --ps-* de ./tokens.css.
  */
 
 html {
@@ -7,12 +8,12 @@ html {
 }
 
 body {
-  font-family: 'Roboto', system-ui, sans-serif;
+  font-family: var(--ps-font-family-body);
 }
 
 /* Data/labels use a numeric variant of the same body font, for alignment */
 .mono {
-  font-family: 'Roboto', system-ui, sans-serif;
+  font-family: var(--ps-font-family-body);
   font-variant-numeric: tabular-nums;
 }
 
@@ -25,11 +26,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.3 0.02 265);
-  border-radius: 2px;
+  background: var(--ps-color-neutral-700);
+  border-radius: var(--ps-radius-xxs);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.4 0.02 265);
+  background: var(--ps-color-neutral-600);
 }
 
 /*
@@ -48,6 +49,17 @@ body {
   --button-padding-x-compact-md: calc(0.875rem * var(--mantine-scale));
   --button-padding-x-compact-lg: calc(1rem * var(--mantine-scale));
   --button-padding-x-compact-xl: calc(1.25rem * var(--mantine-scale));
+}
+
+/*
+ * Anel de foco dos tokens (focus-ring): 2px de respiro + 2px no azul da marca (#0e69f2).
+ * Substitui o contorno do Mantine, que usaria a cor primária (preto).
+ */
+.mantine-focus-auto:focus-visible,
+.mantine-focus-always:focus,
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--ps-color-brand-500);
+  outline-offset: 2px;
 }
 
 /* Campos: borda sempre visível (o Mantine usa a mesma cor do fundo em alguns tons) */
@@ -128,7 +140,7 @@ body {
  * as secundárias (default/light/subtle) ficam planas e visivelmente menos importantes.
  */
 .mantine-Button-root[data-variant="filled"]:not(:disabled):not([data-disabled]) {
-  box-shadow: 0 1px 2px rgba(11, 13, 15, 0.12), 0 2px 6px rgba(11, 13, 15, 0.16);
+  box-shadow: var(--ps-shadow-sm);
 }
 
 .mantine-Button-root[data-variant="default"],

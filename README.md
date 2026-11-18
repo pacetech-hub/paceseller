@@ -11,3 +11,11 @@ Run `bun install` to install the dependencies.
 Run `bun run dev` to start the development server.
 
 Run `bun run build` to create a production build.
+
+## Design tokens
+
+Visual values (colors, type, spacing, radius, shadows, focus ring) come from the Figma export in
+`design-tokens/design-tokens.tokens.json`. After updating that file, run `bun run tokens` to regenerate:
+
+- `src/mantine/tokens.ts`: used by the Mantine theme (`src/mantine/theme.ts`)
+- `src/styles/tokens.css`: the same scales as CSS variables (`--ps-color-brand-500`, `--ps-spacing-xl`, `--ps-shadow-sm`…) for CSS modules
