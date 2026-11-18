@@ -7,7 +7,8 @@
  *
  * Rode `bun run tokens` sempre que o JSON for atualizado. Não edite as saídas à mão.
  *
- * A cor de marca é a família BRAND_FAMILY (zinc), não a "brand" azul do export.
+ * A cor de marca é a família BRAND_FAMILY (zinc), não a "brand" azul do export, e a fonte
+ * é FONT_FAMILY (Geist), não a Manrope do export.
  *
  * Observação: os tokens semânticos de "1. color modes" apontam para uma coleção `_primitives`
  * que não vem no export (e só o modo escuro foi exportado), então eles não são gerados aqui.
@@ -24,6 +25,11 @@ const src = JSON.parse(readFileSync(resolve(root, 'design-tokens/design-tokens.t
 // Família de cor usada como marca deste projeto. A família "brand" do export (azul #0e69f2)
 // é substituída por ela em todas as saídas, inclusive nos anéis de foco.
 const BRAND_FAMILY = 'zinc'
+
+// Fonte principal deste projeto (títulos e texto). Substitui a do export (Manrope);
+// tamanhos, entrelinhas e letter-spacing continuam vindo dos tokens.
+// Ao trocar, atualize também o @import de src/styles/fonts.css.
+const FONT_FAMILY = 'Geist'
 
 const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950']
 
@@ -70,8 +76,8 @@ const containers = Object.fromEntries(
 // ---------- Tipografia ----------
 const typo = src['6. typography']
 const fontFamily = {
-  display: typo['font family']['font-family-display'].value,
-  body: typo['font family']['font-family-body'].value,
+  display: FONT_FAMILY ?? typo['font family']['font-family-display'].value,
+  body: FONT_FAMILY ?? typo['font family']['font-family-body'].value,
 }
 const fontSize = Object.fromEntries(Object.entries(typo['font size']).map(([k, t]) => [k, t.value]))
 const lineHeight = Object.fromEntries(Object.entries(typo['line height']).map(([k, t]) => [k, t.value]))

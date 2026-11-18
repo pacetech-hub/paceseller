@@ -411,8 +411,8 @@ export const tokens = {
     "padding-mobile": 16
   },
   "fontFamily": {
-    "display": "Manrope",
-    "body": "Manrope"
+    "display": "Geist",
+    "body": "Geist"
   },
   "fontSize": {
     "text-xs": 12,
