@@ -26,11 +26,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--ps-color-neutral-700);
+  background: var(--ps-color-brand-700);
   border-radius: var(--ps-radius-xxs);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--ps-color-neutral-600);
+  background: var(--ps-color-brand-600);
 }
 
 /*
@@ -52,8 +52,7 @@ body {
 }
 
 /*
- * Anel de foco dos tokens (focus-ring): 2px de respiro + 2px no azul da marca (#0e69f2).
- * Substitui o contorno do Mantine, que usaria a cor primária (preto).
+ * Anel de foco dos tokens (focus-ring): 2px de respiro + 2px na cor da marca (zinc 500).
  */
 .mantine-focus-auto:focus-visible,
 .mantine-focus-always:focus,

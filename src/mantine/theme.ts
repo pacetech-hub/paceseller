@@ -14,8 +14,9 @@ const tuple = (name: Palette): MantineColorsTuple => {
 const px = (n: number) => `${n / 16}rem`;
 
 // Paleta do app (evita cores que brigam entre si):
-// - neutral: ações, navegação e seleção (preto/cinza);
-// - brand: links e anel de foco (azul da marca, #0e69f2);
+// - brand: ações, navegação, seleção e anel de foco — família zinc dos tokens
+//   (definida em scripts/build-tokens.mjs, BRAND_FAMILY); o tom 900 (#18181b) é o "preto" das ações;
+// - blue: somente links;
 // - teal: sucesso / disponível; yellow: atenção / baixo estoque; red: erro / esgotado / excluir.
 // Cores de produto (swatches de cor do calçado) são dados, não parte da paleta de interface.
 // Todas as famílias dos tokens ficam registradas; as que têm o mesmo nome de uma cor do
@@ -60,7 +61,7 @@ const inputDefaults = {
 } as const;
 
 export const mantineTheme = createTheme({
-  primaryColor: "neutral",
+  primaryColor: "brand",
   primaryShade: 9,
   colors: { ...colors, grape: colors.purple },
   white: tokens.base.white,
@@ -135,9 +136,9 @@ export const mantineTheme = createTheme({
     },
   },
   components: {
-    // Links sempre reconhecíveis: azul da marca e sublinhados (nunca parecem texto comum).
-    // brand.6 (#0d5acc) em vez do 500 para manter contraste AA com texto de 14px.
-    Anchor: { defaultProps: { underline: "always", c: "brand.6" } },
+    // Links sempre reconhecíveis: azul e sublinhados (nunca parecem texto comum).
+    // A marca é cinza (zinc), então o link usa o blue dos tokens para não parecer texto comum.
+    Anchor: { defaultProps: { underline: "always", c: "blue.7" } },
     Button: {
       defaultProps: { size: CONTROL_SIZE },
       styles: { label: { fontWeight: SEMIBOLD } },

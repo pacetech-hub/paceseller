@@ -99,14 +99,14 @@ export function buildSeries(monthlyBase: number, period: Period) {
 // `color` é uma cor do tema Mantine (nome.tom) — só neutro + cores de status da paleta
 export const STATUS_CONFIG: { key: string; label: string; color: string; ratio: number; orderStatus: string }[] = [
   { key: 'analise', label: 'Em análise', color: 'yellow.6', ratio: 0.10, orderStatus: 'em análise' },
-  { key: 'aprovado', label: 'Aprovado', color: 'neutral.9', ratio: 0.40, orderStatus: 'aprovado' },
-  { key: 'faturado', label: 'Faturado', color: 'neutral.5', ratio: 0.27, orderStatus: 'faturado' },
+  { key: 'aprovado', label: 'Aprovado', color: 'brand.9', ratio: 0.40, orderStatus: 'aprovado' },
+  { key: 'faturado', label: 'Faturado', color: 'brand.5', ratio: 0.27, orderStatus: 'faturado' },
   { key: 'entregue', label: 'Entregue', color: 'teal.6', ratio: 0.18, orderStatus: 'entregue' },
   { key: 'cancelado', label: 'Cancelado', color: 'red.5', ratio: 0.05, orderStatus: 'cancelado' },
 ];
 
 const SERIES_CHART = [
-  { name: 'current', label: 'Período atual', color: 'neutral.9', type: 'bar' as const },
+  { name: 'current', label: 'Período atual', color: 'brand.9', type: 'bar' as const },
   { name: 'lastYear', label: 'Ano passado', color: 'yellow.6', type: 'line' as const },
 ];
 

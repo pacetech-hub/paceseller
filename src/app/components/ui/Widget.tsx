@@ -18,7 +18,7 @@ export function Widget({ icon: WidgetIcon, title, subtitle, action, footer, chil
       <Stack gap="md" h="100%">
         <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
           <Group gap="sm" wrap="nowrap" miw={0}>
-            <ThemeIcon size={32} radius="md" variant="light" color="neutral" aria-hidden>
+            <ThemeIcon size={32} radius="md" variant="light" color="brand" aria-hidden>
               <WidgetIcon size={18} />
             </ThemeIcon>
             <Box miw={0}>
@@ -38,7 +38,7 @@ export function Widget({ icon: WidgetIcon, title, subtitle, action, footer, chil
 
 export function WidgetLink({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <Button variant="transparent" color="neutral" px={0} fw={600} rightSection={<ArrowRightIcon size={18} />} onClick={onClick} disabled={disabled}>
+    <Button variant="transparent" color="brand" px={0} fw={600} rightSection={<ArrowRightIcon size={18} />} onClick={onClick} disabled={disabled}>
       {label}
     </Button>
   );

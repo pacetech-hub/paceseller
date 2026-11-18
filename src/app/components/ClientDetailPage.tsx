@@ -225,7 +225,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       {/* Header */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group gap="md" wrap="nowrap" miw={0}>
-          <Avatar size={56} color="neutral" variant="light" styles={{ placeholder: { fontWeight: 700 } }}>
+          <Avatar size={56} color="brand" variant="light" styles={{ placeholder: { fontWeight: 700 } }}>
             {client.avatar}
           </Avatar>
           <Box miw={0}>
@@ -248,7 +248,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
           <Button
             onClick={() => setExpanded(v => !v)}
             variant="subtle"
-            color="neutral"
+            color="brand"
             ml={-12}
             aria-expanded={expanded}
             rightSection={
@@ -297,7 +297,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       {/* Último pedido e ticket médio */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         <Paper withBorder p="md">
-          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
+          <ThemeIcon variant="light" color="brand" size={36} mb="sm">
             <ClockIcon size={16} />
           </ThemeIcon>
           <Text c="dimmed" size="sm">Último pedido</Text>
@@ -305,7 +305,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         </Paper>
 
         <Paper withBorder p="md">
-          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
+          <ThemeIcon variant="light" color="brand" size={36} mb="sm">
             <ChartBarIcon size={16} />
           </ThemeIcon>
           <Text c="dimmed" size="sm">Ticket médio por pedido</Text>
@@ -316,7 +316,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       {/* Ações de carrinho */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         <Paper withBorder p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
-          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
+          <ThemeIcon variant="light" color="brand" size={36} mb="sm">
             <PlusIcon size={16} />
           </ThemeIcon>
           <Text fw={600}>Novo carrinho</Text>
@@ -324,12 +324,12 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
         </Paper>
 
         <Paper withBorder p="md" component="button" type="button" onClick={() => onNavigate('carts')} className={`${classes.cardButton} ${classes.hoverable}`}>
-          <ThemeIcon variant="light" color="neutral" size={36} mb="sm">
+          <ThemeIcon variant="light" color="brand" size={36} mb="sm">
             <ShoppingCartIcon size={16} />
           </ThemeIcon>
           <Group gap="xs">
             <Text fw={600}>Carrinhos</Text>
-            <Badge variant="light" color="neutral" circle>{cartCount}</Badge>
+            <Badge variant="light" color="brand" circle>{cartCount}</Badge>
           </Group>
           <Text c="dimmed" size="sm" mt={4}>
             {cartCount === 1 ? 'pedido em aberto sendo criado' : 'pedidos em aberto sendo criados'}
@@ -404,7 +404,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
             onClick={() => setStockFilter('todos')}
             variant={stockFilter === 'todos' ? 'light' : 'default'}
             aria-pressed={stockFilter === 'todos'}
-            color="neutral"
+            color="brand"
           >
             Todos
           </Button>
@@ -416,7 +416,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                 onClick={() => setStockFilter(key)}
                 variant={active ? 'light' : 'default'}
                 aria-pressed={active}
-                color="neutral"
+                color="brand"
               >
                 {STOCK_STATUS_CONFIG[key].filterLabel}
               </Button>
@@ -455,7 +455,7 @@ function RankCard({ title, items, renderLabel }: { title: string; items: RankIte
               <Text fw={600} component="div">{renderLabel ? renderLabel(item) : item.label}</Text>
               <Text c="dimmed" size="sm" className="mono">{item.pct}%</Text>
             </Group>
-            <Progress value={item.pct} size={6} color="neutral" />
+            <Progress value={item.pct} size={6} color="brand" />
           </Box>
         ))}
       </Stack>

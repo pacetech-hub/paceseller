@@ -26,7 +26,7 @@ export function SalesTeamPage({ scope, entities, onBack, backLabel = 'Indicadore
   return (
     <Stack gap="xl" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
       {/* Link de voltar: margem negativa só para alinhar o texto ao conteúdo */}
-      <Button onClick={onBack} variant="subtle" color="neutral" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
+      <Button onClick={onBack} variant="subtle" color="brand" leftSection={<CaretLeftIcon size={16} />} ml={-12} style={{ alignSelf: 'flex-start' }}>
         Voltar para {backLabel}
       </Button>
 
@@ -37,7 +37,7 @@ export function SalesTeamPage({ scope, entities, onBack, backLabel = 'Indicadore
         <SegmentedControl
           value={period}
           onChange={v => setPeriod(v as Period)}
-          color="neutral"
+          color="brand"
           data={PERIOD_OPTIONS.map(opt => ({ value: opt.id, label: opt.label }))}
         />
       </Group>

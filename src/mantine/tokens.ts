@@ -21,17 +21,17 @@ export const tokens = {
       "950": "#0a0a0a"
     },
     "brand": {
-      "50": "#c1d9fe",
-      "100": "#9cc2fd",
-      "200": "#78acfb",
-      "300": "#5495f8",
-      "400": "#307ff5",
-      "500": "#0e69f2",
-      "600": "#0d5acc",
-      "700": "#0e45a1",
-      "800": "#0e3277",
-      "900": "#0b204f",
-      "950": "#071129"
+      "50": "#fafafa",
+      "100": "#f4f4f5",
+      "200": "#e4e4e7",
+      "300": "#d4d4d8",
+      "400": "#a1a1aa",
+      "500": "#71717a",
+      "600": "#52525b",
+      "700": "#3f3f46",
+      "800": "#27272a",
+      "900": "#18181b",
+      "950": "#09090b"
     },
     "red": {
       "50": "#fef2f2",
@@ -464,10 +464,10 @@ export const tokens = {
     "3xl": "0px 32px 64px -12px #00000024, 0px 5px 5px -2.5px #0000000a"
   },
   "focusRings": {
-    "focus-ring": "0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #0e69f2",
-    "focus-ring-shadow-xs": "0px 1px 2px 0px #0000000d, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #0e69f2",
-    "focus-ring-shadow-xs-skeuomorphic": "inset 0px 0px 0px 1px #0000002e, inset 0px -2px 0px 0px #0000000d, 0px 1px 2px 0px #0000000d, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #0e69f2",
-    "focus-ring-shadow-sm": "0px 1px 3px 0px #0000001a, 0px 1px 2px 0px #0000001a, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #0e69f2",
+    "focus-ring": "0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #71717a",
+    "focus-ring-shadow-xs": "0px 1px 2px 0px #0000000d, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #71717a",
+    "focus-ring-shadow-xs-skeuomorphic": "inset 0px 0px 0px 1px #0000002e, inset 0px -2px 0px 0px #0000000d, 0px 1px 2px 0px #0000000d, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #71717a",
+    "focus-ring-shadow-sm": "0px 1px 3px 0px #0000001a, 0px 1px 2px 0px #0000001a, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #71717a",
     "focus-ring-error": "0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #ef4444",
     "focus-ring-error-shadow-xs": "0px 1px 2px 0px #0000000d, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #ef4444",
     "focus-ring-error-shadow-xs-skeuomorphic": "inset 0px 0px 0px 1px #0000002e, inset 0px -2px 0px 0px #0000000d, 0px 1px 2px 0px #0000000d, 0px 0px 0px 2px #fefefe, 0px 0px 0px 4px #ef4444"

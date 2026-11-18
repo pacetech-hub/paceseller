@@ -69,7 +69,7 @@ function InfoField({ label, value, mono, highlight }: { label: string; value: st
 
 function ErpSyncNotice({ text }: { text: string }) {
   return (
-    <Alert variant="light" color="neutral" icon={<PlugChargingIcon size={16} />} p="sm">
+    <Alert variant="light" color="brand" icon={<PlugChargingIcon size={16} />} p="sm">
       <Text size="sm" lh={1.55}>{text}</Text>
     </Alert>
   );
@@ -94,7 +94,7 @@ function CriteriaChips({ items }: { items: string[] }) {
       {/* Somente leitura: a única forma de mudar é pela regra no ERP */}
       {items.length === 0 && <Text c="dimmed" size="sm">Nenhum item nesta condição. Para incluir, ajuste a regra no ERP da Tesla.</Text>}
       {items.map(v => (
-        <Badge key={v} variant="light" color="neutral" fw={600}>{v}</Badge>
+        <Badge key={v} variant="light" color="brand" fw={600}>{v}</Badge>
       ))}
     </Group>
   );
@@ -541,7 +541,7 @@ export function AdminPage() {
                         <Radio.Card key={role} value={role} p="sm" className={classes.choiceCard}>
                           {/* Rádio alinhado à primeira linha do texto */}
                           <Group align="flex-start" gap="sm" wrap="nowrap">
-                            <Radio.Indicator color="neutral" mt={2} />
+                            <Radio.Indicator color="brand" mt={2} />
                             <Box flex={1} miw={0}>
                               <Text fw={600}>{role}</Text>
                               <Text c="dimmed" size="sm">{profileDescriptions[role]}</Text>
@@ -581,7 +581,7 @@ export function AdminPage() {
               {filteredUsers.map(user => (
                 <Table.Tr key={user.id}>
                   <Table.Td maw={280}><UserCell name={user.name} email={user.email} /></Table.Td>
-                  <Table.Td><Badge variant="light" color="neutral" style={badgeStyle}>{user.role}</Badge></Table.Td>
+                  <Table.Td><Badge variant="light" color="brand" style={badgeStyle}>{user.role}</Badge></Table.Td>
                   <Table.Td><Text>{user.region}</Text></Table.Td>
                   <Table.Td><Badge variant="light" color="teal" style={badgeStyle}>{user.status}</Badge></Table.Td>
                   <Table.Td><Text className="mono">{formatLastLogin(user.lastLogin)}</Text></Table.Td>
@@ -608,7 +608,7 @@ export function AdminPage() {
               {linkedUsers.map(user => (
                 <Table.Tr key={user.id}>
                   <Table.Td maw={280}><UserCell name={user.name} email={user.email} /></Table.Td>
-                  <Table.Td><Badge variant="light" color="neutral" style={badgeStyle}>{user.profile}</Badge></Table.Td>
+                  <Table.Td><Badge variant="light" color="brand" style={badgeStyle}>{user.profile}</Badge></Table.Td>
                   <Table.Td>
                     {/* Vínculo não é status: texto simples */}
                     <Text>{linkLabel(user)}</Text>
@@ -674,11 +674,11 @@ export function AdminPage() {
                   p="md"
                   className={`${classes.cardButton} ${active ? '' : classes.hoverable}`}
                   // Selecionado: borda forte e fundo tingido, ambos ajustados para o modo escuro
-                  bd={active ? '1px solid light-dark(var(--mantine-color-neutral-9), var(--mantine-color-dark-0))' : undefined}
-                  bg={active ? 'light-dark(var(--mantine-color-neutral-0), var(--mantine-color-dark-5))' : undefined}
+                  bd={active ? '1px solid light-dark(var(--mantine-color-brand-9), var(--mantine-color-dark-0))' : undefined}
+                  bg={active ? 'light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-5))' : undefined}
                 >
                   <Group gap="sm" wrap="nowrap">
-                    <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'neutral' : 'gray'} size={36}>
+                    <ThemeIcon variant={active ? 'filled' : 'light'} color={active ? 'brand' : 'gray'} size={36}>
                       <VisaoIcon size={16} />
                     </ThemeIcon>
                     <Box>

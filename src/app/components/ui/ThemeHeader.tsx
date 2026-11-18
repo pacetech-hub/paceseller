@@ -9,14 +9,14 @@ export function ThemeHeader({ icon: HeaderIcon, title, description, count, actio
   return (
     <Group justify="space-between" align="flex-end" gap="sm">
       <Group gap="sm" wrap="nowrap" align="flex-start">
-        <ThemeIcon size={32} radius="md" variant="light" color="neutral" aria-hidden>
+        <ThemeIcon size={32} radius="md" variant="light" color="brand" aria-hidden>
           <HeaderIcon size={18} />
         </ThemeIcon>
         <Box>
           <Group gap="xs">
             <Title order={2} fz="lg">{title}</Title>
             {count !== undefined && (
-              <Badge size="sm" circle variant="filled" color={count > 0 ? 'neutral' : 'gray'}>{count}</Badge>
+              <Badge size="sm" circle variant="filled" color={count > 0 ? 'brand' : 'gray'}>{count}</Badge>
             )}
           </Group>
           <Text size="sm" c="dimmed">{description}</Text>

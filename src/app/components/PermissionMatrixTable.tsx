@@ -24,7 +24,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
         <Stack gap="xs">
           <Group gap="sm">
             {perfis.map(perfil => (
-              <Badge key={perfil} color="neutral" variant="light" styles={{ root: { minWidth: 'max-content' } }}>{perfil}</Badge>
+              <Badge key={perfil} color="brand" variant="light" styles={{ root: { minWidth: 'max-content' } }}>{perfil}</Badge>
             ))}
           </Group>
           <Stack gap={4}>
@@ -58,7 +58,7 @@ export function PermissionMatrixTable({ matrix, onToggle, onReset }: PermissionM
                     <Checkbox
                       checked={matrix[perfil][modulo]}
                       onChange={() => onToggle(perfil, modulo)}
-                      color="neutral"
+                      color="brand"
                       aria-label={`${modulo} · ${perfil}`}
                       styles={{ input: { cursor: 'pointer' } }}
                     />

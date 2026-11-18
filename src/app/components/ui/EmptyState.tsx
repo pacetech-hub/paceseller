@@ -50,7 +50,7 @@ export function EmptyState({
 }) {
   const content = (
     <Stack gap="lg" align="flex-start">
-      <ThemeIcon variant="light" color="neutral" size={48}>
+      <ThemeIcon variant="light" color="brand" size={48}>
         <IconCmp size={24} />
       </ThemeIcon>
       <Box>

@@ -183,7 +183,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
             data={chartData}
             dataKey="month"
             series={[
-              { name: 'Sell-in', color: 'neutral.9' },
+              { name: 'Sell-in', color: 'brand.9' },
               { name: 'Sell-out', color: 'teal.6' },
             ]}
             curveType="monotone"
@@ -212,8 +212,8 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                 data={lines}
                 dataKey="name"
                 orientation="vertical"
-                series={[{ name: 'revenue', label: 'Receita', color: 'neutral.4' }]}
-                getBarColor={v => (v === maxRev ? 'neutral.9' : 'neutral.4')}
+                series={[{ name: 'revenue', label: 'Receita', color: 'brand.4' }]}
+                getBarColor={v => (v === maxRev ? 'brand.9' : 'brand.4')}
                 gridAxis="x"
                 tickLine="none"
                 valueFormatter={formatChartCurrency}
@@ -240,14 +240,14 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                       withBorder
                       p="sm"
                       bg={top ? undefined : 'var(--mantine-color-gray-0)'}
-                      bd={top ? '1px solid var(--mantine-color-neutral-9)' : undefined}
+                      bd={top ? '1px solid var(--mantine-color-brand-9)' : undefined}
                     >
                       <Group justify="space-between" mb="xs" wrap="nowrap">
                         <Group gap="xs" wrap="nowrap" miw={0}>
                           <Center
                             w={24}
                             h={24}
-                            bg={top ? 'neutral.9' : 'gray.2'}
+                            bg={top ? 'brand.9' : 'gray.2'}
                             c={top ? 'white' : 'dimmed'}
                             flex="none"
                             className={classes.rank}

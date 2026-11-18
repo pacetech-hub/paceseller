@@ -7,6 +7,8 @@
  *
  * Rode `bun run tokens` sempre que o JSON for atualizado. Não edite as saídas à mão.
  *
+ * A cor de marca é a família BRAND_FAMILY (zinc), não a "brand" azul do export.
+ *
  * Observação: os tokens semânticos de "1. color modes" apontam para uma coleção `_primitives`
  * que não vem no export (e só o modo escuro foi exportado), então eles não são gerados aqui.
  * Espaçamentos e larguras que referenciam `_primitives` são resolvidos pelo valor em px que
@@ -18,6 +20,10 @@ import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const src = JSON.parse(readFileSync(resolve(root, 'design-tokens/design-tokens.tokens.json'), 'utf8'))
+
+// Família de cor usada como marca deste projeto. A família "brand" do export (azul #0e69f2)
+// é substituída por ela em todas as saídas, inclusive nos anéis de foco.
+const BRAND_FAMILY = 'zinc'
 
 const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950']
 
@@ -41,6 +47,10 @@ for (const [name, family] of Object.entries(src.color)) {
   if (!SHADES.every((s) => family[s]?.value)) continue
   palettes[slug(name)] = Object.fromEntries(SHADES.map((s) => [s, hex(family[s].value)]))
 }
+const exportedBrand = palettes.brand
+palettes.brand = { ...palettes[BRAND_FAMILY] }
+// hex do export → hex equivalente na família da marca (ex.: brand-500 → zinc-500)
+const brandSwap = Object.fromEntries(SHADES.map((s) => [exportedBrand[s], palettes.brand[s]]))
 const base = { white: hex(src.color.base.white.value), black: hex(src.color.base.black.value) }
 
 // ---------- Espaçamento, raio, larguras, containers ----------
@@ -75,7 +85,8 @@ for (const [name, styles] of Object.entries(src.font)) {
 // ---------- Sombras e anel de foco ----------
 const layer = (l) => {
   const inset = l.shadowType === 'innerShadow' ? 'inset ' : ''
-  return `${inset}${l.offsetX}px ${l.offsetY}px ${l.radius}px ${l.spread}px ${hex(l.color)}`
+  const color = brandSwap[hex(l.color)] ?? hex(l.color)
+  return `${inset}${l.offsetX}px ${l.offsetY}px ${l.radius}px ${l.spread}px ${color}`
 }
 const effect = (node) =>
   node.value

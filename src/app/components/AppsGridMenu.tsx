@@ -68,7 +68,7 @@ export function AppsGridMenu<V extends string>({ items, secondaryItems, account,
           aria-label={`Meu Perfil · ${account.typeLabel} · ${account.userName}`}
         >
           <Group gap="sm" wrap="nowrap" miw={0}>
-            <ThemeIcon size={36} radius="xl" variant="light" color="neutral" aria-hidden>
+            <ThemeIcon size={36} radius="xl" variant="light" color="brand" aria-hidden>
               <AccountIcon size={18} />
             </ThemeIcon>
             <Box miw={0}>

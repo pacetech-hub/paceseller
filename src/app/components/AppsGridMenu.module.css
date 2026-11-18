@@ -27,7 +27,7 @@
 }
 
 .item.item[data-active] {
-  border-color: var(--mantine-color-neutral-9);
+  border-color: var(--mantine-color-brand-9);
 }
 
 /* Conta (tipo + usuário): leva ao Meu Perfil */
@@ -44,5 +44,5 @@
 }
 
 .account[data-active] {
-  border-color: var(--mantine-color-neutral-9);
+  border-color: var(--mantine-color-brand-9);
 }

@@ -146,10 +146,10 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Popover.Target>
               <Button
                 variant={activeFilterCount > 0 ? 'light' : 'default'}
-                color="neutral"
+                color="brand"
                 leftSection={<FunnelIcon size={16} />}
                 rightSection={activeFilterCount > 0 ? (
-                  <Badge circle color="neutral">{activeFilterCount}</Badge>
+                  <Badge circle color="brand">{activeFilterCount}</Badge>
                 ) : undefined}
               >
                 Filtros
@@ -161,7 +161,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb="xs">Região</Text>
                   <Group gap="sm">
                     {REGIONS.map(r => (
-                      <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="neutral">
+                      <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="brand">
                         {r}
                       </Chip>
                     ))}
@@ -172,7 +172,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                   <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb="xs">Status</Text>
                   <Group gap="sm">
                     {STATUS_OPTIONS.map(s => (
-                      <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="neutral">
+                      <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="brand">
                         {s.label}
                       </Chip>
                     ))}
@@ -180,7 +180,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 </Box>
 
                 {activeFilterCount > 0 && (
-                  <Button variant="subtle" color="neutral" onClick={clearFilters}>
+                  <Button variant="subtle" color="brand" onClick={clearFilters}>
                     Limpar Filtros
                   </Button>
                 )}
@@ -192,7 +192,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Popover.Target>
               <Button
                 variant={sortActive ? 'light' : 'default'}
-                color="neutral"
+                color="brand"
               >
                 Ordenar: {SORT_OPTIONS.find(o => o.value === sortOrder)?.label}
               </Button>
@@ -207,12 +207,12 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 >
                   <Stack gap="sm" mt="xs">
                     {SORT_OPTIONS.map(opt => (
-                      <Radio key={opt.value} value={opt.value} label={opt.label} color="neutral" />
+                      <Radio key={opt.value} value={opt.value} label={opt.label} color="brand" />
                     ))}
                   </Stack>
                 </Radio.Group>
                 {sortActive && (
-                  <Button variant="subtle" color="neutral" onClick={() => setSortOrder(DEFAULT_SORT)}>
+                  <Button variant="subtle" color="brand" onClick={() => setSortOrder(DEFAULT_SORT)}>
                     Restaurar Ordenação Padrão
                   </Button>
                 )}
@@ -243,7 +243,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                     <Group gap="xs" wrap="nowrap">
                       <Badge color={statusColor[client.status]} variant="light" styles={badgeStyles}>{client.status}</Badge>
                       {client.inadimplente && <Badge color="yellow" variant="light" styles={badgeStyles}>inadimplente</Badge>}
-                      {isSelected && <Badge color="neutral" variant="light" styles={badgeStyles}>selecionado</Badge>}
+                      {isSelected && <Badge color="brand" variant="light" styles={badgeStyles}>selecionado</Badge>}
                     </Group>
                   </Table.Td>
                   <Table.Td>

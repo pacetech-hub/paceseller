@@ -179,7 +179,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
                   <ActionIcon
                     onClick={handleClick}
                     variant={active ? 'light' : 'subtle'}
-                    color={active ? 'neutral' : 'gray'}
+                    color={active ? 'brand' : 'gray'}
                     aria-label={item.label}
                   >
                     <ItemIcon size={16} />
@@ -193,11 +193,11 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
                 key={item.label}
                 onClick={handleClick}
                 active={active}
-                color="neutral"
+                color="brand"
                 variant="light"
                 label={item.label}
                 leftSection={<ItemIcon size={16} />}
-                rightSection={item.badge ? <Badge variant="light" color="neutral">{item.badge}</Badge> : undefined}
+                rightSection={item.badge ? <Badge variant="light" color="brand">{item.badge}</Badge> : undefined}
                 classNames={{ root: classes.navLink, label: classes.navLabel }}
                 styles={{ label: { fontWeight: active ? 600 : 400 } }}
               />
@@ -248,7 +248,7 @@ export function Sidebar({ currentView, onNavigate, profile, onLogout, notificati
             </Button>
           )}
           <Group gap="xs" px="sm" py="xs" wrap="nowrap">
-            <Avatar size={32} color="neutral" variant="light">
+            <Avatar size={32} color="brand" variant="light">
               TF
             </Avatar>
             <Box flex={1} miw={0}>
@@ -453,14 +453,14 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
               Ícone + texto em telas largas; abaixo disso, só ícone com tooltip */}
           {showCart && (
             <>
-            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.wideOnly}>
-              <Button onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" px="sm" leftSection={<ShoppingCartIcon size={16} />} aria-label={`Carrinho · ${cartCount} abertos`}>
+            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="brand" offset={4} className={classes.wideOnly}>
+              <Button onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="brand" px="sm" leftSection={<ShoppingCartIcon size={16} />} aria-label={`Carrinho · ${cartCount} abertos`}>
                 Carrinho
               </Button>
             </Indicator>
-            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4} className={classes.narrowOnly}>
+            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="brand" offset={4} className={classes.narrowOnly}>
               <Tooltip label="Ver Carrinho" withArrow>
-                <ActionIcon onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="neutral" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
+                <ActionIcon onClick={() => (onOpenCartDrawer ? onOpenCartDrawer() : onNavigate('carts'))} variant="subtle" color="brand" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
                   <ShoppingCartIcon size={16} />
                 </ActionIcon>
               </Tooltip>
@@ -470,13 +470,13 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
 
           {/* Notifications: ícone + texto em telas largas, só ícone abaixo */}
           <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4} className={classes.wideOnly}>
-            <Button variant="subtle" color="neutral" px="sm" leftSection={<BellIcon size={16} />}>
+            <Button variant="subtle" color="brand" px="sm" leftSection={<BellIcon size={16} />}>
               Notificações
             </Button>
           </Indicator>
           <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4} className={classes.narrowOnly}>
             <Tooltip label="Ver Notificações" withArrow>
-              <ActionIcon variant="subtle" color="neutral" aria-label="Ver Notificações">
+              <ActionIcon variant="subtle" color="brand" aria-label="Ver Notificações">
                 <BellIcon size={16} />
               </ActionIcon>
             </Tooltip>
@@ -488,7 +488,7 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
               <Button
                 onClick={() => onNavigate('history')}
                 variant="default"
-                color="neutral"
+                color="brand"
                 maw={{ sm: 180, lg: 260 }}
                 visibleFrom="sm"
                 leftSection={<StorefrontIcon size={16} />}
@@ -506,7 +506,7 @@ export function TopBar({ title, subtitle, profile, userName, currentView, notifi
                   onClick={() => onNavigate('history')}
                   hiddenFrom="sm"
                   variant="default"
-                  color="neutral"
+                  color="brand"
                   aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
                 >
                   <StorefrontIcon size={16} />
