@@ -2,8 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
-import { ThemeHeader } from "./ui/ThemeHeader";
-import { RepSalesSection } from "./RepSalesSection";
+import { RepRadar } from "./RepRadar";
 import { LojistaOrdersSection } from "./LojistaOrdersSection";
 import { IndustrySalesSection } from "./IndustrySalesSection";
 import { LojistaPurchasesSection } from "./LojistaPurchasesSection";
@@ -13,20 +12,13 @@ import {
 import {
   TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
   RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, DotsThreeVerticalIcon, InfoIcon, ClockIcon, XIcon,
-  ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon, PhoneCallIcon, CurrencyCircleDollarIcon, HourglassIcon,
-  ArrowCounterClockwiseIcon, CalendarCheckIcon, PaperPlaneTiltIcon, HandshakeIcon, ChatCircleDotsIcon,
-  type Icon,
+  ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon, type Icon,
 } from "@phosphor-icons/react";
 import {
   SEVERITY_META, SIGNAL_META, actByText, bucketOf, days, dismissSignal, isCritical, marginLabel, snoozeSignal, undoSignalAction,
   updatedText, useRadar, type Bucket, type CtaTarget, type RadarSignal, type SignalType,
 } from "../data/radar";
 import { productById } from "../data/cartStore";
-import { formatCurrency } from "../data/mockData";
-import {
-  CONTACT_REASON_META, markContacted, snoozeContact, undoContactAction, useRepRadar,
-  type ContactPriority, type ContactReason,
-} from "../data/repRadar";
 import { toast } from "../lib/toast";
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -423,166 +415,6 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
         )}
       </Modal>
       <DismissModal key={dismissing?.id} signal={dismissing} onClose={() => setDismissing(null)} />
-    </Stack>
-  );
-}
-
-const CONTACT_ICON: Record<ContactReason, Icon> = {
-  'carrinho-esperando': ShoppingCartIcon,
-  cobranca: CurrencyCircleDollarIcon,
-  'recompra-atrasada': HourglassIcon,
-  'queda-compras': TrendDownIcon,
-  reativacao: ArrowCounterClockwiseIcon,
-  'sugestao-sem-resposta': PaperPlaneTiltIcon,
-  'reposicao-cliente': PackageIcon,
-  'pos-venda': HandshakeIcon,
-  'recompra-prevista': CalendarCheckIcon,
-};
-
-function ContactCard({ contact, onCta, onWhy, resolved }: {
-  contact: ContactPriority; onCta: () => void; onWhy?: () => void; resolved?: boolean;
-}) {
-  const sev = SEVERITY_META[contact.severity];
-  const extra = contact.otherReasons.length;
-  return (
-    <RadarCard
-      icon={CONTACT_ICON[contact.reason]}
-      color={sev.color}
-      eyebrow={`${resolved ? 'Contatado' : sev.label} · ${CONTACT_REASON_META[contact.reason].label}`}
-      metric={contact.metric}
-      subject={contact.clientName}
-      context={extra > 0 ? `${contact.context} · +${extra} ${extra === 1 ? 'motivo' : 'motivos'}` : contact.context}
-      suggestion={`${contact.suggestion} · ${contact.channel}`}
-      ctaLabel={contact.ctaLabel}
-      onCta={onCta}
-      variant={resolved ? 'resolved' : 'default'}
-      resolvedText="Contato registrado · sai do Radar em até 24 h"
-      footer={`${contact.timeText}${resolved ? '' : ` · ${actByText(contact.actByDays).replace('agir', 'contatar')}`} · ${updatedText(contact.updatedHoursAgo)}`}
-      menu={onWhy && (
-        <>
-          <Menu.Item leftSection={<InfoIcon size={16} />} onClick={onWhy}>Por que isso aparece</Menu.Item>
-          <Menu.Item
-            leftSection={<PhoneCallIcon size={16} />}
-            onClick={() => {
-              markContacted(contact.id);
-              toast.successWithAction('Contato registrado', `${contact.clientName} sai das prioridades.`, { label: 'Desfazer', onClick: () => undoContactAction(contact.id) });
-            }}
-          >
-            Marcar como contatado
-          </Menu.Item>
-          <Menu.Divider />
-          <SnoozeItems
-            options={[1, 3, 7]}
-            onSnooze={d => {
-              snoozeContact(contact.id, d);
-              toast.successWithAction('Contato adiado', `Volta às prioridades em ${days(d)}.`, { label: 'Desfazer', onClick: () => undoContactAction(contact.id) });
-            }}
-          />
-        </>
-      )}
-    />
-  );
-}
-
-function RepRadar({ userName, greetName, onCta }: Omit<RadarPageProps, 'profile'>) {
-  const [period, setPeriod] = useState<Bucket>('hoje');
-  const [showAll, setShowAll] = useState(false);
-  const [why, setWhy] = useState<ContactPriority | null>(null);
-  const loading = useMockLoading();
-  const radar = useRepRadar(userName);
-  const { contacts, urgent } = radar;
-  // mesmos baldes do lojista, pela data de contatar
-  const inBucket = (b: Bucket) => contacts.filter(c => bucketOf(c.actByDays) === b);
-  const visible = inBucket(period);
-  const shown = showAll ? visible : visible.slice(0, MAX_CARDS);
-  const contacted = radar.contacted.filter(c => (bucketOf(c.actByDays) ?? 'hoje') === period);
-  const nextWithItems = PERIODS.find(p => p.value !== period && inBucket(p.value).length > 0);
-  const firstName = (greetName ?? userName).split(' ')[0];
-
-  return (
-    <Stack gap="xl">
-      <Box>
-        <Title order={1}>{getGreeting()}, {firstName}</Title>
-        <Group gap="sm" mt={4} wrap="wrap">
-          <Text fw={600} c={urgent > 0 ? 'red.7' : contacts.length > 0 ? 'yellow.8' : 'teal.8'}>
-            {urgent > 0
-              ? `${urgent} ${urgent === 1 ? 'contato urgente' : 'contatos urgentes'} hoje`
-              : contacts.length > 0 ? 'Carteira pede atenção' : 'Carteira em dia'}
-          </Text>
-          <Text c="dimmed">
-            {contacts.length} {contacts.length === 1 ? 'cliente para contatar' : 'clientes para contatar'}
-            {radar.impact > 0 && ` · ${formatCurrency(radar.impact)} em jogo`}
-          </Text>
-        </Group>
-      </Box>
-
-      <Stack gap="md">
-        <ThemeHeader
-          icon={ChatCircleDotsIcon}
-          title="Prioridades de contato"
-          description="Quem da sua carteira contatar primeiro, por quê e o que oferecer"
-          count={contacts.length}
-        />
-        <BucketTabs
-          value={period}
-          onChange={b => { setPeriod(b); setShowAll(false); }}
-          noun={['contato', 'contatos']}
-          counts={b => { const items = inBucket(b); return { total: items.length, critical: items.filter(c => c.severity === 'critico').length }; }}
-        />
-        {loading ? (
-          <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />
-        ) : visible.length > 0 ? (
-          <>
-            {/* severidade, depois prazo para contatar, depois o motivo — uma prioridade por cliente */}
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-              {shown.map(c => (
-                <ContactCard key={c.id} contact={c} onCta={() => onCta(c.cta)} onWhy={() => setWhy(c)} />
-              ))}
-            </SimpleGrid>
-            {visible.length > MAX_CARDS && (
-              <Button variant="default" onClick={() => setShowAll(v => !v)} mx="auto">
-                {showAll ? 'Ver menos' : `Ver todos (${visible.length})`}
-              </Button>
-            )}
-          </>
-        ) : (
-          <EmptyState
-            icon={CheckCircleIcon}
-            title={period === 'hoje' ? 'Nenhum contato pra hoje' : 'Nenhum contato neste período'}
-            description="Quando um cliente passar do ciclo de compra, tiver carrinho esperando você ou título vencido, ele aparece aqui."
-            action={nextWithItems
-              ? { label: `Ver ${nextWithItems.label.toLowerCase()} (${inBucket(nextWithItems.value).length})`, onClick: () => setPeriod(nextWithItems.value) }
-              : undefined}
-          />
-        )}
-      </Stack>
-
-      {!loading && contacted.length > 0 && (
-        <Stack gap="sm">
-          <Text fw={600}>Contatados nas últimas 24 h</Text>
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-            {contacted.map(c => (
-              <ContactCard key={c.id} contact={c} resolved onCta={() => {}} />
-            ))}
-          </SimpleGrid>
-        </Stack>
-      )}
-
-      {/* Tema complementar: vendas, vendedores e pedidos do período vs. ano anterior */}
-      <RepSalesSection repName={userName} onCta={onCta} />
-
-      <Modal opened={!!why} onClose={() => setWhy(null)} centered title={<Text fw={600}>Por que isso aparece</Text>}>
-        {why && (
-          <Stack gap="sm">
-            <Text fw={600}>{CONTACT_REASON_META[why.reason].code} · {CONTACT_REASON_META[why.reason].label} · {why.clientName}</Text>
-            <Text>{why.why}</Text>
-            {why.otherReasons.length > 0 && (
-              <Text size="sm">Também: {why.otherReasons.map(r => CONTACT_REASON_META[r].label).join(', ')}</Text>
-            )}
-            <Text size="sm" c="dimmed">{actByText(why.actByDays).replace('agir', 'contatar')} · {updatedText(why.updatedHoursAgo)}</Text>
-          </Stack>
-        )}
-      </Modal>
     </Stack>
   );
 }

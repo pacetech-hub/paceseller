@@ -353,3 +353,28 @@ const subscribe = (l: () => void) => {
 export function useRepRadar(repName: string): RepRadarResult {
   return useSyncExternalStore(subscribe, () => getRepRadar(repName));
 }
+
+// ---------------------------------------------------------------------------
+// Oportunidade na carteira: produto em alta que lojas da carteira ainda não têm
+// (mock até integrar o sell-in por loja; o produto e as lojas viriam do motor do Radar)
+// ---------------------------------------------------------------------------
+const OPPORTUNITY_MOCK = {
+  productId: 'P009',
+  reason: 'Alta demanda',
+  /** Lojas da carteira que ainda não compraram o produto. */
+  missingClientIds: ['CLI-009', 'CLI-013', 'CLI-015', 'CLI-011'],
+};
+
+export interface CarteiraOpportunity {
+  productId: string;
+  reason: string;
+  clients: Client[];
+}
+
+/** Lojas sem o produto, menos as que já têm carrinho aberto com ele (sugestão enviada ou pedido em curso). */
+export function carteiraOpportunity(repName: string, carts: Cart[]): CarteiraOpportunity | null {
+  const { productId, reason, missingClientIds } = OPPORTUNITY_MOCK;
+  const withProduct = new Set(carts.filter(c => isOpen(c) && c.lines.some(l => l.productId === productId)).map(c => c.clientId));
+  const list = clients.filter(c => c.rep === repName && missingClientIds.includes(c.id) && !withProduct.has(c.id));
+  return list.length ? { productId, reason, clients: list } : null;
+}
