@@ -24,6 +24,7 @@ import {
   HeadsetIcon,
   UserCircleIcon,
   UsersThreeIcon,
+  HandHeartIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -33,7 +34,7 @@ import classes from "./Sidebar.module.css";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support';
+  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support' | 'pos-venda';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -99,6 +100,7 @@ function mainPages(profile: Profile): MenuPage[] {
     { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
     { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
     { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
+    { icon: HandHeartIcon, label: 'Pós-venda', view: 'pos-venda' },
     { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
     { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
     { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },

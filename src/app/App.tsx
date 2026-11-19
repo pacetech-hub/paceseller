@@ -40,6 +40,7 @@ import { RepStockPage } from "./components/RepStockPage";
 import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
 import { RadarPage } from "./components/RadarPage";
 import { SupportPage } from "./components/SupportPage";
+import { PosVendaPage } from "./components/PosVendaPage";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -70,6 +71,7 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   'sales-team': { title: 'Vendedores', subtitle: 'Representantes e prepostos' },
   support: { title: 'Suporte', subtitle: 'Contatos de atendimento e do seu representante' },
   radar: { title: 'Radar', subtitle: 'O que precisa de ação na sua loja, por quando agir' },
+  'pos-venda': { title: 'Pós-venda', subtitle: 'Seus clientes: quem chamar, por quê e com qual mensagem' },
 };
 
 export default function App() {
@@ -349,6 +351,8 @@ export default function App() {
         );
       case 'support':
         return <SupportPage profile={profile} />;
+      case 'pos-venda':
+        return <PosVendaPage />;
       case 'permissions':
         return <AccessPermissionsPage profile={profile === 'lojista' ? 'lojista' : 'rep'} />;
       default:

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSmallerThan } from "../lib/responsive";
 import {
   ActionIcon, Anchor, Badge, Box, Button, Card, Chip, Divider, Flex, Group, Modal, Input, Paper, SegmentedControl,
-  SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, ThemeIcon, Title, Tooltip, UnstyledButton,
+  SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, Title, Tooltip, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
 import {
@@ -15,6 +15,7 @@ import {
   PackageIcon,
   EyeIcon,
   PlusIcon,
+  SneakerIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
   UsersThreeIcon,
@@ -239,10 +240,41 @@ function signalChip(signal: RadarSignal, product: Product) {
   return SIGNAL_META[signal.type].label;
 }
 
+/** Cobertura na loja em dias (BR-10: estoque ÷ venda média diária dos últimos 30 dias). */
+function coverageDays(productId: string): number | null {
+  const s = storeSku(productId);
+  if (!s || !s.inMix || s.dailySales <= 0) return null;
+  return Math.round(s.stock / s.dailySales);
+}
+
+/** Etiqueta com contorno sobre a foto, em caixa-alta mono (cor só como reforço do texto). */
+function OutlineTag({ children, color }: { children: ReactNode; color?: string }) {
+  return (
+    <Box
+      component="span"
+      px={6}
+      py={2}
+      fz={10}
+      fw={600}
+      ff="monospace"
+      tt="uppercase"
+      lts={0.4}
+      c={color ? `${color}.8` : undefined}
+      bg="var(--mantine-color-body)"
+      lh="14px"
+      display="inline-block"
+      style={{ border: `1px solid ${color ? `var(--mantine-color-${color}-7)` : 'var(--mantine-color-text)'}`, borderRadius: 'var(--mantine-radius-xs)', whiteSpace: 'nowrap' }}
+    >
+      {children}
+    </Box>
+  );
+}
+
 /**
- * Cartão do modelo no catálogo (grade): um cartão por linha, com as cores em miniaturas.
- * Clicar no cartão abre a página do produto da cor escolhida; as miniaturas só trocam a cor
- * mostrada e "Adicionar ao carrinho" abre a grade de numeração (BR-20).
+ * Cartão do modelo no catálogo (grade de 4 colunas): foto grande com etiquetas e a linha de
+ * margem/cobertura embaixo, miniaturas das cores, e o texto (linha, nome, cor, preço).
+ * Clicar na foto ou no texto abre a página do produto da cor escolhida; as miniaturas só trocam
+ * a cor mostrada; "+" abre a grade de numeração (BR-20), preenchida quando há sinal (FR-205).
  */
 function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
   variants: Product[];
@@ -256,39 +288,59 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
   const signal = radar.byProduct[product.id];
   const topSeller = isTopSeller(product.id, radar);
   const stripRef = useRef<HTMLDivElement>(null);
-  const scroll = (dir: 1 | -1) => stripRef.current?.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  const scroll = (dir: 1 | -1) => stripRef.current?.scrollBy({ left: dir * 160, behavior: 'smooth' });
   const lineName = `Tênis Tesla ${product.line}`;
-  const showArrows = variants.length > 4;
+  const showArrows = variants.length > 6;
+  const coverage = coverageDays(product.id);
+  const soldOut = product.availability === 'esgotado';
 
   return (
-    <Card withBorder padding={0} className={classes.card}>
-      {/* foto: clicável, abre o detalhe; selo "Mais vendida" sobre a foto (BR-33) */}
-      <UnstyledButton onClick={() => onOpenDetail(product)} pos="relative" display="block" w="100%" pt="62%" bg="white" aria-label={`Ver detalhes de ${productDisplayName(product)}`}>
-        <Box pos="absolute" inset={0}>
+    <Box className={classes.modelCard}>
+      {/* foto: clicável, abre o detalhe; etiquetas no alto, margem e cobertura embaixo */}
+      <UnstyledButton
+        onClick={() => onOpenDetail(product)}
+        pos="relative"
+        display="block"
+        w="100%"
+        pt="125%"
+        className={classes.modelImage}
+        aria-label={`Ver detalhes de ${productDisplayName(product)}`}
+      >
+        <Box pos="absolute" inset={0} px="md" pt={40} pb={40}>
           <ProductImage
             key={product.id}
             src={product.image}
             alt={productDisplayName(product)}
-            imageProps={{ fit: 'contain', p: 'sm' }}
-            fallback={<Group h="100%" justify="center"><PackageIcon size={40} color={DIMMED} opacity={0.3} /></Group>}
+            imageProps={{ fit: 'contain', h: '100%', style: { mixBlendMode: 'multiply' } }}
+            fallback={<Group h="100%" justify="center"><SneakerIcon size={44} color={DIMMED} opacity={0.5} /></Group>}
           />
         </Box>
-        {topSeller && (
-          <Badge pos="absolute" top={12} left={12} variant="filled" color="brand.9" radius="sm" ff="monospace" leftSection={<StarIcon size={14} weight="fill" />}>
-            Mais vendida
-          </Badge>
-        )}
+        <Group gap={6} pos="absolute" top={10} left={10} right={10} wrap="wrap" align="center">
+          {topSeller && <OutlineTag>Mais vendida</OutlineTag>}
+          {signal && (
+            <Tooltip label={`${SEVERITY_META[signal.severity].label} · ${signal.context}`} multiline maw={260}>
+              <span style={{ display: "inline-flex" }}><OutlineTag color={SEVERITY_META[signal.severity].color}>{signalChip(signal, product)}</OutlineTag></span>
+            </Tooltip>
+          )}
+          {product.availability !== 'disponível' && <OutlineTag color={availColor[product.availability]}>{product.availability}</OutlineTag>}
+        </Group>
+        <Tooltip label={markupLabel(product)} position="top">
+          <Text pos="absolute" bottom={12} left={8} right={8} ta="center" fz={11} ff="monospace" lh={1.3}>
+            {marginLabel(product)}
+            {coverage !== null && <Text span inherit c="dimmed" display="block">Cobertura de {coverage} dias na loja</Text>}
+          </Text>
+        </Tooltip>
       </UnstyledButton>
 
-      {/* miniaturas das cores: trocam a cor mostrada no cartão */}
-      <Group gap={6} wrap="nowrap" px="xs" pt={2} pb="xs" style={{ borderTop: BORDER, borderBottom: BORDER }}>
+      {/* miniaturas das cores: trocam a cor mostrada; ★ marca a mais vendida */}
+      <Group gap={2} wrap="nowrap" mt={6}>
         {showArrows && (
-          <ActionIcon variant="default" radius="xl" size="sm" onClick={() => scroll(-1)} aria-label="Cores anteriores" flex="none">
-            <CaretLeftIcon size={16} />
+          <ActionIcon variant="subtle" color="brand" size="sm" onClick={() => scroll(-1)} aria-label="Cores anteriores" flex="none">
+            <CaretLeftIcon size={14} />
           </ActionIcon>
         )}
         <Box ref={stripRef} flex={1} miw={0} style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
-          <Group gap={6} wrap="nowrap" pt={6} pr={6} role="radiogroup" aria-label={`Cores de ${lineName}`}>
+          <Group gap={4} wrap="nowrap" role="radiogroup" aria-label={`Cores de ${lineName}`}>
             {variants.map(v => {
               const active = v.id === product.id;
               return (
@@ -298,22 +350,15 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
                     aria-checked={active}
                     aria-label={`Cor ${colorwayOf(v)}`}
                     onClick={() => setSelectedId(v.id)}
-                    pos="relative"
-                    w={56}
-                    h={56}
-                    flex="none"
-                    bg="white"
-                    style={{
-                      borderRadius: 'var(--mantine-radius-sm)',
-                      border: active ? '2px solid var(--mantine-color-brand-9)' : BORDER,
-                    }}
+                    className={classes.swatch}
+                    data-active={active || undefined}
                   >
-                    <ProductImage src={v.image} alt="" imageProps={{ fit: 'contain', p: 2 }} fallback={<Group h="100%" justify="center"><PackageIcon size={18} color={DIMMED} /></Group>} />
-                    {isTopSeller(v.id, radar) && (
-                      <ThemeIcon pos="absolute" top={-6} right={-6} size={16} radius="xl" color="brand.9" aria-hidden>
-                        <StarIcon size={12} weight="fill" />
-                      </ThemeIcon>
-                    )}
+                    <Box w={36} h={28}>
+                      <ProductImage src={v.image} alt="" imageProps={{ fit: 'contain' }} fallback={<Group h="100%" justify="center"><SneakerIcon size={18} color={DIMMED} /></Group>} />
+                    </Box>
+                    <Text component="span" fz={10} lh={1} h={10} ta="center" display="block" aria-hidden>
+                      {isTopSeller(v.id, radar) ? '★' : ''}
+                    </Text>
                   </UnstyledButton>
                 </Tooltip>
               );
@@ -321,56 +366,40 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
           </Group>
         </Box>
         {showArrows && (
-          <ActionIcon variant="default" radius="xl" size="sm" onClick={() => scroll(1)} aria-label="Próximas cores" flex="none">
-            <CaretRightIcon size={16} />
+          <ActionIcon variant="subtle" color="brand" size="sm" onClick={() => scroll(1)} aria-label="Próximas cores" flex="none">
+            <CaretRightIcon size={14} />
           </ActionIcon>
         )}
       </Group>
 
-      <Stack gap="sm" p="md" flex={1}>
-        {/* texto, preço e selos: clicáveis, abrem o detalhe */}
-        <UnstyledButton onClick={() => onOpenDetail(product)} display="block" w="100%">
-          <Text fw={700} fz="lg" lh={1.3}>{lineName}</Text>
-          <Text size="sm" c="dimmed">{colorwayOf(product)}</Text>
-          <Group gap={6} align="baseline" mt="sm">
-            <Text className="mono" fw={700} fz="lg">{formatCurrency(product.price)}</Text>
-            <Text size="sm" c="dimmed">Seu custo</Text>
-          </Group>
-          <Group gap="xs" mt={4} wrap="wrap">
-            <Text size="sm" c="dimmed" className="mono">PDV sugerido {formatCurrency(product.priceRetail)}</Text>
-            <Tooltip label={markupLabel(product)}>
-              <Badge variant="light" color="teal" radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>
-                {marginLabel(product)}
-              </Badge>
+      {/* texto: linha, nome, cor e preço; "+" ao lado do nome abre a grade */}
+      <Group gap="xs" wrap="nowrap" align="flex-start" mt="sm">
+        <UnstyledButton onClick={() => onOpenDetail(product)} flex={1} miw={0} display="block">
+          <Text fz={11} ff="monospace" tt="uppercase" c="dimmed" lts={0.4}>{product.line}</Text>
+          <Text fw={700} lh={1.3} mt={2} truncate>{lineName}</Text>
+          <Text size="sm" c="dimmed" truncate>{colorwayOf(product)}</Text>
+          <Group gap={6} align="baseline" mt={6} wrap="wrap" style={{ rowGap: 0 }}>
+            <Tooltip label="Seu custo por par">
+              <Text className="mono" fw={700}>{formatCurrency(product.price)}</Text>
             </Tooltip>
-          </Group>
-          <Group gap={6} mt="sm" wrap="wrap">
-            {signal && (
-              <Tooltip label={`${SEVERITY_META[signal.severity].label} · ${signal.context}`} multiline maw={260}>
-                <Badge variant="light" color={SEVERITY_META[signal.severity].color} radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>
-                  {signalChip(signal, product)}
-                </Badge>
-              </Tooltip>
-            )}
-            {product.availability !== 'disponível' && (
-              <Badge variant="light" color={availColor[product.availability]} radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>
-                {product.availability}
-              </Badge>
-            )}
+            <Text fz={11} ff="monospace" c="dimmed">PDV sugerido {formatCurrency(product.priceRetail)}</Text>
           </Group>
         </UnstyledButton>
-        <Button
-          mt="auto"
-          fullWidth
-          variant="default"
-          disabled={product.availability === 'esgotado'}
-          leftSection={<ShoppingCartIcon size={18} />}
-          onClick={() => onAdd(product)}
-        >
-          Adicionar ao carrinho
-        </Button>
-      </Stack>
-    </Card>
+        <Tooltip label={soldOut ? 'Esgotado' : 'Adicionar ao carrinho'}>
+          <ActionIcon
+            variant="default"
+            radius="xl"
+            size="lg"
+            mt={14}
+            disabled={soldOut}
+            onClick={() => onAdd(product)}
+            aria-label={`Adicionar ${productDisplayName(product)} ao carrinho`}
+          >
+            <PlusIcon size={16} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    </Box>
   );
 }
 
@@ -714,7 +743,7 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
 
         {loading ? (
           viewMode === 'grid'
-            ? <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} imageRatio={1.25} />
+            ? <CardGridSkeleton count={8} cols={{ base: 1, xs: 2, md: 3, lg: 4 }} imageRatio={1.25} />
             : <ListSkeleton rows={5} withAvatar />
         ) : sorted.length === 0 ? (
           <EmptyState
@@ -727,7 +756,9 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
             ]}
           />
         ) : viewMode === 'grid' ? (
-          <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing={{ base: 'sm', sm: 'md' }}>
+          // grade de 4 colunas dentro de um painel; 3, 2 e 1 coluna nas telas menores
+          <Paper withBorder p={{ base: 'sm', sm: 'md' }}>
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 3, lg: 4 }} spacing={{ base: 'md', sm: 'lg' }} verticalSpacing={{ base: 'lg', sm: 'xl' }}>
             {models.map(m => (
               <ModelCard
                 key={m.line}
@@ -739,6 +770,7 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
               />
             ))}
           </SimpleGrid>
+          </Paper>
         ) : (
           <Stack gap="sm">
             {sorted.map(product => renderProductCard(product, 'list'))}

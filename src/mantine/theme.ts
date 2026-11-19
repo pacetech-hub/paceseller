@@ -4,12 +4,13 @@ import { tokens } from "./tokens";
 // Todos os valores visuais vêm dos design tokens (design-tokens/design-tokens.tokens.json),
 // convertidos por scripts/build-tokens.mjs em ./tokens.ts. Rode `bun run tokens` ao atualizar o JSON.
 
-// O Mantine usa 10 tons por cor; os tokens têm 11 (50–950). Usamos 50–900 → índices 0–9,
-// então o índice 5 do Mantine = tom 500 do token, 6 = 600 e assim por diante.
+// Os tokens têm 11 tons por cor (50–950). Correlação com os índices do Mantine:
+//   50 → 0, 100 → 1, 200 → 2, … 900 → 9, e 950 → 10 (tom extra, além dos 10 padrão do Mantine).
+// Ex.: brand.9 = zinc 900 (#18181b), brand.10 = zinc 950 (#09090b).
 type Palette = keyof typeof tokens.palettes;
 const tuple = (name: Palette): MantineColorsTuple => {
   const p = tokens.palettes[name];
-  return [p["50"], p["100"], p["200"], p["300"], p["400"], p["500"], p["600"], p["700"], p["800"], p["900"]];
+  return [p["50"], p["100"], p["200"], p["300"], p["400"], p["500"], p["600"], p["700"], p["800"], p["900"], p["950"]];
 };
 const px = (n: number) => `${n / 16}rem`;
 
