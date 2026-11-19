@@ -122,7 +122,7 @@ export function PosVendaPage() {
           <Tabs value={segment} onChange={(v) => v && setSegment(v as CustomerSegment)} variant="pills">
             <Tabs.List>
               {SEGMENTS.map(s => (
-                <Tabs.Tab key={s} value={s} rightSection={<Badge size="xs" variant={segment === s ? 'white' : 'filled'} color="neutral" px={6}>{customersIn(s).length}</Badge>}>
+                <Tabs.Tab key={s} value={s} rightSection={<Badge size="xs" variant={segment === s ? 'white' : 'filled'} color="brand" px={6}>{customersIn(s).length}</Badge>}>
                   {SEGMENT_META[s].label}
                 </Tabs.Tab>
               ))}
@@ -167,7 +167,7 @@ export function PosVendaPage() {
                   <Tooltip label={`Enviar mensagem para ${firstName(c.name)}`} withArrow>
                     <ActionIcon
                       variant="subtle"
-                      color="neutral"
+                      color="brand"
                       aria-label={`Enviar mensagem para ${c.name}`}
                       onClick={() => setCampaign({
                         title: `Mensagem para ${c.name}`,
