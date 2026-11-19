@@ -39,7 +39,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 11 | Pagamento e Entrega | Parcial | Bloco de pagamento dentro de `CartPage.tsx` | Tela própria com endereço, prazo, nota fiscal e contrato |
 | 12 | Pedido confirmado | Existe | `CartPage.tsx` ("Pedido confirmado") | Conferir CTAs: "Voltar ao radar" / "Acompanhar pedido" |
 | 13 | Acompanhamento do pedido | Existe | `OrderDetailPage.tsx`: botão "Ver detalhes" ao lado do status abre a linha do tempo recebido → aprovado → em produção → faturado e enviado → entregue, com transportadora e rastreio | Transportadora e rastreio são mock até existir integração |
-| 14 | Pós-venda: Radar de fidelização (consumidor final) | Falta | — | Base de clientes finais da loja (CRM), que hoje não existe. O spec atual lista "store CRM" como fonte a decidir |
+| 14 | Pós-venda: Radar de fidelização (consumidor final) | Existe (mock) | `PosVendaPage.tsx`, `data/posVenda.ts`, no menu do lojista: cartões de sumidos (90+ dias), aniversariantes (30 dias) e produto mais recomprado; lista por segmento (Todos, Aniversariantes, Sumidos, Fiéis, Novos) com busca; campanha personalizada por WhatsApp ou e-mail com {nome} e prévia; quem não autorizou contato fica de fora | Os clientes são mock. Falta decidir a fonte (CRM / PDV da loja, "store CRM" no spec) e o envio real |
 
 ### Representante
 
@@ -84,7 +84,7 @@ O Planejamento da Compra (8) e o CTA "Planejar" da Ficha (7) não entram. O "Aju
 1. ~~**Acompanhamento com linha do tempo (13)**~~ — feito.
 2. ~~**Quem está usando + PIN (0.4, 0.5)**~~ — feito.
 3. **Onboarding (1–3)** — em espera.
-4. **Pós-venda (14)**, depois de decidir a fonte de dados dos clientes finais.
+4. ~~**Pós-venda (14)**~~ — feito com dados mock.
 5. **Montar pedido sugerido (5b)** — em espera.
 
 ## Pendências herdadas da proposta

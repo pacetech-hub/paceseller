@@ -90,7 +90,7 @@ export function getGreeting(date = new Date()): string {
 // O mesmo cartão serve ao Radar do lojista (sinais) e ao do representante (cartões temáticos).
 type CardVariant = 'default' | 'highlight' | 'resolved';
 
-function RadarCard({
+export function RadarCard({
   icon: CardIcon, color, eyebrow, metric, subject, context, suggestion, ctaLabel, onCta, footer, menu,
   variant = 'default', resolvedText = 'Sai do Radar em até 24 h',
 }: {
