@@ -123,7 +123,7 @@ function PriceBlock({ product, size = 'sm' }: { product: Product; size?: 'sm' | 
         </Box>
       </Group>
       <Tooltip label={markupLabel(product)}>
-        <Badge mt="xs" variant="light" color="neutral" styles={{ label: { textTransform: 'none' } }}>{marginLabel(product)}</Badge>
+        <Badge mt="xs" variant="light" color="brand" styles={{ label: { textTransform: 'none' } }}>{marginLabel(product)}</Badge>
       </Tooltip>
     </Box>
   );
@@ -143,7 +143,7 @@ function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggle
     <Group gap={4} wrap="wrap">
       <Badge variant="light" color={availColor[product.availability]}>{product.availability}</Badge>
       <SignalTag signal={signal} />
-      {topSeller && <Badge variant="light" color="neutral" leftSection={<StarIcon size={14} weight="fill" />}>Mais vendida</Badge>}
+      {topSeller && <Badge variant="light" color="brand" leftSection={<StarIcon size={14} weight="fill" />}>Mais vendida</Badge>}
     </Group>
   );
   const addButton = (
@@ -175,7 +175,7 @@ function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggle
           <Flex gap="sm" direction={{ base: 'row', sm: 'column' }} align={{ base: 'center', sm: 'flex-end' }} justify="space-between" wrap="wrap" w={{ base: '100%', sm: 'auto' }} flex="none">
             <PriceBlock product={product} />
             <Group gap="sm">
-              <Button onClick={onToggleFav} variant={product.isFavorite ? 'light' : 'default'} color="neutral" leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />} aria-pressed={product.isFavorite}>
+              <Button onClick={onToggleFav} variant={product.isFavorite ? 'light' : 'default'} color="brand" leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />} aria-pressed={product.isFavorite}>
                 {product.isFavorite ? 'Favoritado' : 'Favoritar'}
               </Button>
               {addButton}
@@ -202,7 +202,7 @@ function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggle
         <Button
           onClick={onToggleFav}
           pos="absolute" top={8} right={8} size="sm" px="xs"
-          variant={product.isFavorite ? 'light' : 'default'} color="neutral"
+          variant={product.isFavorite ? 'light' : 'default'} color="brand"
           leftSection={<HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />}
           aria-pressed={!!product.isFavorite}
         >
@@ -274,7 +274,7 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
           />
         </Box>
         {topSeller && (
-          <Badge pos="absolute" top={12} left={12} variant="filled" color="neutral.9" radius="sm" ff="monospace" leftSection={<StarIcon size={14} weight="fill" />}>
+          <Badge pos="absolute" top={12} left={12} variant="filled" color="brand.9" radius="sm" ff="monospace" leftSection={<StarIcon size={14} weight="fill" />}>
             Mais vendida
           </Badge>
         )}
@@ -305,12 +305,12 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
                     bg="white"
                     style={{
                       borderRadius: 'var(--mantine-radius-sm)',
-                      border: active ? '2px solid var(--mantine-color-neutral-9)' : BORDER,
+                      border: active ? '2px solid var(--mantine-color-brand-9)' : BORDER,
                     }}
                   >
                     <ProductImage src={v.image} alt="" imageProps={{ fit: 'contain', p: 2 }} fallback={<Group h="100%" justify="center"><PackageIcon size={18} color={DIMMED} /></Group>} />
                     {isTopSeller(v.id, radar) && (
-                      <ThemeIcon pos="absolute" top={-6} right={-6} size={16} radius="xl" color="neutral.9" aria-hidden>
+                      <ThemeIcon pos="absolute" top={-6} right={-6} size={16} radius="xl" color="brand.9" aria-hidden>
                         <StarIcon size={12} weight="fill" />
                       </ThemeIcon>
                     )}
@@ -468,7 +468,7 @@ function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, is
               <Box>
                 <Text size="sm" c="dimmed" mb={4}>Outras cores da linha {product.line}</Text>
                 <Group gap="xs">
-                  <Badge variant="filled" color="neutral">{product.colors[0]}</Badge>
+                  <Badge variant="filled" color="brand">{product.colors[0]}</Badge>
                   {siblings.map(s => (
                     <Button key={s.id} size="compact-sm" variant="default" onClick={() => onSwitch(s)}>{s.name.replace(`${s.line} `, '')}</Button>
                   ))}
@@ -483,7 +483,7 @@ function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, is
               <Text size="sm" c="dimmed" fw={600}>{product.category} · {product.line} · {product.reference}</Text>
               <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap">
                 <Title order={2}>{productDisplayName(product)}</Title>
-                <Button onClick={onToggleFav} variant={isFavorite ? 'light' : 'default'} color="neutral" flex="none" leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />} aria-pressed={isFavorite}>
+                <Button onClick={onToggleFav} variant={isFavorite ? 'light' : 'default'} color="brand" flex="none" leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />} aria-pressed={isFavorite}>
                   {isFavorite ? 'Favoritado' : 'Favoritar'}
                 </Button>
               </Group>
@@ -692,12 +692,12 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
               {viewMode === 'grid' && <Text span c="dimmed" fw={400} inherit> em {models.length} {models.length === 1 ? 'modelo' : 'modelos'}</Text>}
             </Text>
             {activeChips.map(ch => (
-              <Button key={ch.key} variant="light" color="neutral" size="compact-md" rightSection={<XIcon size={16} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
+              <Button key={ch.key} variant="light" color="brand" size="compact-md" rightSection={<XIcon size={16} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
                 {ch.label}
               </Button>
             ))}
             {countActiveFilters(filters) > 0 && (
-              <Button variant="subtle" color="neutral" size="compact-md" onClick={clearFilters}>Limpar filtros</Button>
+              <Button variant="subtle" color="brand" size="compact-md" onClick={clearFilters}>Limpar filtros</Button>
             )}
             <SegmentedControl
               ml="auto"

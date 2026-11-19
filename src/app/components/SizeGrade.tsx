@@ -62,7 +62,7 @@ export function SizeGradeEditor({ product, value, onChange, suggestion }: {
           </Button>
         )}
         {total > 0 && (
-          <Button variant="subtle" color="neutral" onClick={() => onChange({})}>Limpar</Button>
+          <Button variant="subtle" color="brand" onClick={() => onChange({})}>Limpar</Button>
         )}
       </Group>
       <Text size="sm" c="dimmed">Distribuir usa a {curveLabel(curve)}.</Text>
@@ -142,7 +142,7 @@ export function TargetCartPicker({ cart, clientId }: { cart: Cart | null; client
       {cart && <Text size="sm" c="dimmed">· {cartPairs(cart)}/{CART_PARAMS.minOrderPairs} pares</Text>}
       <Menu position="bottom-start" withinPortal shadow="md" width={300}>
         <Menu.Target>
-          <Button variant="subtle" color="neutral" size="compact-sm" rightSection={<CaretDownIcon size={16} />}>trocar</Button>
+          <Button variant="subtle" color="brand" size="compact-sm" rightSection={<CaretDownIcon size={16} />}>trocar</Button>
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Carrinhos que aceitam itens</Menu.Label>
@@ -268,7 +268,7 @@ export function GradeSheet({ request, onClose }: { request: GradeRequest | null;
             <Text className="mono" fw={700}>{formatCurrency(product.price)}</Text>
             <Text size="sm" c="dimmed">Seu custo/par</Text>
             <Tooltip label={markupLabel(product)}>
-              <Badge variant="light" color="neutral">{marginLabel(product)}</Badge>
+              <Badge variant="light" color="brand">{marginLabel(product)}</Badge>
             </Tooltip>
           </Group>
         </Box>

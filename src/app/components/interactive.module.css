@@ -28,8 +28,8 @@
 }
 
 .choiceCard[data-checked] {
-  border-color: var(--choice-color, var(--mantine-color-neutral-9));
-  background-color: var(--choice-bg, var(--mantine-color-neutral-0));
+  border-color: var(--choice-color, var(--mantine-color-brand-9));
+  background-color: var(--choice-bg, var(--mantine-color-brand-0));
 }
 
 /* Linha de lista com divisória inferior, exceto no último item */

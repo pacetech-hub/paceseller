@@ -35,9 +35,9 @@ interface OrderHistoryProps {
 // etapas intermediárias em neutro, atenção em amarelo, concluído em verde-azulado, cancelado em vermelho.
 // O ícone de cada status diferencia os neutros entre si.
 export const statusColors: Record<string, string> = {
-  'aprovado': 'neutral',
+  'aprovado': 'brand',
   'em análise': 'yellow',
-  'faturado': 'neutral',
+  'faturado': 'brand',
   'cancelado': 'red',
   'entregue': 'teal',
 };
@@ -190,7 +190,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
         <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
           <Group gap="sm">
             {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="neutral">
+              <Chip key={s} value={s} variant="filled" color="brand">
                 {statusLabels[s]}
               </Chip>
             ))}

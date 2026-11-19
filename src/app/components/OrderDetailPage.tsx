@@ -138,7 +138,7 @@ function trackingSteps(order: Order): { steps: TrackingStep[]; current: number }
 function OrderTimeline({ order, profile }: { order: Order; profile: Profile }) {
   if (order.status === 'cancelado') {
     return (
-      <Timeline active={1} bulletSize={24} lineWidth={2} color="neutral">
+      <Timeline active={1} bulletSize={24} lineWidth={2} color="brand">
         <Timeline.Item bullet={<CheckIcon size={14} weight="bold" />} title="Pedido recebido">
           <Text c="dimmed" size="sm">{formatDate(order.date)}</Text>
         </Timeline.Item>
@@ -152,7 +152,7 @@ function OrderTimeline({ order, profile }: { order: Order; profile: Profile }) {
   const { steps, current } = trackingSteps(order);
   return (
     <Stack gap="md">
-      <Timeline active={Math.min(current, steps.length - 1)} bulletSize={24} lineWidth={2} color="neutral">
+      <Timeline active={Math.min(current, steps.length - 1)} bulletSize={24} lineWidth={2} color="brand">
         {steps.map((step, i) => {
           const done = i < current;
           const isCurrent = i === current;
@@ -309,7 +309,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
               {/* Botão terciário: abre a linha do tempo do pedido logo abaixo do status */}
               <Button
                 variant="transparent"
-                color="neutral"
+                color="brand"
                 px={0}
                 ml="xs"
                 fw={600}

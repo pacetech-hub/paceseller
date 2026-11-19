@@ -36,11 +36,11 @@ const stockByLine = [
 
 // parte do todo com 2 partes: donut; o rótulo central é calculado dos próprios dados
 const pieData = [
-  { name: 'Vendido', value: 2860000, color: 'neutral.9' },
+  { name: 'Vendido', value: 2860000, color: 'brand.9' },
   { name: 'Estoque', value: 140000, color: 'gray.3' },
 ];
 
-const SELL_IN_COLOR = 'neutral.9';
+const SELL_IN_COLOR = 'brand.9';
 const SELL_OUT_COLOR = 'teal.6';
 
 // tooltip dos gráficos: valor completo em reais, sem centavos (ex.: "R$ 23.818")
@@ -61,7 +61,7 @@ const totalSellOut = selloutData.reduce((a, b) => a + b.sellOut, 0);
 const daysColor = (days: number) => (days > 60 ? 'red.6' : days > 45 ? 'yellow.7' : undefined);
 
 // giro por linha (barra e número com a mesma regra): >= 95 ótimo, >= 90 ok, abaixo atenção
-const giroBarColor = (giro: number) => (giro >= 95 ? 'teal.6' : giro >= 90 ? 'neutral.9' : 'yellow.6');
+const giroBarColor = (giro: number) => (giro >= 95 ? 'teal.6' : giro >= 90 ? 'brand.9' : 'yellow.6');
 const giroTextColor = (giro: number) => (giro >= 95 ? 'teal.7' : giro >= 90 ? undefined : 'yellow.8');
 
 // linhas ordenadas pelo giro, do maior para o menor

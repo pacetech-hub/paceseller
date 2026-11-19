@@ -93,7 +93,7 @@ function RepContacts({ rep }: { rep: RepContact }) {
   return (
     <>
       <Group gap="sm" wrap="nowrap">
-        <Avatar color="neutral" radius="xl">{initialsOf(rep.name)}</Avatar>
+        <Avatar color="brand" radius="xl">{initialsOf(rep.name)}</Avatar>
         <Box miw={0}>
           <Text fw={600} truncate>{rep.name}</Text>
           <Text c="dimmed" size="sm" truncate>{[rep.role, rep.region].filter(Boolean).join(' · ')}</Text>
@@ -216,7 +216,7 @@ function ContactForm<T extends object>({ title, description, fields, value, onSa
         </SimpleGrid>
         <Group justify="flex-end" gap="sm" mt="lg">
           <Button variant="default" onClick={discard} disabled={!dirty}>Descartar</Button>
-          <Button type="submit" color="neutral" leftSection={<FloppyDiskIcon size={16} />} disabled={!dirty}>
+          <Button type="submit" color="brand" leftSection={<FloppyDiskIcon size={16} />} disabled={!dirty}>
             Salvar Alterações
           </Button>
         </Group>
@@ -228,7 +228,7 @@ function ContactForm<T extends object>({ title, description, fields, value, onSa
 function PageHeader({ subtitle }: { subtitle: string }) {
   return (
     <Group gap="sm" wrap="nowrap">
-      <ThemeIcon size={40} variant="light" color="neutral">
+      <ThemeIcon size={40} variant="light" color="brand">
         <HeadsetIcon size={20} />
       </ThemeIcon>
       <Box>

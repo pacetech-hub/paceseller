@@ -252,7 +252,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
         key={p.view}
         onClick={() => selectPage(p.view)}
         active={active}
-        color="neutral"
+        color="brand"
         variant="light"
         label={p.label}
         leftSection={<ItemIcon size={18} />}
@@ -274,7 +274,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
     >
       <Group h="100%" gap="sm" wrap="nowrap">
         {/* Celular: o menu inteiro fica na gaveta */}
-        <ActionIcon onClick={openNav} hiddenFrom="sm" variant="subtle" color="neutral" size="lg" aria-label="Abrir Menu" aria-expanded={navOpened}>
+        <ActionIcon onClick={openNav} hiddenFrom="sm" variant="subtle" color="brand" size="lg" aria-label="Abrir Menu" aria-expanded={navOpened}>
           <ListIcon size={20} weight="bold" />
         </ActionIcon>
 
@@ -293,9 +293,9 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
 
           {/* Carrinho só no Catálogo e no processo de compra (FR-401: abre a gaveta e mostra os carrinhos abertos) */}
           {showCart && (
-            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="neutral" offset={4}>
+            <Indicator label={cartCount} disabled={cartCount === 0} size={16} color="brand" offset={4}>
               <Tooltip label="Ver Carrinho" withArrow>
-                <ActionIcon onClick={openCart} variant="subtle" color="neutral" size="lg" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
+                <ActionIcon onClick={openCart} variant="subtle" color="brand" size="lg" aria-label={`Ver Carrinho · ${cartCount} abertos`}>
                   <ShoppingCartIcon size={18} />
                 </ActionIcon>
               </Tooltip>
@@ -304,7 +304,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
 
           <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4}>
             <Tooltip label="Ver Notificações" withArrow>
-              <ActionIcon variant="subtle" color="neutral" size="lg" aria-label={`Ver Notificações · ${notifications}`}>
+              <ActionIcon variant="subtle" color="brand" size="lg" aria-label={`Ver Notificações · ${notifications}`}>
                 <BellIcon size={18} />
               </ActionIcon>
             </Tooltip>
@@ -333,7 +333,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
             <Menu position="bottom-end" offset={6} shadow="md" width={240} withinPortal>
               <Menu.Target>
                 <UnstyledButton className={classes.accountButton} aria-label={`Menu da conta · ${userName}`}>
-                  <ThemeIcon size={32} radius="xl" variant="light" color="neutral" aria-hidden>
+                  <ThemeIcon size={32} radius="xl" variant="light" color="brand" aria-hidden>
                     <ProfileIcon size={16} />
                   </ThemeIcon>
                   <Text size="sm" fw={600} truncate maw={140} visibleFrom="lg">{userName}</Text>
@@ -392,7 +392,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
           )}
           <Divider my="sm" />
           <Group gap="sm" wrap="nowrap" px="sm" py="xs">
-            <ThemeIcon size={32} radius="xl" variant="light" color="neutral" aria-hidden>
+            <ThemeIcon size={32} radius="xl" variant="light" color="brand" aria-hidden>
               <ProfileIcon size={16} />
             </ThemeIcon>
             <Box flex={1} miw={0}>

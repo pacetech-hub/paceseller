@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "dev": "vite"
+    "dev": "vite",
+    "tokens": "node scripts/build-tokens.mjs"
   },
   "dependencies": {
     "@mantine/charts": "^7.17.8",

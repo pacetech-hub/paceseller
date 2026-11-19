@@ -67,7 +67,7 @@ export function StockKpis({ items }: { items: StockItem[] }) {
     { label: 'Sem estoque', value: skus(kpis.ruptura), sub: `${pct(kpis.ruptura)} dos ${kpis.total} SKUs cadastrados`, icon: EmptyIcon, color: 'red' },
     { label: 'Estoque baixo', value: skus(kpis.baixo), sub: `${pct(kpis.baixo)} · abaixo do estoque mínimo`, icon: TrendDownIcon, color: 'yellow' },
     { label: 'Estoque normal', value: skus(kpis.ok), sub: `${pct(kpis.ok)} · disponíveis para venda`, icon: CheckSquareIcon, color: 'teal' },
-    { label: 'Valor em estoque', value: formatCurrency(kpis.valor), sub: 'a preço de tabela', icon: WarehouseIcon, color: 'neutral' },
+    { label: 'Valor em estoque', value: formatCurrency(kpis.valor), sub: 'a preço de tabela', icon: WarehouseIcon, color: 'brand' },
   ];
 
   return (
@@ -109,7 +109,7 @@ export function StockProductCell({ item }: { item: StockItem }) {
   return (
     <Group gap="sm" wrap="nowrap">
       {/* miniatura de produto: quadrado arredondado (8px, igual ao tema), não círculo — não é uma pessoa */}
-      <Avatar src={item.image} alt={item.name} radius="md" size={40} color="neutral">
+      <Avatar src={item.image} alt={item.name} radius="md" size={40} color="brand">
         <PackageIcon size={16} />
       </Avatar>
       <Box miw={0}>

@@ -104,17 +104,17 @@ export function RadarCard({
   const base = resolved ? 'gray' : color;
   // texto na cor do status: tom 8 sobre o fundo claro; no destaque, branco sobre preto
   const tone = highlight ? 'white' : resolved ? 'dimmed' : `${color}.8`;
-  const muted = highlight ? 'neutral.3' : 'dimmed';
+  const muted = highlight ? 'brand.3' : 'dimmed';
 
   return (
     <Paper
       withBorder
       p="lg"
       h="100%"
-      bg={highlight ? 'neutral.9' : `var(--mantine-color-${base}-light)`}
+      bg={highlight ? 'brand.9' : `var(--mantine-color-${base}-light)`}
       // no destaque a borda só aparece no modo escuro, para o cartão preto não sumir no fundo
       style={highlight
-        ? { borderColor: 'light-dark(var(--mantine-color-neutral-9), var(--mantine-color-neutral-7))' }
+        ? { borderColor: 'light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-7))' }
         : { borderColor: `var(--mantine-color-${base}-light-hover)`, opacity: resolved ? 0.8 : 1 }}
     >
       <Stack gap="md" h="100%">
@@ -123,7 +123,7 @@ export function RadarCard({
             size={40}
             radius="md"
             variant="filled"
-            color={highlight ? 'neutral.7' : base}
+            color={highlight ? 'brand.7' : base}
             aria-hidden
           >
             <CardIcon size={20} weight={highlight ? 'fill' : 'regular'} />
@@ -131,7 +131,7 @@ export function RadarCard({
           {!resolved && menu && (
             <Menu position="bottom-end" withinPortal shadow="md">
               <Menu.Target>
-                <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'neutral'} aria-label="Mais opções do aviso" mr={-8}>
+                <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'brand'} aria-label="Mais opções do aviso" mr={-8}>
                   <DotsThreeVerticalIcon size={20} />
                 </ActionIcon>
               </Menu.Target>
@@ -295,7 +295,7 @@ function BucketTabs({ value, onChange, counts, noun = ['pendência', 'pendência
                 <Badge
                   size="sm"
                   circle
-                  color={critical > 0 ? 'red' : total > 0 ? 'neutral' : 'gray'}
+                  color={critical > 0 ? 'red' : total > 0 ? 'brand' : 'gray'}
                   variant={total > 0 ? 'filled' : 'light'}
                   aria-label={`${total} ${total === 1 ? noun[0] : noun[1]}${critical ? `, ${critical} críticos` : ''}`}
                 >

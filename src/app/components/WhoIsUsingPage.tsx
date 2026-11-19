@@ -72,13 +72,13 @@ export function WhoIsUsingPage({ repName, onSelect, onAddAssistant, onLogout }: 
                 const isTitular = person.id === titular?.id;
                 return (
                   <UnstyledButton key={person.id} role="listitem" className={classes.person} onClick={() => choose(person)}>
-                    <Avatar size={44} radius="xl" color="neutral" variant={isTitular ? 'filled' : 'light'}>
+                    <Avatar size={44} radius="xl" color="brand" variant={isTitular ? 'filled' : 'light'}>
                       {initials(person.name)}
                     </Avatar>
                     <Box flex={1} miw={0}>
                       <Group gap="xs" wrap="nowrap">
                         <Text fw={600} truncate>{person.name}</Text>
-                        <Badge variant={isTitular ? 'filled' : 'default'} color="neutral" styles={{ label: { textTransform: 'none' } }}>
+                        <Badge variant={isTitular ? 'filled' : 'default'} color="brand" styles={{ label: { textTransform: 'none' } }}>
                           {isTitular ? 'Titular' : 'Preposto'}
                         </Badge>
                       </Group>
@@ -149,7 +149,7 @@ function PinStep({ person, titular, onBack, onConfirm, onEnterAsTitular }: {
       </Button>
 
       <Stack align="center" gap={4}>
-        <Avatar size={64} radius="xl" color="neutral" variant="light">{initials(person.name)}</Avatar>
+        <Avatar size={64} radius="xl" color="brand" variant="light">{initials(person.name)}</Avatar>
         <Title order={1} size="h2" mt="sm" ta="center">Olá, {person.name.split(' ')[0]}</Title>
         <Text c="dimmed" size="sm" ta="center">Digite seu PIN de 4 dígitos para confirmar que é você.</Text>
         <Text c="dimmed" size="sm" ta="center">Para testar, use 1234.</Text>
@@ -168,7 +168,7 @@ function PinStep({ person, titular, onBack, onConfirm, onEnterAsTitular }: {
         ))}
         <Box />
         <Button variant="default" h={56} fz="xl" className="mono" onClick={() => press('0')}>0</Button>
-        <Button variant="subtle" color="neutral" h={56} onClick={erase} aria-label="Apagar dígito">
+        <Button variant="subtle" color="brand" h={56} onClick={erase} aria-label="Apagar dígito">
           <BackspaceIcon size={22} />
         </Button>
       </SimpleGrid>
