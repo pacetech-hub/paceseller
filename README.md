@@ -12,6 +12,11 @@ Run `bun run dev` to start the development server.
 
 Run `bun run build` to create a production build.
 
+## Product docs
+
+- Radar and shopping-journey spec: `src/imports/pasted_text/radar-spec.md`
+- Retail Performance Platform proposal and how it maps to this app: `docs/retail-performance-platform/README.md`
+
 ## Design tokens
 
 Visual values (colors, type, spacing, radius, shadows, focus ring) come from the Figma export in

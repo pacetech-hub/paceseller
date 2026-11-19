@@ -1,0 +1,33 @@
+/* Pessoa da conta: linha clicável com borda, como um cartão */
+.person {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  color: var(--mantine-color-text);
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--mantine-color-default-hover);
+    border-color: var(--mantine-color-text);
+  }
+}
+
+/* Indicador de dígito do PIN: vazio com borda, preenchido em preto, vermelho no erro */
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--mantine-color-text);
+  transition: background-color 100ms ease;
+}
+
+.dot[data-filled] {
+  background-color: var(--mantine-color-text);
+}
+
+.dot[data-error] {
+  border-color: var(--mantine-color-red-6);
+}

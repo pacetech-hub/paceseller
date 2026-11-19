@@ -126,7 +126,7 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
 export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = 'lojista' }: CartPageProps) {
   const { carts } = useCartStore();
   const radar = useRadar();
-  const { openGrade } = useShop();
+  const { openGrade, actorName } = useShop();
   const loading = useMockLoading();
   const cart = getCart(cartContext?.id) ?? null;
   const [paying, setPaying] = useState(false);
@@ -207,7 +207,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
 
   const talkToRep = () => commentRef.current?.focus();
   const sendComment = () => {
-    addComment(cart.id, viewerRole, viewerRole === 'lojista' ? 'Você' : cart.rep, comment);
+    addComment(cart.id, viewerRole, viewerRole === 'lojista' ? 'Você' : actorName ?? cart.rep, comment);
     setComment('');
   };
   const newCart = () => {

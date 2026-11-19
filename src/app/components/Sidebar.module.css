@@ -1,69 +1,109 @@
-/* Barra lateral fixa: borda à direita e animação ao recolher/expandir */
-.aside {
-  border-right: 1px solid var(--mantine-color-default-border);
-  transition: width 200ms ease;
-}
-
 /* Cabeçalho translúcido com desfoque do conteúdo que rola por baixo */
 .header {
   border-bottom: 1px solid var(--mantine-color-default-border);
   backdrop-filter: blur(8px);
 }
 
-/* Logo do cabeçalho separado dos itens de navegação */
-.headerLogo {
-  border-right: 1px solid var(--mantine-color-default-border);
-}
-
-/* Avatar do menu do usuário com traço à esquerda
-   (classe duplicada para vencer a borda do próprio ActionIcon) */
-.avatarButton.avatarButton {
-  border-left: 1px solid var(--mantine-color-default-border);
-}
-
-/* Itens de navegação: 42px de altura e rótulo de 16px, como os demais controles
-   (classes duplicadas para vencer os tamanhos padrão do próprio NavLink) */
-.navLink.navLink {
-  min-height: 42px;
-}
-
-.navLabel.navLabel {
-  font-size: var(--mantine-font-size-md);
-}
-
-/* Carrinhos/Notificações com texto só em telas largas (≥ 1600px); abaixo disso,
-   ao lado dos itens de navegação, não há espaço e ficam só com ícone + tooltip
-   (classes duplicadas para vencer o display do próprio Indicator) */
-.wideOnly.wideOnly {
-  display: none;
-}
-
-@media (min-width: 100em) {
-  .wideOnly.wideOnly {
-    display: block;
-  }
-
-  .narrowOnly.narrowOnly {
-    display: none;
-  }
-}
-
-/* Ícone do menu + logo: um só botão, para a área de clique ser maior */
-.menuTrigger {
+/* Logo: leva ao Radar */
+.logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex: none;
   height: 40px;
-  padding: 0 10px 0 8px;
+  padding: 0 6px;
+  border-radius: var(--mantine-radius-md);
+}
+
+/* Menu horizontal: itens de texto em linha, a página atual com traço embaixo */
+.nav {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Cópia invisível usada só para medir a largura de cada item */
+.navMeasure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 4px;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.nav .navLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding: 0 12px;
+  white-space: nowrap;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--mantine-color-text);
+  }
+}
+
+.nav .navLink[data-active] {
+  color: var(--mantine-color-text);
+  font-weight: 600;
+}
+
+.nav .navLink[data-active]::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--mantine-color-text);
+}
+
+/* A medida usa o peso semibold, para o item não mudar de largura quando fica ativo */
+.nav .navMeasure .navLink {
+  font-weight: 600;
+}
+
+/* Botão do menu da conta */
+.accountButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 8px 0 4px;
   border-radius: var(--mantine-radius-md);
   color: var(--mantine-color-text);
-  transition: background-color 150ms ease;
 
   @mixin hover {
     background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
   }
 }
 
-.menuTrigger[data-open] {
+.accountButton[data-expanded] {
   background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+}
+
+/* Itens da gaveta (celular): 44px de altura e rótulo de 16px */
+.drawerLink.drawerLink {
+  min-height: 44px;
+}
+
+.drawerLabel.drawerLabel {
+  font-size: var(--mantine-font-size-md);
+}
+
+/* Faixa do título da página, abaixo do menu */
+.pageTitle {
+  border-bottom: 1px solid var(--mantine-color-default-border);
 }

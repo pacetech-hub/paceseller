@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Box, Stack } from "@mantine/core";
 import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
-import { TopBar } from "./components/Sidebar";
+import { WhoIsUsingPage } from "./components/WhoIsUsingPage";
+import type { LinkedUser } from "./data/linkedUsers";
+import { TopBar, PageTitle } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
 import { clients as clientsList, orders as ordersList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
@@ -72,6 +74,8 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
+  // Conta do representante é compartilhada: quem está operando nesta sessão (titular ou preposto)
+  const [operator, setOperator] = useState<LinkedUser | null>(null);
   const [profile, setProfile] = useState<Profile>('admin');
   const [currentView, setCurrentView] = useState<View>('radar');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -112,11 +116,13 @@ export default function App() {
     openGrade: (req) => setGradeRequest(req),
     openCart,
     openDrawer: () => setDrawerOpen(true),
+    actorName: profile === 'rep' ? operator?.name ?? CURRENT_REP_NAME : undefined,
   };
 
   const handleLogin = (selectedProfile: Profile) => {
     setProfile(selectedProfile);
     setAuthenticated(true);
+    setOperator(null);
     // Todos os perfis entram no Radar (a central de informações)
     setCurrentView('radar');
     setSelectedClient(null);
@@ -125,6 +131,7 @@ export default function App() {
 
   const handleLogout = () => {
     setAuthenticated(false);
+    setOperator(null);
     setCurrentView('radar');
     setSelectedClient(null);
     setSelectedOrder(null);
@@ -215,6 +222,18 @@ export default function App() {
         {/* MARKER-MAKE-KIT-INVOKED */}
         <LoginPage onLogin={handleLogin} />
       </div>
+    );
+  }
+
+  // 0.4 / 0.5: na conta do representante, escolher quem está usando antes de entrar
+  if (profile === 'rep' && !operator) {
+    return (
+      <WhoIsUsingPage
+        repName={CURRENT_REP_NAME}
+        onSelect={(person) => { setOperator(person); setCurrentView('radar'); }}
+        onAddAssistant={(titular) => { setOperator(titular); setCurrentView('permissions'); }}
+        onLogout={handleLogout}
+      />
     );
   }
 
@@ -324,6 +343,7 @@ export default function App() {
           <RadarPage
             profile={profile}
             userName={profile === 'rep' ? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
+            greetName={profile === 'rep' ? operator?.name : undefined}
             onCta={handleRadarCta}
           />
         );
@@ -353,10 +373,10 @@ export default function App() {
     <Box h="100dvh" display="flex" className={classes.shell}>
       <Stack gap={0} flex={1} miw={0}>
         <TopBar
-          title={viewInfo.title}
-          subtitle={viewInfo.subtitle}
           profile={profile}
-          userName={profile === 'admin' ? CURRENT_ADMIN_NAME : profile === 'rep' ? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
+          userName={profile === 'admin' ? CURRENT_ADMIN_NAME : profile === 'rep' ? operator?.name ?? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
+          accountOwner={profile === 'rep' && operator && operator.name !== CURRENT_REP_NAME ? CURRENT_REP_NAME : undefined}
+          onSwitchUser={profile === 'rep' ? () => setOperator(null) : undefined}
           currentView={currentView}
           notifications={bellCount}
           onNavigate={navigate}
@@ -366,6 +386,7 @@ export default function App() {
           showCart={commerceView}
           selectedClient={commerceView ? selectedClient : null}
         />
+        <PageTitle title={viewInfo.title} subtitle={viewInfo.subtitle} />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>
