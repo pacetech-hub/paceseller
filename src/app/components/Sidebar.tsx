@@ -74,37 +74,54 @@ interface MenuPage {
   view: View;
 }
 
-/** Páginas do menu principal, na ordem de prioridade (as últimas vão primeiro para o "Mais"). */
-function mainPages(profile: Profile): MenuPage[] {
-  if (profile === 'admin') return [
+/**
+ * Ordem única do menu superior, para todos os perfis: Radar, Catálogo, Clientes, Pedidos, Estoque,
+ * Ficha Técnica e, depois, as demais. Cada perfil mostra só as páginas que tem, sempre nesta ordem.
+ * As últimas são as primeiras a ir para o "Mais" quando falta largura.
+ */
+const MENU_ORDER: View[] = [
+  'radar', 'catalog', 'clients', 'history', 'industry-stock', 'stock', 'ficha-tecnica',
+  'pos-venda', 'boletos', 'marketing',
+];
+
+/** Páginas de cada perfil (a ordem vem de MENU_ORDER). */
+const PROFILE_PAGES: Record<Profile, MenuPage[]> = {
+  admin: [
     { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
+    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
     { icon: UsersIcon, label: 'Clientes', view: 'clients' },
-    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-    { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
     { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+    { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
+    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
     { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
     { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-  ];
-  if (profile === 'rep') return [
+  ],
+  rep: [
     { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
+    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
     { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
-    { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-    { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
     { icon: ClockIcon, label: 'Pedidos', view: 'history' },
+    { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
     { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
     { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-  ];
-  return [
+  ],
+  lojista: [
     { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
     { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
-    { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
     { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
+    { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
+    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
     { icon: HandHeartIcon, label: 'Pós-venda', view: 'pos-venda' },
     { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
     { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
-  ];
+  ],
+};
+
+const menuRank = (v: View) => { const i = MENU_ORDER.indexOf(v); return i === -1 ? MENU_ORDER.length : i; };
+
+/** Páginas do menu principal do perfil, na ordem única do menu. */
+function mainPages(profile: Profile): MenuPage[] {
+  return [...PROFILE_PAGES[profile]].sort((a, b) => menuRank(a.view) - menuRank(b.view));
 }
 
 /** Páginas da conta: ficam no menu do usuário, não na barra. */
