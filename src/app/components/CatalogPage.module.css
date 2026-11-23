@@ -66,13 +66,6 @@
   object-position: bottom;
 }
 
-/* Corpo rolável do modal de detalhes; a grade de compra fica fixa embaixo */
-.detailBody {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
 /* Coluna da galeria no modal: fundo cinza levemente tingido; no escuro, um tom acima do modal */
 .galleryPane {
   background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
@@ -83,3 +76,27 @@
   background-color: light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-5));
   border: 1px solid light-dark(var(--mantine-color-brand-3), var(--mantine-color-dark-4));
 }
+
+/* Cartão do modelo (grade de 4 colunas): sem borda própria, a foto sobre fundo oliva claro (olive 100 dos tokens) */
+.modelImage.modelImage {
+  background-color: light-dark(var(--mantine-color-olive-1), var(--mantine-color-dark-6));
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 150ms ease;
+}
+
+.modelCard:hover .modelImage.modelImage {
+  background-color: light-dark(var(--mantine-color-olive-2), var(--mantine-color-dark-5));
+}
+
+/* Miniatura de cor: traço embaixo na cor escolhida */
+.swatch.swatch {
+  flex: none;
+  padding: 2px 2px 0;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--mantine-radius-xs) var(--mantine-radius-xs) 0 0;
+}
+
+.swatch.swatch[data-active] {
+  border-bottom-color: var(--mantine-color-text);
+}
+

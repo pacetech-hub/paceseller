@@ -32,14 +32,14 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 4.1 | Ajustar foco | Não adotado | — | Mudaria a ordem do Radar definida no spec (C2) |
 | — | Estado vazio do Radar com % do perfil | Parcial | `ui/EmptyState.tsx` existe; o Radar mostra "Nada pra hoje" por aba | Barra de progresso do perfil e "Enquanto isso" |
 | 6 | Catálogo | Existe | `CatalogPage.tsx`, `CatalogFiltersBar.tsx` | Filtros já são os sinais do Radar (FR-202); falta só o chip "Recomendado p/ você" como ordenação padrão |
-| 7 | Ficha de Decisão | Existe | Página de produto dentro de `CatalogPage.tsx`; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Nada a fazer: o CTA "Planejar" sai junto com o Planejamento (8) |
+| 7 | Ficha de Decisão | Existe | Página inteira dentro de `CatalogPage.tsx` (antes era um modal): caminho Radar / Catálogo / produto, foto à esquerda e a decisão à direita — preço, "Por que comprar este produto", sinal do Radar, grade e "Como você quer seguir?"; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Nada a fazer: o CTA "Planejar" sai junto com o Planejamento (8) |
 | 8 | Planejamento da Compra (mix sugerido) | Não adotado | O aviso de mix em `CartDrawer.tsx` e `CartPage.tsx` (`mixCheck`) continua | **Decidido: fora do escopo.** A compra segue Catálogo → grade → carrinho ativo |
 | 9 | Meus Pedidos (lista de carrinhos) | Existe | `CartsListPage.tsx` | — |
 | 10 | Carrinho compartilhado | Existe | `CartPage.tsx`, `data/cartStore.ts`: abas por carrinho, comentários, "Antes de fechar", ação por status | Ver conflito C4 sobre a ordem enviar / confirmar / pagar |
 | 11 | Pagamento e Entrega | Parcial | Bloco de pagamento dentro de `CartPage.tsx` | Tela própria com endereço, prazo, nota fiscal e contrato |
 | 12 | Pedido confirmado | Existe | `CartPage.tsx` ("Pedido confirmado") | Conferir CTAs: "Voltar ao radar" / "Acompanhar pedido" |
 | 13 | Acompanhamento do pedido | Existe | `OrderDetailPage.tsx`: botão "Ver detalhes" ao lado do status abre a linha do tempo recebido → aprovado → em produção → faturado e enviado → entregue, com transportadora e rastreio | Transportadora e rastreio são mock até existir integração |
-| 14 | Pós-venda: Radar de fidelização (consumidor final) | Falta | — | Base de clientes finais da loja (CRM), que hoje não existe. O spec atual lista "store CRM" como fonte a decidir |
+| 14 | Pós-venda: Radar de fidelização (consumidor final) | Existe (mock) | `PosVendaPage.tsx`, `data/posVenda.ts`, no menu do lojista: cartões de sumidos (90+ dias), aniversariantes (30 dias) e produto mais recomprado; lista por segmento (Todos, Aniversariantes, Sumidos, Fiéis, Novos) com busca; campanha personalizada por WhatsApp ou e-mail com {nome} e prévia; quem não autorizou contato fica de fora | Os clientes são mock. Falta decidir a fonte (CRM / PDV da loja, "store CRM" no spec) e o envio real |
 
 ### Representante
 
@@ -48,7 +48,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 0.3 | Login do representante | Parcial | Mesmo `LoginPage.tsx` | Mesmas pendências do 0.2, sem login social |
 | 0.4 | Quem está usando agora | Existe | `WhoIsUsingPage.tsx`, depois do login do representante: titular (entra direto) e prepostos ativos de `data/linkedUsers.ts`; "Adicionar preposto" abre Permissões como titular; "Trocar usuário" no menu da conta volta para cá | Comentários do carrinho já saem no nome de quem opera. Outras ações (edições, aprovações) ainda saem no nome do titular |
 | 0.5 | PIN do auxiliar | Existe | Mesmo componente: teclado numérico e teclado físico, erro ao errar, "Esqueceu o PIN? Entrar como [titular]" | PIN de demonstração 1234 para todos; falta o cadastro de PIN por preposto em Permissões |
-| 5 | Radar do representante | Existe | `RadarPage.tsx`, `data/repRadar.ts`: prioridades de contato C-01 a C-09, já com "Pós-venda" (C-08) | Fica como está ("Ver cliente" / "Revisar carrinho"); o Radar não muda |
+| 5 | Radar do representante | Existe | `RepRadar.tsx`, `data/repRadar.ts`. Novo layout: "N lojas precisam de atenção"; "Aguardando você" (pedidos para confirmar, com "Aprovar todos"); "Oportunidade na carteira" (produto em alta que lojas da carteira não têm, com "Sugerir pras N lojas" por grade); "Carteira" loja por loja com o próximo passo e filtro Todas / Hoje / 15 dias / 30 dias. Os motivos de contato C-01 a C-09 continuam os mesmos | A oportunidade na carteira é mock (produto e lojas fixos) até integrar o sell-in por loja |
 | 5a | Carteira de clientes | Existe | `ClientsPage.tsx`, `ClientDetailPage.tsx` | Mostrar o score de recompra na lista |
 | 5b | Montar pedido sugerido | Em espera | O rep já cria carrinho para o cliente | Sem o Planejamento, seria um carrinho já preenchido a partir do histórico do cliente. Decidir se entra |
 | 10 | Revisar / aprovar pedido | Existe | `CartPage.tsx` com `viewerRole` 'rep' ("Confirmar condições") | — |
@@ -71,7 +71,7 @@ Cada item abaixo é uma regra que a proposta e o app atual resolvem de formas op
 | C5 | Fechar o pedido | "Enviar para aprovação" e "Confirmar" lado a lado | Uma ação por status: envia ao rep → rep confirma condições → lojista paga (FR-603) | **Decidido: o spec vale.** Uma ação por status: envia ao rep → rep confirma condições → lojista paga |
 | C6 | Margem | Vários números ("Margem estimada 42%", "38%", "39%") | Uma métrica: "Margem 39% no PDV sugerido" (BR-03) | **Decidido: o spec vale.** Uma margem só, "Margem X% no PDV sugerido" (BR-03), também nas telas novas |
 | C7 | Preço | Duas linhas, com e sem imposto (IBS/CBS) | "Seu custo" e "PDV sugerido" (BR-01, BR-02) | **Decidido: o spec vale.** "Seu custo" e "PDV sugerido"; o "Seu custo" informa se inclui impostos e frete (BR-01). Sem segunda linha de preço |
-| C8 | Visual | Space Grotesk / IBM Plex, preto e branco 60/30/10, cantos de 4px | Mantine + Roboto, tema em `src/mantine/theme.ts` (fases 6 e 7 de revisão de UI) | **Decidido: fica o visual atual** (Mantine + Roboto). As telas novas seguem o tema existente |
+| C8 | Visual | Space Grotesk / IBM Plex, preto e branco 60/30/10, cantos de 4px | Mantine + Roboto, tema em `src/mantine/theme.ts` (fases 6 e 7 de revisão de UI) | **Decidido: o visual da proposta não é adotado.** O app segue o próprio tema, hoje gerado dos tokens do Figma (`design-tokens/`): marca na família Zinc, botões e seleções em Zinc 900 (`brand.9`), fonte Geist. Os tons 50–950 dos tokens viram os índices 0–10 do Mantine |
 | C9 | Marca | Logo só no rodapé do login | Logo no menu do header (`2bfdec1`) | **Decidido: logo no cabeçalho**, à esquerda do menu, levando ao Radar |
 | C10 | Navegação | Barra inferior no mobile, rail lateral no tablet | Menu em grade de apps (`AppsGridMenu.tsx`) em todos os tamanhos | **Decidido: menu clássico, nem grade de apps nem barra inferior.** Páginas em linha no cabeçalho; as que não cabem vão para "Mais". Perfil, Permissões/Administração, Suporte e Sair ficam no menu da conta. No celular, tudo fica numa gaveta aberta pelo ícone ☰. O título da página desce para uma faixa abaixo do menu. **Sem "Meus carrinhos" no menu, de propósito:** há um só ícone de carrinho no cabeçalho, que abre o carrinho ativo; outros carrinhos abertos continuam editáveis quando escolhidos como ativo ("Vai para: … · trocar"). O BR-70 do spec não muda; o app só não o segue neste ponto |
 
@@ -84,7 +84,7 @@ O Planejamento da Compra (8) e o CTA "Planejar" da Ficha (7) não entram. O "Aju
 1. ~~**Acompanhamento com linha do tempo (13)**~~ — feito.
 2. ~~**Quem está usando + PIN (0.4, 0.5)**~~ — feito.
 3. **Onboarding (1–3)** — em espera.
-4. **Pós-venda (14)**, depois de decidir a fonte de dados dos clientes finais.
+4. ~~**Pós-venda (14)**~~ — feito com dados mock.
 5. **Montar pedido sugerido (5b)** — em espera.
 
 ## Pendências herdadas da proposta

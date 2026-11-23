@@ -3,6 +3,12 @@
   overflow: hidden;
 }
 
+/*
+ * Área principal: fundo cinza (zinc 100 dos tokens) para os cartões e tabelas brancos se
+ * destacarem em todas as páginas. No modo escuro o contraste já vem do tema
+ * (fundo dark-8 < cartões dark-7), então o fundo continua o da página.
+ */
 .main {
   overflow-y: auto;
+  background-color: light-dark(var(--mantine-color-brand-1), var(--mantine-color-body));
 }
