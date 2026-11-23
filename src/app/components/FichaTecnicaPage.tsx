@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, SegmentedControl, Input, Badge, SimpleGrid,
+  Stack, Group, Box, Paper, Text, Title, Button, TextInput, Select, Badge, SimpleGrid,
   ActionIcon, Modal, Table, Image, AspectRatio, List, Divider, Tabs, Tooltip, Skeleton, type BoxProps, type ImageProps,
   type ComboboxData, type MantineSpacing,
 } from "@mantine/core";
@@ -21,6 +21,7 @@ import {
   PackageIcon,
   CheckCircleIcon,
   ArrowsClockwiseIcon,
+  SortAscendingIcon,
 } from "@phosphor-icons/react";
 import { products, type Product } from "../data/mockData";
 
@@ -356,20 +357,22 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           miw={0}
           w={{ md: 180 }}
         />
-        {/* Ordenação com 3 opções fixas: controle segmentado, na linha inteira abaixo de md */}
-        <Input.Wrapper label="Ordenar por" labelElement="div" id="ficha-sort" flex={{ base: '1 1 100%', md: 'none' }}>
-          <SegmentedControl
-            fullWidth
-            value={sortBy}
-            onChange={v => setSortBy(v as typeof sortBy)}
-            aria-labelledby="ficha-sort-label"
-            data={[
-              { value: 'relevância', label: 'Mais relevantes' },
-              { value: 'nome', label: 'Nome de A a Z' },
-              { value: 'referência', label: 'Referência de 0 a 9' },
-            ]}
-          />
-        </Input.Wrapper>
+        {/* Ordenação numa lista suspensa, como Linha e Categoria */}
+        <Select
+          value={sortBy}
+          onChange={v => v && setSortBy(v as typeof sortBy)}
+          allowDeselect={false}
+          label="Ordenar por"
+          leftSection={<SortAscendingIcon size={16} />}
+          data={[
+            { value: 'relevância', label: 'Mais relevantes' },
+            { value: 'nome', label: 'Nome de A a Z' },
+            { value: 'referência', label: 'Referência de 0 a 9' },
+          ]}
+          flex={{ base: '1 1 100%', md: 'none' }}
+          miw={0}
+          w={{ md: 200 }}
+        />
       </Group>
 
       {loading ? (
