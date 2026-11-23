@@ -56,7 +56,8 @@ export const priceTables = [
   { id: 'atacado', label: 'Atacado', desc: 'Acima de 50 pares' },
 ];
 
-const lines = ['Todos', 'Premium', 'Urban', 'Sport', 'Flow', 'Flow XL', 'Coil', 'Hertz', 'Hertz Art', 'Fusion', 'TG II'];
+// linhas que existem no catálogo (vindas dos produtos)
+const lines = ['Todos', ...Array.from(new Set(products.map(p => p.line))).sort((a, b) => a.localeCompare(b, 'pt-BR'))];
 const categories = ['Todos', 'Social', 'Casual', 'Esportivo', 'Sandália', 'Bota'];
 
 const allColors = Array.from(
