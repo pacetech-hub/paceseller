@@ -32,7 +32,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 4.1 | Ajustar foco | Não adotado | — | Mudaria a ordem do Radar definida no spec (C2) |
 | — | Estado vazio do Radar com % do perfil | Parcial | `ui/EmptyState.tsx` existe; o Radar mostra "Nada pra hoje" por aba | Barra de progresso do perfil e "Enquanto isso" |
 | 6 | Catálogo | Existe | `CatalogPage.tsx`, `CatalogFiltersBar.tsx` | Filtros já são os sinais do Radar (FR-202); falta só o chip "Recomendado p/ você" como ordenação padrão |
-| 7 | Ficha de Decisão | Existe | Página de produto dentro de `CatalogPage.tsx`; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Nada a fazer: o CTA "Planejar" sai junto com o Planejamento (8) |
+| 7 | Ficha de Decisão | Existe | Página inteira dentro de `CatalogPage.tsx` (antes era um modal): caminho Radar / Catálogo / produto, foto à esquerda e a decisão à direita — preço, "Por que comprar este produto", sinal do Radar, grade e "Como você quer seguir?"; `FichaTecnicaPage.tsx` é a ficha técnica | "Por que comprar" (FR-303) já vem antes da grade, como a proposta pede. Nada a fazer: o CTA "Planejar" sai junto com o Planejamento (8) |
 | 8 | Planejamento da Compra (mix sugerido) | Não adotado | O aviso de mix em `CartDrawer.tsx` e `CartPage.tsx` (`mixCheck`) continua | **Decidido: fora do escopo.** A compra segue Catálogo → grade → carrinho ativo |
 | 9 | Meus Pedidos (lista de carrinhos) | Existe | `CartsListPage.tsx` | — |
 | 10 | Carrinho compartilhado | Existe | `CartPage.tsx`, `data/cartStore.ts`: abas por carrinho, comentários, "Antes de fechar", ação por status | Ver conflito C4 sobre a ordem enviar / confirmar / pagar |

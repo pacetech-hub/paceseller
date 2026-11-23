@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useSmallerThan } from "../lib/responsive";
 import {
-  ActionIcon, Anchor, Badge, Box, Button, Card, Chip, Divider, Flex, Group, Modal, Input, Paper, SegmentedControl,
+  ActionIcon, Anchor, Badge, Box, Button, Card, Chip, Divider, Flex, Grid, Group, Input, Paper, SegmentedControl,
   SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, Title, Tooltip, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
@@ -406,8 +405,16 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
 // Tabela de medidas: comprimento interno aproximado por numeração
 const footLength = (size: string) => (Number(size) * 0.667 - 0.5).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
-/** Página do produto (M3): por que comprar e montar o pedido por numeração. */
-function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, isFavorite, onBackToRadar }: {
+/** Rótulo de seção em caixa-alta mono, como nos cartões do Radar. */
+function Eyebrow({ children, mb = 'xs' }: { children: ReactNode; mb?: string | number }) {
+  return <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed" mb={mb}>{children}</Text>;
+}
+
+/**
+ * Página do produto (M3), em página inteira: foto à esquerda; à direita a decisão, de cima para
+ * baixo — o que é, quanto custa, por que comprar, o sinal do Radar, a grade e "Como você quer seguir?".
+ */
+function ProductDetailPage({ product, entry, onClose, onSwitch, onToggleFav, isFavorite, onBackToRadar }: {
   product: Product; entry?: CatalogEntry; onClose: () => void; onSwitch: (p: Product) => void;
   onToggleFav: () => void; isFavorite: boolean; onBackToRadar?: () => void;
 }) {
@@ -430,187 +437,207 @@ function ProductDetailModal({ product, entry, onClose, onSwitch, onToggleFav, is
     { src: product.image, label: 'Frontal' },
     { src: product.image, label: 'Solado' },
   ];
-  const fullScreen = useSmallerThan('sm');
   const n = Object.values(sizes).reduce((a, b) => a + b, 0);
   const stuck = signal?.type === 'sem-giro' || signal?.type === 'giro-baixo';
+  const soldOut = product.availability === 'esgotado';
 
+  // a página abre no topo; vindo de um CTA do Radar com bloco, rola até ele
   useEffect(() => {
     if (entry?.block) document.getElementById(`bloco-${entry.block}`)?.scrollIntoView({ block: 'center' });
-  }, [entry?.block]);
+    else document.querySelector('main')?.scrollTo({ top: 0 });
+  }, [entry?.block, product.id]);
 
   const add = () => {
     if (n === 0) { setTriedEmpty(true); return; }
-    if (commit(product, sizes, target?.id)) { setSizes({}); onClose(); }
+    // continua na página: o aviso traz os novos totais e "Ver carrinho" (FR-309)
+    if (commit(product, sizes, target?.id)) setSizes({});
   };
 
-  return (
-    <Modal
-      opened
-      onClose={onClose}
-      centered
-      size="64rem"
-      fullScreen={fullScreen}
-      radius={fullScreen ? 0 : undefined}
-      padding={0}
-      overlayProps={{ backgroundOpacity: 0.7 }}
-      title={
-        // BR-72: breadcrumb começa no módulo; vindo do Radar, link de volta mantém o contexto
-        <Group gap="sm" wrap="wrap">
-          {entry?.fromRadar && onBackToRadar && (
-            <Anchor component="button" type="button" size="sm" fw={600} onClick={onBackToRadar}>
-              <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={16} />Voltar ao Radar</Group>
-            </Anchor>
-          )}
-          <Text lh={1.5} component="span" c="dimmed" size="sm" fw={600}>Catálogo / {product.name}</Text>
+  const about = (
+    <Stack gap="md">
+      <Box>
+        <Eyebrow>Sobre o produto</Eyebrow>
+        <Text lh={1.6} size="sm">{product.description}</Text>
+        <Group gap="lg" mt="xs">
+          <Box><Text size="sm" c="dimmed">Material</Text><Text size="sm" fw={600}>{product.material}</Text></Box>
+          <Box><Text size="sm" c="dimmed">Coleção</Text><Text size="sm" fw={600}>{product.collection}</Text></Box>
+          <Box><Text size="sm" c="dimmed">Cores</Text><Text size="sm" fw={600}>{product.colors.join(', ')}</Text></Box>
         </Group>
-      }
-      styles={{
-        content: { display: 'flex', flexDirection: 'column', maxHeight: fullScreen ? '100dvh' : '92vh', overflow: 'hidden' },
-        header: { padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-lg)', minHeight: 0, borderBottom: BORDER },
-        body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0 },
-      }}
-    >
-      <Box className={classes.detailBody}>
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
-          <Stack gap="sm" p="md" className={classes.galleryPane}>
-            <Paper pos="relative" w="100%" pt="90%" bg="white">
-              <Box pos="absolute" inset={0} p="md">
-                <ProductImage
-                  key={images[activeImg].src + product.id}
-                  src={images[activeImg].src}
-                  alt={`${productDisplayName(product)} — vista ${images[activeImg].label.toLowerCase()}`}
-                  imageProps={{ fit: 'contain', style: { cursor: 'zoom-in' } }}
-                  fallback={<Group h="100%" justify="center"><PackageIcon size={48} color={DIMMED} opacity={0.3} /></Group>}
-                />
-              </Box>
-            </Paper>
-            <Group gap="xs" role="tablist" aria-label="Vistas do produto">
-              {images.map((img, i) => (
-                <UnstyledButton key={img.label} onClick={() => setActiveImg(i)} className={classes.thumbButton} data-active={activeImg === i || undefined} role="tab" aria-selected={activeImg === i}>
-                  <Box className={classes.thumb}><ProductImage src={img.src} alt="" /></Box>
-                  <Text lh={1.5} size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>{img.label}</Text>
-                </UnstyledButton>
-              ))}
-            </Group>
+      </Box>
+
+      <Box>
+        <Eyebrow>Tabela de medidas · comprimento interno aproximado</Eyebrow>
+        <Table.ScrollContainer minWidth={480} type="native">
+          <Table withTableBorder verticalSpacing={4} fz="sm">
+            <Table.Tbody>
+              <Table.Tr>
+                <Table.Th>Nº</Table.Th>
+                {Object.keys(product.grades).map(s => <Table.Td key={s} ta="center">{s}</Table.Td>)}
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>cm</Table.Th>
+                {Object.keys(product.grades).map(s => <Table.Td key={s} ta="center" className="mono">{footLength(s)}</Table.Td>)}
+              </Table.Tr>
+            </Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
+      </Box>
+    </Stack>
+  );
+
+  return (
+    <Stack gap="lg">
+      {/* BR-72: breadcrumb começa no módulo; vindo do Radar, o Radar abre o caminho */}
+      <Group gap={8} wrap="wrap" component="nav" aria-label="Caminho">
+        {entry?.fromRadar && onBackToRadar && (
+          <>
+            <Anchor component="button" type="button" size="sm" onClick={onBackToRadar}>Radar</Anchor>
+            <Text size="sm" c="dimmed" aria-hidden>/</Text>
+          </>
+        )}
+        <Anchor component="button" type="button" size="sm" onClick={onClose}>Catálogo</Anchor>
+        <Text size="sm" c="dimmed" aria-hidden>/</Text>
+        <Text size="sm" fw={600} aria-current="page">{productDisplayName(product)}</Text>
+      </Group>
+
+      <Grid gutter={{ base: 'lg', md: 48 }}>
+        {/* Esquerda (5/12): fotos, outras cores, sobre o produto e medidas */}
+        <Grid.Col span={{ base: 12, md: 5 }}>
+          <Stack gap="md">
+            <Box p="md" className={classes.galleryPane} style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+              <Paper pos="relative" w="100%" pt="100%" bg="white">
+                <Box pos="absolute" inset={0} p="lg">
+                  <ProductImage
+                    key={images[activeImg].src + product.id}
+                    src={images[activeImg].src}
+                    alt={`${productDisplayName(product)} — vista ${images[activeImg].label.toLowerCase()}`}
+                    imageProps={{ fit: 'contain', style: { cursor: 'zoom-in' } }}
+                    fallback={<Group h="100%" justify="center"><SneakerIcon size={56} color={DIMMED} opacity={0.5} /></Group>}
+                  />
+                </Box>
+              </Paper>
+              <Group gap="xs" mt="sm" role="tablist" aria-label="Vistas do produto">
+                {images.map((img, i) => (
+                  <UnstyledButton key={img.label} onClick={() => setActiveImg(i)} className={classes.thumbButton} data-active={activeImg === i || undefined} role="tab" aria-selected={activeImg === i}>
+                    <Box className={classes.thumb}><ProductImage src={img.src} alt="" fallback={<Group h="100%" justify="center"><SneakerIcon size={20} color={DIMMED} /></Group>} /></Box>
+                    <Text lh={1.5} size="sm" fw={activeImg === i ? 600 : 400} c={activeImg === i ? undefined : 'dimmed'}>{img.label}</Text>
+                  </UnstyledButton>
+                ))}
+              </Group>
+            </Box>
+
             {/* Troca de cor: outros modelos da mesma linha */}
             {siblings.length > 0 && (
               <Box>
-                <Text size="sm" c="dimmed" mb={4}>Outras cores da linha {product.line}</Text>
+                <Eyebrow>Outras cores da linha {product.line}</Eyebrow>
                 <Group gap="xs">
-                  <Badge variant="filled" color="brand">{product.colors[0]}</Badge>
+                  <Badge variant="filled" color="brand" size="lg" styles={{ label: { textTransform: 'none' } }}>{colorwayOf(product)}</Badge>
                   {siblings.map(s => (
-                    <Button key={s.id} size="compact-sm" variant="default" onClick={() => onSwitch(s)}>{s.name.replace(`${s.line} `, '')}</Button>
+                    <Button key={s.id} size="compact-sm" variant="default" onClick={() => onSwitch(s)}>{colorwayOf(s)}</Button>
                   ))}
                 </Group>
               </Box>
             )}
+
+            {/* FR-308: sobre o produto e medidas — aqui em telas largas; no celular, depois da compra */}
+            <Box visibleFrom="md">{about}</Box>
           </Stack>
+        </Grid.Col>
 
-          <Stack gap="md" p={{ base: 'md', sm: 'lg' }}>
-            {/* FR-301: categoria · linha · código, nome no padrão Tênis Tesla + linha + cor */}
-            <Box>
-              <Text size="sm" c="dimmed" fw={600}>{product.category} · {product.line} · {product.reference}</Text>
-              <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap">
-                <Title order={2}>{productDisplayName(product)}</Title>
-                <Button onClick={onToggleFav} variant={isFavorite ? 'light' : 'default'} color="brand" flex="none" leftSection={<HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />} aria-pressed={isFavorite}>
-                  {isFavorite ? 'Favoritado' : 'Favoritar'}
-                </Button>
-              </Group>
-            </Box>
-            {/* FR-302: Seu custo, PDV sugerido e margem; "margem real" só com preços de sell-out (não integrados) */}
-            <Box>
-              <PriceBlock product={product} size="lg" />
-              <Text size="sm" c="dimmed" mt={4}>Seu custo por par, {COST_BASIS}.</Text>
-            </Box>
-
-            {/* FR-304: mesmo sinal, data de agir e quantidade do cartão do Radar */}
-            {signal && <SignalLine signal={signal} />}
-
-            {/* FR-303: só razões com dados, cada uma com escopo e período */}
-            {reasons.length > 0 && !stuck && (
-              <Box>
-                <Text fw={600} mb={4}>Por que comprar</Text>
-                <Stack gap={4}>
-                  {reasons.map(r => (
-                    <Group key={r} gap="xs" wrap="nowrap" align="flex-start">
-                      <CheckCircleIcon size={16} color="var(--mantine-color-teal-7)" style={{ flex: 'none', marginTop: 3 }} />
-                      <Text size="sm">{r}</Text>
-                    </Group>
-                  ))}
-                </Stack>
-              </Box>
-            )}
-
-            {stuck && (
-              <Paper id="bloco-como-girar" withBorder p="sm" bd={entry?.block === 'como-girar' ? '2px solid var(--mantine-color-yellow-6)' : undefined}>
-                <Group gap="xs" mb={4}><MegaphoneIcon size={16} /><Text fw={600}>Como girar</Text></Group>
-                <Stack gap={2}>
-                  <Text size="sm">• Crie uma campanha no Marketing IA com este modelo.</Text>
-                  <Text size="sm">• Coloque na vitrine ou perto do caixa por 15 dias.</Text>
-                  <Text size="sm">• O Radar não sugere reposição nem combos com este produto enquanto o giro estiver baixo.</Text>
-                </Stack>
-              </Paper>
-            )}
-
-            {sku && sku.peerSalesDiffPct > 0 && (
-              <Paper id="bloco-benchmark" withBorder p="sm" bd={entry?.block === 'benchmark' ? '2px solid var(--mantine-color-blue-6)' : undefined}>
-                <Group gap="xs" mb={4}><UsersThreeIcon size={16} /><Text fw={600}>Benchmark: lojas parecidas</Text></Group>
-                <Text size="sm">Lojas parecidas venderam {sku.peerSalesDiffPct}% mais deste modelo que a sua loja, últimos 30 dias.</Text>
-                <Text size="sm" c="dimmed">Grupo de {PEER_GROUP_SIZE} lojas da mesma região, porte e posicionamento de preço · dados agregados e anônimos.</Text>
-              </Paper>
-            )}
-
-            {/* FR-308: sobre o produto */}
-            <Box>
-              <Text fw={600} mb={4}>Sobre o produto</Text>
-              <Text lh={1.6} size="sm">{product.description}</Text>
-              <Group gap="lg" mt="xs">
-                <Box><Text size="sm" c="dimmed">Material</Text><Text size="sm" fw={600}>{product.material}</Text></Box>
-                <Box><Text size="sm" c="dimmed">Coleção</Text><Text size="sm" fw={600}>{product.collection}</Text></Box>
-                <Box><Text size="sm" c="dimmed">Cores</Text><Text size="sm" fw={600}>{product.colors.join(', ')}</Text></Box>
-              </Group>
-            </Box>
-          </Stack>
-        </SimpleGrid>
-
-        {/* FR-305/306/307: grade, resumo e carrinho de destino */}
-        <Stack gap="md" p={{ base: 'md', sm: 'lg' }} style={{ borderTop: BORDER }}>
-          <Title order={3}>Montar pedido por numeração</Title>
-          <SizeGradeEditor product={product} value={sizes} onChange={v => { setSizes(v); setTriedEmpty(false); }} suggestion={suggestion} />
+        {/* Direita (7/12): a decisão */}
+        <Grid.Col span={{ base: 12, md: 7 }}>
+        <Stack gap="lg" maw={600}>
+          {/* FR-301: categoria · linha · código, nome no padrão Tênis Tesla + linha + cor */}
           <Box>
-            <Text size="sm" c="dimmed" mb={4}>Tabela de medidas (comprimento interno aproximado)</Text>
-            <Table.ScrollContainer minWidth={520} type="native">
-              <Table withTableBorder verticalSpacing={4} fz="sm">
-                <Table.Tbody>
-                  <Table.Tr>
-                    <Table.Th>Nº</Table.Th>
-                    {Object.keys(product.grades).map(s => <Table.Td key={s} ta="center">{s}</Table.Td>)}
-                  </Table.Tr>
-                  <Table.Tr>
-                    <Table.Th>cm</Table.Th>
-                    {Object.keys(product.grades).map(s => <Table.Td key={s} ta="center" className="mono">{footLength(s)}</Table.Td>)}
-                  </Table.Tr>
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          </Box>
-        </Stack>
-      </Box>
-      <Box flex="none" px={{ base: 'md', sm: 'lg' }} py="sm" style={{ borderTop: BORDER }} bg="var(--mantine-color-default-hover)">
-        <Group justify="space-between" gap="sm" wrap="wrap">
-          <GradeOrderSummary product={product} sizes={sizes} />
-          <Stack gap={4} align="flex-end">
-            <TargetCartPicker cart={target} clientId={clientId} />
-            <Group gap="sm">
-              <Button variant="default" onClick={onClose}>Fechar</Button>
-              {/* o botão fica habilitado; com 0 pares ele explica o que falta */}
-              <Button onClick={add} leftSection={<ShoppingCartIcon size={18} />}>Adicionar ao carrinho</Button>
+            <Eyebrow mb={4}>{product.category} · Linha {product.line} · {product.reference}</Eyebrow>
+            <Group justify="space-between" align="flex-start" gap="xs" wrap="nowrap">
+              <Title order={1}>{productDisplayName(product)}</Title>
+              <Tooltip label={isFavorite ? 'Remover dos favoritos' : 'Favoritar'}>
+                <ActionIcon onClick={onToggleFav} variant={isFavorite ? 'light' : 'default'} color="brand" size="lg" radius="xl" aria-pressed={isFavorite} aria-label={isFavorite ? 'Remover dos favoritos' : 'Favoritar'} mt={4}>
+                  <HeartIcon size={18} weight={isFavorite ? 'fill' : 'regular'} />
+                </ActionIcon>
+              </Tooltip>
             </Group>
-            {triedEmpty && n === 0 && <Text size="sm" c="red.7">Selecione ao menos 1 par</Text>}
-          </Stack>
-        </Group>
-      </Box>
-    </Modal>
+          </Box>
+
+          {/* FR-302: Seu custo, PDV sugerido e a única margem (BR-01 a BR-04) */}
+          <Box>
+            <Group gap={8} align="baseline">
+              <Text className="mono" fw={700} fz={26} lh={1.1}>{formatCurrency(product.price)}</Text>
+              <Text size="sm" c="dimmed">Seu custo por par</Text>
+            </Group>
+            <Group gap="sm" mt={8} align="center">
+              <Text className="mono" size="sm" c="dimmed">PDV sugerido {formatCurrency(product.priceRetail)}</Text>
+              <Tooltip label={markupLabel(product)}>
+                <Badge variant="light" color="teal" radius="sm" ff="monospace" styles={{ label: { textTransform: 'none' } }}>{marginLabel(product)}</Badge>
+              </Tooltip>
+            </Group>
+            <Text size="xs" c="dimmed" mt={6}>Seu custo {COST_BASIS}.</Text>
+          </Box>
+
+          {/* FR-303: só razões com dados, cada uma com escopo e período */}
+          {reasons.length > 0 && !stuck && (
+            <Paper withBorder p="md">
+              <Eyebrow mb="sm">Por que comprar este produto</Eyebrow>
+              <Stack gap="sm">
+                {reasons.map((r, i) => (
+                  <Group key={r} gap="sm" wrap="nowrap" align="flex-start">
+                    <CheckCircleIcon size={20} weight="fill" color={i === 0 ? 'var(--mantine-color-teal-7)' : 'var(--mantine-color-brand-9)'} style={{ flex: 'none' }} />
+                    <Text size="sm" fw={i === 0 ? 600 : 400}>{r}</Text>
+                  </Group>
+                ))}
+              </Stack>
+            </Paper>
+          )}
+
+          {/* FR-304: mesmo sinal, data de agir e quantidade do cartão do Radar */}
+          {signal && <SignalLine signal={signal} />}
+
+          {stuck && (
+            <Paper id="bloco-como-girar" withBorder p="md" bd={entry?.block === 'como-girar' ? '2px solid var(--mantine-color-yellow-6)' : undefined}>
+              <Group gap="xs" mb={4}><MegaphoneIcon size={16} /><Text fw={600}>Como girar</Text></Group>
+              <Stack gap={2}>
+                <Text size="sm">• Crie uma campanha no Marketing IA com este modelo.</Text>
+                <Text size="sm">• Coloque na vitrine ou perto do caixa por 15 dias.</Text>
+                <Text size="sm">• O Radar não sugere reposição nem combos com este produto enquanto o giro estiver baixo.</Text>
+              </Stack>
+            </Paper>
+          )}
+
+          {sku && sku.peerSalesDiffPct > 0 && (
+            <Paper id="bloco-benchmark" withBorder p="md" bd={entry?.block === 'benchmark' ? '2px solid var(--mantine-color-blue-6)' : undefined}>
+              <Group gap="xs" mb={4}><UsersThreeIcon size={16} /><Text fw={600}>Benchmark: lojas parecidas</Text></Group>
+              <Text size="sm">Lojas parecidas venderam {sku.peerSalesDiffPct}% mais deste modelo que a sua loja, últimos 30 dias.</Text>
+              <Text size="sm" c="dimmed">Grupo de {PEER_GROUP_SIZE} lojas da mesma região, porte e posicionamento de preço · dados agregados e anônimos.</Text>
+            </Paper>
+          )}
+
+          {/* FR-305/306: grade por numeração e resumo */}
+          <Box>
+            <Eyebrow mb="sm">Grade por numeração</Eyebrow>
+            <SizeGradeEditor product={product} value={sizes} onChange={v => { setSizes(v); setTriedEmpty(false); }} suggestion={suggestion} />
+            <Box mt="md"><GradeOrderSummary product={product} sizes={sizes} /></Box>
+          </Box>
+
+          <Divider />
+
+          {/* FR-307: carrinho de destino e a ação */}
+          <Box>
+            <Eyebrow mb="sm">Como você quer seguir?</Eyebrow>
+            <TargetCartPicker cart={target} clientId={clientId} />
+            {/* o botão fica habilitado; com 0 pares ele explica o que falta */}
+            <Button fullWidth size="md" mt="sm" onClick={add} disabled={soldOut} leftSection={<ShoppingCartIcon size={18} />}>
+              {soldOut ? 'Esgotado' : 'Adicionar ao carrinho'}
+            </Button>
+            {triedEmpty && n === 0 && <Text size="sm" c="red.7" mt={6}>Selecione ao menos 1 par</Text>}
+            <Text size="sm" c="dimmed" mt="sm">Antes de fechar o carrinho, você vê como esse pedido se compara ao mesmo período do ano passado.</Text>
+          </Box>
+
+          <Box hiddenFrom="md"><Divider mb="lg" />{about}</Box>
+        </Stack>
+        </Grid.Col>
+      </Grid>
+    </Stack>
   );
 }
 
@@ -671,7 +698,17 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
     ...filters.colors.map(c => ({ key: `color-${c}`, label: `Cor: ${c}`, remove: () => onFiltersChange({ ...filters, colors: filters.colors.filter(x => x !== c) }) })),
   ];
 
-  const openDetail = (p: Product, e?: CatalogEntry) => { setDetailEntry(e); setDetailProduct(p); };
+  // ao voltar da página do produto, a grade reabre na mesma altura em que estava
+  const gridScroll = useRef(0);
+  const openDetail = (p: Product, e?: CatalogEntry) => {
+    if (!detailProduct) gridScroll.current = document.querySelector('main')?.scrollTop ?? 0;
+    setDetailEntry(e);
+    setDetailProduct(p);
+  };
+  const closeDetail = () => {
+    setDetailProduct(null);
+    requestAnimationFrame(() => document.querySelector('main')?.scrollTo({ top: gridScroll.current }));
+  };
 
   // Grade: um cartão por modelo (linha), na ordem do primeiro produto de cada linha; as cores
   // que passam nos filtros vêm primeiro, mas todas as cores da linha ficam nas miniaturas
@@ -698,6 +735,24 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
       onToggleFav={() => toggleFav(product.id)}
     />
   );
+
+  // Página do produto em página inteira, no lugar da grade; "Catálogo" no caminho volta para a grade
+  if (detailProduct) {
+    return (
+      <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+        <ProductDetailPage
+          key={detailProduct.id}
+          product={{ ...detailProduct, isFavorite: favoriteIds.has(detailProduct.id) }}
+          entry={detailEntry}
+          isFavorite={favoriteIds.has(detailProduct.id)}
+          onClose={closeDetail}
+          onSwitch={p => openDetail(p, detailEntry?.fromRadar ? { fromRadar: true } : undefined)}
+          onToggleFav={() => toggleFav(detailProduct.id)}
+          onBackToRadar={onBackToRadar}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
@@ -778,18 +833,6 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
         )}
       </Stack>
 
-      {detailProduct && (
-        <ProductDetailModal
-          key={detailProduct.id}
-          product={{ ...detailProduct, isFavorite: favoriteIds.has(detailProduct.id) }}
-          entry={detailEntry}
-          isFavorite={favoriteIds.has(detailProduct.id)}
-          onClose={() => setDetailProduct(null)}
-          onSwitch={p => openDetail(p, detailEntry?.fromRadar ? { fromRadar: true } : undefined)}
-          onToggleFav={() => toggleFav(detailProduct.id)}
-          onBackToRadar={onBackToRadar}
-        />
-      )}
     </Stack>
   );
 }

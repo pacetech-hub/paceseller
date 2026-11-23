@@ -66,13 +66,6 @@
   object-position: bottom;
 }
 
-/* Corpo rolável do modal de detalhes; a grade de compra fica fixa embaixo */
-.detailBody {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
 /* Coluna da galeria no modal: fundo cinza levemente tingido; no escuro, um tom acima do modal */
 .galleryPane {
   background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
@@ -106,3 +99,4 @@
 .swatch.swatch[data-active] {
   border-bottom-color: var(--mantine-color-text);
 }
+
