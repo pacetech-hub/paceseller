@@ -1,18 +1,17 @@
 import { useRef, useState } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, Textarea, Badge, ThemeIcon, Grid, Alert, Image, Modal, Radio,
-  Divider, Skeleton, Switch, Tabs, Progress, Collapse, NumberInput, Select, Anchor, UnstyledButton, Avatar,
+  Stack, Group, Box, Paper, Text, Title, Button, Textarea, Badge, ThemeIcon, Grid, Image, Modal, Radio, ActionIcon, TextInput,
+  Divider, Skeleton, Switch, Collapse, NumberInput, Select, Anchor, UnstyledButton, Avatar,
 } from "@mantine/core";
 import {
-  ShoppingCartIcon, TrashIcon, PlusIcon, CheckIcon, CaretDownIcon, CaretUpIcon, PackageIcon, ArrowRightIcon,
-  PaperPlaneTiltIcon, ChatCircleIcon, UsersIcon, TruckIcon, WarningIcon, PencilSimpleIcon, CreditCardIcon, CaretLeftIcon,
-  ClockCounterClockwiseIcon,
+  ShoppingCartIcon, PlusIcon, CheckIcon, CaretDownIcon, CaretUpIcon, PackageIcon, ArrowRightIcon, ArrowLeftIcon,
+  PaperPlaneTiltIcon, ChatCircleIcon, PencilSimpleIcon, CreditCardIcon, ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../data/mockData";
 import {
   CART_PARAMS, addComment, approveMinimumException, approveRepSuggestion, autoSendText, cartPairs, cartStatus, cartValue,
   confirmPayment, createCart, getCart, isEditableBy, isOpen, lineValue, pairsOf, productById, removeLine, repConfirmConditions,
-  repFirstName, sendToRep, setAutoSend, setRepCanEdit, statusColor, statusLabel, toContext, useCartStore,
+  renameCart, repFirstName, sendToRep, setAutoSend, setRepCanEdit, statusColorFor, statusLabelFor, toContext, useCartStore,
   type Cart, type CartContext, type CartCreator,
 } from "../data/cartStore";
 import { belowLastYear, cartMarginPct, mixCheck, pairsText, productDisplayName, useRadar } from "../data/radar";
@@ -21,8 +20,9 @@ import { toast } from "../lib/toast";
 import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
+import classes from "./CartPage.module.css";
 
-type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients';
+type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'radar';
 
 interface CartPageProps {
   onNavigate: (view: View) => void;
@@ -62,6 +62,12 @@ const timeAgo = (iso: string) => {
   return `há ${d} ${d === 1 ? 'dia' : 'dias'}`;
 };
 
+/** Faixa de numeração da linha (ex.: "36–40"). */
+const sizeRange = (sizes: Record<string, number>) => {
+  const n = Object.entries(sizes).filter(([, q]) => q > 0).map(([s]) => Number(s)).sort((x, y) => x - y);
+  return n.length === 0 ? '—' : n[0] === n[n.length - 1] ? String(n[0]) : `${n[0]}–${n[n.length - 1]}`;
+};
+
 function LineItem({ cart, productId, sizes, editable, discountPct }: {
   cart: Cart; productId: string; sizes: Record<string, number>; editable: boolean; discountPct: number;
 }) {
@@ -73,48 +79,45 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
   const value = lineValue({ productId, sizes });
   const newUnit = p.price * (1 - discountPct / 100);
   return (
-    <Paper withBorder p={{ base: 'sm', sm: 'md' }}>
+    <Paper withBorder px="md" py="sm">
       <Group align="flex-start" gap="sm" wrap="nowrap">
-        <ProductThumb src={p.image} alt={p.name} />
+        <ProductThumb src={p.image} alt={p.name} size={44} />
         <Box miw={0} flex={1}>
-          <Text fw={600}>{productDisplayName(p)}</Text>
-          {/* BR-07: desconto por linha com preço antigo, novo e percentual */}
-          {discountPct > 0 ? (
-            <Group gap={6}>
-              <Text size="sm" c="dimmed" td="line-through">{formatCurrency(p.price)}</Text>
-              <Text size="sm" fw={600}>{formatCurrency(newUnit)}/par</Text>
-              <Badge size="sm" variant="light" color="teal">-{discountPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</Badge>
-            </Group>
-          ) : (
-            <Text size="sm" c="dimmed">{p.reference} · {formatCurrency(p.price)}/par</Text>
-          )}
-          <UnstyledButton onClick={() => setOpen(o => !o)} mt={4} aria-expanded={open}>
-            <Group gap={4}>
-              <Text size="sm" fw={600}>{pairsText(n)}</Text>
-              {open ? <CaretUpIcon size={16} /> : <CaretDownIcon size={16} />}
-              <Text size="sm" c="dimmed">{open ? 'ocultar numeração' : 'ver por numeração'}</Text>
+          <Text fw={600} size="sm">{productDisplayName(p)}</Text>
+          <UnstyledButton onClick={() => setOpen(o => !o)} mt={2} aria-expanded={open} aria-label={`${open ? 'Ocultar' : 'Ver'} numeração de ${p.name}`}>
+            <Group gap={4} wrap="nowrap">
+              <Text fz={12} ff="monospace" c="dimmed">qtd {n} · grade {sizeRange(sizes)}</Text>
+              {open ? <CaretUpIcon size={12} /> : <CaretDownIcon size={12} />}
             </Group>
           </UnstyledButton>
+          {/* BR-07: desconto por linha com preço antigo, novo e percentual */}
+          {discountPct > 0 && (
+            <Group gap={6} mt={2}>
+              <Text size="xs" c="dimmed" td="line-through" className="mono">{formatCurrency(p.price)}</Text>
+              <Text size="xs" fw={600} className="mono">{formatCurrency(newUnit)}/par</Text>
+              <Badge size="xs" variant="light" color="teal">-{discountPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</Badge>
+            </Group>
+          )}
         </Box>
-        <Stack gap={4} align="flex-end" flex="none">
-          <Text className="mono" fw={700}>{formatCurrency(value * (1 - discountPct / 100))}</Text>
+        <Stack gap={2} align="flex-end" flex="none">
+          <Text className="mono" size="sm" fw={600}>{formatCurrency(value * (1 - discountPct / 100))}</Text>
           {editable && (
-            <Group gap={4}>
-              <Button size="compact-sm" variant="default" leftSection={<PencilSimpleIcon size={16} />} onClick={() => openGrade({ productId, mode: 'edit', cartId: cart.id, initial: sizes })}>
+            <Group gap="sm">
+              <Anchor component="button" type="button" size="xs" onClick={() => openGrade({ productId, mode: 'edit', cartId: cart.id, initial: sizes })}>
                 Editar grade
-              </Button>
-              <Button size="compact-sm" variant="subtle" color="red" leftSection={<TrashIcon size={16} />} onClick={() => removeLine(cart.id, productId, role)} aria-label={`Remover ${p.name} do carrinho`}>
+              </Anchor>
+              <Anchor component="button" type="button" size="xs" c="red.7" onClick={() => removeLine(cart.id, productId, role)} aria-label={`Remover ${p.name} do carrinho`}>
                 Remover
-              </Button>
+              </Anchor>
             </Group>
           )}
         </Stack>
       </Group>
       <Collapse in={open}>
         <Group gap="xs" mt="sm">
-          {Object.entries(sizes).sort(([a], [b]) => Number(a) - Number(b)).map(([s, q]) => (
-            <Paper key={s} withBorder px="xs" py={4} bg="var(--mantine-color-default-hover)">
-              <Text size="sm"><Text span c="dimmed" inherit>Nº {s}</Text> · <Text span fw={600} className="mono" inherit>{q}</Text></Text>
+          {Object.entries(sizes).sort(([x], [y]) => Number(x) - Number(y)).map(([sz, q]) => (
+            <Paper key={sz} withBorder px="xs" py={2} bg="var(--mantine-color-default-hover)">
+              <Text size="xs"><Text span c="dimmed" inherit>Nº {sz}</Text> · <Text span fw={600} className="mono" inherit>{q}</Text></Text>
             </Paper>
           ))}
         </Group>
@@ -138,6 +141,8 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
   const [exceptionReason, setExceptionReason] = useState('');
   const [doneOrder, setDoneOrder] = useState<string | null>(null);
   const commentRef = useRef<HTMLTextAreaElement>(null);
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
 
   if (doneOrder) {
     return (
@@ -215,137 +220,113 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
     onSwitchCart(toContext(c));
   };
 
+  const otherSide = viewerRole === 'lojista' ? cart.rep : cart.clientName;
+  const sharedNow = cart.stage !== 'montagem' || cart.createdBy === 'rep';
+  // o que falta acontecer, dito por quem olha (ao lado da ação principal)
+  const waitingText = (() => {
+    switch (status) {
+      case 'aguardando-rep': return viewerRole === 'rep' ? 'O cliente espera suas condições' : `Aguardando ${repName} confirmar`;
+      case 'aguardando-voce': return viewerRole === 'rep' ? 'Aguardando o lojista revisar' : `${repName} espera sua revisão`;
+      case 'aguardando-pagamento': return viewerRole === 'rep' ? `Aguardando ${cart.clientName} pagar` : 'Condições confirmadas';
+      case 'pronto': return viewerRole === 'rep' ? 'O lojista ainda não enviou' : 'Pronto pra enviar';
+      default: return viewerRole === 'rep' ? 'O lojista está montando' : 'Em montagem';
+    }
+  })();
+
   return (
     <Box p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
-      <Button onClick={() => onNavigate('carts')} variant="subtle" color="gray" ml={-12} mb="xs" leftSection={<CaretLeftIcon size={16} />}>
-        Meus carrinhos
-      </Button>
-
-      {/* FR-601: abas para trocar de carrinho + novo carrinho */}
-      <Group gap="sm" wrap="nowrap" mb="md" align="flex-end">
-        <Tabs value={cart.id} onChange={v => { const c = getCart(v); if (c) { setPaying(false); onSwitchCart(toContext(c)); } }} style={{ overflowX: 'auto', flex: 1 }}>
-          <Tabs.List style={{ flexWrap: 'nowrap' }}>
-            {siblings.map(c => (
-              <Tabs.Tab key={c.id} value={c.id} rightSection={<Badge size="xs" variant="light" color={statusColor[cartStatus(c)]}>{cartPairs(c)}</Badge>}>
-                <Text span size="sm" fw={c.id === cart.id ? 600 : 400} style={{ whiteSpace: 'nowrap' }}>{c.cartName}</Text>
-              </Tabs.Tab>
-            ))}
-          </Tabs.List>
-        </Tabs>
-        <Button variant="default" size="compact-md" leftSection={<PlusIcon size={16} />} onClick={newCart} flex="none">Novo carrinho</Button>
+      {/* BR-72: caminho até o carrinho */}
+      <Group gap={8} component="nav" aria-label="Caminho" mb="lg">
+        {viewerRole === 'rep' && (
+          <>
+            <Anchor component="button" type="button" size="sm" onClick={() => onNavigate('radar')}>Radar</Anchor>
+            <Text size="sm" c="dimmed" aria-hidden>/</Text>
+          </>
+        )}
+        <Anchor component="button" type="button" size="sm" onClick={() => onNavigate('carts')}>{viewerRole === 'rep' ? cart.clientName : 'Meus carrinhos'}</Anchor>
+        <Text size="sm" c="dimmed" aria-hidden>/</Text>
+        <Text size="sm" fw={600} aria-current="page">{cart.cartName}</Text>
       </Group>
 
-      {/* FR-602: quem vê o carrinho e permissão de edição do representante */}
-      <Paper withBorder p="sm" mb="md" bg="var(--mantine-color-default-hover)">
-        <Group justify="space-between" wrap="wrap" gap="sm">
-          <Group gap="xs" wrap="nowrap">
-            <UsersIcon size={18} />
-            <Text size="sm">Compartilhado entre <Text span fw={600} inherit>{viewerRole === 'lojista' ? 'você' : cart.clientName}</Text> e <Text span fw={600} inherit>{viewerRole === 'rep' ? 'você' : `${cart.rep} (representante)`}</Text></Text>
-          </Group>
-          <Switch
-            checked={cart.repCanEdit}
-            disabled={viewerRole !== 'lojista'}
-            onChange={e => setRepCanEdit(cart.id, e.currentTarget.checked)}
-            label={`${repName} pode editar este carrinho`}
-            description={cart.repCanEdit ? 'Cada edição avisa você e fica nos comentários' : undefined}
-          />
-        </Group>
-      </Paper>
-
-      <Grid gutter="lg">
-        <Grid.Col span={{ base: 12, lg: 8 }}>
+      <Grid gutter={{ base: 'lg', lg: 40 }}>
+        <Grid.Col span={{ base: 12, lg: 8, xl: 9 }}>
           <Stack gap="md">
-            {/* FR-603: status, condição de pagamento, prazo e uma ação principal */}
-            <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-              <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+            {/* FR-603/604/605: o pedido — condição e prazo, linhas, subtotal, status e uma ação principal */}
+            <Paper withBorder style={{ overflow: 'hidden' }}>
+              <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
                 <Box miw={0}>
-                  <Title order={2}>{cart.cartName}</Title>
-                  <Group gap="xs" mt={4} wrap="wrap">
-                    <Badge variant="light" color={statusColor[status]}>{statusLabel(status, cart.rep)}</Badge>
-                    {cart.createdBy === 'rep' && <Badge variant="light" color="brand">Montado por {repName}</Badge>}
-                    {cart.exception && <Badge variant="light" color="brand">Exceção aprovada por {repFirstName(cart.exception.by)}</Badge>}
-                  </Group>
-                  <Group gap="md" mt="xs">
-                    <Text size="sm" c="dimmed">Condição: {status === 'aguardando-pagamento' || status === 'confirmado' ? `30/60/90 dias ou à vista com ${CART_PARAMS.cashDiscountPct}%` : `a confirmar com ${repName}`}</Text>
-                    <Group gap={4}><TruckIcon size={16} /><Text size="sm" c="dimmed">{CART_PARAMS.leadTimeLabel}</Text></Group>
-                  </Group>
+                  <Text fw={700}>Pedido</Text>
+                  <Text fz={12} ff="monospace" c="dimmed" mt={2}>
+                    {status === 'aguardando-pagamento' ? `30/60/90 dias ou à vista com ${CART_PARAMS.cashDiscountPct}%` : `Condição a confirmar com ${repName}`} · {CART_PARAMS.leadTimeLabel}
+                  </Text>
                 </Box>
-                {primary && (
-                  <Button onClick={primary.run} disabled={'disabled' in primary && primary.disabled} leftSection={<primary.icon size={16} />}>
-                    {primary.label}
-                  </Button>
-                )}
-                {!primary && status === 'aguardando-rep' && viewerRole === 'lojista' && (
-                  <Button variant="default" leftSection={<ChatCircleIcon size={16} />} onClick={talkToRep}>Falar com {repName}</Button>
-                )}
+                <Group gap="md" wrap="wrap">
+                  {editable && !paying && <Anchor component="button" type="button" size="sm" fw={600} onClick={() => onNavigate('catalog')}>Adicionar produtos</Anchor>}
+                  <Anchor component="button" type="button" size="sm" fw={600} onClick={talkToRep}>Falar com {viewerRole === 'lojista' ? cart.rep : cart.clientName}</Anchor>
+                  <Badge variant="outline" color={statusColorFor(status, viewerRole)} radius="sm" ff="monospace" styles={{ label: { textTransform: 'none', fontWeight: 500 } }}>
+                    {statusLabelFor(status, cart, viewerRole)}
+                  </Badge>
+                </Group>
               </Group>
-              {status === 'pronto' && viewerRole === 'lojista' && (
-                <Group mt="sm" gap="sm" wrap="wrap">
-                  <Switch checked={cart.autoSend} onChange={e => setAutoSend(cart.id, e.currentTarget.checked)} label="Envio automático" />
-                  {auto && <Text size="sm" c="dimmed">{auto}</Text>}
+
+              <Box px={{ base: 'sm', sm: 'lg' }} py="md" bg="var(--mantine-color-default-hover)">
+                {loading ? (
+                  <ListSkeleton rows={Math.max(1, cart.lines.length)} />
+                ) : cart.lines.length === 0 ? (
+                  <EmptyState
+                    icon={ShoppingCartIcon}
+                    title="Carrinho vazio"
+                    description="Adicione produtos pelo Catálogo ou pelo Radar. Cada produto entra pela grade de numeração."
+                    action={{ label: 'Ir para o Catálogo', onClick: () => onNavigate('catalog') }}
+                  />
+                ) : (
+                  <Stack gap="xs">
+                    {cart.lines.map(l => (
+                      <LineItem key={l.productId} cart={cart} productId={l.productId} sizes={l.sizes} editable={editable && !paying} discountPct={discountPct} />
+                    ))}
+                  </Stack>
+                )}
+              </Box>
+
+              {cart.lines.length > 0 && (
+                <Group justify="space-between" align="center" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+                  <Box>
+                    <Text className="mono" fw={700}>{discountPct > 0 ? 'Total' : 'Subtotal'}: {formatCurrency(total)}</Text>
+                    {discountPct > 0 && <Text size="xs" c="teal.7" className="mono">Desconto à vista nas linhas: -{formatCurrency(subtotal - total)}</Text>}
+                    {margin !== null && <Text size="xs" c="dimmed">Margem do carrinho {margin}% no PDV sugerido · Seu custo, sem impostos e sem frete</Text>}
+                  </Box>
+                  <Group gap="md" wrap="wrap" justify="flex-end">
+                    <Text size="sm" c="dimmed">{waitingText}</Text>
+                    {primary && (
+                      <Button onClick={primary.run} disabled={'disabled' in primary && primary.disabled} leftSection={<primary.icon size={16} />}>
+                        {primary.label}
+                      </Button>
+                    )}
+                  </Group>
                 </Group>
               )}
-              {status === 'aguardando-rep' && (
-                <Text size="sm" c="dimmed" mt="sm">{viewerRole === 'lojista' ? `${repName} está revisando as condições comerciais. O pagamento abre quando ele confirmar.` : 'Revise as condições e confirme para liberar o pagamento ao lojista.'}</Text>
+
+              {/* BR-23/24: grade mínima — verde quando atingida; abaixo dela não envia nem confirma sem exceção */}
+              {cart.lines.length > 0 && (
+                pairs >= CART_PARAMS.minOrderPairs || cart.exception ? (
+                  <Box px={{ base: 'md', sm: 'lg' }} py={8} bg="var(--mantine-color-teal-light)">
+                    <Text fz={12} ff="monospace" c="teal.8">
+                      ✓ {pairs} pares — {cart.exception ? `exceção aprovada por ${repFirstName(cart.exception.by)}` : 'grade mínima atingida'}
+                    </Text>
+                  </Box>
+                ) : (
+                  <Group justify="space-between" wrap="wrap" gap="xs" px={{ base: 'md', sm: 'lg' }} py={8} bg="var(--mantine-color-yellow-light)">
+                    <Text fz={12} ff="monospace" c="yellow.9">
+                      {pairs}/{CART_PARAMS.minOrderPairs} pares — faltam {CART_PARAMS.minOrderPairs - pairs} para a grade mínima; abaixo dela o carrinho não pode ser enviado nem confirmado
+                    </Text>
+                    {viewerRole === 'rep' && <Anchor component="button" type="button" size="xs" fw={600} onClick={() => setExceptionOpen(true)}>Aprovar exceção</Anchor>}
+                  </Group>
+                )
               )}
             </Paper>
 
-            {/* BR-24: abaixo da grade mínima não envia nem confirma sem exceção registrada */}
-            {belowMin && cart.lines.length > 0 && (
-              <Alert variant="light" color="yellow" icon={<WarningIcon size={18} />} title={`Faltam ${CART_PARAMS.minOrderPairs - pairs} pares para a grade mínima de ${CART_PARAMS.minOrderPairs}`}>
-                <Group justify="space-between" wrap="wrap" gap="sm">
-                  <Text size="sm">Abaixo do mínimo o carrinho fica em Rascunho e não pode ser enviado nem confirmado.</Text>
-                  {viewerRole === 'rep' && <Button size="compact-md" variant="default" onClick={() => setExceptionOpen(true)}>Aprovar exceção</Button>}
-                </Group>
-              </Alert>
-            )}
-
-            {/* FR-604: linhas */}
-            {loading ? (
-              <ListSkeleton rows={Math.max(1, cart.lines.length)} />
-            ) : cart.lines.length === 0 ? (
-              <EmptyState
-                icon={ShoppingCartIcon}
-                title="Carrinho vazio"
-                description="Adicione produtos pelo Catálogo ou pelo Radar. Cada produto entra pela grade de numeração."
-                action={{ label: 'Ir para o Catálogo', onClick: () => onNavigate('catalog') }}
-              />
-            ) : (
-              <Stack gap="sm">
-                {cart.lines.map(l => (
-                  <LineItem key={l.productId} cart={cart} productId={l.productId} sizes={l.sizes} editable={editable && !paying} discountPct={discountPct} />
-                ))}
-                {editable && !paying && (
-                  <Button variant="default" leftSection={<PlusIcon size={16} />} onClick={() => onNavigate('catalog')} style={{ borderStyle: 'dashed' }}>
-                    Adicionar produtos
-                  </Button>
-                )}
-              </Stack>
-            )}
-
-            {/* FR-605: subtotal, grade mínima e margem (os totais aparecem uma vez, aqui) */}
-            {cart.lines.length > 0 && (
-              <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-                <Stack gap="xs">
-                  <Group justify="space-between"><Text c="dimmed">Subtotal · {pairsText(pairs)}</Text><Text className="mono">{formatCurrency(subtotal)}</Text></Group>
-                  {discountPct > 0 && (
-                    <Group justify="space-between"><Text c="teal.7">Desconto à vista nas linhas</Text><Text c="teal.7" className="mono">-{formatCurrency(subtotal - total)}</Text></Group>
-                  )}
-                  {margin !== null && (
-                    <Group justify="space-between"><Text c="dimmed">Margem do carrinho no PDV sugerido</Text><Text className="mono" fw={600}>{margin}%</Text></Group>
-                  )}
-                  <Box>
-                    <Group justify="space-between">
-                      <Text c="dimmed">Grade mínima</Text>
-                      <Text className="mono">{pairs >= CART_PARAMS.minOrderPairs ? `${pairs} pares · mínimo ${CART_PARAMS.minOrderPairs}` : `${pairs}/${CART_PARAMS.minOrderPairs} pares`}</Text>
-                    </Group>
-                    <Progress mt={4} value={Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)} color={pairs >= CART_PARAMS.minOrderPairs ? 'teal' : 'yellow'} aria-label="Progresso da grade mínima" />
-                  </Box>
-                  <Divider my={4} />
-                  <Group justify="space-between"><Text fw={600}>Total</Text><Text className="mono" size="xl" fw={700}>{formatCurrency(total)}</Text></Group>
-                  <Text size="sm" c="dimmed">Valores pelo Seu custo, sem impostos e sem frete.</Text>
-                </Stack>
-              </Paper>
+            {status === 'aguardando-rep' && (
+              <Text size="sm" c="dimmed">{viewerRole === 'lojista' ? `${repName} está revisando as condições comerciais. O pagamento abre quando ele confirmar.` : 'Revise as condições e confirme para liberar o pagamento ao lojista.'}</Text>
             )}
 
             {/* FR-606: Antes de fechar — ano passado (S-12) e mix (S-13) */}
@@ -423,23 +404,15 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                 </Group>
               </Paper>
             )}
-          </Stack>
-        </Grid.Col>
 
-        {/* FR-609: a lateral fica só com colaboração */}
-        <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Stack gap="md">
+            {/* FR-607: conversa do carrinho; cada edição do representante aparece aqui */}
             <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-              <Group justify="space-between" mb="sm">
-                <Group gap="xs"><ChatCircleIcon size={18} /><Title order={3}>Comentários</Title></Group>
-                {viewerRole === 'lojista' && <Button size="compact-sm" variant="default" onClick={talkToRep}>Falar com {repName}</Button>}
-              </Group>
-              {/* FR-607: cada edição do representante aparece aqui */}
+              <Group gap="xs" mb="sm"><ChatCircleIcon size={18} /><Title order={3}>Conversa com {viewerRole === 'lojista' ? repName : cart.clientName}</Title></Group>
               <Stack gap="sm" mah={360} style={{ overflowY: 'auto' }}>
-                {cart.comments.length === 0 && <Text size="sm" c="dimmed">Nenhum comentário ainda.</Text>}
+                {cart.comments.length === 0 && <Text size="sm" c="dimmed">Nenhuma mensagem ainda.</Text>}
                 {cart.comments.map(cm => (
                   <Group key={cm.id} gap="xs" align="flex-start" wrap="nowrap">
-                    <Avatar size={28} color={cm.author === 'rep' ? 'yellow' : 'teal'} variant="light">{cm.name === 'Você' ? 'V' : cm.name[0]}</Avatar>
+                    <Avatar size={28} radius="xl" color="brand" variant={cm.author === viewerRole ? 'filled' : 'light'}>{cm.name === 'Você' ? 'V' : cm.name[0]}</Avatar>
                     <Box miw={0}>
                       <Group gap={6}>
                         <Text size="sm" fw={600}>{cm.name === 'Você' ? 'Você' : repFirstName(cm.name)}</Text>
@@ -451,15 +424,93 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                   </Group>
                 ))}
               </Stack>
-              <Textarea ref={commentRef} mt="md" placeholder={`Escreva para ${viewerRole === 'lojista' ? repName : 'o lojista'}`} value={comment} onChange={e => setComment(e.currentTarget.value)} autosize minRows={2} maxLength={500} aria-label="Novo comentário" />
+              <Textarea ref={commentRef} mt="md" placeholder={`Escreva para ${viewerRole === 'lojista' ? repName : 'o lojista'}`} value={comment} onChange={e => setComment(e.currentTarget.value)} autosize minRows={2} maxLength={500} aria-label="Nova mensagem" />
               <Group justify="flex-end" mt="xs">
                 <Button size="compact-md" disabled={!comment.trim()} onClick={sendComment}>Responder</Button>
               </Group>
             </Paper>
-            <Button variant="default" onClick={() => { toast.success('Carrinho salvo', 'Continue quando quiser em Meus carrinhos.'); onNavigate('carts'); }}>
-              Salvar e sair
-            </Button>
-            <Anchor component="button" type="button" size="sm" onClick={() => onNavigate('history')} ta="center">Ver pedidos anteriores</Anchor>
+          </Stack>
+        </Grid.Col>
+
+        {/* Lateral: o carrinho em números, quem vê e pode editar, e para onde seguir */}
+        <Grid.Col span={{ base: 12, lg: 4, xl: 3 }}>
+          <Stack gap="md" pl={{ lg: 'lg' }} className={classes.cartAside}>
+            <Box>
+              {renaming ? (
+                <TextInput
+                  size="xs"
+                  value={nameDraft}
+                  onChange={e => setNameDraft(e.currentTarget.value)}
+                  onBlur={() => { renameCart(cart.id, nameDraft); setRenaming(false); }}
+                  onKeyDown={e => { if (e.key === 'Enter') { renameCart(cart.id, nameDraft); setRenaming(false); } if (e.key === 'Escape') setRenaming(false); }}
+                  maxLength={60}
+                  aria-label="Nome do carrinho"
+                  autoFocus
+                />
+              ) : (
+                <Group gap={6} wrap="nowrap">
+                  <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed" truncate>Carrinho: {cart.cartName}</Text>
+                  <ActionIcon size="sm" variant="subtle" color="gray" onClick={() => { setNameDraft(cart.cartName); setRenaming(true); }} aria-label="Renomear carrinho">
+                    <PencilSimpleIcon size={14} />
+                  </ActionIcon>
+                </Group>
+              )}
+              <Text fz={28} fw={700} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
+              <Text className="mono" size="sm" c="dimmed">{formatCurrency(total)}</Text>
+            </Box>
+
+            <Paper withBorder p="sm">
+              <Text size="sm">
+                {sharedNow
+                  ? `Compartilhado com ${otherSide} — ${viewerRole === 'lojista' ? 'ele' : 'a loja'} já pode ver e decidir.`
+                  : viewerRole === 'lojista'
+                    ? `Só você vê este carrinho por enquanto. Ele vai para ${repName} quando você enviar.`
+                    : 'Rascunho do lojista: ele ainda não enviou para você.'}
+              </Text>
+              {cart.createdBy === 'rep' && <Text size="xs" c="dimmed" mt={4}>Montado por {repName}</Text>}
+            </Paper>
+
+            {/* FR-602: permissão de edição do representante (só o lojista muda) */}
+            <Switch
+              checked={cart.repCanEdit}
+              disabled={viewerRole !== 'lojista'}
+              onChange={e => setRepCanEdit(cart.id, e.currentTarget.checked)}
+              color="teal"
+              label={viewerRole === 'lojista' ? `${repName} pode editar este carrinho` : 'Você pode editar este carrinho'}
+              description={cart.repCanEdit ? 'Cada edição avisa o lojista e fica na conversa' : viewerRole === 'rep' ? 'Só o lojista libera a edição' : undefined}
+            />
+
+            {status === 'pronto' && viewerRole === 'lojista' && (
+              <Box>
+                <Switch checked={cart.autoSend} onChange={e => setAutoSend(cart.id, e.currentTarget.checked)} label="Envio automático" color="teal" />
+                {auto && <Text size="xs" c="dimmed" mt={4}>{auto}</Text>}
+              </Box>
+            )}
+
+            <Anchor component="button" type="button" size="sm" fw={600} onClick={() => onNavigate('catalog')} ta="center">
+              <Group gap={4} justify="center" wrap="nowrap"><ArrowLeftIcon size={14} />Continuar comprando</Group>
+            </Anchor>
+
+            {/* FR-601: outros carrinhos abertos desta loja */}
+            {siblings.length > 1 && (
+              <Box>
+                <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed" mb={6}>Outros carrinhos desta loja</Text>
+                <Stack gap={4}>
+                  {siblings.filter(c => c.id !== cart.id).map(c => (
+                    <UnstyledButton key={c.id} onClick={() => { setPaying(false); onSwitchCart(toContext(c)); }} className={classes.siblingCart}>
+                      <Group justify="space-between" wrap="nowrap" gap="xs">
+                        <Text size="sm" truncate>{c.cartName}</Text>
+                        <Text fz={12} ff="monospace" c="dimmed" flex="none">{cartPairs(c)} pares</Text>
+                      </Group>
+                    </UnstyledButton>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+            <Group gap="md" justify="center">
+              <Anchor component="button" type="button" size="sm" onClick={newCart}>Novo carrinho</Anchor>
+              <Anchor component="button" type="button" size="sm" onClick={() => onNavigate('history')}>Pedidos anteriores</Anchor>
+            </Group>
           </Stack>
         </Grid.Col>
       </Grid>

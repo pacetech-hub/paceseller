@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Stack } from "@mantine/core";
 import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
@@ -80,6 +80,8 @@ export default function App() {
   const [operator, setOperator] = useState<LinkedUser | null>(null);
   const [profile, setProfile] = useState<Profile>('admin');
   const [currentView, setCurrentView] = useState<View>('radar');
+  // cada página abre no topo (a área principal rola sozinha e guardaria a posição da anterior)
+  useEffect(() => { document.querySelector('main')?.scrollTo({ top: 0 }); }, [currentView]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
@@ -284,6 +286,8 @@ export default function App() {
             onNavigateClients={profile === 'lojista' ? undefined : () => setCurrentView('clients')}
             onSelectClient={profile === 'lojista' ? undefined : (c) => setSelectedClient(c)}
             onOpenCart={(ctx) => openCart(ctx.id)}
+            onViewSent={() => navigate('history')}
+            onBackToRadar={profile === 'lojista' ? undefined : () => navigate('radar')}
             onCartCreated={(ctx) => {
               if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== ctx.clientId)) {
                 const c = clientsList.find(x => x.id === ctx.clientId) ?? null;
@@ -390,7 +394,8 @@ export default function App() {
           showCart={commerceView}
           selectedClient={commerceView ? selectedClient : null}
         />
-        <PageTitle title={viewInfo.title} subtitle={viewInfo.subtitle} />
+        {/* Carrinhos e carrinho trazem o próprio título e caminho na página */}
+        {currentView !== 'carts' && currentView !== 'cart' && <PageTitle title={viewInfo.title} subtitle={viewInfo.subtitle} />}
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>
