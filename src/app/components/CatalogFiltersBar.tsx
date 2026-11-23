@@ -119,7 +119,70 @@ interface Props {
   onSortChange: (v: string) => void;
 }
 
-// Barra do topo do catálogo: linha 1 = tabela de preço + busca; linha 2 = filtros em popovers + ordenar.
+// Filtros rápidos em pílulas (os mais usados ficam à vista); o resto fica em "Mais filtros".
+const QUICK_SIGNALS: RadarFilter[] = ['alto-giro', 'boa-margem', 'lancamentos', 'oportunidade-perdida'];
+const TAIL_SIGNALS: RadarFilter[] = ['benchmark', 'reposicao'];
+const PRICE_PILLS: Record<string, string> = { 'ate-250': 'Até R$250', '250-320': 'R$250 – R$320', '320-mais': 'Acima de R$320' };
+
+/** Pílula de filtro: contorno quando inativa, preenchida quando ativa; texto de 12px. */
+function Pill({ active, onClick, children, caret, ariaLabel }: {
+  active: boolean; onClick?: () => void; children: React.ReactNode; caret?: boolean; ariaLabel?: string;
+}) {
+  return (
+    <Button
+      size="compact-sm"
+      radius="xl"
+      variant={active ? 'filled' : 'default'}
+      color="brand"
+      h={30}
+      px={12}
+      // o tema deixa todo rótulo de botão em semibold; a pílula usa 12px e peso normal quando inativa
+      styles={{ label: { fontSize: 'var(--mantine-font-size-xs)', fontWeight: active ? 600 : 400 } }}
+      onClick={onClick}
+      aria-pressed={caret ? undefined : active}
+      aria-label={ariaLabel}
+      rightSection={caret ? <CaretDownIcon size={12} /> : undefined}
+      className={classes.pill}
+    >
+      {children}
+    </Button>
+  );
+}
+
+function PillPopover({ label, active, width = 320, children }: { label: string; active: boolean; width?: number; children: React.ReactNode }) {
+  return (
+    <Popover position="bottom-start" shadow="md" width={width} withinPortal>
+      <Popover.Target>
+        <span><Pill active={active} caret>{label}</Pill></span>
+      </Popover.Target>
+      <Popover.Dropdown>{children}</Popover.Dropdown>
+    </Popover>
+  );
+}
+
+const PillDivider = () => <Box w={1} h={20} flex="none" bg="var(--mantine-color-default-border)" aria-hidden />;
+
+/** Busca do catálogo (fica na linha das abas, à direita). */
+export function CatalogSearch({ filters, onChange }: { filters: CatalogFilters; onChange: (f: CatalogFilters) => void }) {
+  return (
+    <TextInput
+      size="sm"
+      w={{ base: '100%', sm: 280 }}
+      placeholder="Buscar produtos"
+      aria-label="Buscar produtos"
+      value={filters.search}
+      onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
+      leftSection={<MagnifyingGlassIcon size={16} />}
+      rightSection={filters.search ? (
+        <ActionIcon onClick={() => onChange({ ...filters, search: '' })} variant="subtle" color="gray" size="input-xs" aria-label="Limpar busca">
+          <XIcon size={14} />
+        </ActionIcon>
+      ) : null}
+    />
+  );
+}
+
+// Linha de pílulas: sinais do Radar | faixas de preço | Coleção, Numeração | Benchmark, Reposição | Mais filtros
 export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: Props) {
   const [colorQuery, setColorQuery] = useState('');
   const visibleColors = allColors.filter(c => normalize(c).includes(normalize(colorQuery.trim())));
@@ -131,13 +194,6 @@ export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: P
       : [...filters.colors, c];
     onChange({ ...filters, colors: next });
   };
-
-  // Limpa só os filtros; busca e tabela de preço continuam como estão.
-  const reset = () => onChange({
-    ...defaultFilters,
-    search: filters.search,
-    priceTable: filters.priceTable,
-  });
 
   // Amostras de cor: botões só com a cor → o nome aparece em tooltip (rótulo extra; aria-label tem o nome)
   const renderSwatches = (list: string[]) => (
@@ -169,236 +225,108 @@ export function CatalogFiltersBar({ filters, onChange, sortBy, onSortChange }: P
     </SimpleGrid>
   );
 
-  const currentTable = priceTables.find(t => t.id === filters.priceTable);
-  const activeCount = countActiveFilters(filters);
   const toggleRadar = (v: RadarFilter) => onChange({
     ...filters,
     radar: filters.radar.includes(v) ? filters.radar.filter(x => x !== v) : [...filters.radar, v],
   });
+  const signalPill = (v: RadarFilter) => {
+    const meta = radarFilterOptions.find(f => f.value === v);
+    if (!meta) return null; // "Boa margem" some enquanto as margens forem iguais
+    return <Pill key={v} active={filters.radar.includes(v)} onClick={() => toggleRadar(v)}>{meta.label}</Pill>;
+  };
+  const otherSignals = radarFilterOptions.filter(f => !QUICK_SIGNALS.includes(f.value) && !TAIL_SIGNALS.includes(f.value));
+
+  // o que está dentro de "Mais filtros" (para a pílula mostrar quantos estão ativos)
+  const moreActive =
+    (filters.line !== 'Todos' ? 1 : 0) + (filters.category !== 'Todos' ? 1 : 0) + filters.colors.length +
+    filters.radar.filter(r => otherSignals.some(o => o.value === r)).length +
+    (filters.priceTable !== defaultFilters.priceTable ? 1 : 0);
+  const currentTable = priceTables.find(t => t.id === filters.priceTable);
 
   return (
-    <Paper withBorder p="sm">
-      <Stack gap="sm">
-      <Group gap="sm" wrap="wrap" align="center">
-        {/* Tabela de Preço — 4 opções fixas com descrição: cartões de opção (radio) em vez de lista suspensa */}
-        <FilterPopover
-          icon={CurrencyDollarIcon}
-          label={currentTable?.label ?? 'Tabela de preço'}
-          active={false}
-          ariaLabel={`Tabela de preço: ${currentTable?.label ?? ''}`}
-        >
-          <Radio.Group
-            value={filters.priceTable}
-            onChange={v => onChange({ ...filters, priceTable: v })}
-            name="catalog-price-table"
-            label="Tabela de preço"
-          >
-            <Stack gap="sm" mt={4}>
+    <Group gap={8} wrap="wrap" align="center" role="group" aria-label="Filtros do catálogo" className={classes.pillRow}>
+      {QUICK_SIGNALS.map(signalPill)}
+      <PillDivider />
+      {PRICE_BANDS.map(b => (
+        <Pill key={b.value} active={filters.priceBand === b.value} onClick={() => onChange({ ...filters, priceBand: filters.priceBand === b.value ? '' : b.value })} ariaLabel={`Seu custo: ${b.label}`}>
+          {PRICE_PILLS[b.value]}
+        </Pill>
+      ))}
+      <PillDivider />
+      <PillPopover label={filters.collection !== 'Todas' ? `Coleção: ${filters.collection}` : 'Coleção'} active={filters.collection !== 'Todas'}>
+        <ChoiceChips options={['Todas', ...allCollections]} value={filters.collection} onSelect={v => onChange({ ...filters, collection: v })} />
+      </PillPopover>
+      <PillPopover label={filters.size ? `Numeração: ${filters.size}` : 'Numeração'} active={!!filters.size}>
+        <ChoiceChips options={['Todas', ...allSizes]} value={filters.size || 'Todas'} onSelect={v => onChange({ ...filters, size: v === 'Todas' ? '' : v })} />
+      </PillPopover>
+      <PillDivider />
+      {TAIL_SIGNALS.map(signalPill)}
+
+      {/* Tabela de preço, linha, categoria, cores, outros sinais e ordenação */}
+      <PillPopover label={moreActive > 0 ? `Mais filtros (${moreActive})` : 'Mais filtros'} active={moreActive > 0} width={360}>
+        <Stack gap="md">
+          <Select
+            label="Ordenar por"
+            data={SORT_OPTIONS}
+            value={sortBy}
+            onChange={v => v && onSortChange(v)}
+            allowDeselect={false}
+            leftSection={<SortAscendingIcon size={16} />}
+            comboboxProps={{ withinPortal: false }}
+          />
+          <Radio.Group value={filters.priceTable} onChange={v => onChange({ ...filters, priceTable: v })} name="catalog-price-table" label={`Tabela de preço · ${currentTable?.label ?? ''}`}>
+            <Group gap="xs" mt={6}>
               {priceTables.map(t => (
-                <Radio.Card key={t.id} value={t.id} p="sm" className={interactive.choiceCard}>
-                  <Group align="flex-start" gap="sm" wrap="nowrap">
-                    <Radio.Indicator color="brand" mt={2} />
-                    <Box flex={1} miw={0}>
-                      <Text lh={1.5} fw={600}>{t.label}</Text>
-                      <Text lh={1.5} c="dimmed" size="sm">{t.desc}</Text>
-                    </Box>
-                  </Group>
-                </Radio.Card>
+                <Chip key={t.id} checked={filters.priceTable === t.id} onChange={() => onChange({ ...filters, priceTable: t.id })} variant="filled" size="sm">
+                  {t.label}
+                </Chip>
               ))}
-            </Stack>
-          </Radio.Group>
-        </FilterPopover>
-
-        {/* Busca no topo, à direita da tabela de preço */}
-        <TextInput
-          flex={{ base: '1 1 100%', xs: 1 }}
-          miw={{ xs: 200 }}
-          placeholder="Buscar por nome, linha ou código"
-          aria-label="Buscar produtos"
-          value={filters.search}
-          onChange={e => onChange({ ...filters, search: e.currentTarget.value })}
-          leftSection={<MagnifyingGlassIcon size={18} />}
-          rightSection={filters.search ? (
-            <ActionIcon onClick={() => onChange({ ...filters, search: '' })} variant="subtle" color="gray" size="input-sm" aria-label="Limpar busca">
-              <XIcon size={16} />
-            </ActionIcon>
-          ) : null}
-        />
-      </Group>
-
-      <Group gap="sm" wrap="wrap" align="center">
-        <Group gap="xs" wrap="nowrap">
-          <FunnelIcon size={18} />
-          <Text lh={1.5} fw={600}>Filtros</Text>
-          {activeCount > 0 && (
-            <Badge variant="light" color="brand" circle aria-label={`${activeCount} filtros ativos`}>
-              {activeCount}
-            </Badge>
-          )}
-        </Group>
-
-        {/* Sinais do Radar: os mesmos sinais do Radar e da página do produto */}
-        <FilterPopover
-          icon={CrosshairIcon}
-          label={filters.radar.length > 0 ? `Sinais do Radar (${filters.radar.length})` : 'Sinais do Radar'}
-          active={filters.radar.length > 0}
-        >
-          <Text lh={1.5} fw={600} mb="xs">Sinais do Radar</Text>
-          <Group gap="sm">
-            {radarFilterOptions.map(f => (
-              <Chip key={f.value} checked={filters.radar.includes(f.value)} onChange={() => toggleRadar(f.value)} variant="filled">
-                {f.label}
-              </Chip>
-            ))}
-          </Group>
-        </FilterPopover>
-
-        <FilterPopover
-          icon={TagIcon}
-          label={filters.line !== 'Todos' ? `Linha: ${filters.line}` : 'Modelo / Linha'}
-          active={filters.line !== 'Todos'}
-        >
-          {/* 11 linhas: caixa de busca no topo filtra enquanto digita */}
-          <SearchableChips
-            options={lines}
-            popular={popularLines}
-            restLabel="Outras linhas"
-            value={filters.line}
-            onSelect={l => onChange({ ...filters, line: l })}
-            searchLabel="Buscar linha"
-            placeholder="ex.: Flow"
-            emptyTitle="Nenhuma linha encontrada"
-            emptyText="Nenhuma linha com esse nome. Limpe a busca para ver todas."
-          />
-        </FilterPopover>
-
-        <FilterPopover
-          icon={StackIcon}
-          label={filters.category !== 'Todos' ? `Categoria: ${filters.category}` : 'Categoria'}
-          active={filters.category !== 'Todos'}
-        >
-          <ChoiceChips
-            options={categories}
-            popular={popularCategories}
-            restLabel="Outras categorias"
-            value={filters.category}
-            onSelect={c => onChange({ ...filters, category: c })}
-          />
-        </FilterPopover>
-
-        <FilterPopover
-          icon={PaletteIcon}
-          label={filters.colors.length > 0 ? `Cores (${filters.colors.length})` : 'Cores'}
-          active={filters.colors.length > 0}
-        >
-          {/* Muitas cores: caixa de busca no topo filtra as amostras pelo nome */}
-          <TextInput
-            aria-label="Buscar cor"
-            placeholder="Buscar cor (ex.: Preto)"
-            leftSection={<MagnifyingGlassIcon size={18} />}
-            value={colorQuery}
-            onChange={e => setColorQuery(e.currentTarget.value)}
-            mb="sm"
-          />
-          {visibleColors.length === 0 && (
-            <EmptyState
-              withBorder={false}
-              icon={MagnifyingGlassIcon}
-              title="Nenhuma cor encontrada"
-              description="Nenhuma cor com esse nome. Limpe a busca para ver todas."
-              action={{ label: 'Limpar Busca', onClick: () => setColorQuery(''), forward: false }}
-            />
-          )}
-          {/* Cores mais vendidas primeiro; o resto em seguida, em ordem alfabética */}
-          <Stack gap="sm">
-            {visiblePopularColors.length > 0 && (
-              <Box>
-                <Text lh={1.5} c="dimmed" size="sm" mb={4}>Mais usados</Text>
-                {renderSwatches(visiblePopularColors)}
-              </Box>
-            )}
-            {visibleOtherColors.length > 0 && (
-              <Box>
-                {visiblePopularColors.length > 0 && (
-                  <Text lh={1.5} c="dimmed" size="sm" mb={4}>Outras cores</Text>
-                )}
-                {renderSwatches(visibleOtherColors)}
-              </Box>
-            )}
-          </Stack>
-          {filters.colors.length > 0 && (
-            <Text lh={1.5} mt="xs" c="dimmed" size="sm">
-              {filters.colors.join(', ')}
-            </Text>
-          )}
-        </FilterPopover>
-
-        <FilterPopover
-          icon={StackIcon}
-          label={filters.collection !== 'Todas' ? `Coleção: ${filters.collection}` : 'Coleção'}
-          active={filters.collection !== 'Todas'}
-        >
-          <Text lh={1.5} fw={600} mb="xs">Coleção</Text>
-          <ChoiceChips options={['Todas', ...allCollections]} value={filters.collection} onSelect={v => onChange({ ...filters, collection: v })} />
-        </FilterPopover>
-
-        <FilterPopover
-          icon={CurrencyDollarIcon}
-          label={priceBandOf(filters.priceBand)?.label ?? 'Faixa de preço'}
-          active={!!filters.priceBand}
-        >
-          <Text lh={1.5} fw={600}>Faixa de preço</Text>
-          <Text lh={1.5} c="dimmed" size="sm" mb="xs">Sobre o Seu custo por par</Text>
-          <ChoiceChips
-            options={['Todas', ...PRICE_BANDS.map(b => b.label)]}
-            value={priceBandOf(filters.priceBand)?.label ?? 'Todas'}
-            onSelect={v => onChange({ ...filters, priceBand: PRICE_BANDS.find(b => b.label === v)?.value ?? '' })}
-          />
-        </FilterPopover>
-
-        <FilterPopover
-          icon={RulerIcon}
-          label={filters.size ? `Numeração: ${filters.size}` : 'Numeração'}
-          active={!!filters.size}
-        >
-          <Text lh={1.5} fw={600}>Numeração</Text>
-          <Text lh={1.5} c="dimmed" size="sm" mb="xs">Só produtos com pares disponíveis nesta numeração</Text>
-          <ChoiceChips options={['Todas', ...allSizes]} value={filters.size || 'Todas'} onSelect={v => onChange({ ...filters, size: v === 'Todas' ? '' : v })} />
-        </FilterPopover>
-
-        {activeCount > 0 && (
-          <Button
-            onClick={reset}
-            variant="subtle"
-            color="brand"
-            leftSection={<XIcon size={16} />}
-          >
-            Limpar Filtros
-          </Button>
-        )}
-
-        {/* Ordenar: à direita dos filtros */}
-        <Select
-          ml={{ md: 'auto' }}
-          w={{ base: '100%', xs: 220 }}
-          aria-label="Ordenar"
-          leftSection={<SortAscendingIcon size={18} />}
-          data={SORT_OPTIONS}
-          value={sortBy}
-          onChange={v => v && onSortChange(v)}
-          allowDeselect={false}
-          comboboxProps={{ withinPortal: true }}
-          renderOption={({ option, checked }) => (
-            <Group gap="xs" wrap="nowrap">
-              {checked ? <CheckIcon size={16} /> : <Box w={16} />}
-              <Text inherit>{option.label}</Text>
             </Group>
+          </Radio.Group>
+          {otherSignals.length > 0 && (
+            <Box>
+              <Text fw={600} size="sm" mb={6}>Outros sinais do Radar</Text>
+              <Group gap="xs">
+                {otherSignals.map(f => (
+                  <Chip key={f.value} checked={filters.radar.includes(f.value)} onChange={() => toggleRadar(f.value)} variant="filled" size="sm">{f.label}</Chip>
+                ))}
+              </Group>
+            </Box>
           )}
-          styles={{ input: { fontWeight: 600 } }}
-        />
-      </Group>
-      </Stack>
-    </Paper>
+          <Box>
+            <Text fw={600} size="sm" mb={6}>Modelo / Linha</Text>
+            <SearchableChips
+              options={lines}
+              popular={popularLines}
+              restLabel="Outras linhas"
+              value={filters.line}
+              onSelect={l => onChange({ ...filters, line: l })}
+              searchLabel="Buscar linha"
+              placeholder="ex.: Flow"
+              emptyTitle="Nenhuma linha encontrada"
+              emptyText="Nenhuma linha com esse nome. Limpe a busca para ver todas."
+            />
+          </Box>
+          <Box>
+            <Text fw={600} size="sm" mb={6}>Categoria</Text>
+            <ChoiceChips options={categories} popular={popularCategories} restLabel="Outras categorias" value={filters.category} onSelect={c => onChange({ ...filters, category: c })} />
+          </Box>
+          <Box>
+            <Text fw={600} size="sm" mb={6}>Cores</Text>
+            <TextInput
+              aria-label="Buscar cor"
+              placeholder="Buscar cor (ex.: Preto)"
+              leftSection={<MagnifyingGlassIcon size={18} />}
+              value={colorQuery}
+              onChange={e => setColorQuery(e.currentTarget.value)}
+              mb="xs"
+            />
+            {visiblePopularColors.length > 0 && renderSwatches(visiblePopularColors)}
+            {visibleOtherColors.length > 0 && <Box mt="xs">{renderSwatches(visibleOtherColors)}</Box>}
+          </Box>
+        </Stack>
+      </PillPopover>
+    </Group>
   );
 }
 
