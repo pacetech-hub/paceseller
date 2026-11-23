@@ -4,7 +4,7 @@ import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
 import { WhoIsUsingPage } from "./components/WhoIsUsingPage";
 import type { LinkedUser } from "./data/linkedUsers";
-import { TopBar, PageTitle } from "./components/Sidebar";
+import { TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
 import { clients as clientsList, orders as ordersList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
@@ -220,6 +220,11 @@ export default function App() {
     ? { title: selectedClient.name, subtitle: 'Informações e ações rápidas' }
     : viewTitles[currentView];
 
+  // o título de cada página vai para a aba do navegador (a faixa de título saiu da tela)
+  useEffect(() => {
+    document.title = authenticated ? `${viewInfo.title} · Pace Seller` : 'Pace Seller';
+  }, [authenticated, viewInfo.title]);
+
   if (!authenticated) {
     return (
       <div>
@@ -394,8 +399,6 @@ export default function App() {
           showCart={commerceView}
           selectedClient={commerceView ? selectedClient : null}
         />
-        {/* Carrinhos e carrinho trazem o próprio título e caminho na página */}
-        {currentView !== 'carts' && currentView !== 'cart' && <PageTitle title={viewInfo.title} subtitle={viewInfo.subtitle} />}
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>
