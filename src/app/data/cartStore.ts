@@ -112,6 +112,33 @@ export const statusColor: Record<CartStatus, string> = {
   confirmado: 'gray',
 };
 
+/** Status visto por quem está olhando: o lojista lê "Aguardando você"; o representante, "Aguardando o cliente". */
+export function statusLabelFor(status: CartStatus, cart: Pick<Cart, 'rep'>, viewer: CartCreator): string {
+  if (viewer === 'lojista') return statusLabel(status, cart.rep);
+  switch (status) {
+    case 'rascunho': return 'Rascunho do lojista';
+    case 'pronto': return 'Rascunho do lojista · já bate a grade mínima';
+    case 'aguardando-rep': return 'Aguardando você';
+    case 'aguardando-voce': return 'Aguardando o cliente';
+    case 'aguardando-pagamento': return 'Aguardando pagamento do cliente';
+    case 'confirmado': return 'Confirmado';
+  }
+}
+
+/** Cor do status para quem está olhando: o que espera a ação desta pessoa fica em âmbar. */
+export function statusColorFor(status: CartStatus, viewer: CartCreator): string {
+  if (viewer === 'lojista') return statusColor[status];
+  if (status === 'aguardando-rep') return 'yellow';
+  if (status === 'aguardando-voce') return 'gray';
+  return statusColor[status];
+}
+
+/** Compartilhado = já saiu da montagem do lojista (o outro lado vê e decide). */
+export const isShared = (cart: Cart) => cart.stage !== 'montagem' || cart.createdBy === 'rep';
+
+/** Dias desde a última mudança de etapa. */
+export const daysInStage = (cart: Cart) => Math.floor((Date.now() - new Date(cart.stageSince).getTime()) / 86_400_000);
+
 /** Carrinho em aberto = ainda não confirmado (os confirmados vão para Pedidos). */
 export const isOpen = (cart: Cart) => cart.stage !== 'confirmado';
 /** O lojista só adiciona itens em carrinhos que estão com ele. */

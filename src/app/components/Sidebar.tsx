@@ -228,18 +228,6 @@ function PriorityNav({ pages, currentView, onSelect }: { pages: MenuPage[]; curr
   );
 }
 
-/** Título da página, numa faixa logo abaixo do menu. */
-export function PageTitle({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <Box flex="none" className={classes.pageTitle}>
-      <Box maw={1400} mx="auto" px={{ base: 'md', sm: 'lg' }} py="sm">
-        <Title order={1} size="h3" lh={1.3}>{title}</Title>
-        {subtitle && <Text c="dimmed" size="sm" mt={2}>{subtitle}</Text>}
-      </Box>
-    </Box>
-  );
-}
-
 /** Páginas de detalhe marcam no menu a seção de onde vieram. */
 const PARENT_VIEW: Partial<Record<View, View>> = { 'order-detail': 'history', 'client-detail': 'clients' };
 

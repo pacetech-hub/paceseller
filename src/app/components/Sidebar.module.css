@@ -103,7 +103,3 @@
   font-size: var(--mantine-font-size-md);
 }
 
-/* Faixa do título da página, abaixo do menu */
-.pageTitle {
-  border-bottom: 1px solid var(--mantine-color-default-border);
-}

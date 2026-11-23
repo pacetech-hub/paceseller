@@ -304,6 +304,43 @@ export const products: Product[] = [
   },
 ];
 
+// Mais linhas para o catálogo (mock): 13 linhas novas (15 cores), 20 linhas no total.
+// Fotos reaproveitam as do CDN da marca; vendas abaixo das campeãs para não mudar o "Mais vendida".
+const IMG = [
+  'https://cdn.dooca.store/153486/products/flow-xl-2502-10-black-reflect-b-suclc_1600x1600+fill_ffffff.jpg?v=1773944251',
+  'https://cdn.dooca.store/153486/products/226-tesla-1_1600x1600+fill_ffffff.jpg?v=1727965004',
+  'https://cdn.dooca.store/153486/products/21-tesla_1600x1600+fill_ffffff.jpg?v=1720100415',
+  'https://cdn.dooca.store/153486/products/dsc00810jpg_1600x1600+fill_ffffff.jpg?v=1759512194',
+];
+const FULL_GRADE = { '34': 30, '35': 55, '36': 80, '37': 105, '38': 120, '39': 120, '40': 105, '41': 80, '42': 55, '43': 30, '44': 15 };
+const ADULT_GRADE = { '37': 60, '38': 90, '39': 110, '40': 110, '41': 90, '42': 60, '43': 30 };
+
+// [id, linha, cor, referência, Seu custo, PDV, foto, cores, material, coleção, público, pares vendidos, disponibilidade, grade]
+const EXTRA_PRODUCTS: Array<[string, string, string, string, number, number, number, string[], string, string, Product['segment'], number, Product['availability'], Grade]> = [
+  ['P012', 'Vulc', 'Off White', '2601-01', 229.90, 379.90, 1, ['Branco', 'Bege'], 'Lona', 'Verão 2027', 'Unissex', 760, 'disponível', FULL_GRADE],
+  ['P013', 'Vulc', 'Preto', '2601-02', 229.90, 379.90, 2, ['Preto'], 'Lona', 'Verão 2027', 'Unissex', 690, 'disponível', FULL_GRADE],
+  ['P014', 'Drift', 'Grafite', '2602-01', 289.90, 479.90, 0, ['Cinza', 'Preto'], 'Camurça', 'Inverno 2026', 'Masculino', 540, 'disponível', ADULT_GRADE],
+  ['P015', 'Kickflip', 'Vermelho', '2603-04', 259.90, 429.90, 2, ['Vermelho', 'Preto'], 'Camurça', 'Lançamentos 2026', 'Unissex', 410, 'disponível', FULL_GRADE],
+  ['P016', 'Grind', 'Marrom', '2604-02', 309.90, 509.90, 3, ['Marrom'], 'Couro', 'Inverno 2026', 'Masculino', 380, 'baixo estoque', ADULT_GRADE],
+  ['P017', 'Grind', 'Preto', '2604-03', 309.90, 509.90, 2, ['Preto'], 'Couro', 'Inverno 2026', 'Masculino', 450, 'disponível', ADULT_GRADE],
+  ['P018', 'Ollie', 'Rosa', '2605-01', 239.90, 399.90, 1, ['Rosa', 'Branco'], 'Lona', 'Verão 2027', 'Feminino', 620, 'disponível', FULL_GRADE],
+  ['P019', 'Nollie', 'Azul Marinho', '2606-02', 249.90, 409.90, 0, ['Navy', 'Branco'], 'Lona', 'Verão 2027', 'Unissex', 300, 'disponível', FULL_GRADE],
+  ['P020', 'Manual', 'Bege', '2607-01', 219.90, 359.90, 3, ['Bege'], 'Lona', 'Verão 2027', 'Feminino', 270, 'disponível', FULL_GRADE],
+  ['P021', 'Rail', 'Preto Gum', '2608-05', 299.90, 499.90, 2, ['Preto', 'Marrom'], 'Camurça', 'Lançamentos 2026', 'Masculino', 230, 'disponível', ADULT_GRADE],
+  ['P022', 'Ledge', 'Verde', '2609-03', 269.90, 449.90, 0, ['Verde', 'Preto'], 'Camurça', 'Lançamentos 2026', 'Unissex', 190, 'disponível', FULL_GRADE],
+  ['P023', 'Bowl', 'Amarelo', '2610-01', 259.90, 429.90, 1, ['Amarelo', 'Preto'], 'Lona', 'Verão 2027', 'Unissex', 160, 'baixo estoque', FULL_GRADE],
+  ['P024', 'Quarter', 'Cinza', '2611-02', 279.90, 459.90, 3, ['Cinza'], 'Couro', 'Inverno 2026', 'Masculino', 140, 'esgotado', ADULT_GRADE],
+  ['P025', 'Ramp', 'Branco Azul', '2612-01', 249.90, 419.90, 0, ['Branco', 'Azul'], 'Lona', 'Verão 2027', 'Feminino', 120, 'disponível', FULL_GRADE],
+  ['P026', 'Slide', 'Preto Branco', '2613-01', 239.90, 399.90, 2, ['Preto', 'Branco'], 'Lona', 'Lançamentos 2026', 'Unissex', 100, 'disponível', FULL_GRADE],
+];
+
+products.push(...EXTRA_PRODUCTS.map(([id, line, colorway, reference, price, priceRetail, img, colors, material, collection, segment, soldUnits, availability, grades]) => ({
+  id, name: `${line} ${colorway}`, reference, line, category: 'Tênis', collection, price, priceRetail,
+  image: IMG[img], availability, colors, material, isFavorite: false, rating: 4.5, soldUnits,
+  description: `Tênis linha ${line}, modelo ${colorway}.`, segment,
+  grades: availability === 'esgotado' ? Object.fromEntries(Object.keys(grades).map(s => [s, 0])) : grades,
+})));
+
 export const orders: Order[] = [
   { id: '4790-1', date: '2026-09-16', client: 'Calçadão Paulista LTDA', clientId: 'CLI-001', rep: 'Marcos Andrade', status: 'faturado', total: 6718.00, items: 48, paymentCondition: '5x sem juros', collection: 'Coleção 2026' },
   { id: 'PED-2026-0412', date: '2026-06-09', client: 'Calçadão Paulista LTDA', clientId: 'CLI-001', rep: 'Marcos Andrade', status: 'aprovado', total: 10540.00, items: 124, paymentCondition: '5x sem juros', collection: 'Coleção 2026' },

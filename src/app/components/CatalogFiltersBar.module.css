@@ -14,3 +14,23 @@
 .swatch[data-active] {
   transform: scale(1.1);
 }
+
+/* Pílula de filtro do catálogo: sem a sombra/relevo dos botões comuns */
+.pill.pill {
+  box-shadow: none;
+}
+
+/* No celular as pílulas ficam numa linha só, com rolagem lateral (sem barra visível) */
+@media (max-width: $mantine-breakpoint-sm) {
+  .pillRow.pillRow {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(var(--mantine-spacing-md) * -1);
+    padding-inline: var(--mantine-spacing-md);
+  }
+
+  .pillRow.pillRow > * {
+    flex: none;
+  }
+}

@@ -201,10 +201,6 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
       {/* Orders */}
       {loading ? <TableSkeleton rows={8} cols={headers.length} /> : (
       <Stack gap="sm">
-        {/* ordem da lista em palavras simples */}
-        {filtered.length > 0 && (
-          <Text c="dimmed" size="sm">Em análise primeiro, depois aprovados, faturados, entregues e cancelados</Text>
-        )}
         {filtered.length > 0 && (
           <DataTable headers={headers} numeric={NUMERIC_HEADERS} minWidth={900}>
             {filtered.map(order => (

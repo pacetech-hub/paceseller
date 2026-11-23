@@ -100,3 +100,33 @@
   border-bottom-color: var(--mantine-color-text);
 }
 
+
+/* Abas do catálogo (Produtos / Combos sugeridos): caixa-alta mono, traço embaixo na ativa */
+.tabsRow {
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.tab.tab {
+  position: relative;
+  padding: 8px 0 10px;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mantine-color-dimmed);
+}
+
+.tab.tab[data-active] {
+  color: var(--mantine-color-text);
+  font-weight: 700;
+}
+
+.tab.tab[data-active]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background-color: var(--mantine-color-text);
+}

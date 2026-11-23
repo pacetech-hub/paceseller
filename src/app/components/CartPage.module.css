@@ -1,1 +1,21 @@
 /* Seleção de campanhas agora usa a cor neutra padrão de interactive.choiceCard (regra 29). */
+
+/* Lateral do carrinho: separada do pedido por uma linha vertical em telas largas */
+@media (min-width: $mantine-breakpoint-lg) {
+  .cartAside {
+    border-left: 1px solid var(--mantine-color-default-border);
+    min-height: 100%;
+  }
+}
+
+/* Outro carrinho da mesma loja: linha clicável */
+.siblingCart {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--mantine-radius-sm);
+
+  @mixin hover {
+    background-color: var(--mantine-color-default-hover);
+  }
+}

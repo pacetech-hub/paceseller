@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Stack } from "@mantine/core";
 import classes from "./App.module.css";
 import { LoginPage } from "./components/LoginPage";
 import { WhoIsUsingPage } from "./components/WhoIsUsingPage";
 import type { LinkedUser } from "./data/linkedUsers";
-import { TopBar, PageTitle } from "./components/Sidebar";
+import { TopBar } from "./components/Sidebar";
 import type { View } from "./components/Sidebar";
 import { clients as clientsList, orders as ordersList, type Client, type Order } from "./data/mockData";
 import { DashboardAdmin } from "./components/DashboardAdmin";
@@ -80,6 +80,8 @@ export default function App() {
   const [operator, setOperator] = useState<LinkedUser | null>(null);
   const [profile, setProfile] = useState<Profile>('admin');
   const [currentView, setCurrentView] = useState<View>('radar');
+  // cada página abre no topo (a área principal rola sozinha e guardaria a posição da anterior)
+  useEffect(() => { document.querySelector('main')?.scrollTo({ top: 0 }); }, [currentView]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
@@ -218,6 +220,11 @@ export default function App() {
     ? { title: selectedClient.name, subtitle: 'Informações e ações rápidas' }
     : viewTitles[currentView];
 
+  // o título de cada página vai para a aba do navegador (a faixa de título saiu da tela)
+  useEffect(() => {
+    document.title = authenticated ? `${viewInfo.title} · Pace Seller` : 'Pace Seller';
+  }, [authenticated, viewInfo.title]);
+
   if (!authenticated) {
     return (
       <div>
@@ -284,6 +291,8 @@ export default function App() {
             onNavigateClients={profile === 'lojista' ? undefined : () => setCurrentView('clients')}
             onSelectClient={profile === 'lojista' ? undefined : (c) => setSelectedClient(c)}
             onOpenCart={(ctx) => openCart(ctx.id)}
+            onViewSent={() => navigate('history')}
+            onBackToRadar={profile === 'lojista' ? undefined : () => navigate('radar')}
             onCartCreated={(ctx) => {
               if (profile !== 'lojista' && (!selectedClient || selectedClient.id !== ctx.clientId)) {
                 const c = clientsList.find(x => x.id === ctx.clientId) ?? null;
@@ -390,7 +399,6 @@ export default function App() {
           showCart={commerceView}
           selectedClient={commerceView ? selectedClient : null}
         />
-        <PageTitle title={viewInfo.title} subtitle={viewInfo.subtitle} />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
         </Box>

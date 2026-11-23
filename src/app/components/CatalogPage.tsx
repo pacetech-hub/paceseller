@@ -1,48 +1,39 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  ActionIcon, Anchor, Badge, Box, Button, Card, Chip, Divider, Flex, Grid, Group, Input, Paper, SegmentedControl,
-  SimpleGrid, Image, Skeleton, Stack, Table, Text, TextInput, Title, Tooltip, UnstyledButton,
+  ActionIcon, Anchor, Badge, Box, Button, Divider, Grid, Group, Paper,
+  SimpleGrid, Image, Skeleton, Stack, Table, Text, Title, Tooltip, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
 import {
-  MagnifyingGlassIcon,
-  GridNineIcon,
-  ListBulletsIcon,
   HeartIcon,
   ShoppingCartIcon,
   XIcon,
   PackageIcon,
-  EyeIcon,
   PlusIcon,
   SneakerIcon,
-  ArrowLeftIcon,
   CheckCircleIcon,
   UsersThreeIcon,
   MegaphoneIcon,
   LightningIcon,
-  StarIcon,
   CaretLeftIcon,
   CaretRightIcon,
 } from "@phosphor-icons/react";
 import { products, Product, formatCurrency, type Client } from "../data/mockData";
 import {
-  COST_BASIS, PEER_GROUP_SIZE, RADAR_FILTERS, SEVERITY_META, SIGNAL_META, buyReasons, isTopSeller, marginLabel, markupLabel,
+  COST_BASIS, PEER_GROUP_SIZE, SEVERITY_META, SIGNAL_META, buyReasons, isTopSeller, marginLabel, markupLabel,
   matchesRadarFilter, productDisplayName, storeSku, suggestedGrade, useRadar, type RadarFilter, type RadarSignal,
 } from "../data/radar";
 import { resolveTargetCart, useCartStore } from "../data/cartStore";
 import { useShop } from "../lib/shop";
-import bannerLimitedAsset from "../../assets/banner-edicao-limitada.webp";
 import classes from "./CatalogPage.module.css";
 import {
-  CatalogFiltersBar, SORT_OPTIONS, PRICE_BANDS, countActiveFilters, defaultFilters, priceBandOf, type CatalogFilters,
+  CatalogFiltersBar, CatalogSearch, SORT_OPTIONS, countActiveFilters, defaultFilters, priceBandOf, type CatalogFilters,
 } from "./CatalogFiltersBar";
 import { useMockLoading } from "../lib/useMockLoading";
-import { CardGridSkeleton, ListSkeleton } from "./ui/Skeletons";
+import { CardGridSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
 import { GradeOrderSummary, SignalLine, SizeGradeEditor, TargetCartPicker, useCommitAdd } from "./SizeGrade";
 
-const BORDER_COLOR = 'var(--mantine-color-default-border)';
-const BORDER = `1px solid ${BORDER_COLOR}`;
 const DIMMED = 'var(--mantine-color-dimmed)';
 
 // Foto remota do produto: skeleton no lugar até a imagem carregar; se falhar, mostra o fallback
@@ -97,139 +88,6 @@ const availColor: Record<Product['availability'], string> = {
   'esgotado': 'red',
 };
 
-/** Selo do sinal principal do Radar (o mesmo sinal em todas as telas — BR-30/31). */
-function SignalTag({ signal }: { signal?: RadarSignal }) {
-  if (!signal) return null;
-  const sev = SEVERITY_META[signal.severity];
-  return (
-    <Tooltip label={`${sev.label} · ${signal.context}`} multiline maw={260}>
-      <Badge variant="light" color={sev.color}>{SIGNAL_META[signal.type].label}</Badge>
-    </Tooltip>
-  );
-}
-
-/** Seu custo, PDV sugerido e a única margem (BR-01 a BR-04). */
-function PriceBlock({ product, size = 'sm' }: { product: Product; size?: 'sm' | 'lg' }) {
-  return (
-    <Box>
-      <Group gap="lg" wrap="wrap" align="flex-end">
-        <Box>
-          <Text size="sm" c="dimmed">Seu custo</Text>
-          <Text className="mono" fw={700} fz={size === 'lg' ? 'xl' : undefined}>{formatCurrency(product.price)}</Text>
-        </Box>
-        <Box>
-          <Text size="sm" c="dimmed">PDV sugerido</Text>
-          <Text className="mono" fz={size === 'lg' ? 'xl' : undefined}>{formatCurrency(product.priceRetail)}</Text>
-        </Box>
-      </Group>
-      <Tooltip label={markupLabel(product)}>
-        <Badge mt="xs" variant="light" color="brand" styles={{ label: { textTransform: 'none' } }}>{marginLabel(product)}</Badge>
-      </Tooltip>
-    </Box>
-  );
-}
-
-function ProductCard({ product, signal, topSeller, onAdd, onOpenDetail, onToggleFav, viewMode }: {
-  product: Product;
-  signal?: RadarSignal;
-  topSeller: boolean;
-  onAdd: () => void;
-  onOpenDetail: () => void;
-  onToggleFav: () => void;
-  viewMode: 'grid' | 'list';
-}) {
-  const name = productDisplayName(product);
-  const tags = (
-    <Group gap={4} wrap="wrap">
-      <Badge variant="light" color={availColor[product.availability]}>{product.availability}</Badge>
-      <SignalTag signal={signal} />
-      {topSeller && <Badge variant="light" color="brand" leftSection={<StarIcon size={14} weight="fill" />}>Mais vendida</Badge>}
-    </Group>
-  );
-  const addButton = (
-    <Button
-      onClick={onAdd}
-      variant="default"
-      disabled={product.availability === 'esgotado'}
-      leftSection={<PlusIcon size={18} />}
-    >
-      Adicionar
-    </Button>
-  );
-
-  if (viewMode === 'list') {
-    return (
-      <Card withBorder padding={0}>
-        <Flex p={{ base: 'sm', sm: 'md' }} gap={{ base: 'sm', sm: 'md' }} wrap={{ base: 'wrap', sm: 'nowrap' }} align="center">
-          <UnstyledButton onClick={onOpenDetail} w={{ base: 64, sm: 80 }} h={{ base: 64, sm: 80 }} flex="none">
-            <Paper bg="white" h="100%">
-              <ProductImage src={product.image} alt={name} fallback={<Group w="100%" h="100%" justify="center"><PackageIcon size={24} color={DIMMED} opacity={0.4} /></Group>} />
-            </Paper>
-          </UnstyledButton>
-          <UnstyledButton onClick={onOpenDetail} flex={1} miw={0}>
-            <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
-            <Text lh={1.5} fw={600}>{name}</Text>
-            <Text lh={1.5} c="dimmed" size="sm">{product.colors.join(' · ')} · {product.collection}</Text>
-            <Box mt="xs">{tags}</Box>
-          </UnstyledButton>
-          <Flex gap="sm" direction={{ base: 'row', sm: 'column' }} align={{ base: 'center', sm: 'flex-end' }} justify="space-between" wrap="wrap" w={{ base: '100%', sm: 'auto' }} flex="none">
-            <PriceBlock product={product} />
-            <Group gap="sm">
-              <Button onClick={onToggleFav} variant={product.isFavorite ? 'light' : 'default'} color="brand" leftSection={<HeartIcon size={18} weight={product.isFavorite ? 'fill' : 'regular'} />} aria-pressed={product.isFavorite}>
-                {product.isFavorite ? 'Favoritado' : 'Favoritar'}
-              </Button>
-              {addButton}
-            </Group>
-          </Flex>
-        </Flex>
-      </Card>
-    );
-  }
-
-  return (
-    <Card withBorder padding={0} className={classes.card}>
-      <Box pos="relative">
-        <UnstyledButton onClick={onOpenDetail} pos="relative" display="block" w="100%" pt="80%" bg="white" aria-label={`Ver detalhes de ${name}`}>
-          <Box pos="absolute" inset={0}>
-            <ProductImage
-              src={product.image}
-              alt={name}
-              imageProps={{ fit: 'contain', pt: 8, px: 8, className: classes.cardImage }}
-              fallback={<Group h="100%" justify="center"><PackageIcon size={40} color={DIMMED} opacity={0.3} /></Group>}
-            />
-          </Box>
-        </UnstyledButton>
-        <Button
-          onClick={onToggleFav}
-          pos="absolute" top={8} right={8} size="sm" px="xs"
-          variant={product.isFavorite ? 'light' : 'default'} color="brand"
-          leftSection={<HeartIcon size={16} weight={product.isFavorite ? 'fill' : 'regular'} />}
-          aria-pressed={!!product.isFavorite}
-        >
-          {product.isFavorite ? 'Favoritado' : 'Favoritar'}
-        </Button>
-        <Group pos="absolute" left={8} right={8} bottom={8} gap="sm" wrap="nowrap" className={classes.overlay} visibleFrom="sm">
-          <Button onClick={onOpenDetail} flex={1} miw={0} px="xs" variant="default" leftSection={<EyeIcon size={18} />}>Ver</Button>
-        </Group>
-      </Box>
-
-      <Box p="sm">
-        <UnstyledButton onClick={onOpenDetail} display="block" w="100%">
-          <Box mb="xs">{tags}</Box>
-          <Text lh={1.5} c="dimmed" size="sm" fw={600}>{product.line} · {product.reference}</Text>
-          <Text lh={1.5} mt={4} fw={600} lineClamp={2}>{name}</Text>
-          {/* cores do modelo (variações de cor) */}
-          <Text lh={1.5} c="dimmed" size="sm" truncate>{product.colors.join(' · ')}</Text>
-        </UnstyledButton>
-        <Divider my="sm" color={BORDER_COLOR} />
-        <PriceBlock product={product} />
-        <Group mt="sm" grow>{addButton}</Group>
-      </Box>
-    </Card>
-  );
-}
-
-/** Cor do modelo: o nome sem a linha ("Flow XL Purple" → "Purple"). */
 const colorwayOf = (p: Product) => p.name.replace(p.line, '').trim() || p.colors[0];
 
 /** Selo curto do sinal no cartão: crescimento sempre com escopo e período (BR-34). */
@@ -641,8 +499,57 @@ function ProductDetailPage({ product, entry, onClose, onSwitch, onToggleFav, isF
   );
 }
 
+// ---------------------------------------------------------------------------
+// Combos sugeridos (FR-206): modelos que vendem juntos. Mock até o motor do Radar gerar os pares.
+// Regra: nunca entra SKU com Sem giro ou Giro baixo na loja (BR-35); cada item entra pela grade (BR-20).
+// ---------------------------------------------------------------------------
+const COMBO_MOCK = [
+  { id: 'combo-street', name: 'Combo Street', reason: 'Lojas parecidas com a sua vendem estes modelos juntos · últimos 90 dias', productIds: ['P001', 'P002', 'P005'] },
+  { id: 'combo-lancamentos', name: 'Combo Lançamentos', reason: 'Os lançamentos com mais giro na sua região · últimos 30 dias', productIds: ['P009', 'P007', 'P010'] },
+];
+
+interface Combo { id: string; name: string; reason: string; items: Product[] }
+
+function suggestedCombos(radar: ReturnType<typeof useRadar>): Combo[] {
+  return COMBO_MOCK
+    .map(c => ({
+      ...c,
+      items: c.productIds
+        .map(id => products.find(p => p.id === id))
+        .filter((p): p is Product => !!p && !['sem-giro', 'giro-baixo'].includes(radar.byProduct[p.id]?.type ?? '')),
+    }))
+    .filter(c => c.items.length >= 2);
+}
+
+function CombosView({ combos, onOpenDetail, onAdd }: { combos: Combo[]; onOpenDetail: (p: Product) => void; onAdd: (p: Product) => void }) {
+  if (combos.length === 0) {
+    return <EmptyState icon={PackageIcon} title="Nenhum combo sugerido agora" description="Quando modelos que vendem juntos estiverem fora do seu mix, o Radar sugere um combo aqui." />;
+  }
+  return (
+    <Stack gap="md">
+      {combos.map(c => (
+        <Paper key={c.id} withBorder p={{ base: 'sm', sm: 'md' }}>
+          <Group justify="space-between" align="flex-start" gap="sm" mb="md">
+            <Box>
+              <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed">Combo sugerido · {c.items.length} modelos</Text>
+              <Title order={3} mt={2}>{c.name}</Title>
+              <Text size="sm" c="dimmed">{c.reason}</Text>
+            </Box>
+            <Text size="sm" c="dimmed" ta="right">Cada modelo entra pela<br />grade de numeração</Text>
+          </Group>
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 3, lg: 4 }} spacing={{ base: 'md', sm: 'lg' }}>
+            {c.items.map(p => (
+              <ModelCard key={p.id} variants={[p]} initialId={p.id} onOpenDetail={onOpenDetail} onAdd={onAdd} />
+            ))}
+          </SimpleGrid>
+        </Paper>
+      ))}
+    </Stack>
+  );
+}
+
 export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, onBackToRadar }: CatalogPageProps) {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [tab, setTab] = useState<'produtos' | 'combos'>('produtos');
   const [sortBy, setSortBy] = useState<string>(SORT_OPTIONS.some(o => o.value === initialSortBy) ? initialSortBy! : 'lancamento');
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set(products.filter(p => p.isFavorite).map(p => p.id)));
   const [detailProduct, setDetailProduct] = useState<Product | null>(() => products.find(p => p.id === entry?.productId) ?? null);
@@ -651,7 +558,6 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
   const radar = useRadar();
   const { openGrade } = useShop();
   const search = filters.search;
-  const setSearch = (v: string) => onFiltersChange({ ...filters, search: v });
 
   const band = priceBandOf(filters.priceBand);
   const filtered = products.filter(p => {
@@ -687,16 +593,6 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
   const clearFilters = () => onFiltersChange({ ...defaultFilters, search: filters.search, priceTable: filters.priceTable });
   const clearSearchAndFilters = () => onFiltersChange({ ...defaultFilters, priceTable: filters.priceTable });
 
-  // FR-203: filtros ativos como chips removíveis
-  const activeChips: { key: string; label: string; remove: () => void }[] = [
-    ...filters.radar.map(r => ({ key: `radar-${r}`, label: RADAR_FILTERS.find(f => f.value === r)?.label ?? r, remove: () => onFiltersChange({ ...filters, radar: filters.radar.filter(x => x !== r) }) })),
-    ...(filters.line !== 'Todos' ? [{ key: 'line', label: `Linha: ${filters.line}`, remove: () => onFiltersChange({ ...filters, line: 'Todos' }) }] : []),
-    ...(filters.collection !== 'Todas' ? [{ key: 'col', label: `Coleção: ${filters.collection}`, remove: () => onFiltersChange({ ...filters, collection: 'Todas' }) }] : []),
-    ...(filters.category !== 'Todos' ? [{ key: 'cat', label: `Categoria: ${filters.category}`, remove: () => onFiltersChange({ ...filters, category: 'Todos' }) }] : []),
-    ...(band ? [{ key: 'band', label: `Seu custo: ${PRICE_BANDS.find(b => b.value === filters.priceBand)?.label}`, remove: () => onFiltersChange({ ...filters, priceBand: '' }) }] : []),
-    ...(filters.size ? [{ key: 'size', label: `Numeração: ${filters.size}`, remove: () => onFiltersChange({ ...filters, size: '' }) }] : []),
-    ...filters.colors.map(c => ({ key: `color-${c}`, label: `Cor: ${c}`, remove: () => onFiltersChange({ ...filters, colors: filters.colors.filter(x => x !== c) }) })),
-  ];
 
   // ao voltar da página do produto, a grade reabre na mesma altura em que estava
   const gridScroll = useRef(0);
@@ -722,19 +618,6 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
     });
   }, [sorted]);
 
-  const renderProductCard = (product: Product, mode: 'grid' | 'list') => (
-    <ProductCard
-      key={product.id}
-      product={{ ...product, isFavorite: favoriteIds.has(product.id) }}
-      signal={radar.byProduct[product.id]}
-      topSeller={isTopSeller(product.id, radar)}
-      viewMode={mode}
-      // "Adicionar" sempre abre a grade, preenchida quando há sinal (FR-205)
-      onAdd={() => openGrade({ productId: product.id })}
-      onOpenDetail={() => openDetail(product)}
-      onToggleFav={() => toggleFav(product.id)}
-    />
-  );
 
   // Página do produto em página inteira, no lugar da grade; "Catálogo" no caminho volta para a grade
   if (detailProduct) {
@@ -754,85 +637,80 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
     );
   }
 
+  const combos = suggestedCombos(radar);
+
   return (
-    <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+    <Stack gap="md" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
+      {/* BR-72: vindo do Radar, o caminho começa nele */}
       {entry?.fromRadar && onBackToRadar && (
-        <Anchor component="button" type="button" fw={600} onClick={onBackToRadar} mb={-16}>
-          <Group gap={4} wrap="nowrap"><ArrowLeftIcon size={16} />Voltar ao Radar</Group>
-        </Anchor>
+        <Group gap={8} component="nav" aria-label="Caminho">
+          <Anchor component="button" type="button" size="sm" onClick={onBackToRadar}>Radar</Anchor>
+          <Text size="sm" c="dimmed" aria-hidden>/</Text>
+          <Text size="sm" fw={600} aria-current="page">Catálogo</Text>
+        </Group>
       )}
-      <CatalogFiltersBar filters={filters} onChange={onFiltersChange} sortBy={sortBy} onSortChange={setSortBy} />
 
-      <Card withBorder shadow="xs" padding={0}>
-        <Image src={bannerLimitedAsset} alt="Edição Limitada" h="auto" />
-      </Card>
+      {/* Abas Produtos / Combos sugeridos, com a busca à direita */}
+      <Group justify="space-between" align="flex-end" gap="sm" wrap="wrap" className={classes.tabsRow}>
+        <Group gap="lg" role="tablist" aria-label="Catálogo">
+          {([['produtos', 'Produtos'], ['combos', `Combos sugeridos (${combos.length})`]] as const).map(([value, label]) => (
+            <UnstyledButton key={value} role="tab" aria-selected={tab === value} onClick={() => setTab(value)} className={classes.tab} data-active={tab === value || undefined}>
+              {label}
+            </UnstyledButton>
+          ))}
+        </Group>
+        <Box pb={8} w={{ base: '100%', sm: 'auto' }}><CatalogSearch filters={filters} onChange={onFiltersChange} /></Box>
+      </Group>
 
-      <Stack gap="lg">
-        <Stack gap="md">
-          {/* contagem de resultados + filtros ativos removíveis + limpar */}
-          <Group gap="sm" wrap="wrap">
-            <Text fw={600} aria-live="polite">
-              {sorted.length} {sorted.length === 1 ? 'produto' : 'produtos'}
-              {viewMode === 'grid' && <Text span c="dimmed" fw={400} inherit> em {models.length} {models.length === 1 ? 'modelo' : 'modelos'}</Text>}
+      {tab === 'produtos' ? (
+        <>
+          <CatalogFiltersBar filters={filters} onChange={onFiltersChange} sortBy={sortBy} onSortChange={setSortBy} />
+
+          {/* contagem + limpar */}
+          <Group gap="sm" wrap="wrap" aria-live="polite">
+            <Text size="sm" c="dimmed">
+              <Text span inherit fw={600} c="var(--mantine-color-text)">{models.length} {models.length === 1 ? 'linha de produto' : 'linhas de produto'}</Text>
+              {' · '}{sorted.length} {sorted.length === 1 ? 'cor' : 'cores'}
+              {' · '}ordenado por {SORT_OPTIONS.find(o => o.value === sortBy)?.label.toLowerCase()}
             </Text>
-            {activeChips.map(ch => (
-              <Button key={ch.key} variant="light" color="brand" size="compact-md" rightSection={<XIcon size={16} />} onClick={ch.remove} aria-label={`Remover filtro ${ch.label}`}>
-                {ch.label}
-              </Button>
-            ))}
             {countActiveFilters(filters) > 0 && (
-              <Button variant="subtle" color="brand" size="compact-md" onClick={clearFilters}>Limpar filtros</Button>
+              <Button variant="subtle" color="brand" size="compact-sm" onClick={clearFilters} leftSection={<XIcon size={14} />}>Limpar filtros</Button>
             )}
-            <SegmentedControl
-              ml="auto"
-              value={viewMode}
-              onChange={v => setViewMode(v as 'grid' | 'list')}
-              aria-label="Modo de exibição"
-              data={[
-                { value: 'grid', label: <Group gap="xs" wrap="nowrap" justify="center"><GridNineIcon size={18} /><Text span inherit>Grade</Text></Group> },
-                { value: 'list', label: <Group gap="xs" wrap="nowrap" justify="center"><ListBulletsIcon size={18} /><Text span inherit>Lista</Text></Group> },
+          </Group>
+
+          {loading ? (
+            <CardGridSkeleton count={8} cols={{ base: 1, xs: 2, md: 3, lg: 4 }} imageRatio={1.25} />
+          ) : sorted.length === 0 ? (
+            <EmptyState
+              icon={PackageIcon}
+              title="Nenhum produto encontrado"
+              description="Nenhum produto combina com a busca e os filtros. Limpe a busca e os filtros para ver o catálogo inteiro."
+              action={{ label: 'Limpar Busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
+              suggestions={[
+                { label: 'Ver produtos em alta', description: 'Sinal Alto giro do Radar', icon: LightningIcon, onClick: () => onFiltersChange({ ...defaultFilters, priceTable: filters.priceTable, radar: ['alto-giro' as RadarFilter] }) },
               ]}
             />
-          </Group>
-        </Stack>
-
-        {loading ? (
-          viewMode === 'grid'
-            ? <CardGridSkeleton count={8} cols={{ base: 1, xs: 2, md: 3, lg: 4 }} imageRatio={1.25} />
-            : <ListSkeleton rows={5} withAvatar />
-        ) : sorted.length === 0 ? (
-          <EmptyState
-            icon={PackageIcon}
-            title="Nenhum produto encontrado"
-            description="Nenhum produto combina com a busca e os filtros. Limpe a busca e os filtros para ver o catálogo inteiro."
-            action={{ label: 'Limpar Busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
-            suggestions={[
-              { label: 'Ver produtos em alta', description: 'Sinal Alto giro do Radar', icon: LightningIcon, onClick: () => onFiltersChange({ ...defaultFilters, priceTable: filters.priceTable, radar: ['alto-giro' as RadarFilter] }) },
-            ]}
-          />
-        ) : viewMode === 'grid' ? (
-          // grade de 4 colunas dentro de um painel; 3, 2 e 1 coluna nas telas menores
-          <Paper withBorder p={{ base: 'sm', sm: 'md' }}>
-          <SimpleGrid cols={{ base: 1, xs: 2, md: 3, lg: 4 }} spacing={{ base: 'md', sm: 'lg' }} verticalSpacing={{ base: 'lg', sm: 'xl' }}>
-            {models.map(m => (
-              <ModelCard
-                key={m.line}
-                variants={m.variants}
-                initialId={m.variants[0].id}
-                onOpenDetail={p => openDetail(p)}
-                // "Adicionar" sempre abre a grade, preenchida quando há sinal (FR-205)
-                onAdd={p => openGrade({ productId: p.id })}
-              />
-            ))}
-          </SimpleGrid>
-          </Paper>
-        ) : (
-          <Stack gap="sm">
-            {sorted.map(product => renderProductCard(product, 'list'))}
-          </Stack>
-        )}
-      </Stack>
-
+          ) : (
+            // grade de 4 colunas dentro de um painel; 3, 2 e 1 coluna nas telas menores
+            <Paper withBorder p={{ base: 'sm', sm: 'md' }}>
+              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, lg: 4 }} spacing={{ base: 'md', sm: 'lg' }} verticalSpacing={{ base: 'lg', sm: 'xl' }}>
+                {models.map(m => (
+                  <ModelCard
+                    key={m.line}
+                    variants={m.variants}
+                    initialId={m.variants[0].id}
+                    onOpenDetail={p => openDetail(p)}
+                    // "Adicionar" sempre abre a grade, preenchida quando há sinal (FR-205)
+                    onAdd={p => openGrade({ productId: p.id })}
+                  />
+                ))}
+              </SimpleGrid>
+            </Paper>
+          )}
+        </>
+      ) : (
+        <CombosView combos={combos} onOpenDetail={p => openDetail(p)} onAdd={p => openGrade({ productId: p.id })} />
+      )}
     </Stack>
   );
 }
