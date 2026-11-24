@@ -46,8 +46,8 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | # | Tela proposta | Status | Onde está hoje | O que falta |
 |---|---|---|---|---|
 | 0.3 | Login do representante | Parcial | Mesmo `LoginPage.tsx` | Mesmas pendências do 0.2, sem login social |
-| 0.4 | Quem está usando agora | Existe | `WhoIsUsingPage.tsx`, depois do login do representante: titular (entra direto) e prepostos ativos de `data/linkedUsers.ts`; "Adicionar preposto" abre Permissões como titular; "Trocar usuário" no menu da conta volta para cá | Comentários do carrinho já saem no nome de quem opera. Outras ações (edições, aprovações) ainda saem no nome do titular |
-| 0.5 | PIN do auxiliar | Existe | Mesmo componente: teclado numérico e teclado físico, erro ao errar, "Esqueceu o PIN? Entrar como [titular]" | PIN de demonstração 1234 para todos; falta o cadastro de PIN por preposto em Permissões |
+| 0.4 | Quem está usando agora | Removida | O representante entra direto como titular depois do login | — |
+| 0.5 | PIN do auxiliar | Removida | Saiu junto com a tela 0.4 | — |
 | 5 | Radar do representante | Existe | `RepRadar.tsx`, `data/repRadar.ts`. Novo layout: "N lojas precisam de atenção"; "Aguardando você" (pedidos para confirmar, com "Aprovar todos"); "Oportunidade na carteira" (produto em alta que lojas da carteira não têm, com "Sugerir pras N lojas" por grade); "Carteira" loja por loja com o próximo passo e filtro Todas / Hoje / 15 dias / 30 dias. Os motivos de contato C-01 a C-09 continuam os mesmos | A oportunidade na carteira é mock (produto e lojas fixos) até integrar o sell-in por loja |
 | 5a | Carteira de clientes | Existe | `ClientsPage.tsx`, `ClientDetailPage.tsx` | Mostrar o score de recompra na lista |
 | 5b | Montar pedido sugerido | Em espera | O rep já cria carrinho para o cliente | Sem o Planejamento, seria um carrinho já preenchido a partir do histórico do cliente. Decidir se entra |
