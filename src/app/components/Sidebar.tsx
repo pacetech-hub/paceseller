@@ -24,7 +24,6 @@ import {
   HeadsetIcon,
   UserCircleIcon,
   UsersThreeIcon,
-  HandHeartIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import type { Client } from "../data/mockData";
@@ -35,7 +34,7 @@ import { NotificationsMenu } from "./NotificationsMenu";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support' | 'pos-venda'
+  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support'
   | 'checkout' | 'cart-chat';
 
 type Profile = 'admin' | 'rep' | 'lojista';
@@ -84,7 +83,7 @@ interface MenuPage {
  */
 const MENU_ORDER: View[] = [
   'radar', 'catalog', 'carts', 'clients', 'history', 'industry-stock', 'stock', 'ficha-tecnica',
-  'pos-venda', 'boletos', 'marketing',
+  'boletos', 'marketing',
 ];
 
 /** Páginas de cada perfil (a ordem vem de MENU_ORDER). */
@@ -115,7 +114,6 @@ const PROFILE_PAGES: Record<Profile, MenuPage[]> = {
     { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
     { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
     { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-    { icon: HandHeartIcon, label: 'Pós-venda', view: 'pos-venda' },
     { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
     { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
   ],

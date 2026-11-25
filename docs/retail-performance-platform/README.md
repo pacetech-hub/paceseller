@@ -39,7 +39,7 @@ Legenda: **Existe** = já no app · **Parcial** = existe com outra forma ou sem 
 | 11 | Pagamento e Entrega | Parcial | Bloco de pagamento dentro de `CartPage.tsx` | Tela própria com endereço, prazo, nota fiscal e contrato |
 | 12 | Pedido confirmado | Existe | `CartPage.tsx` ("Pedido confirmado") | Conferir CTAs: "Voltar ao radar" / "Acompanhar pedido" |
 | 13 | Acompanhamento do pedido | Existe | `OrderDetailPage.tsx`: botão "Ver detalhes" ao lado do status abre a linha do tempo recebido → aprovado → em produção → faturado e enviado → entregue, com transportadora e rastreio | Transportadora e rastreio são mock até existir integração |
-| 14 | Pós-venda: Radar de fidelização (consumidor final) | Existe (mock) | `PosVendaPage.tsx`, `data/posVenda.ts`, no menu do lojista: cartões de sumidos (90+ dias), aniversariantes (30 dias) e produto mais recomprado; lista por segmento (Todos, Aniversariantes, Sumidos, Fiéis, Novos) com busca; campanha personalizada por WhatsApp ou e-mail com {nome} e prévia; quem não autorizou contato fica de fora | Os clientes são mock. Falta decidir a fonte (CRM / PDV da loja, "store CRM" no spec) e o envio real |
+| 14 | Pós-venda: Radar de fidelização (consumidor final) | Removido | A página saiu do menu do lojista e do projeto (`PosVendaPage.tsx` e `data/posVenda.ts` apagados) | Retomar só se o escopo voltar a incluir o consumidor final; o motivo "Pós-venda" do Radar do representante (C-08) é outra coisa e continua |
 
 ### Representante
 
