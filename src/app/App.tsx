@@ -15,6 +15,7 @@ import { OrderGrade } from "./components/OrderGrade";
 import { CartPage } from "./components/CartPage";
 import { CartsListPage } from "./components/CartsListPage";
 import { CheckoutPage } from "./components/CheckoutPage";
+import { CartChatPage } from "./components/CartChatPage";
 import { CartDrawer } from "./components/CartDrawer";
 import { GradeSheet } from "./components/SizeGrade";
 import { isOpen, toContext, getCart, useCartStore, type CartContext, type CartCreator } from "./data/cartStore";
@@ -266,10 +267,13 @@ export default function App() {
             onSwitchCart={setActiveCart}
             viewerRole={viewerRole}
             onCheckout={profile === 'lojista' ? () => setCurrentView('checkout') : undefined}
+            onOpenChat={profile === 'lojista' ? () => setCurrentView('cart-chat') : undefined}
           />
         );
       case 'checkout':
         return <CheckoutPage cartContext={activeCart} onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))} />;
+      case 'cart-chat':
+        return <CartChatPage cartContext={activeCart} onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))} />;
       case 'carts':
         return (
           <CartsListPage

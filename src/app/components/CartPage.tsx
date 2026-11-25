@@ -33,6 +33,8 @@ interface CartPageProps {
   viewerRole?: CartCreator;
   /** Abre a página de pagamento do pedido (lojista, depois que o representante confirma). */
   onCheckout?: () => void;
+  /** Abre a página de conversa com o representante (lojista); sem ela, foca a conversa desta página. */
+  onOpenChat?: () => void;
 }
 
 function LineItem({ cart, productId, sizes, editable }: {
@@ -84,7 +86,7 @@ function LineItem({ cart, productId, sizes, editable }: {
   );
 }
 
-export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = 'lojista', onCheckout }: CartPageProps) {
+export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = 'lojista', onCheckout, onOpenChat }: CartPageProps) {
   const { carts } = useCartStore();
   const radar = useRadar();
   const { openGrade, actorName } = useShop();
@@ -141,7 +143,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
     }
   })();
 
-  const talkToRep = () => commentRef.current?.focus();
+  const talkToRep = () => (onOpenChat ? onOpenChat() : commentRef.current?.focus());
   const sendComment = () => {
     addComment(cart.id, viewerRole, viewerRole === 'lojista' ? 'Você' : actorName ?? cart.rep, comment);
     setComment('');
