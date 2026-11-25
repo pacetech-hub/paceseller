@@ -1,5 +1,6 @@
 import { createTheme, type MantineColorsTuple } from "@mantine/core";
 import { tokens } from "./tokens";
+import tabsClasses from "./tabs.module.css";
 
 // Todos os valores visuais vêm dos design tokens (design-tokens/design-tokens.tokens.json),
 // convertidos por scripts/build-tokens.mjs em ./tokens.ts. Rode `bun run tokens` ao atualizar o JSON.
@@ -216,6 +217,11 @@ export const mantineTheme = createTheme({
     Combobox: { styles: { groupLabel: { fontWeight: SEMIBOLD } } },
     Notification: { styles: { title: { fontWeight: SEMIBOLD } } },
     Timeline: { styles: { itemTitle: { fontWeight: SEMIBOLD } } },
-    Tabs: { styles: { tab: { fontWeight: SEMIBOLD } } },
+    // Abas: um só desenho (caixa-alta mono, traço na ativa) — ver tabs.module.css.
+    // Para escolher um valor (período, forma de pagamento) use SegmentedControl, não abas.
+    Tabs: {
+      defaultProps: { variant: "default", keepMounted: false },
+      classNames: { list: tabsClasses.list, tab: tabsClasses.tab, tabSection: tabsClasses.tabSection },
+    },
   },
 });

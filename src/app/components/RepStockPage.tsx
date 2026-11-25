@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Container, Stack, Group, SegmentedControl, Badge } from "@mantine/core";
-import { WarehouseIcon, StorefrontIcon, EyeIcon } from "@phosphor-icons/react";
+import { Box, Container, Stack, Tabs, Badge } from "@mantine/core";
+import { EyeIcon } from "@phosphor-icons/react";
 import { clients } from "../data/mockData";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 
 const tabs = [
-  { id: 'industrial', label: 'Estoque Industrial', icon: WarehouseIcon },
-  { id: 'cliente', label: 'Estoque do Cliente', icon: StorefrontIcon },
+  { id: 'industrial', label: 'Estoque Industrial' },
+  { id: 'cliente', label: 'Estoque do Cliente' },
 ] as const;
 
 type TabId = (typeof tabs)[number]['id'];
@@ -19,28 +19,14 @@ export function RepStockPage() {
   return (
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="xl">
-        <Group justify="space-between" gap="sm" wrap="wrap">
-          <SegmentedControl
-            w={{ base: '100%', sm: 'auto' }}
-            value={activeTab}
-            onChange={v => setActiveTab(v as TabId)}
-            data={tabs.map(tab => {
-              const Icon = tab.icon;
-              return {
-                value: tab.id,
-                label: (
-                  <Group gap="xs" wrap="nowrap">
-                    <Icon size={16} />
-                    {tab.label}
-                  </Group>
-                ),
-              };
-            })}
-          />
-          <Badge variant="light" color="gray" leftSection={<EyeIcon size={14} />}>
-            Somente visualização
-          </Badge>
-        </Group>
+        <Tabs value={activeTab} onChange={v => v && setActiveTab(v as TabId)}>
+          <Tabs.List aria-label="Estoque">
+            {tabs.map(tab => <Tabs.Tab key={tab.id} value={tab.id}>{tab.label}</Tabs.Tab>)}
+            <Box ml="auto" pl="md" pb={8} style={{ alignSelf: 'flex-end', flex: 'none' }}>
+              <Badge variant="light" color="gray" leftSection={<EyeIcon size={14} />}>Somente visualização</Badge>
+            </Box>
+          </Tabs.List>
+        </Tabs>
 
         {activeTab === 'industrial' ? (
           <IndustryStockTable readOnly />

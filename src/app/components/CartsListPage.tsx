@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  Anchor, Avatar, Badge, Box, Button, Group, Image, Paper, Popover, SegmentedControl, Stack, Text, TextInput, ThemeIcon, Title, UnstyledButton,
+  Anchor, Avatar, Badge, Box, Button, Group, Image, Paper, Popover, Stack, Tabs, Text, TextInput, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
   ArrowsLeftRightIcon, CaretRightIcon, ClockIcon, MagnifyingGlassIcon, PaperPlaneTiltIcon, PlusIcon, ShoppingCartIcon,
@@ -364,21 +364,12 @@ export function CartsListPage({
         )}
 
         {!lockClient && selectedClient && (
-          <SegmentedControl
-            value={showAll ? 'all' : 'client'}
-            onChange={v => setShowAll(v === 'all')}
-            w={{ base: '100%', xs: 'auto' }}
-            style={{ alignSelf: 'flex-start' }}
-            data={[
-              { value: 'client', label: 'Desta loja' },
-              { value: 'all', label: (
-                <Group gap="xs" wrap="nowrap" justify="center">
-                  <ArrowsLeftRightIcon size={16} />Toda a carteira
-                  {otherCarts.length > 0 && <Badge variant="default">+{otherCarts.length}</Badge>}
-                </Group>
-              ) },
-            ]}
-          />
+          <Tabs value={showAll ? 'all' : 'client'} onChange={v => v && setShowAll(v === 'all')}>
+            <Tabs.List aria-label="Quais carrinhos">
+              <Tabs.Tab value="client">Desta loja</Tabs.Tab>
+              <Tabs.Tab value="all">Toda a carteira{otherCarts.length > 0 ? ` (+${otherCarts.length})` : ''}</Tabs.Tab>
+            </Tabs.List>
+          </Tabs>
         )}
 
         {newOpen && selectedClient && (

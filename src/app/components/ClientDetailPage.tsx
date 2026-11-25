@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Stack, Group, Box, Paper, Text, Title, Button, Badge, ThemeIcon, SimpleGrid, Avatar, Collapse,
-  Divider, Progress, AspectRatio, Image, Center, ColorSwatch, Card, Skeleton,
+  Divider, Progress, AspectRatio, Image, Center, ColorSwatch, Card, Skeleton, Tabs,
 } from "@mantine/core";
 import {
   CaretLeftIcon,
@@ -399,30 +399,14 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       <Paper withBorder p={{ base: 'md', sm: 'lg' }} id="sugestoes-de-venda">
         <Title order={2} fw={600} mb="sm">Sugestões de venda</Title>
 
-        <Group gap="sm" mb="md">
-          <Button
-            onClick={() => setStockFilter('todos')}
-            variant={stockFilter === 'todos' ? 'light' : 'default'}
-            aria-pressed={stockFilter === 'todos'}
-            color="brand"
-          >
-            Todos
-          </Button>
-          {(Object.keys(STOCK_STATUS_CONFIG) as StockStatusKey[]).map(key => {
-            const active = stockFilter === key;
-            return (
-              <Button
-                key={key}
-                onClick={() => setStockFilter(key)}
-                variant={active ? 'light' : 'default'}
-                aria-pressed={active}
-                color="brand"
-              >
-                {STOCK_STATUS_CONFIG[key].filterLabel}
-              </Button>
-            );
-          })}
-        </Group>
+        <Tabs value={stockFilter} onChange={v => v && setStockFilter(v as typeof stockFilter)} mb="md">
+          <Tabs.List aria-label="Filtrar sugestões">
+            <Tabs.Tab value="todos">Todos</Tabs.Tab>
+            {(Object.keys(STOCK_STATUS_CONFIG) as StockStatusKey[]).map(key => (
+              <Tabs.Tab key={key} value={key}>{STOCK_STATUS_CONFIG[key].filterLabel}</Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs>
 
         {filteredBuyProducts.length > 0 ? (
           <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">

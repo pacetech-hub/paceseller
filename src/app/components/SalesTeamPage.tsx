@@ -37,7 +37,6 @@ export function SalesTeamPage({ scope, entities, onBack, backLabel = 'Indicadore
         <SegmentedControl
           value={period}
           onChange={v => setPeriod(v as Period)}
-          color="brand"
           data={PERIOD_OPTIONS.map(opt => ({ value: opt.id, label: opt.label }))}
         />
       </Group>

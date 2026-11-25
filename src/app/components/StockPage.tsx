@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
-import { Container, Stack, Paper, Group, Box, Text, Title, ThemeIcon, SegmentedControl, SimpleGrid, UnstyledButton, Badge, Button, Table, NumberInput } from "@mantine/core";
+import { Container, Stack, Paper, Group, Box, Text, Title, ThemeIcon, Tabs, SimpleGrid, UnstyledButton, Badge, Button, Table, NumberInput } from "@mantine/core";
 import {
   WarehouseIcon,
   PlugIcon,
-  PencilSimpleIcon,
   ArrowsClockwiseIcon,
   CheckCircleIcon,
 } from "@phosphor-icons/react";
@@ -34,8 +33,8 @@ const initialStock: StockItem[] = products.slice(0, 12).map((p, i) => ({
 }));
 
 const MODE_OPTIONS = [
-  { value: 'manual', label: 'Cadastro manual', icon: PencilSimpleIcon },
-  { value: 'integration', label: 'Integração ERP', icon: PlugIcon },
+  { value: 'manual', label: 'Cadastro manual' },
+  { value: 'integration', label: 'Integração ERP' },
 ] as const;
 
 const INTEGRATIONS = ['Bling', 'Tiny ERP', 'Omie', 'API customizada'];
@@ -90,25 +89,15 @@ export function StockPage() {
                 </Text>
               </Box>
             </Group>
-            <SegmentedControl
-              w={{ base: '100%', sm: 'auto' }}
-              value={mode}
-              onChange={v => setMode(v as Mode)}
-              data={MODE_OPTIONS.map(o => {
-                const Icon = o.icon;
-                return {
-                  value: o.value,
-                  label: (
-                    <Group gap="xs" wrap="nowrap">
-                      <Icon size={16} />
-                      {o.label}
-                    </Group>
-                  ),
-                };
-              })}
-            />
           </Group>
         </Paper>
+
+        {/* Como o estoque entra: cadastro manual ou integração com o ERP */}
+        <Tabs value={mode} onChange={v => v && setMode(v as Mode)}>
+          <Tabs.List aria-label="Como atualizar o estoque">
+            {MODE_OPTIONS.map(o => <Tabs.Tab key={o.value} value={o.value}>{o.label}</Tabs.Tab>)}
+          </Tabs.List>
+        </Tabs>
 
         {loading ? <KpiSkeleton count={4} cols={{ base: 2, lg: 4 }} /> : <StockKpis items={items} />}
 

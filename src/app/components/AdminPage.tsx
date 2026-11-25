@@ -5,10 +5,6 @@ import {
 } from "@mantine/core";
 import {
   UsersIcon,
-  WarehouseIcon,
-  TagIcon,
-  GearIcon,
-  ShieldIcon,
   PlusIcon,
   PencilSimpleLineIcon,
   TrashIcon,
@@ -20,8 +16,6 @@ import {
   UserCircleIcon,
   StackIcon,
   PackageIcon,
-  LockIcon,
-  StorefrontIcon,
   PlugChargingIcon,
   type Icon,
 } from "@phosphor-icons/react";
@@ -38,15 +32,14 @@ import { DataTable, DataTableEmptyRow, TableToolbar } from "./ui/DataTable";
 import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 import classes from "./interactive.module.css";
-import admin from "./AdminPage.module.css";
 
 const tabs = [
-  { id: 'industry-stock', label: 'Estoque Industrial', icon: WarehouseIcon },
-  { id: 'client-stock', label: 'Estoque do Cliente', icon: StorefrontIcon },
-  { id: 'pricing', label: 'Campanhas Comerciais', icon: TagIcon },
-  { id: 'policies', label: 'Políticas', icon: LockIcon },
-  { id: 'permissions', label: 'Permissões', icon: ShieldIcon },
-  { id: 'settings', label: 'Configurações', icon: GearIcon },
+  { id: 'industry-stock', label: 'Estoque Industrial' },
+  { id: 'client-stock', label: 'Estoque do Cliente' },
+  { id: 'pricing', label: 'Campanhas Comerciais' },
+  { id: 'policies', label: 'Políticas' },
+  { id: 'permissions', label: 'Permissões' },
+  { id: 'settings', label: 'Configurações' },
 ];
 
 // Enquanto os dados "carregam", mostra o skeleton no lugar só da região de dados
@@ -290,35 +283,12 @@ export function AdminPage() {
 
   return (
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
-      {/* Tab bar */}
-      <Paper withBorder p={4}>
-        <Tabs value={activeTab} onChange={v => v && setActiveTab(v)} variant="pills" color="gray">
-          <Tabs.List className={admin.tabList}>
-            {tabs.map(tab => {
-              const TabIcon = tab.icon;
-              const active = activeTab === tab.id;
-              return (
-                <Tabs.Tab
-                  key={tab.id}
-                  value={tab.id}
-                  leftSection={<TabIcon size={16} />}
-                  flex="none"
-                  className={admin.tab}
-                  styles={{
-                    tab: {
-                      fontWeight: active ? 600 : 400,
-                      color: active ? 'var(--mantine-color-text)' : 'var(--mantine-color-dimmed)',
-                      backgroundColor: active ? 'var(--mantine-color-default-hover)' : undefined,
-                    },
-                  }}
-                >
-                  {tab.label}
-                </Tabs.Tab>
-              );
-            })}
-          </Tabs.List>
-        </Tabs>
-      </Paper>
+      {/* Abas da Gestão (desenho único de abas do app) */}
+      <Tabs value={activeTab} onChange={v => v && setActiveTab(v)}>
+        <Tabs.List aria-label="Gestão">
+          {tabs.map(tab => <Tabs.Tab key={tab.id} value={tab.id}>{tab.label}</Tabs.Tab>)}
+        </Tabs.List>
+      </Tabs>
 
       {/* Estoque Industrial Tab */}
       {activeTab === 'industry-stock' && (

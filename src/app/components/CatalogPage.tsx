@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ActionIcon, Anchor, Badge, Box, Button, Divider, Grid, Group, Paper,
-  SimpleGrid, Image, Skeleton, Stack, Table, Text, Title, Tooltip, UnstyledButton,
+  SimpleGrid, Image, Skeleton, Stack, Table, Tabs, Text, Title, Tooltip, UnstyledButton,
   type ImageProps,
 } from "@mantine/core";
 import {
@@ -650,17 +650,15 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
         </Group>
       )}
 
-      {/* Abas Produtos / Combos sugeridos, com a busca à direita */}
-      <Group justify="space-between" align="flex-end" gap="sm" wrap="wrap" className={classes.tabsRow}>
-        <Group gap="lg" role="tablist" aria-label="Catálogo">
-          {([['produtos', 'Produtos'], ['combos', `Combos sugeridos (${combos.length})`]] as const).map(([value, label]) => (
-            <UnstyledButton key={value} role="tab" aria-selected={tab === value} onClick={() => setTab(value)} className={classes.tab} data-active={tab === value || undefined}>
-              {label}
-            </UnstyledButton>
-          ))}
-        </Group>
-        <Box pb={8} w={{ base: '100%', sm: 'auto' }}><CatalogSearch filters={filters} onChange={onFiltersChange} /></Box>
-      </Group>
+      {/* Abas Produtos / Combos sugeridos, com a busca à direita (no celular, a busca vem embaixo) */}
+      <Tabs value={tab} onChange={v => v && setTab(v as typeof tab)}>
+        <Tabs.List aria-label="Catálogo">
+          <Tabs.Tab value="produtos">Produtos</Tabs.Tab>
+          <Tabs.Tab value="combos">Combos sugeridos ({combos.length})</Tabs.Tab>
+          <Box ml="auto" pb={8} pl="md" visibleFrom="sm" style={{ alignSelf: 'flex-end' }}><CatalogSearch filters={filters} onChange={onFiltersChange} /></Box>
+        </Tabs.List>
+      </Tabs>
+      <Box hiddenFrom="sm"><CatalogSearch filters={filters} onChange={onFiltersChange} /></Box>
 
       {tab === 'produtos' ? (
         <>

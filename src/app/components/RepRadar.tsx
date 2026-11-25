@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
+import { TabCount } from "./ui/TabCount";
 import {
-  ActionIcon, Badge, Box, Button, Checkbox, Divider, Flex, Group, Menu, Modal, NumberInput, Paper, SimpleGrid, Stack, Text, ThemeIcon, Title, UnstyledButton,
+  ActionIcon, Badge, Box, Button, Checkbox, Divider, Flex, Group, Menu, Modal, NumberInput, Paper, SimpleGrid, Stack, Tabs, Text, ThemeIcon, Title, UnstyledButton,
 } from "@mantine/core";
 import {
   ArrowCounterClockwiseIcon, ArrowRightIcon, CalendarCheckIcon, CheckIcon, ClockIcon, CurrencyCircleDollarIcon, DotsThreeVerticalIcon,
@@ -347,31 +348,19 @@ function CarteiraCard({ carteira, contacts, contacted, onCta }: {
 
   return (
     <Paper withBorder p="lg">
-      <Group justify="space-between" gap="sm" wrap="wrap">
-        <Text fw={600}>Carteira</Text>
-        <Group gap={6} wrap="wrap">
+      <Text fw={600}>Carteira</Text>
+      <Tabs value={filter} onChange={v => v && setFilter(v as typeof filter)} mt="xs">
+        <Tabs.List aria-label="Prazo de contato">
           {FILTERS.map(f => {
-            const active = filter === f.value;
             const n = f.value === 'todas' ? null : count(f.value);
             return (
-              <Button
-                key={f.value}
-                size="compact-sm"
-                radius="xl"
-                variant={active ? 'outline' : 'default'}
-                color="brand"
-                fw={active ? 600 : 400}
-                onClick={() => setFilter(f.value)}
-                aria-pressed={active}
-                styles={active ? { root: { borderWidth: 2 } } : undefined}
-              >
-                {f.label}{n !== null && <Text span inherit c="dimmed" ml={6} className="mono">{n}</Text>}
-              </Button>
+              <Tabs.Tab key={f.value} value={f.value} rightSection={n !== null ? <TabCount value={n} /> : undefined}>
+                {f.label}
+              </Tabs.Tab>
             );
           })}
-        </Group>
-      </Group>
-      <Divider mt="sm" />
+        </Tabs.List>
+      </Tabs>
 
       {rows.length === 0 ? (
         <Text c="dimmed" size="sm" py="md">Nenhuma loja com contato neste período.</Text>

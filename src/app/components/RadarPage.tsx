@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { TabCount } from "./ui/TabCount";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
@@ -7,7 +8,7 @@ import { LojistaOrdersSection } from "./LojistaOrdersSection";
 import { IndustrySalesSection } from "./IndustrySalesSection";
 import { LojistaPurchasesSection } from "./LojistaPurchasesSection";
 import {
-  Stack, Paper, Text, Title, ThemeIcon, Tabs, Badge, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
+  Stack, Paper, Text, Title, ThemeIcon, Tabs, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
 } from "@mantine/core";
 import {
   TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
@@ -275,25 +276,15 @@ function BucketTabs({ value, onChange, counts, noun = ['pendência', 'pendência
   noun?: [string, string];
 }) {
   return (
-    <Tabs value={value} onChange={(v) => { if (v) onChange(v as Bucket); }} variant="pills">
-      <Tabs.List>
+    <Tabs value={value} onChange={(v) => { if (v) onChange(v as Bucket); }}>
+      <Tabs.List aria-label="Prazo">
         {PERIODS.map(p => {
           const { total, critical } = counts(p.value);
           return (
             <Tabs.Tab
               key={p.value}
               value={p.value}
-              rightSection={
-                <Badge
-                  size="sm"
-                  circle
-                  color={critical > 0 ? 'red' : total > 0 ? 'brand' : 'gray'}
-                  variant={total > 0 ? 'filled' : 'light'}
-                  aria-label={`${total} ${total === 1 ? noun[0] : noun[1]}${critical ? `, ${critical} críticos` : ''}`}
-                >
-                  {total}
-                </Badge>
-              }
+              rightSection={<TabCount value={total} critical={critical > 0} label={`${total} ${total === 1 ? noun[0] : noun[1]}${critical ? `, ${critical} críticos` : ''}`} />}
             >
               {p.label}
             </Tabs.Tab>

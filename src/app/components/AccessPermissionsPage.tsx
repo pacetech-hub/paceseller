@@ -216,7 +216,6 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                     value={u.profile}
                     onChange={v => changeUserProfile(u.id, v)}
                     data={availableProfiles}
-                    color="brand"
                     aria-label={`Perfil de acesso de ${u.name}`}
                   />
                 </Table.Td>

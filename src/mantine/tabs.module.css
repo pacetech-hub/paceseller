@@ -1,0 +1,55 @@
+/* Abas do app (um só desenho em todas as páginas): rótulo em caixa alta e monoespaçado,
+   inativa em cinza, ativa em negrito com traço de 2px na cor do texto. Linha fina embaixo
+   da lista inteira. Classes duplicadas para vencer o estilo padrão do Tabs do Mantine. */
+
+.list.list {
+  gap: var(--mantine-spacing-lg);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.list.list::-webkit-scrollbar {
+  display: none;
+}
+
+.list.list::before {
+  border-color: var(--mantine-color-default-border);
+  border-bottom-width: 1px;
+}
+
+.tab.tab {
+  flex: none;
+  padding: 8px 0 10px;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--mantine-color-dimmed);
+  background-color: transparent;
+  border-bottom-width: 2px;
+  border-radius: 0;
+}
+
+.tab.tab:hover {
+  color: var(--mantine-color-text);
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.tab.tab[data-active] {
+  color: var(--mantine-color-text);
+  font-weight: 700;
+  border-color: var(--mantine-color-text);
+}
+
+.tab.tab:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.tabSection.tabSection {
+  font-family: var(--mantine-font-family-monospace);
+}
