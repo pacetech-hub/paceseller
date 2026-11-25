@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect, useRef } from "react";
 import {
   Group, Button, ActionIcon, Indicator, Text, Box, Stack, NavLink, Tooltip, Drawer, Image, UnstyledButton, Divider, Menu, ThemeIcon, Title,
+  Anchor, Badge,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -67,6 +68,8 @@ interface TopBarProps {
   accountOwner?: string;
   /** Conta compartilhada (representante): volta para "Quem está usando agora". */
   onSwitchUser?: () => void;
+  /** Representante: abre a escolha da loja em atendimento ("Trocar loja"). */
+  onSwitchStore?: () => void;
 }
 
 interface MenuPage {
@@ -81,7 +84,7 @@ interface MenuPage {
  * As últimas são as primeiras a ir para o "Mais" quando falta largura.
  */
 const MENU_ORDER: View[] = [
-  'radar', 'catalog', 'clients', 'history', 'industry-stock', 'stock', 'ficha-tecnica',
+  'radar', 'catalog', 'carts', 'clients', 'history', 'industry-stock', 'stock', 'ficha-tecnica',
   'pos-venda', 'boletos', 'marketing',
 ];
 
@@ -100,6 +103,7 @@ const PROFILE_PAGES: Record<Profile, MenuPage[]> = {
   rep: [
     { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
     { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
+    { icon: ShoppingCartIcon, label: 'Carrinhos', view: 'carts' },
     { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
     { icon: ClockIcon, label: 'Pedidos', view: 'history' },
     { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
@@ -230,9 +234,11 @@ function PriorityNav({ pages, currentView, onSelect }: { pages: MenuPage[]; curr
 }
 
 /** Páginas de detalhe marcam no menu a seção de onde vieram. */
-const PARENT_VIEW: Partial<Record<View, View>> = { 'order-detail': 'history', 'client-detail': 'clients' };
+const PARENT_VIEW: Partial<Record<View, View>> = {
+  'order-detail': 'history', 'client-detail': 'clients', cart: 'carts', 'cart-chat': 'carts', checkout: 'carts',
+};
 
-export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer, accountOwner, onSwitchUser }: TopBarProps) {
+export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer, accountOwner, onSwitchUser, onSwitchStore }: TopBarProps) {
   const [navOpened, { open: openNav, close: closeNav }] = useDisclosure(false);
   const currentView = PARENT_VIEW[view] ?? view;
   const profileInfo = profileLabels[profile];
@@ -316,22 +322,25 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
             </Tooltip>
           </Indicator>
 
-          {/* Cliente em atendimento (rep), leva aos pedidos dele */}
-          {selectedClient && (
-            <Button
-              onClick={() => onNavigate('history')}
-              variant="default"
-              maw={{ sm: 180, lg: 260 }}
-              visibleFrom="md"
-              leftSection={<StorefrontIcon size={16} />}
-              aria-label={`Ver Histórico de Pedidos de ${selectedClient.name}`}
-              styles={{ label: { overflow: 'hidden' } }}
-            >
-              <Stack gap={0} miw={0} align="flex-start">
-                <Text span size="sm" c="dimmed" lh={1.2}>Ver pedidos de</Text>
-                <Text span fw={600} lh={1.2} truncate maw="100%">{selectedClient.name}</Text>
-              </Stack>
-            </Button>
+          {/* Loja em atendimento (rep): o carrinho, o catálogo e os pedidos são sempre desta loja */}
+          {onSwitchStore && (
+            selectedClient ? (
+              <Group gap={6} wrap="nowrap" visibleFrom="md" maw={{ md: 280, lg: 360 }} miw={0}>
+                <Text size="sm" c="dimmed" flex="none">Atendendo:</Text>
+                <Text size="sm" fw={700} truncate>{selectedClient.name}</Text>
+                <Anchor component="button" type="button" size="sm" fw={600} flex="none" onClick={onSwitchStore}>Trocar loja</Anchor>
+              </Group>
+            ) : (
+              <Button variant="default" size="compact-md" visibleFrom="md" leftSection={<StorefrontIcon size={16} />} onClick={onSwitchStore}>
+                Escolher loja
+              </Button>
+            )
+          )}
+
+          {profile === 'rep' && (
+            <Badge variant="outline" color="gray" radius="sm" ff="monospace" visibleFrom="lg" styles={{ label: { letterSpacing: 0.6 } }}>
+              Representante
+            </Badge>
           )}
 
           {/* Menu da conta: perfil, permissões/administração, suporte e sair */}
@@ -385,6 +394,16 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
         title={<Image src={teslaLogo} alt="Tesla Footwear" h={24} w="auto" fit="contain" />}
       >
         <Stack gap={0} component="nav" aria-label="Páginas">
+          {onSwitchStore && (
+            <NavLink
+              onClick={() => { closeNav(); onSwitchStore(); }}
+              label={selectedClient ? `Atendendo: ${selectedClient.name}` : 'Escolher loja'}
+              description={selectedClient ? 'Trocar loja' : undefined}
+              leftSection={<StorefrontIcon size={18} />}
+              classNames={{ root: classes.drawerLink, label: classes.drawerLabel }}
+              mb="xs"
+            />
+          )}
           {pages.map(drawerLink)}
           <Divider my="sm" />
           {account.map(drawerLink)}

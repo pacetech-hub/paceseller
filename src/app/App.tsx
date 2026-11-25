@@ -42,6 +42,7 @@ import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
 import { RadarPage } from "./components/RadarPage";
 import { SupportPage } from "./components/SupportPage";
 import { PosVendaPage } from "./components/PosVendaPage";
+import { StorePickerModal } from "./components/StorePickerModal";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -96,6 +97,7 @@ export default function App() {
   const [catalogSortBy, setCatalogSortBy] = useState<string | null>(null);
   const [gradeRequest, setGradeRequest] = useState<GradeRequest | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [storePickerOpen, setStorePickerOpen] = useState(false);
 
   const viewerRole: CartCreator = profile === 'lojista' ? 'lojista' : 'rep';
   // Lojista não seleciona cliente — ele é o próprio cliente da sua loja.
@@ -209,6 +211,8 @@ export default function App() {
         title: 'Suporte',
         subtitle: profile === 'admin' ? 'Contatos de atendimento exibidos para os lojistas' : 'Seus contatos exibidos para os lojistas',
       }
+    : currentView === 'carts' && profile === 'rep'
+    ? { title: selectedClient ? `Carrinhos de ${selectedClient.name}` : 'Carrinhos', subtitle: 'Carrinhos das lojas que você atende' }
     : currentView === 'radar' && profile === 'rep'
     ? { title: 'Radar', subtitle: 'Quem da sua carteira precisa de contato e por quê' }
     : currentView === 'radar' && profile === 'admin'
@@ -390,6 +394,7 @@ export default function App() {
           cartCount={cartsClient ? clientCarts.length : carts.filter(isOpen).length}
           showCart={commerceView}
           selectedClient={commerceView ? selectedClient : null}
+          onSwitchStore={profile === 'rep' && commerceView ? () => setStorePickerOpen(true) : undefined}
         />
         <Box component="main" flex={1} className={classes.main}>
           {renderView()}
@@ -397,6 +402,23 @@ export default function App() {
       </Stack>
       <CartDrawer opened={drawerOpen} onClose={() => setDrawerOpen(false)} onViewCarts={() => navigate('carts')} />
       <GradeSheet request={gradeRequest} onClose={() => setGradeRequest(null)} />
+      {profile === 'rep' && (
+        <StorePickerModal
+          opened={storePickerOpen}
+          onClose={() => setStorePickerOpen(false)}
+          repName={CURRENT_REP_NAME}
+          current={selectedClient}
+          onSelect={(c) => {
+            if (selectedClient?.id === c.id) return;
+            setSelectedClient(c);
+            // o carrinho aberto era da loja anterior: volta para os carrinhos da loja nova
+            if (currentView === 'cart' || currentView === 'cart-chat' || currentView === 'checkout') {
+              setActiveCart(null);
+              setCurrentView('carts');
+            }
+          }}
+        />
+      )}
     </Box>
     </ShopContext.Provider>
   );
