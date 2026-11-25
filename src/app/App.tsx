@@ -13,6 +13,7 @@ import { DashboardLojista } from "./components/DashboardLojista";
 import { CatalogPage } from "./components/CatalogPage";
 import { OrderGrade } from "./components/OrderGrade";
 import { CartPage } from "./components/CartPage";
+import { LojistaCartPage } from "./components/LojistaCartPage";
 import { CartsListPage } from "./components/CartsListPage";
 import { CheckoutPage } from "./components/CheckoutPage";
 import { CartChatPage } from "./components/CartChatPage";
@@ -260,15 +261,16 @@ export default function App() {
       case 'order-grade':
         return <OrderGrade onNavigate={navigate} selectedClient={selectedClient} />;
       case 'cart':
-        return (
-          <CartPage
+        return profile === 'lojista' ? (
+          <LojistaCartPage
             onNavigate={navigate}
             cartContext={activeCart}
             onSwitchCart={setActiveCart}
-            viewerRole={viewerRole}
-            onCheckout={profile === 'lojista' ? () => setCurrentView('checkout') : undefined}
-            onOpenChat={profile === 'lojista' ? () => setCurrentView('cart-chat') : undefined}
+            onCheckout={() => setCurrentView('checkout')}
+            onOpenChat={() => setCurrentView('cart-chat')}
           />
+        ) : (
+          <CartPage onNavigate={navigate} cartContext={activeCart} onSwitchCart={setActiveCart} viewerRole={viewerRole} />
         );
       case 'checkout':
         return <CheckoutPage cartContext={activeCart} onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))} />;
