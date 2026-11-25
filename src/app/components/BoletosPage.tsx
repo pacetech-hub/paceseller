@@ -63,7 +63,7 @@ function seededDigits(seed: string, len: number): string {
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   let out = '';
   for (let i = 0; i < len; i++) {
-    h = (h * 1103515245 + 12345) >>> 0;
+    h = (Math.imul(h, 1103515245) + 12345) >>> 0;
     out += (h % 10).toString();
   }
   return out;
@@ -75,7 +75,7 @@ function seededHex(seed: string, len: number): string {
   const hexChars = '0123456789abcdef';
   let out = '';
   for (let i = 0; i < len; i++) {
-    h = (h * 1103515245 + 12345) >>> 0;
+    h = (Math.imul(h, 1103515245) + 12345) >>> 0;
     out += hexChars[h % 16];
   }
   return out;
@@ -94,7 +94,7 @@ function buildBoletoLine(id: string, amount: number): string {
   return `${b1a}.${b1b} ${b2a}.${b2b} ${b3a}.${b3b} ${checkDigit} ${factor}${valueCode}`;
 }
 
-function buildPixCode(id: string, amount: number): string {
+export function buildPixCode(id: string, amount: number): string {
   const hex = seededHex(id + 'pix', 32);
   const uuid = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
   const amountStr = amount.toFixed(2);
@@ -171,7 +171,7 @@ const statusLabel: Record<PaymentStatus, string> = {
 };
 
 // Copia o código e devolve se deu certo; a confirmação persistente fica no próprio cartão (botão + texto ao lado)
-async function copyToClipboard(text: string, label: string): Promise<boolean> {
+export async function copyToClipboard(text: string, label: string): Promise<boolean> {
   try {
     if (!navigator.clipboard) throw new Error('clipboard indisponível');
     await navigator.clipboard.writeText(text);
@@ -183,7 +183,7 @@ async function copyToClipboard(text: string, label: string): Promise<boolean> {
   }
 }
 
-function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
+export function PixQrCode({ data, size = 168 }: { data: string; size?: number }) {
   const grid = 25;
   const cell = size / grid;
   const zones: Array<[number, number]> = [[0, 0], [0, grid - 7], [grid - 7, 0]];

@@ -34,7 +34,8 @@ import classes from "./Sidebar.module.css";
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
   | 'marketing' | 'sellout' | 'admin' | 'clients' | 'client-detail' | 'profile' | 'stock'
-  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support' | 'pos-venda';
+  | 'industry-stock' | 'permissions' | 'boletos' | 'order-detail' | 'ficha-tecnica' | 'sales-team' | 'radar' | 'support' | 'pos-venda'
+  | 'checkout' | 'cart-chat';
 
 type Profile = 'admin' | 'rep' | 'lojista';
 

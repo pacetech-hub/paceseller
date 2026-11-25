@@ -1,16 +1,16 @@
 import { useRef, useState } from "react";
 import {
-  Stack, Group, Box, Paper, Text, Title, Button, Textarea, Badge, ThemeIcon, Grid, Image, Modal, Radio, ActionIcon, TextInput,
-  Divider, Skeleton, Switch, Collapse, NumberInput, Select, Anchor, UnstyledButton, Avatar,
+  Stack, Group, Box, Paper, Text, Title, Button, Textarea, Badge, Grid, Modal, ActionIcon, TextInput,
+  Divider, Switch, Collapse, Anchor, UnstyledButton, Avatar,
 } from "@mantine/core";
 import {
-  ShoppingCartIcon, PlusIcon, CheckIcon, CaretDownIcon, CaretUpIcon, PackageIcon, ArrowRightIcon, ArrowLeftIcon,
+  ShoppingCartIcon, PlusIcon, CheckIcon, CaretDownIcon, CaretUpIcon, ArrowLeftIcon,
   PaperPlaneTiltIcon, ChatCircleIcon, PencilSimpleIcon, CreditCardIcon, ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../data/mockData";
 import {
   CART_PARAMS, addComment, approveMinimumException, approveRepSuggestion, autoSendText, cartPairs, cartStatus, cartValue,
-  confirmPayment, createCart, getCart, isEditableBy, isOpen, lineValue, pairsOf, productById, removeLine, repConfirmConditions,
+  createCart, getCart, isEditableBy, isOpen, lineValue, pairsOf, productById, removeLine, repConfirmConditions,
   renameCart, repFirstName, sendToRep, setAutoSend, setRepCanEdit, statusColorFor, statusLabelFor, toContext, useCartStore,
   type Cart, type CartContext, type CartCreator,
 } from "../data/cartStore";
@@ -21,6 +21,7 @@ import { useMockLoading } from "../lib/useMockLoading";
 import { ListSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
 import classes from "./CartPage.module.css";
+import { ProductThumb, sizeRange, timeAgo } from "./CartParts";
 
 type View = 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history' | 'marketing' | 'sellout' | 'admin' | 'clients' | 'radar';
 
@@ -30,46 +31,12 @@ interface CartPageProps {
   /** Troca o carrinho aberto (abas do topo). */
   onSwitchCart: (ctx: CartContext) => void;
   viewerRole?: CartCreator;
+  /** Abre a página de pagamento do pedido (lojista, depois que o representante confirma). */
+  onCheckout?: () => void;
 }
 
-/** Miniatura do produto: skeleton até a imagem carregar; ícone neutro se a imagem falhar. */
-function ProductThumb({ src, alt, size = 64 }: { src: string; alt: string; size?: number }) {
-  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
-  return (
-    <Box w={size} h={size} pos="relative" flex="none" bg="white" style={{ overflow: 'hidden', borderRadius: 'var(--mantine-radius-default)', border: '1px solid var(--mantine-color-default-border)' }}>
-      {status === 'loading' && <Skeleton h="100%" style={{ position: 'absolute', inset: 0 }} />}
-      {status === 'error' ? (
-        <Box h="100%" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}><PackageIcon size={20} color="var(--mantine-color-dimmed)" /></Box>
-      ) : (
-        <Image src={src} alt={alt} w="100%" h="100%" fit="contain" onLoad={() => setStatus('loaded')} onError={() => setStatus('error')} style={{ opacity: status === 'loaded' ? 1 : 0 }} />
-      )}
-    </Box>
-  );
-}
-
-type PayMethod = 'prazo' | 'avista' | 'dividido';
-const TERMS = [
-  { value: '30-60-90', label: '30/60/90 dias' },
-  { value: '30-60', label: '30/60 dias' },
-  { value: '30', label: '30 dias' },
-];
-
-const timeAgo = (iso: string) => {
-  const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
-  if (h < 1) return 'agora';
-  if (h < 24) return `há ${h}h`;
-  const d = Math.floor(h / 24);
-  return `há ${d} ${d === 1 ? 'dia' : 'dias'}`;
-};
-
-/** Faixa de numeração da linha (ex.: "36–40"). */
-const sizeRange = (sizes: Record<string, number>) => {
-  const n = Object.entries(sizes).filter(([, q]) => q > 0).map(([s]) => Number(s)).sort((x, y) => x - y);
-  return n.length === 0 ? '—' : n[0] === n[n.length - 1] ? String(n[0]) : `${n[0]}–${n[n.length - 1]}`;
-};
-
-function LineItem({ cart, productId, sizes, editable, discountPct }: {
-  cart: Cart; productId: string; sizes: Record<string, number>; editable: boolean; discountPct: number;
+function LineItem({ cart, productId, sizes, editable }: {
+  cart: Cart; productId: string; sizes: Record<string, number>; editable: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const { openGrade, role } = useShop();
@@ -77,7 +44,6 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
   if (!p) return null;
   const n = pairsOf(sizes);
   const value = lineValue({ productId, sizes });
-  const newUnit = p.price * (1 - discountPct / 100);
   return (
     <Paper withBorder px="md" py="sm">
       <Group align="flex-start" gap="sm" wrap="nowrap">
@@ -90,17 +56,9 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
               {open ? <CaretUpIcon size={12} /> : <CaretDownIcon size={12} />}
             </Group>
           </UnstyledButton>
-          {/* BR-07: desconto por linha com preço antigo, novo e percentual */}
-          {discountPct > 0 && (
-            <Group gap={6} mt={2}>
-              <Text size="xs" c="dimmed" td="line-through" className="mono">{formatCurrency(p.price)}</Text>
-              <Text size="xs" fw={600} className="mono">{formatCurrency(newUnit)}/par</Text>
-              <Badge size="xs" variant="light" color="teal">-{discountPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</Badge>
-            </Group>
-          )}
         </Box>
         <Stack gap={2} align="flex-end" flex="none">
-          <Text className="mono" size="sm" fw={600}>{formatCurrency(value * (1 - discountPct / 100))}</Text>
+          <Text className="mono" size="sm" fw={600}>{formatCurrency(value)}</Text>
           {editable && (
             <Group gap="sm">
               <Anchor component="button" type="button" size="xs" onClick={() => openGrade({ productId, mode: 'edit', cartId: cart.id, initial: sizes })}>
@@ -126,40 +84,18 @@ function LineItem({ cart, productId, sizes, editable, discountPct }: {
   );
 }
 
-export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = 'lojista' }: CartPageProps) {
+export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = 'lojista', onCheckout }: CartPageProps) {
   const { carts } = useCartStore();
   const radar = useRadar();
   const { openGrade, actorName } = useShop();
   const loading = useMockLoading();
   const cart = getCart(cartContext?.id) ?? null;
-  const [paying, setPaying] = useState(false);
-  const [method, setMethod] = useState<PayMethod>('prazo');
-  const [terms, setTerms] = useState('30-60-90');
-  const [cashShare, setCashShare] = useState<number | string>(50);
   const [comment, setComment] = useState('');
   const [exceptionOpen, setExceptionOpen] = useState(false);
   const [exceptionReason, setExceptionReason] = useState('');
-  const [doneOrder, setDoneOrder] = useState<string | null>(null);
   const commentRef = useRef<HTMLTextAreaElement>(null);
   const [renaming, setRenaming] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
-
-  if (doneOrder) {
-    return (
-      <Stack align="center" justify="center" p={{ base: 'md', sm: 'lg' }} mih="60vh">
-        <Stack align="center" gap={0} maw={420} ta="center">
-          <ThemeIcon variant="light" color="teal" size={64} mb="lg"><CheckIcon size={32} /></ThemeIcon>
-          <Title order={1}>Pedido confirmado</Title>
-          <Text c="dimmed" mt="xs">Pedido <Text span fw={600} c="var(--mantine-color-text)" className="mono" inherit>{doneOrder}</Text></Text>
-          <Text mt="md">O carrinho saiu de Meus carrinhos e agora aparece em Pedidos. {CART_PARAMS.leadTimeLabel}.</Text>
-          <Group gap="sm" mt="xl" justify="center">
-            <Button onClick={() => onNavigate('carts')} variant="default">Meus carrinhos</Button>
-            <Button onClick={() => onNavigate('history')} rightSection={<ArrowRightIcon size={16} />}>Acompanhar</Button>
-          </Group>
-        </Stack>
-      </Stack>
-    );
-  }
 
   if (!cart || !isOpen(cart)) {
     return (
@@ -185,12 +121,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
   const lastYear = belowLastYear(cart);
   const mix = mixCheck(cart, radar);
   const auto = autoSendText(cart);
-  const share = method === 'avista' ? 1 : method === 'dividido' ? Math.min(100, Math.max(0, Number(cashShare) || 0)) / 100 : 0;
-  const discountPct = paying ? CART_PARAMS.cashDiscountPct * share : 0;
-  const total = subtotal * (1 - discountPct / 100);
-  const paymentCondition = method === 'prazo'
-    ? TERMS.find(t => t.value === terms)?.label ?? ''
-    : method === 'avista' ? `À vista com ${CART_PARAMS.cashDiscountPct}% de desconto` : `${Math.round(share * 100)}% à vista + ${TERMS.find(t => t.value === terms)?.label}`;
+  const total = subtotal;
 
   // Uma ação principal por status (FR-603 / BR-74)
   const primary = (() => {
@@ -205,7 +136,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
         label: 'Revisar e aprovar', icon: CheckIcon, disabled: belowMin,
         run: () => { if (approveRepSuggestion(cart.id)) toast.success('Sugestão aprovada', `${repName} confirma as condições comerciais em seguida.`); },
       };
-      case 'aguardando-pagamento': return paying ? null : { label: 'Ir para pagamento', icon: CreditCardIcon, run: () => setPaying(true) };
+      case 'aguardando-pagamento': return onCheckout ? { label: 'Ir para pagamento', icon: CreditCardIcon, run: onCheckout } : null;
       default: return null;
     }
   })();
@@ -261,7 +192,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                   </Text>
                 </Box>
                 <Group gap="md" wrap="wrap">
-                  {editable && !paying && <Anchor component="button" type="button" size="sm" fw={600} onClick={() => onNavigate('catalog')}>Adicionar produtos</Anchor>}
+                  {editable && <Anchor component="button" type="button" size="sm" fw={600} onClick={() => onNavigate('catalog')}>Adicionar produtos</Anchor>}
                   <Anchor component="button" type="button" size="sm" fw={600} onClick={talkToRep}>Falar com {viewerRole === 'lojista' ? cart.rep : cart.clientName}</Anchor>
                   <Badge variant="outline" color={statusColorFor(status, viewerRole)} radius="sm" ff="monospace" styles={{ label: { textTransform: 'none', fontWeight: 500 } }}>
                     {statusLabelFor(status, cart, viewerRole)}
@@ -282,7 +213,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                 ) : (
                   <Stack gap="xs">
                     {cart.lines.map(l => (
-                      <LineItem key={l.productId} cart={cart} productId={l.productId} sizes={l.sizes} editable={editable && !paying} discountPct={discountPct} />
+                      <LineItem key={l.productId} cart={cart} productId={l.productId} sizes={l.sizes} editable={editable} />
                     ))}
                   </Stack>
                 )}
@@ -291,8 +222,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
               {cart.lines.length > 0 && (
                 <Group justify="space-between" align="center" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
                   <Box>
-                    <Text className="mono" fw={700}>{discountPct > 0 ? 'Total' : 'Subtotal'}: {formatCurrency(total)}</Text>
-                    {discountPct > 0 && <Text size="xs" c="teal.7" className="mono">Desconto à vista nas linhas: -{formatCurrency(subtotal - total)}</Text>}
+                    <Text className="mono" fw={700}>Subtotal: {formatCurrency(total)}</Text>
                     {margin !== null && <Text size="xs" c="dimmed">Margem do carrinho {margin}% no PDV sugerido · Seu custo, sem impostos e sem frete</Text>}
                   </Box>
                   <Group gap="md" wrap="wrap" justify="flex-end">
@@ -330,7 +260,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
             )}
 
             {/* FR-606: Antes de fechar — ano passado (S-12) e mix (S-13) */}
-            {cart.lines.length > 0 && !paying && (lastYear.length > 0 || mix.length > 0) && (
+            {cart.lines.length > 0 && (lastYear.length > 0 || mix.length > 0) && (
               <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
                 <Group gap="xs" mb="sm"><ClockCounterClockwiseIcon size={18} /><Title order={3}>Antes de fechar</Title></Group>
                 <Stack gap="sm">
@@ -367,41 +297,6 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                     </Box>
                   ))}
                 </Stack>
-              </Paper>
-            )}
-
-            {/* FR-608: pagamento só depois que o representante confirma */}
-            {paying && status === 'aguardando-pagamento' && (
-              <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-                <Group gap="xs" mb="md"><CreditCardIcon size={18} /><Title order={3}>Pagamento</Title></Group>
-                <Radio.Group value={method} onChange={v => setMethod(v as PayMethod)} name="pay-method">
-                  <Stack gap="sm">
-                    <Radio value="prazo" label="A prazo" description="Boleto em parcelas, sem desconto" />
-                    <Radio value="avista" label={`À vista (PIX ou boleto) · ${CART_PARAMS.cashDiscountPct}% de desconto`} description="O desconto aparece em cada linha" />
-                    <Radio value="dividido" label="Dividir entre à vista e a prazo" description={`O desconto vale só para a parte à vista`} />
-                  </Stack>
-                </Radio.Group>
-                <Group mt="md" gap="md" align="flex-end" wrap="wrap">
-                  {method !== 'avista' && <Select label="Prazo" data={TERMS} value={terms} onChange={v => v && setTerms(v)} allowDeselect={false} w={200} />}
-                  {method === 'dividido' && <NumberInput label="Parte à vista (%)" value={cashShare} onChange={setCashShare} min={0} max={100} w={180} />}
-                </Group>
-                {method === 'dividido' && (
-                  <Text size="sm" c="dimmed" mt="xs">
-                    À vista: {formatCurrency(subtotal * share * (1 - CART_PARAMS.cashDiscountPct / 100))} · A prazo: {formatCurrency(subtotal * (1 - share))}
-                  </Text>
-                )}
-                <Group justify="flex-end" mt="lg" gap="sm">
-                  <Button variant="default" onClick={() => setPaying(false)}>Voltar</Button>
-                  <Button
-                    leftSection={<CheckIcon size={16} />}
-                    onClick={() => {
-                      const id = confirmPayment(cart.id, paymentCondition, total);
-                      if (id) setDoneOrder(id);
-                    }}
-                  >
-                    Confirmar pagamento · {formatCurrency(total)}
-                  </Button>
-                </Group>
               </Paper>
             )}
 
@@ -497,7 +392,7 @@ export function CartPage({ onNavigate, cartContext, onSwitchCart, viewerRole = '
                 <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed" mb={6}>Outros carrinhos desta loja</Text>
                 <Stack gap={4}>
                   {siblings.filter(c => c.id !== cart.id).map(c => (
-                    <UnstyledButton key={c.id} onClick={() => { setPaying(false); onSwitchCart(toContext(c)); }} className={classes.siblingCart}>
+                    <UnstyledButton key={c.id} onClick={() => onSwitchCart(toContext(c))} className={classes.siblingCart}>
                       <Group justify="space-between" wrap="nowrap" gap="xs">
                         <Text size="sm" truncate>{c.cartName}</Text>
                         <Text fz={12} ff="monospace" c="dimmed" flex="none">{cartPairs(c)} pares</Text>

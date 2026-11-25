@@ -729,6 +729,19 @@ export function mixCheck(cart: Cart, radar: RadarResult): { segment: Product['se
     }));
 }
 
+/**
+ * Aderência do carrinho ao mix ideal do perfil da loja (0–100): quanto dos pares cai dentro do
+ * alvo de cada público (soma de min(participação, alvo)). Sem itens = null.
+ */
+export function mixFitPct(lines: { productId: string; sizes: Record<string, number> }[]): number | null {
+  const total = lines.reduce((a, l) => a + pairsOf(l.sizes), 0);
+  if (total === 0) return null;
+  return Math.round((Object.keys(STORE_MIX_TARGET) as Product['segment'][]).reduce((acc, segment) => {
+    const n = lines.filter(l => productById(l.productId)?.segment === segment).reduce((a, l) => a + pairsOf(l.sizes), 0);
+    return acc + Math.min((n / total) * 100, STORE_MIX_TARGET[segment]);
+  }, 0));
+}
+
 /** Sugestões da gaveta (FR-406): S-02, S-05, S-07, S-08 e S-13; nunca parados nem já no carrinho. */
 export function drawerSuggestions(cart: Cart | null, radar: RadarResult): { product: Product; reason: string }[] {
   const inCart = new Set(cart?.lines.map(l => l.productId) ?? []);

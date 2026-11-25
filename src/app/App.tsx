@@ -14,6 +14,7 @@ import { CatalogPage } from "./components/CatalogPage";
 import { OrderGrade } from "./components/OrderGrade";
 import { CartPage } from "./components/CartPage";
 import { CartsListPage } from "./components/CartsListPage";
+import { CheckoutPage } from "./components/CheckoutPage";
 import { CartDrawer } from "./components/CartDrawer";
 import { GradeSheet } from "./components/SizeGrade";
 import { isOpen, toContext, getCart, useCartStore, type CartContext, type CartCreator } from "./data/cartStore";
@@ -70,6 +71,8 @@ const viewTitles: Record<View, { title: string; subtitle?: string }> = {
   support: { title: 'Suporte', subtitle: 'Contatos de atendimento e do seu representante' },
   radar: { title: 'Radar', subtitle: 'O que precisa de ação na sua loja, por quando agir' },
   'pos-venda': { title: 'Pós-venda', subtitle: 'Seus clientes: quem chamar, por quê e com qual mensagem' },
+  checkout: { title: 'Pagamento', subtitle: 'Pague o pedido do carrinho' },
+  'cart-chat': { title: 'Conversa', subtitle: 'Fale com o representante sobre o pedido' },
 };
 
 export default function App() {
@@ -229,7 +232,7 @@ export default function App() {
   }
 
   // Páginas do processo de compra: só nelas o topo mostra o carrinho e o cliente selecionado
-  const commerceView = (['catalog', 'order-grade', 'cart', 'carts'] as View[]).includes(currentView);
+  const commerceView = (['catalog', 'order-grade', 'cart', 'carts', 'checkout', 'cart-chat'] as View[]).includes(currentView);
 
   const renderView = () => {
     switch (currentView) {
@@ -262,8 +265,11 @@ export default function App() {
             cartContext={activeCart}
             onSwitchCart={setActiveCart}
             viewerRole={viewerRole}
+            onCheckout={profile === 'lojista' ? () => setCurrentView('checkout') : undefined}
           />
         );
+      case 'checkout':
+        return <CheckoutPage cartContext={activeCart} onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))} />;
       case 'carts':
         return (
           <CartsListPage

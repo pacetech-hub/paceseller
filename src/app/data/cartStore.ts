@@ -429,3 +429,29 @@ export function confirmPayment(cartId: string, paymentCondition: string, total: 
   patch(cartId, c => ({ ...c, stage: 'confirmado', stageSince: now(), updatedAt: now(), orderId }));
   return orderId;
 }
+
+/** Troca todas as linhas de uma vez (gaveta de edição do pedido: "Salvar alterações"). Linhas zeradas saem. */
+export function replaceLines(cartId: string, lines: CartLine[], role: CartCreator = 'lojista') {
+  const clean = lines
+    .map(l => ({ ...l, sizes: Object.fromEntries(Object.entries(l.sizes).filter(([, q]) => q > 0)) }))
+    .filter(l => pairsOf(l.sizes) > 0);
+  patch(cartId, cart => {
+    const next = { ...cart, lines: clean, updatedAt: now() };
+    return role === 'rep' ? repEdit(next, `Editou o pedido (${clean.reduce((a, l) => a + pairsOf(l.sizes), 0)} pares).`) : next;
+  });
+}
+
+// ---- Representante visto pelo lojista (página "Falar com") — mock até existir cadastro real ----
+export interface RepProfile {
+  /** Ano em que passou a atender a loja. */
+  since: number;
+  /** Tempo típico de resposta, em horas úteis. */
+  responseHours: number;
+}
+const REP_PROFILES: Record<string, RepProfile> = {
+  'Marcos Andrade': { since: 2022, responseHours: 2 },
+  'Fernanda Lima': { since: 2021, responseHours: 4 },
+  'Carlos Mendes': { since: 2023, responseHours: 3 },
+  'Ana Santos': { since: 2020, responseHours: 2 },
+};
+export const repProfile = (rep: string): RepProfile => REP_PROFILES[rep] ?? { since: 2024, responseHours: 4 };
