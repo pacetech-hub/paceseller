@@ -18,6 +18,7 @@ import { CartsListPage } from "./components/CartsListPage";
 import { CheckoutPage } from "./components/CheckoutPage";
 import { CartChatPage } from "./components/CartChatPage";
 import { CartDrawer } from "./components/CartDrawer";
+import { RepCartDrawer } from "./components/RepCartDrawer";
 import { GradeSheet } from "./components/SizeGrade";
 import { isOpen, toContext, getCart, useCartStore, visibleTo, type CartContext, type CartCreator } from "./data/cartStore";
 import { useRadar, isCritical, type CtaTarget } from "./data/radar";
@@ -412,7 +413,17 @@ export default function App() {
           {renderView()}
         </Box>
       </Stack>
-      <CartDrawer opened={drawerOpen} onClose={() => setDrawerOpen(false)} onViewCarts={() => navigate('carts')} />
+      {profile === 'rep' ? (
+        <RepCartDrawer
+          opened={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          storeName={selectedClient?.name ?? null}
+          onChooseStore={() => setStorePickerOpen(true)}
+          onViewCarts={() => navigate('carts')}
+        />
+      ) : (
+        <CartDrawer opened={drawerOpen} onClose={() => setDrawerOpen(false)} onViewCarts={() => navigate('carts')} />
+      )}
       <GradeSheet request={gradeRequest} onClose={() => setGradeRequest(null)} />
       {profile === 'rep' && (
         <StorePickerModal
