@@ -21,8 +21,7 @@ import { CartDrawer } from "./components/CartDrawer";
 import { RepCartDrawer } from "./components/RepCartDrawer";
 import { GradeSheet } from "./components/SizeGrade";
 import { isOpen, toContext, getCart, useCartStore, visibleTo, type CartContext, type CartCreator } from "./data/cartStore";
-import { useRadar, isCritical, type CtaTarget } from "./data/radar";
-import { useRepRadar } from "./data/repRadar";
+import type { CtaTarget } from "./data/radar";
 import { ShopContext, type GradeRequest, type ShopContextValue } from "./lib/shop";
 import type { CatalogEntry } from "./components/CatalogPage";
 import { OrderHistory } from "./components/OrderHistory";
@@ -89,8 +88,6 @@ export default function App() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
   const { carts } = useCartStore();
-  const radar = useRadar();
-  const repRadar = useRepRadar(CURRENT_REP_NAME);
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
   const [catalogEntry, setCatalogEntry] = useState<CatalogEntry | undefined>(undefined);
@@ -386,12 +383,6 @@ export default function App() {
     }
   };
 
-  // FR-801: sino = críticos em aberto + carrinhos em "Aguardando você"; no rep, contatos urgentes do Radar
-  const bellCount = profile === 'lojista'
-    ? radar.open.filter(isCritical).length + clientCarts.filter(c => c.stage === 'aguardando-voce').length
-    : profile === 'rep' ? repRadar.urgent
-    : 4;
-
   return (
     <ShopContext.Provider value={shop}>
     <Box h="100dvh" display="flex" className={classes.shell}>
@@ -400,7 +391,6 @@ export default function App() {
           profile={profile}
           userName={profile === 'admin' ? CURRENT_ADMIN_NAME : profile === 'rep' ? CURRENT_REP_NAME : CURRENT_LOJISTA_NAME}
           currentView={currentView}
-          notifications={bellCount}
           onNavigate={navigate}
           onLogout={handleLogout}
           onOpenCartDrawer={() => setDrawerOpen(true)}

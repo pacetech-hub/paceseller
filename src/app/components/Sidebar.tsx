@@ -1,7 +1,7 @@
 import { useState, useLayoutEffect, useRef } from "react";
 import {
   Group, Button, ActionIcon, Indicator, Text, Box, Stack, NavLink, Tooltip, Drawer, Image, UnstyledButton, Divider, Menu, ThemeIcon, Title,
-  Anchor, Badge,
+  Anchor,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -12,7 +12,6 @@ import {
   UsersIcon,
   StorefrontIcon,
   CaretDownIcon,
-  BellIcon,
   ListIcon,
   BuildingsIcon,
   SignOutIcon,
@@ -31,6 +30,7 @@ import {
 import type { Client } from "../data/mockData";
 import teslaLogo from "../../assets/tesla-footwear-logo.png";
 import classes from "./Sidebar.module.css";
+import { NotificationsMenu } from "./NotificationsMenu";
 
 export type View =
   | 'dashboard' | 'catalog' | 'order-grade' | 'cart' | 'carts' | 'history'
@@ -52,7 +52,6 @@ const profileLabels: Record<Profile, { label: string; icon: Icon; color: string 
 interface TopBarProps {
   profile: Profile;
   currentView: View;
-  notifications?: number;
   actions?: React.ReactNode;
   onNavigate: (view: View) => void;
   onLogout: () => void;
@@ -238,7 +237,7 @@ const PARENT_VIEW: Partial<Record<View, View>> = {
   'order-detail': 'history', 'client-detail': 'clients', cart: 'carts', 'cart-chat': 'carts', checkout: 'carts',
 };
 
-export function TopBar({ profile, userName, currentView: view, notifications = 4, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer, accountOwner, onSwitchUser, onSwitchStore }: TopBarProps) {
+export function TopBar({ profile, userName, currentView: view, actions, onNavigate, onLogout, cartCount = 0, showCart = false, selectedClient, onOpenCartDrawer, accountOwner, onSwitchUser, onSwitchStore }: TopBarProps) {
   const [navOpened, { open: openNav, close: closeNav }] = useDisclosure(false);
   const currentView = PARENT_VIEW[view] ?? view;
   const profileInfo = profileLabels[profile];
@@ -314,13 +313,7 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
             </Indicator>
           )}
 
-          <Indicator label={notifications} disabled={notifications === 0} size={16} color="red" offset={4}>
-            <Tooltip label="Ver Notificações" withArrow>
-              <ActionIcon variant="subtle" color="brand" size="lg" aria-label={`Ver Notificações · ${notifications}`}>
-                <BellIcon size={18} />
-              </ActionIcon>
-            </Tooltip>
-          </Indicator>
+          <NotificationsMenu key={profile} profile={profile} onNavigate={onNavigate} />
 
           {/* Loja em atendimento (rep): o carrinho, o catálogo e os pedidos são sempre desta loja */}
           {onSwitchStore && (
@@ -335,12 +328,6 @@ export function TopBar({ profile, userName, currentView: view, notifications = 4
                 Escolher loja
               </Button>
             )
-          )}
-
-          {profile === 'rep' && (
-            <Badge variant="outline" color="gray" radius="sm" ff="monospace" visibleFrom="lg" styles={{ label: { letterSpacing: 0.6 } }}>
-              Representante
-            </Badge>
           )}
 
           {/* Menu da conta: perfil, permissões/administração, suporte e sair */}
