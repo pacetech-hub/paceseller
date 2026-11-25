@@ -1,0 +1,35 @@
+/* Seletor de valor (período, forma de pagamento, filtro): caixa com borda fina, sem
+   divisórias entre as opções; a escolhida fica preenchida na cor das ações (preto),
+   como os botões principais. Classes duplicadas para vencer o estilo padrão do Mantine. */
+
+.root.root {
+  padding: 3px;
+  gap: 2px;
+  background-color: var(--mantine-color-body);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.indicator.indicator {
+  background-color: var(--mantine-color-brand-9);
+  box-shadow: none;
+}
+
+.label.label {
+  font-weight: 500;
+  color: var(--mantine-color-dimmed);
+  padding-inline: 14px;
+}
+
+.label.label:hover {
+  color: var(--mantine-color-text);
+}
+
+.label.label[data-active],
+.label.label[data-active]:hover {
+  color: var(--mantine-color-white);
+  font-weight: 600;
+}
+
+.control.control::before {
+  display: none;
+}

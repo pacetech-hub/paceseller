@@ -1,6 +1,7 @@
 import { createTheme, type MantineColorsTuple } from "@mantine/core";
 import { tokens } from "./tokens";
 import tabsClasses from "./tabs.module.css";
+import segmentedClasses from "./segmented.module.css";
 
 // Todos os valores visuais vêm dos design tokens (design-tokens/design-tokens.tokens.json),
 // convertidos por scripts/build-tokens.mjs em ./tokens.ts. Rode `bun run tokens` ao atualizar o JSON.
@@ -148,7 +149,14 @@ export const mantineTheme = createTheme({
     // Botões só com ícone: mesma altura dos campos (42px) e cantos iguais aos demais botões.
     ActionIcon: { defaultProps: { size: "input-md", radius: "md" } },
     CloseButton: { defaultProps: { size: "xl", radius: "md" } },
-    SegmentedControl: { defaultProps: { size: CONTROL_SIZE, radius: "md" }, styles: { label: { fontWeight: SEMIBOLD } } },
+    // Seletor de valor: borda fina, sem divisórias, opção escolhida em preto — ver segmented.module.css.
+    SegmentedControl: {
+      defaultProps: { size: CONTROL_SIZE, radius: "md", withItemsBorders: false },
+      classNames: {
+        root: segmentedClasses.root, indicator: segmentedClasses.indicator,
+        label: segmentedClasses.label, control: segmentedClasses.control,
+      },
+    },
     Chip: { defaultProps: { size: CONTROL_SIZE, radius: "md" } },
     // Checkbox é sempre uma CAIXA: cantos de 4px (bem menores que o raio geral de 8px),
     // para não parecer um radio redondo.
