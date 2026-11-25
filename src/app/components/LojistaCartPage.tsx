@@ -11,7 +11,7 @@ import { formatCurrency } from "../data/mockData";
 import {
   CART_PARAMS, approveRepSuggestion, autoSendText, cartPairs, cartStatus, cartValue, createCart, getCart, isEditableBy,
   isOpen, productById, renameCart, repFirstName, sendToRep, setAutoSend, setRepCanEdit, statusColorFor, statusLabelFor,
-  toContext, useCartStore, type CartContext,
+  toContext, useCartStore, visibleTo, type CartContext,
 } from "../data/cartStore";
 import { belowLastYear, mixCheck, pairsText, productDisplayName, useRadar } from "../data/radar";
 import { useShop } from "../lib/shop";
@@ -67,7 +67,7 @@ export function LojistaCartPage({ onNavigate, cartContext, onSwitchCart, onCheck
   const editable = isEditableBy(cart, 'lojista');
   const belowMin = pairs < CART_PARAMS.minOrderPairs && !cart.exception;
   const repName = repFirstName(cart.rep);
-  const siblings = carts.filter(c => c.clientId === cart.clientId && isOpen(c) && c.id !== cart.id);
+  const siblings = carts.filter(c => c.clientId === cart.clientId && isOpen(c) && c.id !== cart.id && visibleTo(c, 'lojista'));
   const lastYear = belowLastYear(cart);
   const mix = mixCheck(cart, radar);
   const auto = autoSendText(cart);

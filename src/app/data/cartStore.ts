@@ -113,11 +113,13 @@ export const statusColor: Record<CartStatus, string> = {
 };
 
 /** Status visto por quem está olhando: o lojista lê "Aguardando você"; o representante, "Aguardando o cliente". */
-export function statusLabelFor(status: CartStatus, cart: Pick<Cart, 'rep'>, viewer: CartCreator): string {
+export function statusLabelFor(status: CartStatus, cart: Pick<Cart, 'rep'> & { createdBy?: CartCreator }, viewer: CartCreator): string {
   if (viewer === 'lojista') return statusLabel(status, cart.rep);
+  // rascunho do próprio representante: só ele vê até compartilhar com a loja
+  const own = cart.createdBy === 'rep';
   switch (status) {
-    case 'rascunho': return 'Rascunho do lojista';
-    case 'pronto': return 'Rascunho do lojista · já bate a grade mínima';
+    case 'rascunho': return own ? 'Seu rascunho' : 'Rascunho do lojista';
+    case 'pronto': return own ? 'Seu rascunho · já bate a grade mínima' : 'Rascunho do lojista · já bate a grade mínima';
     case 'aguardando-rep': return 'Aguardando você';
     case 'aguardando-voce': return 'Aguardando o cliente';
     case 'aguardando-pagamento': return 'Aguardando pagamento do cliente';
@@ -133,8 +135,14 @@ export function statusColorFor(status: CartStatus, viewer: CartCreator): string 
   return statusColor[status];
 }
 
-/** Compartilhado = já saiu da montagem do lojista (o outro lado vê e decide). */
-export const isShared = (cart: Cart) => cart.stage !== 'montagem' || cart.createdBy === 'rep';
+/** Compartilhado = já saiu da montagem (o outro lado vê e decide). */
+export const isShared = (cart: Cart) => cart.stage !== 'montagem';
+
+/** Rascunho do representante ainda não compartilhado com a loja: o lojista não vê. */
+export const isRepPrivateDraft = (cart: Cart) => cart.createdBy === 'rep' && cart.stage === 'montagem';
+
+/** O que cada lado enxerga: o lojista não vê os rascunhos do representante antes de compartilhados. */
+export const visibleTo = (cart: Cart, role: CartCreator) => role === 'rep' || !isRepPrivateDraft(cart);
 
 /** Dias desde a última mudança de etapa. */
 export const daysInStage = (cart: Cart) => Math.floor((Date.now() - new Date(cart.stageSince).getTime()) / 86_400_000);
@@ -144,7 +152,7 @@ export const isOpen = (cart: Cart) => cart.stage !== 'confirmado';
 /** O lojista só adiciona itens em carrinhos que estão com ele. */
 export const isEditableBy = (cart: Cart, role: CartCreator) =>
   role === 'lojista'
-    ? cart.stage === 'montagem' || cart.stage === 'aguardando-voce'
+    ? (cart.stage === 'montagem' && !isRepPrivateDraft(cart)) || cart.stage === 'aguardando-voce'
     : cart.repCanEdit && cart.stage !== 'confirmado' && cart.stage !== 'aguardando-pagamento';
 
 /** Texto do envio automático no cartão do carrinho ("Envio automático hoje às 18h"). */
@@ -214,6 +222,13 @@ const initialCarts: Cart[] = [
     lines: [{ productId: 'P001', sizes: { '36': 4, '37': 6, '38': 8, '39': 8, '40': 6, '41': 4 } }],
     updatedAt: ago(2 * DAY), stageSince: ago(2 * DAY), repCanEdit: false, autoSend: false, comments: [],
   },
+  {
+    // rascunho do representante: a loja só vê depois que ele compartilhar
+    id: 'CART-006', clientId: lojistaClient.id, clientName: lojistaClient.name, cartName: 'Giro Hertz Black',
+    createdBy: 'rep', rep: lojistaClient.rep, stage: 'montagem',
+    lines: [{ productId: 'P004', sizes: { '38': 2, '39': 2, '40': 2 } }],
+    updatedAt: ago(1 * DAY), stageSince: ago(1 * DAY), repCanEdit: true, autoSend: false, comments: [],
+  },
   // Carrinhos de outros clientes da carteira do representante
   {
     id: 'CART-101', clientId: c(2).id, clientName: c(2).name, cartName: 'Pedido principal', createdBy: 'rep', rep: c(2).rep,
@@ -277,8 +292,8 @@ export function createCart(opts: { clientId: string; name?: string; createdBy: C
     cartName: opts.name?.trim() || 'Novo carrinho',
     createdBy: opts.createdBy,
     rep: client.rep,
-    // carrinho criado pelo representante começa como sugestão para o lojista revisar
-    stage: opts.createdBy === 'rep' ? 'aguardando-voce' : 'montagem',
+    // carrinho criado pelo representante começa como rascunho dele; vira sugestão ao compartilhar
+    stage: 'montagem',
     lines: [],
     updatedAt: now(),
     stageSince: now(),
@@ -292,6 +307,8 @@ export function createCart(opts: { clientId: string; name?: string; createdBy: C
 
 /** Edição feita pelo representante: fica registrada nos comentários e devolve o carrinho ao lojista. */
 function repEdit(cart: Cart, text: string): Cart {
+  // rascunho do próprio representante: ninguém mais vê, então não avisa nem muda de etapa
+  if (isRepPrivateDraft(cart)) return cart;
   return {
     ...cart,
     stage: cart.stage === 'montagem' ? 'aguardando-voce' : cart.stage === 'aguardando-rep' ? 'aguardando-voce' : cart.stage,
@@ -440,6 +457,45 @@ export function replaceLines(cartId: string, lines: CartLine[], role: CartCreato
     return role === 'rep' ? repEdit(next, `Editou o pedido (${clean.reduce((a, l) => a + pairsOf(l.sizes), 0)} pares).`) : next;
   });
 }
+
+/**
+ * Representante compartilha (ou deixa de compartilhar) o rascunho dele com a loja. Compartilhar
+ * transforma o rascunho em sugestão ("Aguardando o cliente"); só dá para desfazer enquanto o
+ * lojista ainda não respondeu.
+ */
+export function setSharedWithClient(cartId: string, shared: boolean, actor?: string): boolean {
+  const cart = getCart(cartId);
+  if (!cart || cart.createdBy !== 'rep') return false;
+  const who = repFirstName(actor ?? cart.rep);
+  if (shared && cart.stage === 'montagem') {
+    patch(cartId, c => ({
+      ...c, stage: 'aguardando-voce', stageSince: now(), updatedAt: now(),
+      comments: [...c.comments, { id: cid(), author: 'rep', name: actor ?? c.rep, text: `${who} compartilhou o carrinho com a loja.`, at: now(), kind: 'system' }],
+    }));
+    return true;
+  }
+  if (!shared && cart.stage === 'aguardando-voce') {
+    patch(cartId, c => ({
+      ...c, stage: 'montagem', stageSince: now(), updatedAt: now(),
+      comments: [...c.comments, { id: cid(), author: 'rep', name: actor ?? c.rep, text: `${who} deixou de compartilhar o carrinho.`, at: now(), kind: 'system' }],
+    }));
+    return true;
+  }
+  return false;
+}
+
+// ---- Comprador da loja visto pelo representante ("Falar com") — mock até existir cadastro real ----
+const CLIENT_CONTACTS: Record<string, string> = {
+  'CLI-001': 'Juliana Rocha',
+  'CLI-002': 'Paulo Teixeira',
+  'CLI-003': 'Renata Costa',
+  'CLI-004': 'Bruno Almeida',
+  'CLI-005': 'Larissa Moura',
+  'CLI-006': 'Diego Fernandes',
+  'CLI-007': 'Camila Prado',
+};
+/** Pessoa que compra pela loja (com quem o representante conversa no carrinho). */
+export const clientContact = (clientId: string, fallback = 'o comprador da loja') => CLIENT_CONTACTS[clientId] ?? fallback;
 
 // ---- Representante visto pelo lojista (página "Falar com") — mock até existir cadastro real ----
 export interface RepProfile {

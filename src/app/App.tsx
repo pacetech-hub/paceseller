@@ -12,14 +12,14 @@ import { getNetworkEntities, getRepTeamEntities } from "./components/SalesIndica
 import { DashboardLojista } from "./components/DashboardLojista";
 import { CatalogPage } from "./components/CatalogPage";
 import { OrderGrade } from "./components/OrderGrade";
-import { CartPage } from "./components/CartPage";
 import { LojistaCartPage } from "./components/LojistaCartPage";
+import { RepCartPage } from "./components/RepCartPage";
 import { CartsListPage } from "./components/CartsListPage";
 import { CheckoutPage } from "./components/CheckoutPage";
 import { CartChatPage } from "./components/CartChatPage";
 import { CartDrawer } from "./components/CartDrawer";
 import { GradeSheet } from "./components/SizeGrade";
-import { isOpen, toContext, getCart, useCartStore, type CartContext, type CartCreator } from "./data/cartStore";
+import { isOpen, toContext, getCart, useCartStore, visibleTo, type CartContext, type CartCreator } from "./data/cartStore";
 import { useRadar, isCritical, type CtaTarget } from "./data/radar";
 import { useRepRadar } from "./data/repRadar";
 import { ShopContext, type GradeRequest, type ShopContextValue } from "./lib/shop";
@@ -102,7 +102,7 @@ export default function App() {
   const viewerRole: CartCreator = profile === 'lojista' ? 'lojista' : 'rep';
   // Lojista não seleciona cliente — ele é o próprio cliente da sua loja.
   const cartsClient = profile === 'lojista' ? clientsList[0] : selectedClient;
-  const clientCarts = cartsClient ? carts.filter(c => c.clientId === cartsClient.id && isOpen(c)) : [];
+  const clientCarts = cartsClient ? carts.filter(c => c.clientId === cartsClient.id && isOpen(c) && visibleTo(c, viewerRole)) : [];
 
   const openCart = (cartId: string) => {
     const cart = getCart(cartId);
@@ -274,12 +274,24 @@ export default function App() {
             onOpenChat={() => setCurrentView('cart-chat')}
           />
         ) : (
-          <CartPage onNavigate={navigate} cartContext={activeCart} onSwitchCart={setActiveCart} viewerRole={viewerRole} />
+          <RepCartPage
+            onNavigate={navigate}
+            cartContext={activeCart}
+            onSwitchCart={setActiveCart}
+            onOpenChat={() => setCurrentView('cart-chat')}
+          />
         );
       case 'checkout':
         return <CheckoutPage cartContext={activeCart} onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))} />;
       case 'cart-chat':
-        return <CartChatPage cartContext={activeCart} onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))} />;
+        return (
+          <CartChatPage
+            cartContext={activeCart}
+            viewerRole={viewerRole}
+            actorName={profile === 'rep' ? CURRENT_REP_NAME : undefined}
+            onNavigate={(v) => (v === 'cart' ? setCurrentView('cart') : navigate(v))}
+          />
+        );
       case 'carts':
         return (
           <CartsListPage

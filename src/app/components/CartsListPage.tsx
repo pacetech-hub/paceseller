@@ -13,7 +13,7 @@ import { EmptyState, type EmptyStateSuggestion } from "./ui/EmptyState";
 import { clients, formatCurrency, type Client } from "../data/mockData";
 import {
   CART_PARAMS, autoSendText, cartPairs, cartStatus, cartValue, createCart, daysInStage, isOpen, isShared, productById, repFirstName,
-  sendToRep, statusColorFor, statusLabelFor, toContext, useCartStore, type Cart, type CartContext, type CartCreator,
+  sendToRep, setSharedWithClient, visibleTo, clientContact, statusColorFor, statusLabelFor, toContext, useCartStore, type Cart, type CartContext, type CartCreator,
 } from "../data/cartStore";
 import { REP_RADAR_PARAMS } from "../data/repRadar";
 import { toast } from "../lib/toast";
@@ -54,9 +54,12 @@ const initials = (name: string) => name.split(' ').filter(Boolean).slice(0, 2).m
 const days = (n: number) => `${n} ${n === 1 ? 'dia' : 'dias'}`;
 
 /** Uma ação principal por status (BR-74). */
-function primaryAction(cart: Cart, role: CartCreator): { label: string; kind: 'open' | 'send' } | null {
+function primaryAction(cart: Cart, role: CartCreator): { label: string; kind: 'open' | 'send' | 'share' } | null {
   const status = cartStatus(cart);
   if (role === 'rep') {
+    if (cart.createdBy === 'rep' && cart.stage === 'montagem') {
+      return cart.lines.length > 0 ? { label: 'Compartilhar com a loja', kind: 'share' } : { label: 'Adicionar produtos', kind: 'open' };
+    }
     if (status === 'aguardando-rep') return { label: 'Confirmar condições', kind: 'open' };
     if (status === 'aguardando-voce') return { label: 'Acompanhar', kind: 'open' };
     return null;
@@ -96,7 +99,9 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
   const mine = cart.createdBy === viewerRole;
 
   const runAction = () => {
-    if (action?.kind === 'send') {
+    if (action?.kind === 'share') {
+      if (setSharedWithClient(cart.id, true)) toast.success(`"${cart.cartName}" compartilhado com ${clientContact(cart.clientId, cart.clientName)}`, 'A loja já pode ver, comentar e aprovar.');
+    } else if (action?.kind === 'send') {
       if (sendToRep(cart.id)) toast.success(`"${cart.cartName}" enviado para ${repFirstName(cart.rep)}`, 'Você é avisado quando as condições forem confirmadas.');
     } else onOpen();
   };
@@ -181,6 +186,11 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
                   <Text span inherit c="dimmed"> · {minutesAgo(last.at)}</Text>
                 </Text>
               </Group>
+            ) : viewerRole === 'rep' && mine && !isShared(cart) ? (
+              <Group gap={8} mt="sm" wrap="nowrap">
+                <Avatar size={20} radius="xl" color="gray" variant="light"><UserIcon size={11} /></Avatar>
+                <Text size="sm" c="dimmed">Só você vê este rascunho — a loja vê quando você compartilhar.</Text>
+              </Group>
             ) : mine && isShared(cart) && (
               <Group gap={8} mt="sm" wrap="nowrap">
                 <Avatar size={20} radius="xl" color="brand" variant="filled"><UserIcon size={11} /></Avatar>
@@ -190,7 +200,7 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
 
             {action && (
               <Button hiddenFrom="sm" mt="sm" size="compact-md" variant="default" onClick={e => { e.stopPropagation(); runAction(); }}
-                rightSection={action.kind === 'send' ? <PaperPlaneTiltIcon size={14} /> : <CaretRightIcon size={14} />}>
+                rightSection={action.kind !== 'open' ? <PaperPlaneTiltIcon size={14} /> : <CaretRightIcon size={14} />}>
                 {action.label}
               </Button>
             )}
@@ -246,7 +256,7 @@ export function CartsListPage({
   const [showAll, setShowAll] = useState(!selectedClient);
 
   // FR-507: confirmados saem da lista (vão para Pedidos)
-  const openCarts = carts.filter(isOpen);
+  const openCarts = carts.filter(c => isOpen(c) && visibleTo(c, viewerRole));
   const byClient = !!selectedClient && (lockClient || !showAll);
   const scoped = useMemo(
     () => (byClient ? openCarts.filter(c => c.clientId === selectedClient!.id) : openCarts).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
@@ -379,7 +389,7 @@ export function CartsListPage({
               <Text size="sm" c="dimmed">Loja: <Text span fw={600} c="var(--mantine-color-text)" inherit>{selectedClient.name}</Text></Text>
             </Group>
             <TextInput label="Nome do carrinho" value={newName} onChange={e => setNewName(e.currentTarget.value)} placeholder="ex.: Coleção Inverno" maxLength={60} description="Até 60 caracteres" data-autofocus />
-            {viewerRole === 'rep' && <Text size="sm" c="dimmed" mt="xs">Carrinho criado pelo representante começa como sugestão, em "Aguardando o cliente", para o lojista revisar.</Text>}
+            {viewerRole === 'rep' && <Text size="sm" c="dimmed" mt="xs">O carrinho começa como seu rascunho — só você vê. Quando estiver pronto, compartilhe com a loja para o lojista revisar e aprovar.</Text>}
             <Group justify="flex-end" gap="sm" mt="md">
               <Button onClick={() => setNewOpen(false)} variant="default">Cancelar</Button>
               <Button onClick={handleCreate}>Criar e adicionar produtos</Button>

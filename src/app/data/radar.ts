@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { products, formatCurrency, type Product } from "./mockData";
 import {
-  CART_PARAMS, cartPairs, cartStatus, getCartsState, isOpen, pairsOf, productById, repFirstName,
+  CART_PARAMS, cartPairs, cartStatus, getCartsState, isOpen, pairsOf, visibleTo, productById, repFirstName,
   subscribeCarts, type Cart,
 } from "./cartStore";
 
@@ -175,7 +175,7 @@ export const coverageDays = (s: StoreSku) => (s.dailySales > 0 ? s.stock / s.dai
 /** Pares já em carrinhos abertos (não confirmados) do cliente lojista. */
 export function pairsInOpenCarts(productId: string, carts: Cart[], clientId = 'CLI-001'): number {
   return carts
-    .filter(c => c.clientId === clientId && isOpen(c))
+    .filter(c => c.clientId === clientId && isOpen(c) && visibleTo(c, 'lojista'))
     .reduce((a, c) => a + c.lines.filter(l => l.productId === productId).reduce((x, l) => x + pairsOf(l.sizes), 0), 0);
 }
 
@@ -596,7 +596,7 @@ function compute(carts: Cart[]): RadarResult {
     });
   }
 
-  const mine = carts.filter(c => c.clientId === 'CLI-001' && isOpen(c));
+  const mine = carts.filter(c => c.clientId === 'CLI-001' && isOpen(c) && visibleTo(c, 'lojista'));
 
   // S-10 Fechamento
   const withItems = mine.filter(c => c.lines.length > 0 && (cartStatus(c) === 'rascunho' || cartStatus(c) === 'pronto'));

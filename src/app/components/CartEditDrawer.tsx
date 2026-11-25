@@ -70,7 +70,7 @@ export function CartEditDrawer({ cart, opened, onClose }: { cart: Cart; opened: 
       {/* Cabeçalho: o pedido em números */}
       <Group justify="space-between" align="flex-start" wrap="nowrap" px="lg" pt="lg" pb="md" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
         <Box>
-          <Eyebrow>Seu pedido</Eyebrow>
+          <Eyebrow>{role === 'rep' ? `Pedido de ${cart.clientName}` : 'Seu pedido'}</Eyebrow>
           <Title order={2} fz={26} mt={4}>{pairsText(pairs)}</Title>
           <Text size="sm" ff="monospace" c="dimmed" mt={2}>{formatCurrency(value)}{margin !== null ? ` · margem ${margin}%` : ''}</Text>
         </Box>
@@ -96,7 +96,7 @@ export function CartEditDrawer({ cart, opened, onClose }: { cart: Cart; opened: 
           {mixFit !== null && (
             <Box>
               <Group justify="space-between">
-                <Text size="sm" c="dimmed">Mix ideal pro seu perfil</Text>
+                <Text size="sm" c="dimmed">{role === 'rep' ? 'Mix ideal pro perfil da loja' : 'Mix ideal pro seu perfil'}</Text>
                 <Text size="sm" ff="monospace" c="dimmed">{mixFit}%</Text>
               </Group>
               <Progress mt={6} size="sm" value={mixFit} color="brand" aria-label="Aderência ao mix ideal" />
@@ -142,7 +142,7 @@ export function CartEditDrawer({ cart, opened, onClose }: { cart: Cart; opened: 
           <Paper withBorder px="md" py="sm">
             <Text size="sm">
               {shippingGap > 0
-                ? <>Você está a <Text span fw={700} inherit>{formatCurrency(shippingGap)}</Text> de ganhar frete grátis</>
+                ? <>{role === 'rep' ? 'A loja está a' : 'Você está a'} <Text span fw={700} inherit>{formatCurrency(shippingGap)}</Text> de ganhar frete grátis</>
                 : <>Frete grátis neste pedido (a partir de {formatCurrency(CART_PARAMS.freeShippingFrom)})</>}
             </Text>
           </Paper>

@@ -2,7 +2,7 @@ import { ActionIcon, Badge, Box, Button, Drawer, Group, Image, Paper, Progress, 
 import { ArrowRightIcon, PlusIcon, ShoppingCartIcon } from "@phosphor-icons/react";
 import { formatCurrency } from "../data/mockData";
 import {
-  CART_PARAMS, cartPairs, cartStatus, cartValue, isOpen, resolveTargetCart, statusColor, statusLabel, useCartStore,
+  CART_PARAMS, cartPairs, cartStatus, cartValue, isOpen, resolveTargetCart, statusColor, statusLabel, useCartStore, visibleTo,
 } from "../data/cartStore";
 import { cartMarginPct, drawerSuggestions, mixCheck, pairsText, productDisplayName, useRadar } from "../data/radar";
 import { useShop } from "../lib/shop";
@@ -15,7 +15,7 @@ export function CartDrawer({ opened, onClose, onViewCarts }: { opened: boolean; 
   const radar = useRadar();
   const { role, clientId, openGrade, openCart } = useShop();
   const cart = clientId ? resolveTargetCart(clientId, role) : null;
-  const openCount = carts.filter(c => c.clientId === clientId && isOpen(c)).length;
+  const openCount = carts.filter(c => c.clientId === clientId && isOpen(c) && visibleTo(c, role)).length;
   const pairs = cart ? cartPairs(cart) : 0;
   const value = cart ? cartValue(cart) : 0;
   const margin = cart ? cartMarginPct(cart.lines) : null;
