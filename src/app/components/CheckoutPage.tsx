@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Anchor, Box, Button, Checkbox, Chip, Code, Grid, Group, Modal, NumberInput, Paper, Select, SimpleGrid, Stack, Text,
+  Anchor, Box, Button, Checkbox, Code, Grid, Group, Modal, NumberInput, Paper, SegmentedControl, Select, SimpleGrid, Stack, Text,
   ThemeIcon, Title,
 } from "@mantine/core";
 import { useInterval } from "@mantine/hooks";
@@ -217,12 +217,15 @@ export function CheckoutPage({ cartContext, onNavigate }: { cartContext: CartCon
             {/* Condição: a prazo ou à vista com desconto */}
             <Box>
               <Eyebrow mb="xs">Condição de pagamento</Eyebrow>
-              <Chip.Group multiple={false} value={condition} onChange={v => setCondition(v as Condition)}>
-                <Group gap="xs">
-                  <Chip value="prazo" size="sm" variant="outline" styles={{ iconWrapper: { display: 'none' } }}>30/60/90 dias</Chip>
-                  <Chip value="avista" size="sm" variant="outline" styles={{ iconWrapper: { display: 'none' } }}>À vista −{CART_PARAMS.cashDiscountPct}%</Chip>
-                </Group>
-              </Chip.Group>
+              <SegmentedControl
+                value={condition}
+                onChange={v => setCondition(v as Condition)}
+                data={[
+                  { value: 'prazo', label: '30/60/90 dias' },
+                  { value: 'avista', label: `À vista −${CART_PARAMS.cashDiscountPct}%` },
+                ]}
+                aria-label="Condição de pagamento"
+              />
             </Box>
 
             {/* Forma: uma ou mais, para dividir o valor */}

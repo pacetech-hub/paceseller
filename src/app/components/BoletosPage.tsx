@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Stack, Group, Box, Paper, Text, TextInput, Chip, Badge, Button, SegmentedControl, Code, SimpleGrid, List, Table, Modal } from "@mantine/core";
+import { Stack, Group, Box, Paper, Text, TextInput, Badge, Button, SegmentedControl, Code, SimpleGrid, List, Table, Modal } from "@mantine/core";
 import { toast } from "../lib/toast";
 import boletos from "./BoletosPage.module.css";
 import {
@@ -499,15 +499,14 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
           flex={{ base: '1 1 100%', sm: 1 }}
           miw={{ sm: 160 }}
         />
-        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}>
-          <Group gap="sm">
-            {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="brand">
-                {s === 'todos' ? 'Todos' : statusLabel[s]}
-              </Chip>
-            ))}
-          </Group>
-        </Chip.Group>
+        <Box maw="100%" style={{ overflowX: 'auto', flex: 'none' }}>
+          <SegmentedControl
+            value={statusFilter}
+            onChange={v => setStatusFilter(v as 'todos' | PaymentStatus)}
+            data={statuses.map(s => ({ value: s, label: s === 'todos' ? 'Todos' : statusLabel[s] }))}
+            aria-label="Status do pagamento"
+          />
+        </Box>
       </TableToolbar>
 
       {/* Payments — mesma tabela do Meu Estoque: mantida no celular, com rolagem lateral,

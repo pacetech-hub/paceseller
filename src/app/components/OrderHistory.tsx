@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Group, Text, TextInput, Chip, Badge, Button, Table } from "@mantine/core";
+import { Stack, Text, TextInput, Badge, Box, Button, SegmentedControl, Table } from "@mantine/core";
 import {
   MagnifyingGlassIcon,
   EyeIcon,
@@ -187,15 +187,14 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
           flex={{ base: '1 1 100%', sm: 1 }}
           miw={{ sm: 160 }}
         />
-        <Chip.Group value={statusFilter} onChange={v => setStatusFilter(v as string)}>
-          <Group gap="sm">
-            {statuses.map(s => (
-              <Chip key={s} value={s} variant="filled" color="brand">
-                {statusLabels[s]}
-              </Chip>
-            ))}
-          </Group>
-        </Chip.Group>
+        <Box maw="100%" style={{ overflowX: 'auto', flex: 'none' }}>
+          <SegmentedControl
+            value={statusFilter}
+            onChange={v => setStatusFilter(v)}
+            data={statuses.map(s => ({ value: s, label: statusLabels[s] }))}
+            aria-label="Status do pedido"
+          />
+        </Box>
       </TableToolbar>
 
       {/* Orders */}
