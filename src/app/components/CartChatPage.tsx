@@ -30,7 +30,7 @@ export function CartChatPage({ cartContext, onNavigate, viewerRole = 'lojista', 
   if (!cart) {
     return (
       <Box p={{ base: 'md', sm: 'lg' }} maw={900} mx="auto" w="100%">
-        <EmptyState icon={ShoppingCartIcon} title="Nenhum carrinho aberto" description="A conversa é sempre sobre um carrinho. Escolha um na lista de carrinhos." action={{ label: viewerRole === 'rep' ? 'Ir para Carrinhos' : 'Ir para Meus carrinhos', onClick: () => onNavigate('carts') }} />
+        <EmptyState icon={ShoppingCartIcon} title="Nenhum carrinho aberto" description="A conversa é sempre sobre um carrinho. Escolha um na lista de carrinhos." action={{ label: viewerRole === 'rep' ? 'Ir para carrinhos' : 'Ir para Meus carrinhos', onClick: () => onNavigate('carts') }} />
       </Box>
     );
   }

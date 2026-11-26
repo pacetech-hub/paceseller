@@ -89,7 +89,7 @@ export function IndustrySalesSection({ onCta }: { onCta: (target: CtaTarget) => 
                     onClick={() => onCta({ kind: 'orders', status: r.orderStatus })}
                     label={<Text size="sm">{r.label}</Text>}
                     leftSection={<ColorSwatch color={`var(--mantine-color-${r.color.replace('.', '-')})`} size={10} withShadow={false} />}
-                    rightSection={<Text size="sm" fw={700} className="mono">{int(r.count)}</Text>}
+                    rightSection={<Text size="sm" fw={600} className="mono">{int(r.count)}</Text>}
                     styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
                   />
                 ))}
@@ -109,7 +109,7 @@ export function IndustrySalesSection({ onCta }: { onCta: (target: CtaTarget) => 
                   <Group key={x.id} justify="space-between" wrap="nowrap" gap="sm">
                     <Group gap="sm" wrap="nowrap" miw={0}>
                       <ThemeIcon size={26} radius="xl" variant={i === 0 ? 'filled' : 'light'} color="brand" aria-label={`${i + 1}º lugar`}>
-                        <Text size="xs" fw={700} c="inherit">{i + 1}º</Text>
+                        <Text size="xs" fw={600} c="inherit">{i + 1}º</Text>
                       </ThemeIcon>
                       <Box miw={0}>
                         <Text size="sm" fw={600} truncate>{x.name}</Text>
@@ -118,7 +118,7 @@ export function IndustrySalesSection({ onCta }: { onCta: (target: CtaTarget) => 
                         </Text>
                       </Box>
                     </Group>
-                    <Text size="sm" fw={700} style={{ whiteSpace: 'nowrap' }}>{reais(x.value)}</Text>
+                    <Text size="sm" fw={600} style={{ whiteSpace: 'nowrap' }}>{reais(x.value)}</Text>
                   </Group>
                 ))}
               </Stack>

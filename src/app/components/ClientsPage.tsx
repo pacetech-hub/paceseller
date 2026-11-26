@@ -123,7 +123,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Paper key={stat.label} withBorder p={{ base: 'sm', sm: 'md' }}>
               <Stack gap={4}>
                 <Text c="dimmed" size="sm">{stat.label}</Text>
-                <Text fw={700} fz="xl" lh={1} className="mono">{stat.count.toLocaleString('pt-BR')}</Text>
+                <Text fw={600} fz="xl" lh={1} className="mono">{stat.count.toLocaleString('pt-BR')}</Text>
                 <Text c="dimmed" size="sm">{stat.caption}</Text>
               </Stack>
             </Paper>
@@ -158,7 +158,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             <Popover.Dropdown w={320} maw="calc(100vw - 32px)">
               <Stack gap="md">
                 <Box>
-                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb="xs">Região</Text>
+                  <Text c="dimmed" fw={600} size="sm" mb="xs">Região</Text>
                   <Group gap="sm">
                     {REGIONS.map(r => (
                       <Chip key={r} checked={regionFilters.includes(r)} onChange={() => toggleRegion(r)} variant="filled" color="brand">
@@ -169,7 +169,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
                 </Box>
 
                 <Box>
-                  <Text tt="uppercase" c="dimmed" fw={600} size="sm" mb="xs">Status</Text>
+                  <Text c="dimmed" fw={600} size="sm" mb="xs">Status</Text>
                   <Group gap="sm">
                     {STATUS_OPTIONS.map(s => (
                       <Chip key={s.value} checked={statusFilters.includes(s.value)} onChange={() => toggleStatus(s.value)} variant="filled" color="brand">
@@ -181,7 +181,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
 
                 {activeFilterCount > 0 && (
                   <Button variant="subtle" color="brand" onClick={clearFilters}>
-                    Limpar Filtros
+                    Limpar filtros
                   </Button>
                 )}
               </Stack>
@@ -227,7 +227,7 @@ export function ClientsPage({ onNavigate, selectedClient, setSelectedClient }: C
             icon={UsersIcon}
             title="Nenhum cliente encontrado"
             description="Nenhum cliente corresponde à busca ou aos filtros aplicados. Limpe-os para ver a carteira completa."
-            action={{ label: 'Limpar Busca e Filtros', onClick: () => { setSearch(''); clearFilters(); }, forward: false }}
+            action={{ label: 'Limpar busca e Filtros', onClick: () => { setSearch(''); clearFilters(); }, forward: false }}
           />
         ) : (
           <DataTable headers={['Cliente', 'Status', 'Cidade/Estado', 'Representante', 'Ações']} minWidth={860}>

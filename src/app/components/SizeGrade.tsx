@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Badge, Box, Button, Divider, Group, Menu, Modal, NumberInput, Paper, SimpleGrid, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CaretDownIcon, CheckIcon, PlusIcon, ShoppingCartIcon, SparkleIcon, TruckIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, CheckIcon, PlusIcon, ShoppingCartIcon, TruckIcon } from "@phosphor-icons/react";
 import { formatCurrency, products, type Product } from "../data/mockData";
 import {
   CART_PARAMS, addToCart, cartPairs, cartStatus, createCart, getCart, isEditableBy, pairsOf, resolveTargetCart,
@@ -57,7 +57,7 @@ export function SizeGradeEditor({ product, value, onChange, suggestion }: {
         />
         <Button variant="default" onClick={distribute} disabled={!Number(totalInput)}>Distribuir</Button>
         {suggestion && (
-          <Button variant="default" leftSection={<SparkleIcon size={16} />} onClick={() => onChange(suggestion.sizes)}>
+          <Button variant="default" onClick={() => onChange(suggestion.sizes)}>
             Preencher sugestão ({suggestion.qty})
           </Button>
         )}
@@ -116,11 +116,11 @@ export function GradeOrderSummary({ product, sizes }: { product: Product; sizes:
     <Group gap="lg" wrap="wrap">
       <Box>
         <Text size="sm" c="dimmed">Pares</Text>
-        <Text fw={700} className="mono">{n}</Text>
+        <Text fw={600} className="mono">{n}</Text>
       </Box>
       <Box>
         <Text size="sm" c="dimmed">Valor ({pairsText(n)} × Seu custo)</Text>
-        <Text fw={700} className="mono">{formatCurrency(n * product.price)}</Text>
+        <Text fw={600} className="mono">{formatCurrency(n * product.price)}</Text>
       </Box>
       <Group gap={6} wrap="nowrap">
         <TruckIcon size={18} />
@@ -265,7 +265,7 @@ export function GradeSheet({ request, onClose }: { request: GradeRequest | null;
         <Box>
           <Title order={3}>{productDisplayName(product)}</Title>
           <Group gap="sm" mt={4}>
-            <Text className="mono" fw={700}>{formatCurrency(product.price)}</Text>
+            <Text className="mono" fw={600}>{formatCurrency(product.price)}</Text>
             <Text size="sm" c="dimmed">Seu custo/par</Text>
             <Tooltip label={markupLabel(product)}>
               <Badge variant="light" color="brand">{marginLabel(product)}</Badge>

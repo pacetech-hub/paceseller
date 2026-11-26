@@ -56,7 +56,7 @@ export function RepCartPage({ onNavigate, cartContext, onSwitchCart, onOpenChat 
           icon={ShoppingCartIcon}
           title={cart ? 'Este carrinho já virou pedido' : 'Nenhum carrinho aberto'}
           description={cart ? 'Carrinhos confirmados ficam em Pedidos.' : 'Escolha um carrinho em Carrinhos ou crie um novo para a loja.'}
-          action={cart ? { label: 'Acompanhar em Pedidos', onClick: () => onNavigate('history') } : { label: 'Ir para Carrinhos', onClick: () => onNavigate('carts') }}
+          action={cart ? { label: 'Acompanhar em Pedidos', onClick: () => onNavigate('history') } : { label: 'Ir para carrinhos', onClick: () => onNavigate('carts') }}
         />
       </Box>
     );
@@ -139,7 +139,7 @@ export function RepCartPage({ onNavigate, cartContext, onSwitchCart, onOpenChat 
             <Paper withBorder style={{ overflow: 'hidden' }}>
               <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
                 <Box miw={0}>
-                  <Text fw={700}>Pedido</Text>
+                  <Text fw={600}>Pedido</Text>
                   <Text fz={12} ff="monospace" c="dimmed" mt={2}>
                     {status === 'aguardando-pagamento' ? `30/60/90 dias ou à vista com ${CART_PARAMS.cashDiscountPct}%` : '30/60/90 dias'} · {CART_PARAMS.leadTimeLabel}
                   </Text>
@@ -177,7 +177,7 @@ export function RepCartPage({ onNavigate, cartContext, onSwitchCart, onOpenChat 
               {cart.lines.length > 0 && (
                 <Group justify="space-between" align="center" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
                   <Box>
-                    <Text className="mono" fw={700}>Subtotal: {formatCurrency(subtotal)}</Text>
+                    <Text className="mono" fw={600}>Subtotal: {formatCurrency(subtotal)}</Text>
                     {margin !== null && <Text size="xs" c="dimmed">Margem da loja {margin}% no PDV sugerido · custo da loja, sem impostos e sem frete</Text>}
                   </Box>
                   <Group gap="md" wrap="wrap" justify="flex-end">
@@ -288,7 +288,7 @@ export function RepCartPage({ onNavigate, cartContext, onSwitchCart, onOpenChat 
                   </ActionIcon>
                 </Group>
               )}
-              <Text fz={28} fw={700} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
+              <Text fz={28} fw={600} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
               <Text className="mono" size="sm" c="dimmed">{formatCurrency(subtotal)}</Text>
             </Box>
 

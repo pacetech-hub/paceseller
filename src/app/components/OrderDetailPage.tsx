@@ -216,7 +216,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
           icon={PackageIcon}
           title="Nenhum pedido selecionado"
           description="Escolha um pedido no histórico para ver produtos, pagamento e nota fiscal."
-          action={{ label: 'Ver Histórico de Pedidos', onClick: () => onNavigate('history') }}
+          action={{ label: 'Ver Histórico de pedidos', onClick: () => onNavigate('history') }}
         />
       </Box>
     );
@@ -254,7 +254,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
         <Paper withBorder p="md">
           <SectionTitle>Cliente</SectionTitle>
           <Group gap="xs" mb="xs">
-            <Text fw={700}>{client.name}</Text>
+            <Text fw={600}>{client.name}</Text>
             <Badge variant="light" color={clientStatusColors[client.status]} styles={badgeStyles}>
               {client.status}
             </Badge>
@@ -341,7 +341,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
             <Text>{order.rep}</Text>
           </DetailField>
           <DetailField label="Valor total">
-            <Text className="mono" size="xl" fw={700}>{formatCurrency(order.total)}</Text>
+            <Text className="mono" size="xl" fw={600}>{formatCurrency(order.total)}</Text>
             <Text c="dimmed" size="sm">{order.paymentCondition}</Text>
             {profile !== 'rep' && (
               // Navegação para outra página: link, não botão
@@ -353,7 +353,7 @@ export function OrderDetailPage({ order, onNavigate, profile }: OrderDetailPageP
                 mt="xs"
                 style={{ alignItems: 'center', gap: 4 }}
               >
-                Abrir Pagamentos e Boletos
+                Abrir Pagamentos e boletos
                 <ArrowRightIcon size={16} />
               </Anchor>
             )}

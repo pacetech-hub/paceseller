@@ -8,7 +8,6 @@ import {
   HandshakeIcon, HourglassIcon, InfoIcon, PackageIcon, PaperPlaneTiltIcon, PhoneCallIcon, StarIcon, TrendDownIcon,
   type Icon,
 } from "@phosphor-icons/react";
-import { getGreeting } from "./RadarPage";
 import { RepSalesSection } from "./RepSalesSection";
 import { KpiSkeleton } from "./ui/Skeletons";
 import { useMockLoading } from "../lib/useMockLoading";
@@ -60,13 +59,12 @@ function LinkCta({ label, onClick, color = 'blue', c }: { label: string; onClick
  * Radar do representante: o que está esperando você (pedidos para aprovar), uma oportunidade
  * na carteira, e a carteira inteira loja por loja, cada uma com o próximo passo.
  */
-export function RepRadar({ userName, greetName, onCta }: { userName: string; greetName?: string; onCta: (target: CtaTarget) => void }) {
+export function RepRadar({ userName, onCta }: { userName: string; greetName?: string; onCta: (target: CtaTarget) => void }) {
   const loading = useMockLoading();
   const radar = useRepRadar(userName);
   const { carts } = useCartStore();
   const carteira = clients.filter(c => c.rep === userName);
   const attention = new Set(radar.contacts.map(c => c.clientId)).size;
-  const firstName = (greetName ?? userName).split(' ')[0];
 
   // pedidos enviados pelo lojista esperando as condições do representante, o mais antigo primeiro
   const waiting = carts
@@ -77,8 +75,7 @@ export function RepRadar({ userName, greetName, onCta }: { userName: string; gre
   return (
     <Stack gap="xl">
       <Box>
-        <Text c="dimmed">{getGreeting()}, {firstName}</Text>
-        <Title order={1} mt={4}>
+        <Title order={1}>
           {attention === 0 ? 'Carteira em dia' : `${attention} ${attention === 1 ? 'loja precisa' : 'lojas precisam'} de atenção`}
         </Title>
         <Text c="dimmed" mt={4}>
@@ -219,10 +216,7 @@ function OpportunityCard({ productId, reason, stores, onCta }: { productId: stri
   return (
     <Paper p="lg" h="100%" bg="brand.9" style={{ borderColor: 'light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-7))' }} withBorder>
       <Stack gap="sm" h="100%">
-        <Group gap={6} wrap="nowrap">
-          <StarIcon size={16} weight="fill" color="white" />
-          <Text size="xs" fw={700} tt="uppercase" ff="monospace" lts={0.5} c="brand.3">Oportunidade na carteira</Text>
-        </Group>
+        <Text size="sm" fw={600} c="brand.3">Oportunidade na carteira</Text>
         <Title order={3} c="white">{product.category} {product.name}</Title>
         <Text size="sm" c="brand.2">
           {reason} — {n} {n === 1 ? 'loja da sua carteira ainda não tem' : 'lojas da sua carteira ainda não têm'} esse produto

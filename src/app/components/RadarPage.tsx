@@ -27,7 +27,7 @@ type Profile = 'admin' | 'rep' | 'lojista';
 interface RadarPageProps {
   profile: Profile;
   userName: string;
-  /** Quem está operando a conta (preposto do representante); só muda a saudação. */
+  /** Quem está operando a conta (preposto do representante). */
   greetName?: string;
   /** Todo CTA abre o destino com o contexto aplicado (FR-108). */
   onCta: (target: CtaTarget) => void;
@@ -68,63 +68,52 @@ const HEALTH = {
 
 const DISMISS_REASONS = ['Já resolvi por fora', 'Não faz sentido pra minha loja', 'Dados errados', 'Outro motivo'];
 
-export function getGreeting(date = new Date()): string {
-  const hour = date.getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
-  return 'Boa noite';
-}
-
-// Anatomia do cartão (FR-105), no formato do layout: ícone em bloco, sobretítulo em caixa-alta
-// mono (severidade · sinal), métrica principal grande (a situação), assunto, uma linha de contexto,
-// sugestão em mono, CTA como link na cor do cartão e, no rodapé, prazo e "Atualizado há".
-// Cor pela severidade, nunca pelo tipo; a severidade também vem escrita (não só na cor).
+// Anatomia do cartão (FR-105): ponto de status + sobretítulo (severidade · sinal), métrica
+// principal grande (a situação), assunto, uma linha de contexto, sugestão, CTA como link e, no
+// rodapé, prazo e "Atualizado há". A superfície é sempre neutra: a severidade aparece no ponto e
+// no sobretítulo, sempre escrita (não só na cor).
 // "highlight" = Destaque da semana (cartão preto); "resolved" = resolvido nas últimas 24 h.
 // O mesmo cartão serve ao Radar do lojista (sinais) e ao do representante (cartões temáticos).
 type CardVariant = 'default' | 'highlight' | 'resolved';
 
 export function RadarCard({
-  icon: CardIcon, color, eyebrow, metric, subject, context, suggestion, ctaLabel, onCta, footer, menu,
+  color, eyebrow, metric, subject, context, suggestion, ctaLabel, onCta, footer, menu,
   variant = 'default', resolvedText = 'Sai do Radar em até 24 h',
 }: {
-  icon: Icon; color: string; eyebrow: string; metric: string; subject: string; context: string;
+  /** Mantido por compatibilidade; o cartão não mostra ícone. */
+  icon?: Icon; color: string; eyebrow: string; metric: string; subject: string; context: string;
   suggestion?: string; ctaLabel: string; onCta: () => void; footer: string;
   /** Itens do menu "Mais opções" (sem menu nos resolvidos). */
   menu?: ReactNode; variant?: CardVariant; resolvedText?: string;
 }) {
   const highlight = variant === 'highlight';
   const resolved = variant === 'resolved';
-  const base = resolved ? 'gray' : color;
-  // texto na cor do status: tom 8 sobre o fundo claro; no destaque, branco sobre preto
-  const tone = highlight ? 'white' : resolved ? 'dimmed' : `${color}.8`;
+  // sobretítulo na cor do status (tom 8 sobre o fundo claro); no destaque, cinza claro sobre preto
+  const tone = highlight ? 'brand.3' : resolved ? 'dimmed' : `${color}.8`;
   const muted = highlight ? 'brand.3' : 'dimmed';
+  const dot = highlight ? 'var(--mantine-color-brand-3)' : resolved ? 'var(--mantine-color-gray-5)' : `var(--mantine-color-${color}-6)`;
 
   return (
     <Paper
       withBorder
       p="lg"
       h="100%"
-      bg={highlight ? 'brand.9' : `var(--mantine-color-${base}-light)`}
+      bg={highlight ? 'brand.9' : undefined}
       // no destaque a borda só aparece no modo escuro, para o cartão preto não sumir no fundo
       style={highlight
         ? { borderColor: 'light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-7))' }
-        : { borderColor: `var(--mantine-color-${base}-light-hover)`, opacity: resolved ? 0.8 : 1 }}
+        : { opacity: resolved ? 0.8 : 1 }}
     >
       <Stack gap="md" h="100%">
-        <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <ThemeIcon
-            size={40}
-            radius="md"
-            variant="filled"
-            color={highlight ? 'brand.7' : base}
-            aria-hidden
-          >
-            <CardIcon size={20} weight={highlight ? 'fill' : 'regular'} />
-          </ThemeIcon>
+        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="xs" mih={28}>
+          <Group gap={8} wrap="nowrap" align="flex-start" pt={4} miw={0}>
+            <Box w={8} h={8} mt={6} flex="none" bg={dot} style={{ borderRadius: '50%' }} aria-hidden />
+            <Text size="sm" fw={600} c={tone} lineClamp={2}>{eyebrow}</Text>
+          </Group>
           {!resolved && menu && (
             <Menu position="bottom-end" withinPortal shadow="md">
               <Menu.Target>
-                <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'brand'} aria-label="Mais opções do aviso" mr={-8}>
+                <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'brand'} aria-label="Mais opções do aviso" mr={-8} mt={-6}>
                   <DotsThreeVerticalIcon size={20} />
                 </ActionIcon>
               </Menu.Target>
@@ -133,18 +122,13 @@ export function RadarCard({
           )}
         </Group>
 
-        <Stack gap={6}>
-          <Text size="xs" fw={700} tt="uppercase" ff="monospace" lts={0.5} c={highlight ? muted : tone} lineClamp={2}>
-            {eyebrow}
-          </Text>
-          <Text fz={32} fw={700} lh={1.1} c={tone}>{metric}</Text>
-        </Stack>
+        <Text fz={32} fw={600} lh={1.1} c={highlight ? 'white' : resolved ? 'dimmed' : undefined} style={{ fontVariantNumeric: 'tabular-nums' }}>{metric}</Text>
 
         <Box>
           <Text fw={600} c={highlight ? 'white' : undefined}>{subject}</Text>
           <Text size="sm" c={muted} mt={4}>{context}</Text>
           {suggestion && !resolved && (
-            <Text size="sm" fw={700} ff="monospace" mt="sm" c={highlight ? 'white' : undefined}>{suggestion}</Text>
+            <Text size="sm" fw={600} mt="sm" c={highlight ? 'white' : undefined}>{suggestion}</Text>
           )}
         </Box>
 
@@ -153,11 +137,11 @@ export function RadarCard({
             <Text size="sm" c="dimmed">{resolvedText}</Text>
           ) : (
             <Group>
-              {/* CTA como link na cor do cartão; o padding lateral é compensado para alinhar ao texto */}
+              {/* CTA como link; o padding lateral é compensado para alinhar ao texto */}
               <Button
                 variant="transparent"
-                color={highlight ? 'white' : color}
-                c={tone}
+                color={highlight ? 'white' : 'brand'}
+                c={highlight ? 'white' : undefined}
                 px={0}
                 fw={600}
                 fz="md"
@@ -298,7 +282,7 @@ function BucketTabs({ value, onChange, counts, noun = ['pendência', 'pendência
 /** Sinais mostrados na seção de widgets "Pedidos, pagamentos e entregas" em vez de cartões. */
 const WIDGET_SIGNALS = new Set<SignalType>(['pedido-atrasado', 'boleto-a-vencer']);
 
-function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
+function LojistaRadar({ onCta }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Bucket>('hoje');
   const [showAll, setShowAll] = useState(false);
   const [why, setWhy] = useState<RadarSignal | null>(null);
@@ -323,11 +307,11 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   return (
     <Stack gap="xl">
       <Stack gap="md">
-        {/* FR-101/102: saudação, saúde da loja (pela quantidade de críticos) e total de pendências */}
+        {/* FR-101/102: saúde da loja (pela quantidade de críticos) e total de pendências */}
         <Box>
-          <Title order={1}>{getGreeting()}, {userName}</Title>
-          <Group gap="sm" mt={4} wrap="wrap">
-            <Text fw={600} c={health.color}>{health.title}</Text>
+          <Title order={1}>{health.title}</Title>
+          <Group gap={8} mt={4} wrap="nowrap" align="center">
+            <Box w={8} h={8} flex="none" bg={`var(--mantine-color-${health.color.replace('.', '-')})`} style={{ borderRadius: '50%' }} aria-hidden />
             <Text c="dimmed">
               {total} {total === 1 ? 'pendência' : 'pendências'} · {radar.critical} {radar.critical === 1 ? 'crítica' : 'críticas'}
             </Text>
@@ -415,7 +399,7 @@ function IndustryRadar({ onCta }: Omit<RadarPageProps, 'profile'>) {
   return (
     <Stack gap="xl">
       <Box>
-        <Title order={1}>{getGreeting()}</Title>
+        <Title order={1}>Radar da rede</Title>
         <Text c="dimmed" mt={4}>Como está a rede: pedidos, faturamento, vendedores e clientes para contatar</Text>
       </Box>
       <IndustrySalesSection onCta={onCta} />

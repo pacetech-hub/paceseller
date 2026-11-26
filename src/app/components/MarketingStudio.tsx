@@ -8,7 +8,6 @@ import { useMockLoading } from "../lib/useMockLoading";
 import { CardGridSkeleton } from "./ui/Skeletons";
 import { EmptyState } from "./ui/EmptyState";
 import {
-  SparkleIcon,
   CheckIcon,
   ArrowRightIcon,
   MagnifyingGlassIcon,
@@ -191,7 +190,7 @@ function BackLink({ onClick }: { onClick: () => void }) {
         ml={-8}
         leftSection={<CaretLeftIcon size={16} />}
       >
-        Voltar para Marketing IA
+        Voltar para Marketing
       </Button>
     </Group>
   );
@@ -208,7 +207,7 @@ function PieceInfo({ label, copy }: { label: string; copy: string }) {
         fullWidth
         leftSection={<DownloadSimpleIcon size={16} />}
       >
-        Baixar Peça
+        Baixar peça
       </Button>
     </Box>
   );
@@ -219,34 +218,20 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
   return (
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       {/* Header */}
-      <Paper withBorder p={{ base: 'md', sm: 'lg' }} bg="var(--mantine-color-default-hover)">
-        <Group justify="space-between" wrap="wrap" gap="md">
-          <Group gap="sm" wrap="nowrap">
-            <ThemeIcon variant="light" color="brand" size={40}>
-              <SparkleIcon size={20} />
-            </ThemeIcon>
-            <Box>
-              <Title order={1}>Estúdio de Marketing com IA</Title>
-              <Text c="dimmed" size="sm">Crie campanhas profissionais em menos de 2 minutos</Text>
-            </Box>
-          </Group>
-          <Group gap="sm" wrap="wrap">
-            <Button
-              onClick={onManageCampaigns}
-              variant="subtle"
-              leftSection={<PencilSimpleIcon size={16} />}
-            >
-              Gerenciar Campanhas
-            </Button>
-            <Button
-              onClick={() => onCreate()}
-              leftSection={<SparkleIcon size={16} />}
-            >
-              Criar Campanha
-            </Button>
-          </Group>
+      <Group justify="space-between" wrap="wrap" gap="md" align="flex-end">
+        <Box>
+          <Title order={1}>Estúdio de marketing</Title>
+          <Text c="dimmed" mt={4}>Peças para Instagram, WhatsApp e impressão com os produtos do catálogo</Text>
+        </Box>
+        <Group gap="sm" wrap="wrap">
+          <Button onClick={onManageCampaigns} variant="subtle" leftSection={<PencilSimpleIcon size={16} />}>
+            Gerenciar campanhas
+          </Button>
+          <Button onClick={() => onCreate()} leftSection={<PlusIcon size={16} />}>
+            Criar campanha
+          </Button>
         </Group>
-      </Paper>
+      </Group>
 
       {/* Histórico */}
       <Box>
@@ -262,7 +247,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
                     <LoadingImage src={item.image} alt={item.formatLabel} />
                     <Button
                       onClick={() => onDelete(item.id)}
-                      aria-label={`Excluir Peça ${item.formatLabel} do Histórico`}
+                      aria-label={`Excluir peça ${item.formatLabel} do histórico`}
                       variant="transparent"
                       pos="absolute"
                       top={12}
@@ -284,7 +269,7 @@ function MarketingHome({ history, onCreate, onManageCampaigns, onDelete }: { his
             icon={ImageIcon}
             title="Você ainda não criou peças"
             description="As peças que você salvar ao final do assistente aparecem aqui para baixar de novo quando quiser."
-            action={{ label: 'Criar Campanha', onClick: () => onCreate() }}
+            action={{ label: 'Criar campanha', onClick: () => onCreate() }}
             suggestions={[
               { label: 'Criar peça para Instagram', description: 'Feed 4:5, pronta para publicar', icon: InstagramLogoIcon, onClick: () => onCreate('instagram-feed') },
               { label: 'Criar cartaz A4', description: 'PDF para parede e balcão da loja', icon: PrinterIcon, onClick: () => onCreate('impressao-a4') },
@@ -400,7 +385,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             px="sm"
             leftSection={<PlusIcon size={16} />}
           >
-            Nova Campanha
+            Nova campanha
           </Button>
         </Paper>
 
@@ -489,7 +474,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
               description={campaigns.length > 0
                 ? 'Selecione uma campanha na lista ou crie uma nova para enviar cenários.'
                 : 'Crie uma campanha e envie os cenários fotográficos que serão o fundo das peças.'}
-              action={{ label: 'Nova Campanha', onClick: () => setCreating(true), forward: false }}
+              action={{ label: 'Nova campanha', onClick: () => setCreating(true), forward: false }}
             />
           )}
         </Stack>
@@ -533,7 +518,7 @@ function CampaignsManager({ campaigns, selectedId, onSelect, onBack, onCreateCam
             Cancelar
           </Button>
           <Button onClick={handleCreate}>
-            Criar Campanha
+            Criar campanha
           </Button>
         </Group>
       </Modal>
@@ -659,7 +644,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
 
   // Motivo pelo qual o botão principal está desativado, mostrado ao lado da navegação
   const blockedReason =
-    step === 1 && !campaignId ? 'Crie uma campanha em "Gerenciar Campanhas" para continuar' :
+    step === 1 && !campaignId ? 'Crie uma campanha em "Gerenciar campanhas" para continuar' :
     step === 2 && selectedFormats.size === 0 ? 'Selecione ao menos um formato para continuar' :
     step === 3 && selectedProducts.size === 0 ? 'Selecione ao menos um produto para continuar' :
     step === 4 && (!selectedCampaign || selectedCampaign.photos.length === 0) ? 'Adicione um cenário à campanha para continuar' :
@@ -701,7 +686,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                         color={current ? 'brand' : 'gray'}
                         flex="none"
                         fz="md"
-                        fw={700}
+                        fw={600}
                         c={current ? undefined : 'dimmed'}
                         className={classes.stepDot}
                         data-current={current || undefined}
@@ -789,7 +774,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                   icon={FolderSimplePlusIcon}
                   title="Você ainda não tem campanhas"
                   description="A peça precisa de uma campanha com cenários fotográficos. Crie uma para continuar."
-                  action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
+                  action={{ label: 'Gerenciar campanhas', onClick: onManageCampaigns }}
                 />
               )}
             </Box>
@@ -872,7 +857,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                   icon={MagnifyingGlassIcon}
                   title={`Nenhum produto encontrado para "${productQuery.trim()}"`}
                   description="Confira a grafia ou busque pela referência do produto."
-                  action={{ label: 'Limpar Busca', onClick: () => setProductQuery(''), forward: false }}
+                  action={{ label: 'Limpar busca', onClick: () => setProductQuery(''), forward: false }}
                 />
               )}
               <Stack gap="lg">
@@ -969,8 +954,8 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
                   withBorder={false}
                   icon={ImageIcon}
                   title="Esta campanha ainda não tem cenários"
-                  description='Envie ao menos um cenário fotográfico em "Gerenciar Campanhas" ou escolha outra campanha para usar como fundo da peça.'
-                  action={{ label: 'Gerenciar Campanhas', onClick: onManageCampaigns }}
+                  description='Envie ao menos um cenário fotográfico em "Gerenciar campanhas" ou escolha outra campanha para usar como fundo da peça.'
+                  action={{ label: 'Gerenciar campanhas', onClick: onManageCampaigns }}
                   secondaryAction={{ label: 'Escolher Outra Campanha', onClick: () => setStep(1) }}
                 />
               )}
@@ -1096,7 +1081,7 @@ function CampaignWizard({ profile, campaigns, initialFormat = 'instagram-feed', 
               <Button
                 onClick={handleGenerate}
                 disabled={generating || blockedReason !== null}
-                leftSection={generating ? <Loader size={16} color="white" /> : <SparkleIcon size={16} />}
+                leftSection={generating ? <Loader size={16} color="white" /> : <MagicWandIcon size={16} />}
               >
                 {generating ? 'Gerando Peças…' : 'Gerar Peças'}
               </Button>
@@ -1126,7 +1111,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       const fallback = campaigns[idx + 1] ?? campaigns[idx - 1] ?? null;
       setSelectedCampaignId(fallback ? fallback.id : null);
     }
-    toast.success('Campanha excluída', 'Para criar outra, use "Nova Campanha"');
+    toast.success('Campanha excluída', 'Para criar outra, use "Nova campanha"');
   };
 
   if (mode === 'campaigns') {
@@ -1175,7 +1160,7 @@ export function MarketingStudio({ profile }: { profile: Profile }) {
       onManageCampaigns={() => setMode('campaigns')}
       onDelete={id => {
         setHistory(prev => prev.filter(item => item.id !== id));
-        toast.success('Peça excluída do histórico', 'Para criar uma nova peça, use "Criar Campanha"');
+        toast.success('Peça excluída do histórico', 'Para criar uma nova peça, use "Criar campanha"');
       }}
     />
   );

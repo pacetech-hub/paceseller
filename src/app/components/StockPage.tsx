@@ -76,21 +76,12 @@ export function StockPage() {
     <Container size={1400} p={{ base: 'md', sm: 'lg' }} w="100%">
       <Stack gap="xl">
         {/* Header / mode toggle */}
-        <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
-          <Group justify="space-between" gap="sm" wrap="wrap">
-            <Group gap="sm" wrap="nowrap" flex="1 1 280px" align="flex-start">
-              <ThemeIcon size={40} variant="light" flex="none">
-                <WarehouseIcon size={20} />
-              </ThemeIcon>
-              <Box flex={1} miw={0}>
-                <Title order={1} fw={700}>Meu Estoque · Tesla Footwear</Title>
-                <Text c="dimmed" size="sm">
-                  Mantenha seu estoque atualizado para que o catálogo mostre alertas de falta de estoque corretamente para seus clientes finais.
-                </Text>
-              </Box>
-            </Group>
-          </Group>
-        </Paper>
+        <Box>
+          <Title order={1}>Meu estoque · Tesla Footwear</Title>
+          <Text c="dimmed" mt={4}>
+            Com o estoque atualizado, o catálogo e o Radar avisam quando um modelo está acabando
+          </Text>
+        </Box>
 
         {/* Como o estoque entra: cadastro manual ou integração com o ERP */}
         <Tabs value={mode} onChange={v => v && setMode(v as Mode)}>

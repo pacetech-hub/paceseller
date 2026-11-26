@@ -129,20 +129,14 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
 
   const lastLogin = (u: LinkedUser) => (u.lastLogin === '—' ? '—' : formatDate(u.lastLogin));
 
-  const Icon = scope.icon;
   const visaoInfo = visoes.find(v => v.id === scope.visao)!;
 
   return (
     <Stack gap="xl" maw={1400} mx="auto" p={{ base: 'md', sm: 'lg' }}>
-      <Group gap="sm" wrap="nowrap">
-        <ThemeIcon size={40} variant="light" color="brand">
-          <Icon size={20} />
-        </ThemeIcon>
-        <Box>
-          <Title order={1}>{scope.title}</Title>
-          <Text c="dimmed" size="sm">{scope.subtitle}</Text>
-        </Box>
-      </Group>
+      <Box>
+        <Title order={1}>{scope.title}</Title>
+        <Text c="dimmed" mt={4}>{scope.subtitle}</Text>
+      </Box>
 
       <Alert icon={<InfoIcon size={16} />} color="brand" variant="light">
         Estes usuários são registrados pela indústria e vinculados à sua conta. Aqui você escolhe o perfil de acesso de cada um — o que cada perfil pode fazer é definido na tabela abaixo.
@@ -155,13 +149,13 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
             <Title order={2}>Usuários vinculados</Title>
             <Text c="dimmed" size="sm" mt={4}>{scope.usersHint}</Text>
           </Box>
-          {/* Abre o formulário: ação secundária (a principal é "Enviar Convite", dentro dele) */}
+          {/* Abre o formulário: ação secundária (a principal é "Enviar convite", dentro dele) */}
           <Button
             onClick={() => setShowInvite(v => !v)}
             variant="default"
             leftSection={<UserPlusIcon size={16} />}
           >
-            Convidar Usuário
+            Convidar usuário
           </Button>
         </Group>
 
@@ -189,7 +183,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
               </Text>
               <Group justify="flex-end" gap="sm">
                 <Button onClick={() => { setShowInvite(false); setInviteErrors({}); }} variant="default">Cancelar</Button>
-                <Button onClick={inviteUser} color="brand">Enviar Convite</Button>
+                <Button onClick={inviteUser} color="brand">Enviar convite</Button>
               </Group>
             </Stack>
           </Paper>
@@ -247,7 +241,7 @@ export function AccessPermissionsPage({ profile }: AccessPermissionsPageProps) {
                   title="Nenhum usuário vinculado ainda"
                   description={`Convide alguém da sua equipe para acessar com o perfil ${subProfile}. Você pode trocar o perfil depois.`}
                   // Abre o formulário de convite aqui mesmo (ação no lugar, sem seta)
-                  action={showInvite ? undefined : { label: 'Convidar Usuário', onClick: () => setShowInvite(true), forward: false }}
+                  action={showInvite ? undefined : { label: 'Convidar usuário', onClick: () => setShowInvite(true), forward: false }}
                   withBorder={false}
                 />
               </DataTableEmptyRow>

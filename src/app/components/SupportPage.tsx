@@ -20,7 +20,7 @@ type Profile = 'admin' | 'rep' | 'lojista';
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+    <Text size="xs" fw={600} c="dimmed">
       {children}
     </Text>
   );
@@ -42,7 +42,7 @@ function ContactCard({ icon: Icon, label, value, hint, actionLabel, href, extern
       <Stack gap="xs" h="100%">
         <Group gap={6} wrap="nowrap" c="dimmed">
           <Icon size={14} />
-          <Text size="xs" fw={700} tt="uppercase" style={{ letterSpacing: '0.06em' }}>{label}</Text>
+          <Text size="xs" fw={600}>{label}</Text>
         </Group>
         <Box miw={0}>
           <Text fw={600} size="lg" truncate title={value}>{value}</Text>
@@ -227,15 +227,10 @@ function ContactForm<T extends object>({ title, description, fields, value, onSa
 
 function PageHeader({ subtitle }: { subtitle: string }) {
   return (
-    <Group gap="sm" wrap="nowrap">
-      <ThemeIcon size={40} variant="light" color="brand">
-        <HeadsetIcon size={20} />
-      </ThemeIcon>
-      <Box>
-        <Title order={1}>Suporte</Title>
-        <Text c="dimmed" size="sm">{subtitle}</Text>
-      </Box>
-    </Group>
+    <Box>
+      <Title order={1}>Suporte</Title>
+      <Text c="dimmed" mt={4}>{subtitle}</Text>
+    </Box>
   );
 }
 

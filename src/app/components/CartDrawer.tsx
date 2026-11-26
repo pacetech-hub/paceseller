@@ -42,12 +42,12 @@ export function CartDrawer({ opened, onClose, onViewCarts }: { opened: boolean; 
                 <Title order={3} fz="lg">{cart.cartName}</Title>
                 <Badge mt={4} variant="light" color={statusColor[cartStatus(cart)]}>{statusLabel(cartStatus(cart), cart.rep)}</Badge>
               </Box>
-              <Text className="mono" fw={700}>{formatCurrency(value)}</Text>
+              <Text className="mono" fw={600}>{formatCurrency(value)}</Text>
             </Group>
             {/* Totais reais do carrinho de destino (FR-402); margem some com 0 itens (BR-06) */}
             <Group gap="lg" mt="sm">
-              <Box><Text size="sm" c="dimmed">Pares</Text><Text fw={700} className="mono">{pairs}</Text></Box>
-              {margin !== null && <Box><Text size="sm" c="dimmed">Margem no PDV sugerido</Text><Text fw={700} className="mono">{margin}%</Text></Box>}
+              <Box><Text size="sm" c="dimmed">Pares</Text><Text fw={600} className="mono">{pairs}</Text></Box>
+              {margin !== null && <Box><Text size="sm" c="dimmed">Margem no PDV sugerido</Text><Text fw={600} className="mono">{margin}%</Text></Box>}
             </Group>
             {/* Grade mínima (FR-404): passado o mínimo a barra fica cheia e o rótulo mostra o real */}
             <Box mt="sm">

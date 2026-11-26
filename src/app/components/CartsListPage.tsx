@@ -120,7 +120,7 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
               <Box miw={0}>
                 <Group gap="xs" wrap="wrap">
                   <UnstyledButton onClick={e => { e.stopPropagation(); onOpen(); }} aria-label={`Abrir carrinho ${cart.cartName}`}>
-                    <Text fw={700}>{cart.cartName}</Text>
+                    <Text fw={600}>{cart.cartName}</Text>
                   </UnstyledButton>
                   <Badge variant="light" color={color} radius="sm" styles={{ label: { textTransform: 'none' } }}>{statusLabelFor(status, cart, viewerRole)}</Badge>
                 </Group>
@@ -139,7 +139,7 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
                   </Box>
                   <Text fz={12} ff="monospace" c="dimmed" aria-label={`${pairs} de ${CART_PARAMS.minOrderPairs} pares da grade mínima`}>{pairs}/{CART_PARAMS.minOrderPairs}</Text>
                 </Group>
-                <Text className="mono" fw={700} w={110} ta="right">{formatCurrency(cartValue(cart))}</Text>
+                <Text className="mono" fw={600} w={110} ta="right">{formatCurrency(cartValue(cart))}</Text>
                 <Box w={170} ta="right">
                   {action && (
                     <Anchor component="button" type="button" fw={600} size="sm" onClick={e => { e.stopPropagation(); runAction(); }}>
@@ -154,7 +154,7 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
             {/* no celular, grade mínima e valor numa linha própria */}
             <Group gap="md" mt={6} hiddenFrom="sm">
               <Text fz={12} ff="monospace" c="dimmed">{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
-              <Text className="mono" fw={700}>{formatCurrency(cartValue(cart))}</Text>
+              <Text className="mono" fw={600}>{formatCurrency(cartValue(cart))}</Text>
             </Group>
 
             {/* miniaturas dos produtos */}
@@ -391,19 +391,19 @@ export function CartsListPage({
         {/* FR-503: avisos com os mesmos nomes de ação das linhas */}
         {viewerRole === 'rep' && waitingRep.length > 0 && (
           <Notice action={waitingRep.length === 1 ? 'Revisar pedido' : 'Revisar o primeiro'} onAction={() => onOpenCart(toContext(waitingRep[0]))}>
-            <Text span inherit fw={700}>{waitingRep.length === 1 ? '1 pedido espera' : `${waitingRep.length} pedidos esperam`} suas condições</Text>
+            <Text span inherit fw={600}>{waitingRep.length === 1 ? '1 pedido espera' : `${waitingRep.length} pedidos esperam`} suas condições</Text>
             {' — '}{waitingRep.map(c => `"${c.cartName}"`).join(', ')}
           </Notice>
         )}
         {viewerRole === 'rep' && waitingClient.length > 0 && (
           <Notice action="Ver carrinho" onAction={() => onOpenCart(toContext(waitingClient[0]))}>
-            <Text span inherit fw={700}>Você sugeriu {waitingClient.length === 1 ? '1 pedido novo' : `${waitingClient.length} pedidos novos`}</Text>
+            <Text span inherit fw={600}>Você sugeriu {waitingClient.length === 1 ? '1 pedido novo' : `${waitingClient.length} pedidos novos`}</Text>
             {' — '}{waitingClient[0].cartName}, parado há {days(daysInStage(waitingClient[0]))} esperando revisão do lojista
           </Notice>
         )}
         {viewerRole === 'lojista' && waitingClient.length > 0 && (
           <Notice action="Revisar e aprovar" onAction={() => onOpenCart(toContext(waitingClient[0]))}>
-            <Text span inherit fw={700}>{repFirstName(repName)} sugeriu {waitingClient.length === 1 ? '1 pedido' : `${waitingClient.length} pedidos`}</Text>
+            <Text span inherit fw={600}>{repFirstName(repName)} sugeriu {waitingClient.length === 1 ? '1 pedido' : `${waitingClient.length} pedidos`}</Text>
             {' — '}{waitingClient[0].cartName}, esperando sua revisão há {days(daysInStage(waitingClient[0]))}
           </Notice>
         )}
@@ -415,7 +415,7 @@ export function CartsListPage({
               toast.success(`${ready.length === 1 ? 'Carrinho enviado' : `${ready.length} carrinhos enviados`} para ${repFirstName(repName)}`, 'Você é avisado quando as condições forem confirmadas.');
             }}
           >
-            <Text span inherit fw={700}>{ready.length === 1 ? '1 carrinho pronto' : `${ready.length} carrinhos prontos`} pra enviar</Text>
+            <Text span inherit fw={600}>{ready.length === 1 ? '1 carrinho pronto' : `${ready.length} carrinhos prontos`} pra enviar</Text>
             {' — '}já {ready.length === 1 ? 'passou' : 'passaram'} da grade mínima de {CART_PARAMS.minOrderPairs} pares
           </Notice>
         )}

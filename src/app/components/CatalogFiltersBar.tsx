@@ -50,9 +50,9 @@ export const allSizes = Array.from(new Set(products.flatMap(p => Object.keys(p.g
 export const radarFilterOptions = RADAR_FILTERS.filter(f => f.value !== 'boa-margem' || goodMarginFilterVisible);
 
 export const priceTables = [
-  { id: 'padrao', label: 'Tabela Padrão', desc: '30/60/90 dias' },
+  { id: 'padrao', label: 'Tabela padrão', desc: '30/60/90 dias' },
   { id: 'avista', label: 'À vista', desc: '5% desconto' },
-  { id: 'promo', label: 'Tabela Promocional', desc: 'Coleção atual' },
+  { id: 'promo', label: 'Tabela promocional', desc: 'Coleção atual' },
   { id: 'atacado', label: 'Atacado', desc: 'Acima de 50 pares' },
 ];
 
@@ -413,7 +413,7 @@ function SearchableChips({ options, value, onSelect, searchLabel, placeholder, e
           icon={MagnifyingGlassIcon}
           title={emptyTitle}
           description={emptyText}
-          action={{ label: 'Limpar Busca', onClick: () => setQuery(''), forward: false }}
+          action={{ label: 'Limpar busca', onClick: () => setQuery(''), forward: false }}
         />
       )}
       <ChoiceChips options={visible} value={value} onSelect={onSelect} popular={popular} restLabel={restLabel} />

@@ -301,15 +301,15 @@ function RepProfile() {
       <Section icon={StorefrontIcon} title="Carteira de lojas" description="32 lojas vinculadas">
         <SimpleGrid cols={3} spacing="sm">
           <Paper withBorder p="sm" bg="var(--mantine-color-default-hover)">
-            <Text c="teal" fw={700} size="xl">24</Text>
+            <Text c="teal" fw={600} size="xl">24</Text>
             <Text c="dimmed" size="sm">Ativas</Text>
           </Paper>
           <Paper withBorder p="sm" bg="var(--mantine-color-default-hover)">
-            <Text c="yellow.8" fw={700} size="xl">5</Text>
+            <Text c="yellow.8" fw={600} size="xl">5</Text>
             <Text c="dimmed" size="sm">Inativas</Text>
           </Paper>
           <Paper withBorder p="sm" bg="var(--mantine-color-default-hover)">
-            <Text c="red" fw={700} size="xl">3</Text>
+            <Text c="red" fw={600} size="xl">3</Text>
             <Text c="dimmed" size="sm">Bloqueadas</Text>
           </Paper>
         </SimpleGrid>
@@ -364,11 +364,11 @@ function AdminProfile() {
       <Section icon={UsersIcon} title="Usuários cadastrados">
         <SimpleGrid cols={2} spacing="sm">
           <Paper withBorder p="sm">
-            <Text fw={700} size="xl">18</Text>
+            <Text fw={600} size="xl">18</Text>
             <Text c="dimmed" size="sm">Representantes</Text>
           </Paper>
           <Paper withBorder p="sm">
-            <Text fw={700} size="xl">342</Text>
+            <Text fw={600} size="xl">342</Text>
             <Text c="dimmed" size="sm">Lojistas</Text>
           </Paper>
         </SimpleGrid>

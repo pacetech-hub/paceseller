@@ -73,16 +73,10 @@ export function StockKpis({ items }: { items: StockItem[] }) {
   return (
     <SimpleGrid cols={{ base: 2, lg: 4 }} spacing={{ base: 'sm', sm: 'md' }}>
       {cards.map(k => {
-        const Icon = k.icon;
         return (
           <Paper key={k.label} withBorder p="md">
-            <Group justify="space-between" mb="xs" wrap="nowrap">
-              <Text c="dimmed" size="sm">{k.label}</Text>
-              <ThemeIcon size={32} variant="light" color={k.color}>
-                <Icon size={16} />
-              </ThemeIcon>
-            </Group>
-            <Text fw={700} fz="xl" lh={1} className="mono">{k.value}</Text>
+            <Text c="dimmed" size="sm" mb="xs">{k.label}</Text>
+            <Text fw={600} fz="xl" lh={1} className="mono">{k.value}</Text>
             <Text c="dimmed" size="sm" mt={4}>{k.sub}</Text>
           </Paper>
         );
@@ -140,7 +134,7 @@ export function StockEmptyFilterRow({ colSpan, onClear, noItems = false }: { col
         icon={FunnelIcon}
         title="Nenhum SKU encontrado"
         description="Nenhum SKU corresponde à busca ou ao filtro de status aplicado. Limpe os filtros para ver todo o estoque."
-        action={{ label: 'Limpar Filtros', onClick: onClear, forward: false }}
+        action={{ label: 'Limpar filtros', onClick: onClear, forward: false }}
       />
       )}
     </DataTableEmptyRow>

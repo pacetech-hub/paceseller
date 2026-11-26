@@ -107,7 +107,7 @@ export function GradeTableEditor({ product, value, onChange, showName = false }:
           </Table.Tbody>
         </Table>
       </Table.ScrollContainer>
-      <Text size="xs" c="dimmed"><Text span fw={700} c="var(--mantine-color-text)" inherit>{total}</Text> pares selecionados · numeração riscada está esgotada</Text>
+      <Text size="xs" c="dimmed"><Text span fw={600} c="var(--mantine-color-text)" inherit>{total}</Text> pares selecionados · numeração riscada está esgotada</Text>
     </Stack>
   );
 }

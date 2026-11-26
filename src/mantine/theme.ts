@@ -33,7 +33,7 @@ const FONT_FAMILY_DISPLAY = `${tokens.fontFamily.display}, system-ui, sans-serif
 const fs = tokens.fontSize;
 const lh = tokens.lineHeight;
 
-// Tipografia: apenas três pesos — regular (400), semibold (600) e bold (700).
+// Tipografia: apenas dois pesos — regular (400) e semibold (600).
 // O Mantine usa 500 em alguns rótulos internos; aqui eles passam para semibold.
 const SEMIBOLD = 600;
 
@@ -128,7 +128,7 @@ export const mantineTheme = createTheme({
   },
   headings: {
     fontFamily: FONT_FAMILY_DISPLAY,
-    fontWeight: "700",
+    fontWeight: "600",
     sizes: {
       h1: { fontSize: px(fs["display-sm"]), lineHeight: String(lh["display-sm"] / fs["display-sm"]) },
       h2: { fontSize: px(fs["text-xl"]), lineHeight: String(lh["text-xl"] / fs["text-xl"]) },
@@ -225,7 +225,7 @@ export const mantineTheme = createTheme({
     Combobox: { styles: { groupLabel: { fontWeight: SEMIBOLD } } },
     Notification: { styles: { title: { fontWeight: SEMIBOLD } } },
     Timeline: { styles: { itemTitle: { fontWeight: SEMIBOLD } } },
-    // Abas: um só desenho (caixa-alta mono, traço na ativa) — ver tabs.module.css.
+    // Abas: um só desenho (caixa normal, traço na ativa) — ver tabs.module.css.
     // Para escolher um valor (período, forma de pagamento) use SegmentedControl, não abas.
     Tabs: {
       defaultProps: { variant: "default", keepMounted: false },

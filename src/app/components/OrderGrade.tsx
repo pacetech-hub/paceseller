@@ -150,7 +150,7 @@ function ProductSelector({ selected, onSelect }: { selected: Product | null; onS
           icon={MagnifyingGlassIcon}
           title="Nenhum produto encontrado"
           description={`Nada corresponde a "${search}". Confira o nome ou a referência (ex.: 2502-19), ou limpe a busca para ver todos.`}
-          action={{ label: 'Limpar Busca', onClick: () => setSearch(''), forward: false }}
+          action={{ label: 'Limpar busca', onClick: () => setSearch(''), forward: false }}
           withBorder={false}
         />
       ) : (
@@ -310,7 +310,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
           <Group gap="xs" wrap="nowrap">
             <StorefrontIcon size={16} style={{ flexShrink: 0 }} />
             <Text c="dimmed" flex="none">Pedindo para</Text>
-            <Text fw={700} truncate>{selectedClient.name}</Text>
+            <Text fw={600} truncate>{selectedClient.name}</Text>
           </Group>
         </Paper>
       )}
@@ -492,7 +492,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                       );
                     })}
                     <Table.Td ta="right">
-                      <Text span className="mono" fw={700}>{totalPairs}</Text>
+                      <Text span className="mono" fw={600}>{totalPairs}</Text>
                     </Table.Td>
                   </Table.Tr>
                 </Table.Tbody>
@@ -506,7 +506,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                   <Text c="dimmed" size="sm">Subtotal deste produto</Text>
                   <Text>{totalPairs} pares × {formatCurrency(selectedProduct.price)}</Text>
                 </Box>
-                <Text className="mono" fw={700} size="xl">{formatCurrency(totalValue)}</Text>
+                <Text className="mono" fw={600} size="xl">{formatCurrency(totalValue)}</Text>
               </Group>
             </Paper>
 
@@ -543,7 +543,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                 icon={PackageIcon}
                 title="Nenhum produto no pedido"
                 description="Escolha um produto e informe as quantidades por numeração para revisar o pedido."
-                action={{ label: 'Escolher Produto', onClick: () => { setSelectedProduct(null); setStep(2); } }}
+                action={{ label: 'Escolher produto', onClick: () => { setSelectedProduct(null); setStep(2); } }}
                 secondaryAction={selectedProduct ? { label: 'Voltar para Definir Quantidades', onClick: () => setStep(3), forward: false } : undefined}
               />
             ) : (
@@ -556,7 +556,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                         <Text c="dimmed" size="sm">{product.reference}</Text>
                       </Box>
                       <Box ta="right">
-                        <Text className="mono" fw={700}>{formatCurrency(value)}</Text>
+                        <Text className="mono" fw={600}>{formatCurrency(value)}</Text>
                         <Text c="dimmed" size="sm">{pairs} pares</Text>
                       </Box>
                     </Group>
@@ -610,7 +610,7 @@ export function OrderGrade({ onNavigate, selectedClient }: OrderGradeProps) {
                     <Text c="dimmed" size="sm">Total do pedido</Text>
                     <Text>{grandPairs} pares · {allGrades.length} produto(s)</Text>
                   </Box>
-                  <Text className="mono" fw={700} size="xl">{formatCurrency(finalTotal)}</Text>
+                  <Text className="mono" fw={600} size="xl">{formatCurrency(finalTotal)}</Text>
                 </Group>
               </Stack>
             </Paper>

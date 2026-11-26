@@ -66,7 +66,7 @@ export function SalesTeamPage({ scope, entities, onBack, backLabel = 'Indicadore
                 </Box>
               </Group>
             </Table.Td>
-            <Table.Td ta="right"><Text fw={700} className="mono">{brl(e.value)}</Text></Table.Td>
+            <Table.Td ta="right"><Text fw={600} className="mono">{brl(e.value)}</Text></Table.Td>
           </Table.Tr>
         ))}
       </DataTable>
