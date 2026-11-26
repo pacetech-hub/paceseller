@@ -379,7 +379,7 @@ export function CartsListPage({
         )}
 
         {newOpen && selectedClient && (
-          <Paper withBorder p="md" maw={960}>
+          <Paper withBorder p="md">
             <Title order={2} size="h4" mb={4}>Criar novo carrinho</Title>
             <Group gap="xs" mb="md">
               <StorefrontIcon size={16} />
@@ -427,7 +427,7 @@ export function CartsListPage({
         )}
 
         {loading ? (
-          <Box maw={960}><ListSkeleton rows={3} withAvatar /></Box>
+          <ListSkeleton rows={3} withAvatar />
         ) : scoped.length === 0 ? (
           (() => {
             const suggestions: EmptyStateSuggestion[] = [];
@@ -445,7 +445,7 @@ export function CartsListPage({
             );
           })()
         ) : (
-          <Stack gap="xl" maw={960}>
+          <Stack gap="xl">
             <Section title="Compartilhados" carts={shared} viewerRole={viewerRole} onOpenCart={onOpenCart} showClient={!byClient} />
             <Section title="Não compartilhados" carts={notShared} viewerRole={viewerRole} onOpenCart={onOpenCart} showClient={!byClient} />
           </Stack>
