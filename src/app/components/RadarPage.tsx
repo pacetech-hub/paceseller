@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { TabCount } from "./ui/TabCount";
 import { useMockLoading } from "../lib/useMockLoading";
 import { KpiSkeleton } from "./ui/Skeletons";
@@ -8,17 +8,20 @@ import { LojistaOrdersSection } from "./LojistaOrdersSection";
 import { IndustrySalesSection } from "./IndustrySalesSection";
 import { LojistaPurchasesSection } from "./LojistaPurchasesSection";
 import {
-  Stack, Paper, Text, Title, ThemeIcon, Tabs, SimpleGrid, Button, Group, Box, Menu, ActionIcon, Modal, Radio, Textarea,
+  Stack, Text, Title, Tabs, SimpleGrid, Button, Group, Box, Menu, Modal, Radio, Textarea,
 } from "@mantine/core";
 import {
-  TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, ArrowRightIcon, CheckCircleIcon,
-  RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, DotsThreeVerticalIcon, InfoIcon, ClockIcon, XIcon,
-  ShoppingCartIcon, StarIcon, PauseIcon, ReceiptIcon, type Icon,
+  TrendUpIcon, TrendDownIcon, PackageIcon, WarningIcon, CheckCircleIcon,
+  RocketLaunchIcon, UsersThreeIcon, StorefrontIcon, InfoIcon, ClockIcon, XIcon,
+  ShoppingCartIcon, PauseIcon, ReceiptIcon, TagIcon, CreditCardIcon, TruckIcon, CopyIcon, type Icon,
 } from "@phosphor-icons/react";
 import {
-  SEVERITY_META, SIGNAL_META, actByText, bucketOf, days, dismissSignal, isCritical, marginLabel, snoozeSignal, undoSignalAction,
-  updatedText, useRadar, type Bucket, type CtaTarget, type RadarSignal, type SignalType,
+  NATURE_META, SIGNAL_META, actByText, bucketOf, days, dismissSignal, isCritical, marginLabel, snoozeSignal, undoSignalAction,
+  updatedText, useRadar, type Bucket, type CtaTarget, type Nature, type RadarSignal, type SignalType,
 } from "../data/radar";
+import {
+  CorretivoCard, InformativoCard, InformativoSignalCard, NatureBalance, OportunidadeCard, PreventivoCard, ProativoCard, ResolvedRow,
+} from "./radar/InsightCards";
 import { productById } from "../data/cartStore";
 import { toast } from "../lib/toast";
 
@@ -58,6 +61,10 @@ const SIGNAL_ICON: Record<SignalType, Icon> = {
   'abaixo-ano-passado': TrendDownIcon,
   'mix-desbalanceado': ShoppingCartIcon,
   'boleto-a-vencer': ReceiptIcon,
+  'reajuste-preco': TagIcon,
+  'credito-carrinhos': CreditCardIcon,
+  'frete-gratis': TruckIcon,
+  'produto-duplicado': CopyIcon,
 };
 
 const HEALTH = {
@@ -75,106 +82,6 @@ export function getGreeting(date = new Date()): string {
   return 'Boa noite';
 }
 
-// Anatomia do cartão (FR-105), no formato do layout: ícone em bloco, sobretítulo em caixa-alta
-// mono (severidade · sinal), métrica principal grande (a situação), assunto, uma linha de contexto,
-// sugestão em mono, CTA como link na cor do cartão e, no rodapé, prazo e "Atualizado há".
-// Cor pela severidade, nunca pelo tipo; a severidade também vem escrita (não só na cor).
-// "highlight" = Destaque da semana (cartão preto); "resolved" = resolvido nas últimas 24 h.
-// O mesmo cartão serve ao Radar do lojista (sinais) e ao do representante (cartões temáticos).
-type CardVariant = 'default' | 'highlight' | 'resolved';
-
-export function RadarCard({
-  icon: CardIcon, color, eyebrow, metric, subject, context, suggestion, ctaLabel, onCta, footer, menu,
-  variant = 'default', resolvedText = 'Sai do Radar em até 24 h',
-}: {
-  icon: Icon; color: string; eyebrow: string; metric: string; subject: string; context: string;
-  suggestion?: string; ctaLabel: string; onCta: () => void; footer: string;
-  /** Itens do menu "Mais opções" (sem menu nos resolvidos). */
-  menu?: ReactNode; variant?: CardVariant; resolvedText?: string;
-}) {
-  const highlight = variant === 'highlight';
-  const resolved = variant === 'resolved';
-  const base = resolved ? 'gray' : color;
-  // texto na cor do status: tom 8 sobre o fundo claro; no destaque, branco sobre preto
-  const tone = highlight ? 'white' : resolved ? 'dimmed' : `${color}.8`;
-  const muted = highlight ? 'brand.3' : 'dimmed';
-
-  return (
-    <Paper
-      withBorder
-      p="lg"
-      h="100%"
-      bg={highlight ? 'brand.9' : `var(--mantine-color-${base}-light)`}
-      // no destaque a borda só aparece no modo escuro, para o cartão preto não sumir no fundo
-      style={highlight
-        ? { borderColor: 'light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-7))' }
-        : { borderColor: `var(--mantine-color-${base}-light-hover)`, opacity: resolved ? 0.8 : 1 }}
-    >
-      <Stack gap="md" h="100%">
-        <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <ThemeIcon
-            size={40}
-            radius="md"
-            variant="filled"
-            color={highlight ? 'brand.7' : base}
-            aria-hidden
-          >
-            <CardIcon size={20} weight={highlight ? 'fill' : 'regular'} />
-          </ThemeIcon>
-          {!resolved && menu && (
-            <Menu position="bottom-end" withinPortal shadow="md">
-              <Menu.Target>
-                <ActionIcon variant="subtle" color={highlight ? 'gray.0' : 'brand'} aria-label="Mais opções do aviso" mr={-8}>
-                  <DotsThreeVerticalIcon size={20} />
-                </ActionIcon>
-              </Menu.Target>
-              <Menu.Dropdown>{menu}</Menu.Dropdown>
-            </Menu>
-          )}
-        </Group>
-
-        <Stack gap={6}>
-          <Text size="xs" fw={700} tt="uppercase" ff="monospace" lts={0.5} c={highlight ? muted : tone} lineClamp={2}>
-            {eyebrow}
-          </Text>
-          <Text fz={32} fw={700} lh={1.1} c={tone}>{metric}</Text>
-        </Stack>
-
-        <Box>
-          <Text fw={600} c={highlight ? 'white' : undefined}>{subject}</Text>
-          <Text size="sm" c={muted} mt={4}>{context}</Text>
-          {suggestion && !resolved && (
-            <Text size="sm" fw={700} ff="monospace" mt="sm" c={highlight ? 'white' : undefined}>{suggestion}</Text>
-          )}
-        </Box>
-
-        <Stack gap={4} mt="auto">
-          {resolved ? (
-            <Text size="sm" c="dimmed">{resolvedText}</Text>
-          ) : (
-            <Group>
-              {/* CTA como link na cor do cartão; o padding lateral é compensado para alinhar ao texto */}
-              <Button
-                variant="transparent"
-                color={highlight ? 'white' : color}
-                c={tone}
-                px={0}
-                fw={600}
-                fz="md"
-                rightSection={<ArrowRightIcon size={18} />}
-                onClick={onCta}
-              >
-                {ctaLabel}
-              </Button>
-            </Group>
-          )}
-          <Text size="xs" c={muted}>{footer}</Text>
-        </Stack>
-      </Stack>
-    </Paper>
-  );
-}
-
 /** Adiar (FR-106): mesmas opções nos dois Radares. */
 function SnoozeItems({ options, onSnooze }: { options: number[]; onSnooze: (d: number) => void }) {
   return (
@@ -189,49 +96,37 @@ function SnoozeItems({ options, onSnooze }: { options: number[]; onSnooze: (d: n
   );
 }
 
-function ActionCard({ signal, onCta, onWhy, onDismiss, variant = 'default', marginText }: {
-  signal: RadarSignal; onCta: () => void; onWhy?: () => void; onDismiss?: () => void;
-  variant?: CardVariant; marginText?: string;
-}) {
-  const sev = SEVERITY_META[signal.severity];
-  const highlight = variant === 'highlight';
-  const resolved = variant === 'resolved';
-  const eyebrow = highlight
-    ? `Destaque da semana · ${SIGNAL_META[signal.type].label}`
-    : `${resolved ? 'Resolvido' : sev.label} · ${SIGNAL_META[signal.type].label}`;
-
+/** FR-106: por que aparece, adiar e dispensar (com motivo) — o mesmo menu nas cinco naturezas. */
+function SignalMenu({ signal, onWhy, onDismiss }: { signal: RadarSignal; onWhy: () => void; onDismiss: () => void }) {
   return (
-    <RadarCard
-      icon={highlight ? StarIcon : SIGNAL_ICON[signal.type]}
-      color={sev.color}
-      eyebrow={eyebrow}
-      metric={signal.metric}
-      subject={signal.subject}
-      context={marginText ? `${signal.context} · ${marginText}` : signal.context}
-      suggestion={signal.suggestion}
-      ctaLabel={signal.ctaLabel}
-      onCta={onCta}
-      variant={variant}
-      // prazo em palavras + data de agir (BR-40/42) e atualização dos dados (BR-60)
-      footer={`${signal.timeText}${resolved ? '' : ` · ${actByText(signal.actByDays)}`} · ${updatedText(signal.updatedHoursAgo)}`}
-      menu={onWhy && onDismiss && (
-        // FR-106: por que aparece, adiar e dispensar (com motivo)
-        <>
-          <Menu.Item leftSection={<InfoIcon size={16} />} onClick={onWhy}>Por que isso aparece</Menu.Item>
-          <Menu.Divider />
-          <SnoozeItems
-            options={[7, 15, 30]}
-            onSnooze={d => {
-              snoozeSignal(signal.id, d);
-              toast.successWithAction('Aviso adiado', `Volta ao Radar em ${d} dias.`, { label: 'Desfazer', onClick: () => undoSignalAction(signal.id) });
-            }}
-          />
-          <Menu.Divider />
-          <Menu.Item leftSection={<XIcon size={16} />} onClick={onDismiss}>Dispensar</Menu.Item>
-        </>
-      )}
-    />
+    <>
+      <Menu.Item leftSection={<InfoIcon size={16} />} onClick={onWhy}>Por que isso aparece</Menu.Item>
+      <Menu.Divider />
+      <SnoozeItems
+        options={[7, 15, 30]}
+        onSnooze={d => {
+          snoozeSignal(signal.id, d);
+          toast.successWithAction('Aviso adiado', `Volta ao Radar em ${d} dias.`, { label: 'Desfazer', onClick: () => undoSignalAction(signal.id) });
+        }}
+      />
+      <Menu.Divider />
+      <Menu.Item leftSection={<XIcon size={16} />} onClick={onDismiss}>Dispensar</Menu.Item>
+    </>
   );
+}
+
+/** Escolhe o desenho do cartão pela natureza do insight. */
+function InsightCard({ signal, onCta, onWhy, onDismiss }: {
+  signal: RadarSignal; onCta: () => void; onWhy: () => void; onDismiss: () => void;
+}) {
+  const menu = <SignalMenu signal={signal} onWhy={onWhy} onDismiss={onDismiss} />;
+  switch (signal.nature) {
+    case 'corretivo': return <CorretivoCard signal={signal} icon={SIGNAL_ICON[signal.type]} onCta={onCta} menu={menu} />;
+    case 'proativo': return <ProativoCard signal={signal} onCta={onCta} menu={menu} />;
+    case 'preventivo': return <PreventivoCard signal={signal} onCta={onCta} menu={menu} />;
+    case 'oportunidade': return <OportunidadeCard signal={signal} onCta={onCta} menu={menu} />;
+    default: return <InformativoSignalCard signal={signal} onCta={onCta} menu={menu} />;
+  }
 }
 
 function DismissModal({ signal, onClose }: { signal: RadarSignal | null; onClose: () => void }) {
@@ -310,7 +205,6 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const cards = radar.open.filter(s => !WIDGET_SIGNALS.has(s.type));
   const inBucket = (b: Bucket) => cards.filter(s => bucketOf(s.actByDays) === b);
   const visible = inBucket(period);
-  const shown = showAll ? visible : visible.slice(0, MAX_CARDS);
   const resolved = radar.resolved.filter(s => !WIDGET_SIGNALS.has(s.type) && (bucketOf(s.actByDays) ?? 'hoje') === period);
   const health = HEALTH[radar.health];
   const total = radar.open.length;
@@ -319,6 +213,22 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   const destaque = radar.destaques.find(s => !visibleIds.has(s.id));
   const destaqueProduct = destaque?.productId ? productById(destaque.productId) : undefined;
   const nextWithItems = PERIODS.find(p => p.value !== period && inBucket(p.value).length > 0);
+
+  // Cada natureza tem o seu lugar na página: corretivos em faixas no topo; proativos, preventivos
+  // e oportunidades na grade, nessa ordem (oportunidade nunca empurra para o lado um corretivo ou
+  // preventivo — regra de proteção 05); informativos numa linha silenciosa de contexto.
+  const byNature = (n: Nature) => visible.filter(s => s.nature === n);
+  const corretivos = byNature('corretivo');
+  const grid = [...byNature('proativo'), ...byNature('preventivo'), ...byNature('oportunidade')];
+  const informativos = byNature('informativo');
+  const shownGrid = showAll ? grid : grid.slice(0, MAX_CARDS);
+  const counts = Object.fromEntries(
+    (['corretivo', 'proativo', 'preventivo', 'oportunidade', 'informativo'] as Nature[]).map(n => [n, byNature(n).length]),
+  ) as Record<Nature, number>;
+
+  const card = (s: RadarSignal) => (
+    <InsightCard key={s.id} signal={s} onCta={() => onCta(s.cta)} onWhy={() => setWhy(s)} onDismiss={() => setDismissing(s)} />
+  );
 
   return (
     <Stack gap="xl">
@@ -340,37 +250,49 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
           onChange={b => { setPeriod(b); setShowAll(false); }}
           counts={b => { const items = inBucket(b); return { total: items.length, critical: items.filter(isCritical).length }; }}
         />
+        {!loading && <NatureBalance counts={counts} />}
       </Stack>
 
       {loading ? (
         <KpiSkeleton count={3} cols={{ base: 1, sm: 2, lg: 3 }} />
       ) : visible.length > 0 ? (
-        <Stack gap="md">
-          {/* FR-104: severidade, depois data de agir, depois impacto (R$) */}
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-            {/* FR-107: Destaque da semana — primeiro cartão, em preto */}
-            {destaque && (
-              <ActionCard
-                signal={destaque}
-                variant="highlight"
-                marginText={destaqueProduct ? marginLabel(destaqueProduct) : undefined}
-                onCta={() => onCta(destaque.cta)}
-              />
-            )}
-            {shown.map(s => (
-              <ActionCard key={s.id} signal={s} onCta={() => onCta(s.cta)} onWhy={() => setWhy(s)} onDismiss={() => setDismissing(s)} />
-            ))}
-          </SimpleGrid>
-          {visible.length > MAX_CARDS && (
-            <Button variant="default" onClick={() => setShowAll(v => !v)} mx="auto">
-              {showAll ? 'Ver menos' : `Ver todas (${visible.length})`}
-            </Button>
+        <Stack gap="lg">
+          {/* Corretivo: agora — faixas de largura total, primeiro na página */}
+          {corretivos.length > 0 && <Stack gap="sm">{corretivos.map(card)}</Stack>}
+
+          {/* FR-104: dentro de cada natureza, severidade, depois data de agir, depois impacto (R$) */}
+          {(grid.length > 0 || destaque) && (
+            <Stack gap="md">
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                {shownGrid.filter(s => s.nature !== 'oportunidade').map(card)}
+                {/* FR-107: Destaque da semana — abre o grupo de oportunidades, em preto */}
+                {destaque && (
+                  <OportunidadeCard
+                    signal={destaque}
+                    featured
+                    extra={destaqueProduct ? marginLabel(destaqueProduct) : undefined}
+                    onCta={() => onCta(destaque.cta)}
+                  />
+                )}
+                {shownGrid.filter(s => s.nature === 'oportunidade').map(card)}
+              </SimpleGrid>
+              {grid.length > MAX_CARDS && (
+                <Button variant="default" onClick={() => setShowAll(v => !v)} mx="auto">
+                  {showAll ? 'Ver menos' : `Ver todas (${grid.length})`}
+                </Button>
+              )}
+            </Stack>
+          )}
+
+          {/* Informativo: durante — contexto, sem pedir ação */}
+          {informativos.length > 0 && (
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">{informativos.map(card)}</SimpleGrid>
           )}
         </Stack>
       ) : (
         <EmptyState
           icon={CheckCircleIcon}
-          title={period === 'hoje' ? 'Nada pra hoje' : 'Nada neste período'}
+          title={period === 'hoje' ? 'Nada urgente hoje' : 'Nada neste período'}
           description="Quando houver reposições, oportunidades ou alertas com prazo neste período, eles aparecem aqui."
           action={nextWithItems
             ? { label: `Ver ${nextWithItems.label.toLowerCase()} (${inBucket(nextWithItems.value).length})`, onClick: () => setPeriod(nextWithItems.value) }
@@ -382,9 +304,22 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
       {!loading && resolved.length > 0 && (
         <Stack gap="sm">
           <Text fw={600}>Resolvidos nas últimas 24 h</Text>
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-            {resolved.map(s => (
-              <ActionCard key={s.id} signal={s} variant="resolved" onCta={() => {}} />
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="sm">
+            {resolved.map(s => <ResolvedRow key={s.id} signal={s} />)}
+          </SimpleGrid>
+        </Stack>
+      )}
+
+      {/* Sinais vitais: informativos sem prazo, iguais em todas as abas */}
+      {!loading && (
+        <Stack gap="sm">
+          <Box>
+            <Title order={2} fz="lg">Sinais vitais da loja</Title>
+            <Text size="sm" c="dimmed">Contexto para decidir: vendas, estoque, crédito e o que o Radar já resolveu</Text>
+          </Box>
+          <SimpleGrid cols={{ base: 1, xs: 2, lg: 4 }} spacing="md">
+            {radar.vitals.map(v => (
+              <InformativoCard key={v.id} label={v.label} value={v.value} context={v.context} viz={v.viz} source={v.source} />
             ))}
           </SimpleGrid>
         </Stack>
@@ -400,6 +335,7 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
         {why && (
           <Stack gap="sm">
             <Text fw={600}>{SIGNAL_META[why.type].code} · {SIGNAL_META[why.type].label} · {why.subject}</Text>
+            <Text size="sm" c="dimmed">{NATURE_META[why.nature].label}: {NATURE_META[why.nature].promise.toLowerCase()}</Text>
             <Text>{why.why}</Text>
             <Text size="sm" c="dimmed">{actByText(why.actByDays)} · {updatedText(why.updatedHoursAgo)}</Text>
           </Stack>

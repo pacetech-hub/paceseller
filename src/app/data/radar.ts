@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { products, formatCurrency, type Product } from "./mockData";
 import {
-  CART_PARAMS, cartPairs, cartStatus, getCartsState, isOpen, pairsOf, visibleTo, productById, repFirstName,
+  CART_PARAMS, cartPairs, cartStatus, cartValue, getCartsState, isOpen, pairsOf, visibleTo, productById, repFirstName,
   subscribeCarts, type Cart,
 } from "./cartStore";
 
@@ -161,6 +161,13 @@ export const upcomingBills = [
   { id: 'BOL-2026-9011', orderId: '4790-1', product: 'Tênis Fusion — Coleção 2026', orderTotal: 6718.00, amount: 2239.33, installment: '1/3', dueInDays: 3 },
   { id: 'BOL-2026-9005', orderId: 'PED-2026-0377', product: 'Tênis Coil — Reposição', orderTotal: 3780.00, amount: 1890.00, installment: '2/2', dueInDays: 6 },
 ];
+/** Crédito da loja na Pace (mock, T1): limite total e quanto já está comprometido em pedidos e boletos. */
+export const STORE_CREDIT = { limit: 40000, used: 26000 };
+/** Reajustes de tabela já comunicados pela indústria (mock, T1). */
+const PRICE_CHANGES = [{ line: 'Hertz', pct: 5, inDays: 9 }];
+/** Resultados do Radar nos últimos 30 dias (mock): rupturas evitadas e compras antecipadas. */
+const RADAR_RESULTS = { stockoutsAvoided: 2, anticipated: 8400 };
+
 /** Janela do aviso de boletos: vencimentos nos próximos N dias. */
 const BILLS_WINDOW_DAYS = 7;
 
@@ -222,7 +229,8 @@ export function suggestedQuantity(s: StoreSku, carts: Cart[]): number {
 export type SignalType =
   | 'pedido-atrasado' | 'estoque-baixo' | 'sem-giro' | 'giro-baixo' | 'alta-demanda' | 'produtos-em-alta'
   | 'oportunidade-perdida' | 'lancamento' | 'benchmark' | 'fechamento' | 'aguardando-voce'
-  | 'abaixo-ano-passado' | 'mix-desbalanceado' | 'boleto-a-vencer';
+  | 'abaixo-ano-passado' | 'mix-desbalanceado' | 'boleto-a-vencer'
+  | 'reajuste-preco' | 'credito-carrinhos' | 'frete-gratis' | 'produto-duplicado';
 export type Severity = 'critico' | 'atencao' | 'oportunidade' | 'informacao';
 export type Bucket = 'hoje' | '15d' | '30d';
 
@@ -242,7 +250,47 @@ export const SIGNAL_META: Record<SignalType, { code: string; label: string }> = 
   'mix-desbalanceado': { code: 'S-13', label: 'Mix desbalanceado' },
   // fora do catálogo da spec v1: aviso financeiro (mock)
   'boleto-a-vencer': { code: 'S-14', label: 'Boletos a vencer' },
+  // do inventário "Radar Integrado para o Varejista" (dados da Pace, T1)
+  'reajuste-preco': { code: 'S-15', label: 'Reajuste de preço' },
+  'credito-carrinhos': { code: 'S-16', label: 'Crédito vs. carrinhos' },
+  'frete-gratis': { code: 'S-17', label: 'Frete grátis' },
+  'produto-duplicado': { code: 'S-18', label: 'Produto em dois carrinhos' },
 };
+
+/**
+ * Natureza do insight ("As cinco naturezas de um insight"): diz QUANDO o insight age na jornada
+ * e por isso define o desenho do cartão (não só a cor). A severidade continua ordenando o Radar
+ * e medindo a saúde da loja; a natureza decide a forma.
+ */
+export type Nature = 'corretivo' | 'proativo' | 'preventivo' | 'oportunidade' | 'informativo';
+export const NATURE_META: Record<Nature, { label: string; promise: string; when: string; color: string }> = {
+  corretivo: { label: 'Corretivo', promise: 'Resolve um problema atual', when: 'Agora', color: 'red' },
+  proativo: { label: 'Proativo', promise: 'Antecipa uma necessidade', when: 'Antes', color: 'blue' },
+  preventivo: { label: 'Preventivo', promise: 'Evita um erro', when: 'Logo antes de agir', color: 'amber' },
+  oportunidade: { label: 'Oportunidade', promise: 'Mostra um ganho potencial', when: 'A qualquer momento', color: 'green' },
+  informativo: { label: 'Informativo', promise: 'Dá contexto para decidir', when: 'Durante', color: 'gray' },
+};
+
+/**
+ * Dado visual de apoio de cada cartão. Cada natureza tem a sua forma:
+ * proativo → linha do tempo; preventivo → medidor com limite; oportunidade → lojas parecidas,
+ * meta ou comparação; informativo → tendência ou comparação; corretivo usa só o tempo decorrido.
+ */
+export type InsightViz =
+  /** Hoje → pedir até → acaba: a janela de ação antes do prazo de entrega. */
+  | { kind: 'timeline'; endDays: number; endLabel: string; leadDays: number; leadLabel: string }
+  /** Valor contra um limite (estoque parado, crédito livre, giro mínimo). */
+  | { kind: 'meter'; value: number; limit: number; valueLabel: string; limitLabel: string; direction: 'above' | 'below' }
+  /** N de M lojas parecidas. */
+  | { kind: 'peers'; count: number; of: number }
+  /** Quanto falta para uma meta (frete grátis, pedido mínimo). */
+  | { kind: 'goal'; current: number; goal: number; currentLabel: string; goalLabel: string }
+  /** Duas barras: antes × agora ou você × lojas parecidas. */
+  | { kind: 'compare'; a: number; b: number; aLabel: string; bLabel: string }
+  /** Itens envolvidos (carrinhos, produtos). */
+  | { kind: 'list'; items: string[] }
+  /** Série curta (semanas, meses) para uma minitendência. */
+  | { kind: 'trend'; series: number[]; seriesLabel: string };
 
 /** Cor por severidade, não por tipo de sinal. */
 export const SEVERITY_META: Record<Severity, { label: string; color: string; rank: number }> = {
@@ -274,6 +322,10 @@ export interface RadarSignal {
   id: string;
   type: SignalType;
   severity: Severity;
+  /** Natureza do insight: define o desenho do cartão. */
+  nature: Nature;
+  /** Dado visual de apoio, conforme a natureza. */
+  viz?: InsightViz;
   productId?: string;
   /** Prazo para agir, em dias a partir de hoje (≤ 0 = hoje ou vencido). */
   actByDays: number;
@@ -340,9 +392,27 @@ export function bucketOf(actByDays: number): Bucket | null {
 export const isCritical = (s: RadarSignal) =>
   s.type === 'pedido-atrasado' || (s.type === 'estoque-baixo' && s.actByDays <= 0);
 
+/** Sinal ainda sem natureza; a natureza sai do tipo e da severidade (natureOf). */
+type SignalDraft = Omit<RadarSignal, 'nature'> & { nature?: Nature };
+
+/** Natureza padrão por tipo de sinal, seguindo o inventário do Radar Integrado. */
+export function natureOf(s: Pick<RadarSignal, 'type' | 'severity' | 'actByDays'>): Nature {
+  switch (s.type) {
+    case 'pedido-atrasado': return 'corretivo';
+    // pedir até já passou = falta garantida; antes disso, "peça até X pra não faltar"
+    case 'estoque-baixo': return s.actByDays <= 0 ? 'corretivo' : 'proativo';
+    case 'aguardando-voce': return s.severity === 'atencao' ? 'corretivo' : 'proativo';
+    case 'boleto-a-vencer': case 'reajuste-preco': return 'proativo';
+    case 'sem-giro': case 'giro-baixo': case 'credito-carrinhos': case 'produto-duplicado': return 'preventivo';
+    case 'alta-demanda': case 'produtos-em-alta': case 'oportunidade-perdida': case 'lancamento': case 'frete-gratis': return 'oportunidade';
+    default: return 'informativo';
+  }
+}
+const finalize = (d: SignalDraft): RadarSignal => ({ ...d, nature: d.nature ?? natureOf(d) });
+
 // ---- candidatos por produto ----
-function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[] {
-  const out: RadarSignal[] = [];
+function productCandidates(p: Product, s: StoreSku, carts: Cart[]): SignalDraft[] {
+  const out: SignalDraft[] = [];
   const name = productDisplayName(p);
   const w = RADAR_PARAMS.actWindowDays;
   const cov = coverageDays(s);
@@ -365,6 +435,7 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
         ? `Sugestão: repor ${pairsText(qty)}${inCarts > 0 ? ` (além de ${inCarts} já no carrinho)` : ''}`
         : `${pairsText(inCarts)} já no carrinho · envie pro representante`,
       suggestedQty: qty,
+      viz: { kind: 'timeline', endDays: stockout, endLabel: 'estoque acaba', leadDays: RADAR_PARAMS.leadTimeDays, leadLabel: 'prazo de entrega' },
       impact: qty * p.price,
       ctaLabel: 'Repor agora',
       cta: { kind: 'product', productId: p.id, prefill: true },
@@ -379,7 +450,9 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
       timeText: `sem vendas há ${days(s.lastSaleDaysAgo)}`,
       metric: `${pairsText(s.stock)} parados`,
       subject: name,
-      context: 'Bom candidato para uma campanha ou vitrine',
+      context: `${formatCurrency(s.stock * p.price)} parados no estoque · bom candidato para campanha ou vitrine`,
+      suggestion: 'Antes de comprar mais, gire o que já tem',
+      viz: { kind: 'meter', value: s.lastSaleDaysAgo, limit: 30, valueLabel: `${days(s.lastSaleDaysAgo)} sem venda`, limitLabel: 'limite 30 dias', direction: 'above' },
       impact: s.stock * p.price,
       ctaLabel: 'Ver produto',
       cta: { kind: 'product', productId: p.id, block: 'como-girar' },
@@ -396,6 +469,11 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
       metric: `Giro ${below}% abaixo`,
       subject: name,
       context: 'Vendas abaixo da curva esperada desde o lançamento',
+      suggestion: 'Segure a reposição até o giro voltar',
+      viz: {
+        kind: 'meter', value: Math.round(s.expectedSalesRatio * 100), limit: Math.round(RADAR_PARAMS.lowTurnoverRatio * 100),
+        valueLabel: `${Math.round(s.expectedSalesRatio * 100)}% do esperado`, limitLabel: `mínimo ${Math.round(RADAR_PARAMS.lowTurnoverRatio * 100)}%`, direction: 'below',
+      },
       impact: s.stock * p.price,
       ctaLabel: 'Ver produto',
       cta: { kind: 'product', productId: p.id, block: 'como-girar' },
@@ -412,6 +490,7 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
       metric: `+${s.regionalGrowthPct}%`,
       subject: name,
       context: `+${s.regionalGrowthPct}% na sua região, últimos 30 dias`,
+      viz: { kind: 'compare', a: 100, b: 100 + s.regionalGrowthPct, aLabel: '30 dias antes', bLabel: 'Últimos 30 dias' },
       impact: Math.max(qty, 12) * p.price,
       ctaLabel: 'Ver produto',
       cta: { kind: 'product', productId: p.id, prefill: true },
@@ -427,6 +506,7 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
       metric: `${s.peerStoresSelling} de ${PEER_GROUP_SIZE} lojas`,
       subject: name,
       context: `Vende em ${s.peerStoresSelling} de ${PEER_GROUP_SIZE} lojas parecidas · nunca comprado pela sua loja`,
+      viz: { kind: 'peers', count: s.peerStoresSelling, of: PEER_GROUP_SIZE },
       impact: 24 * p.price,
       ctaLabel: 'Ver produto',
       cta: { kind: 'product', productId: p.id, prefill: true },
@@ -442,6 +522,7 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
       metric: `${s.peerStoresSelling} lojas parecidas`,
       subject: `Linha ${p.line}`,
       context: `Ainda fora do seu mix · ${s.peerStoresSelling} lojas parecidas já compram`,
+      viz: { kind: 'peers', count: s.peerStoresSelling, of: PEER_GROUP_SIZE },
       impact: 24 * p.price,
       ctaLabel: 'Ver coleção',
       cta: { kind: 'catalog', line: p.line },
@@ -457,6 +538,7 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
       metric: `+${s.peerSalesDiffPct}%`,
       subject: name,
       context: `Lojas parecidas venderam ${s.peerSalesDiffPct}% mais, últimos 30 dias`,
+      viz: { kind: 'compare', a: 100, b: 100 + s.peerSalesDiffPct, aLabel: 'Sua loja', bLabel: 'Lojas parecidas' },
       impact: 0,
       ctaLabel: 'Comparar',
       cta: { kind: 'product', productId: p.id, block: 'benchmark' },
@@ -467,7 +549,7 @@ function productCandidates(p: Product, s: StoreSku, carts: Cart[]): RadarSignal[
 }
 
 /** BR-31 e BR-32: um sinal principal por produto; sinais contraditórios não convivem. */
-function pickPrimary(cands: RadarSignal[]): RadarSignal | undefined {
+function pickPrimary(cands: SignalDraft[]): SignalDraft | undefined {
   const stuck = cands.some(c => c.type === 'sem-giro' || c.type === 'giro-baixo');
   const allowed = stuck ? cands.filter(c => c.type !== 'estoque-baixo' && c.type !== 'alta-demanda') : cands;
   return [...allowed].sort((a, b) => PRIORITY.indexOf(a.type) - PRIORITY.indexOf(b.type))[0];
@@ -532,13 +614,25 @@ export interface RadarResult {
   health: 'saudavel' | 'atencao' | 'em-risco';
   /** Candidatos ao Destaque da semana (S-05/S-07 de maior impacto primeiro). */
   destaques: RadarSignal[];
+  /** Sinais vitais da loja (informativos, sem prazo). */
+  vitals: Vital[];
+}
+
+/** Sinal vital: um número de contexto com a fonte do dado (regra "todo insight tem um porquê"). */
+export interface Vital {
+  id: string;
+  label: string;
+  value: string;
+  context: string;
+  viz?: InsightViz;
+  source: string;
 }
 
 const sortSignals = (a: RadarSignal, b: RadarSignal) =>
   SEVERITY_META[a.severity].rank - SEVERITY_META[b.severity].rank || a.actByDays - b.actByDays || b.impact - a.impact;
 
 function compute(carts: Cart[]): RadarResult {
-  const all: RadarSignal[] = [];
+  const all: SignalDraft[] = [];
   const byProduct: Record<string, RadarSignal | undefined> = {};
 
   // S-01 Pedido atrasado
@@ -574,7 +668,8 @@ function compute(carts: Cart[]): RadarResult {
   products.forEach(p => {
     const s = storeSku(p.id);
     if (!s) return; // BR-62: sem dados integrados, sem sinal (nunca zero)
-    const primary = pickPrimary(productCandidates(p, s, carts));
+    const draft = pickPrimary(productCandidates(p, s, carts));
+    const primary = draft && finalize(draft);
     byProduct[p.id] = primary;
     if (primary) all.push(primary);
   });
@@ -632,12 +727,121 @@ function compute(carts: Cart[]): RadarResult {
     });
   });
 
+  // S-15 Reajuste de preço chegando (proativo): pedir antes do novo preço
+  PRICE_CHANGES.forEach(pc => {
+    const lineProducts = products.filter(p => p.line === pc.line && storeSku(p.id)?.inMix);
+    if (lineProducts.length === 0) return;
+    const lastDay = pc.inDays - 1;
+    all.push({
+      id: `reajuste-${pc.line}`, type: 'reajuste-preco', severity: 'informacao', actByDays: lastDay,
+      timeText: `reajuste em ${days(pc.inDays)}`,
+      metric: `+${pc.pct}% em ${ddmm(dateInDays(pc.inDays))}`,
+      subject: `Linha ${pc.line}`,
+      context: `${lineProducts.length === 1 ? '1 modelo' : `${lineProducts.length} modelos`} do seu mix · ${lineProducts.map(p => p.name).join(', ')}`,
+      suggestion: `Pedidos enviados até ${ddmm(dateInDays(lastDay))} mantêm o preço atual`,
+      viz: { kind: 'timeline', endDays: pc.inDays, endLabel: 'novo preço', leadDays: 1, leadLabel: 'tabela nova' },
+      impact: 0,
+      ctaLabel: 'Ver a linha', cta: { kind: 'catalog', line: pc.line },
+      why: `A indústria comunicou reajuste de ${pc.pct}% na linha ${pc.line} a partir de ${ddmm(dateInDays(pc.inDays))}. Pedidos enviados antes disso ficam com o preço atual.`,
+      updatedHoursAgo: 4,
+    });
+  });
+
+  const withLines = mine.filter(c => c.lines.length > 0);
+
+  // S-16 Total dos carrinhos vs. crédito livre (preventivo): avisa antes de enviar
+  const creditFree = STORE_CREDIT.limit - STORE_CREDIT.used;
+  const openTotal = withLines.reduce((a, c) => a + cartValue(c), 0);
+  if (openTotal > creditFree) {
+    all.push({
+      id: 'credito-carrinhos', type: 'credito-carrinhos', severity: 'atencao', actByDays: 3,
+      timeText: 'antes de enviar',
+      metric: `${formatCurrency(openTotal - creditFree)} acima`,
+      subject: 'Seus carrinhos passam do crédito livre',
+      context: `${withLines.length} carrinhos somam ${formatCurrency(openTotal)} · limite livre ${formatCurrency(creditFree)}`,
+      suggestion: 'Priorize um carrinho ou pague um boleto antes de enviar',
+      viz: { kind: 'meter', value: openTotal, limit: creditFree, valueLabel: `Carrinhos ${formatCurrency(openTotal)}`, limitLabel: `Limite livre ${formatCurrency(creditFree)}`, direction: 'above' },
+      impact: openTotal - creditFree,
+      ctaLabel: 'Revisar carrinhos', cta: { kind: 'carts' },
+      why: `O limite de crédito da loja é ${formatCurrency(STORE_CREDIT.limit)}, com ${formatCurrency(STORE_CREDIT.used)} já comprometidos em pedidos e boletos. Pedidos acima do limite livre ficam presos na análise de crédito.`,
+      updatedHoursAgo: 1,
+    });
+  }
+
+  // S-17 Distância do frete grátis (oportunidade): o carrinho em montagem mais perto da meta
+  const nearFree = withLines
+    .filter(c => c.stage === 'montagem')
+    .map(c => ({ c, v: cartValue(c) }))
+    .filter(({ v }) => v < CART_PARAMS.freeShippingFrom && v >= CART_PARAMS.freeShippingFrom * 0.5)
+    .sort((a, b) => b.v - a.v)[0];
+  if (nearFree) {
+    const missing = CART_PARAMS.freeShippingFrom - nearFree.v;
+    all.push({
+      id: `frete-gratis-${nearFree.c.id}`, type: 'frete-gratis', severity: 'oportunidade', actByDays: RADAR_PARAMS.actWindowDays.fechamento,
+      timeText: 'antes de fechar',
+      metric: `Faltam ${formatCurrency(missing)}`,
+      subject: `Frete grátis no ${nearFree.c.cartName}`,
+      context: `Frete grátis a partir de ${formatCurrency(CART_PARAMS.freeShippingFrom)} por carrinho`,
+      viz: { kind: 'goal', current: nearFree.v, goal: CART_PARAMS.freeShippingFrom, currentLabel: formatCurrency(nearFree.v), goalLabel: formatCurrency(CART_PARAMS.freeShippingFrom) },
+      impact: missing,
+      ctaLabel: 'Completar carrinho', cta: { kind: 'cart', cartId: nearFree.c.id },
+      why: `O carrinho soma ${formatCurrency(nearFree.v)} e o frete é grátis a partir de ${formatCurrency(CART_PARAMS.freeShippingFrom)}.`,
+      updatedHoursAgo: 0,
+    });
+  }
+
+  // S-18 Mesmo produto em dois carrinhos (preventivo): evita comprar em dobro
+  const cartsByProduct = new Map<string, Cart[]>();
+  withLines.forEach(c => new Set(c.lines.map(l => l.productId)).forEach(id => cartsByProduct.set(id, [...(cartsByProduct.get(id) ?? []), c])));
+  const dup = [...cartsByProduct.entries()].find(([, cs]) => cs.length > 1);
+  if (dup) {
+    const [productId, cs] = dup;
+    const prod = productById(productId);
+    all.push({
+      id: `duplicado-${productId}`, type: 'produto-duplicado', severity: 'atencao', actByDays: 5,
+      timeText: 'antes de enviar',
+      metric: `Em ${cs.length} carrinhos`,
+      subject: prod ? productDisplayName(prod) : productId,
+      context: 'O mesmo modelo está em mais de um carrinho aberto',
+      suggestion: 'Confira se não está comprando em dobro',
+      viz: { kind: 'list', items: cs.map(c => `${c.cartName} · ${pairsText(c.lines.filter(l => l.productId === productId).reduce((a, l) => a + pairsOf(l.sizes), 0))}`) },
+      impact: 0,
+      ctaLabel: 'Ver carrinhos', cta: { kind: 'carts' },
+      why: 'O mesmo produto aparece em dois ou mais carrinhos abertos da loja. Se os dois forem enviados, a quantidade soma.',
+      updatedHoursAgo: 0,
+    });
+  }
+
+  // Sinais vitais (informativo, sem prazo): contexto para decidir, sempre visível
+  const skus = storeSkus.filter(x => x.inMix);
+  const daily = skus.reduce((a, x) => a + x.dailySales, 0);
+  const stockTotal = skus.reduce((a, x) => a + x.stock, 0);
+  const vitals: Vital[] = [
+    {
+      id: 'sell-out', label: 'Vendas da loja', value: pairsText(Math.round(daily * 30)), context: 'últimos 30 dias · +9% vs. mês anterior',
+      viz: { kind: 'trend', series: [41, 46, 44, 52, 55, 58, 61, 64], seriesLabel: 'pares por semana, últimas 8 semanas' }, source: 'Sell-out da loja',
+    },
+    {
+      id: 'cobertura', label: 'Cobertura média', value: days(Math.round(stockTotal / daily)), context: `${pairsText(stockTotal)} em estoque · meta ${days(RADAR_PARAMS.targetCoverageDays)}`,
+      viz: { kind: 'compare', a: Math.round(stockTotal / daily), b: RADAR_PARAMS.targetCoverageDays, aLabel: 'Hoje', bLabel: 'Meta' }, source: 'Estoque da loja',
+    },
+    {
+      id: 'credito', label: 'Uso do crédito', value: `${Math.round((STORE_CREDIT.used / STORE_CREDIT.limit) * 100)}%`, context: `${formatCurrency(creditFree)} livres de ${formatCurrency(STORE_CREDIT.limit)}`,
+      viz: { kind: 'meter', value: STORE_CREDIT.used, limit: STORE_CREDIT.limit, valueLabel: 'Usado', limitLabel: 'Limite', direction: 'above' }, source: 'Crédito Pace',
+    },
+    {
+      id: 'resultados', label: 'O Radar evitou', value: `${RADAR_RESULTS.stockoutsAvoided} rupturas`, context: `${formatCurrency(RADAR_RESULTS.anticipated)} em compras antecipadas · 30 dias`,
+      source: 'Resultados do Radar',
+    },
+  ];
+
+  const signals = all.map(finalize);
   const nowMs = Date.now();
   const isHidden = (s: RadarSignal) =>
     !!lifecycle.dismissed[s.id] || (lifecycle.snoozed[s.id] ?? 0) > nowMs;
   const resolvedAt = (s: RadarSignal) => lifecycle.resolved[s.id];
-  const resolved = all.filter(s => resolvedAt(s) && nowMs - resolvedAt(s) < 86_400_000);
-  const open = all.filter(s => !isHidden(s) && !resolvedAt(s) && bucketOf(s.actByDays) !== null).sort(sortSignals);
+  const resolved = signals.filter(s => resolvedAt(s) && nowMs - resolvedAt(s) < 86_400_000);
+  const open = signals.filter(s => !isHidden(s) && !resolvedAt(s) && bucketOf(s.actByDays) !== null).sort(sortSignals);
   const critical = open.filter(isCritical).length;
   const health = critical === 0 ? 'saudavel' : critical <= 2 ? 'atencao' : 'em-risco';
 
@@ -646,7 +850,7 @@ function compute(carts: Cart[]): RadarResult {
     .filter(s => s.type === 'alta-demanda' || s.type === 'oportunidade-perdida')
     .sort((a, b) => b.impact - a.impact);
 
-  return { open, resolved, byProduct, critical, health, destaques };
+  return { open, resolved, byProduct, critical, health, destaques, vitals };
 }
 
 // Cache: recalcula só quando carrinhos ou ciclo de vida mudam (useSyncExternalStore exige referência estável)

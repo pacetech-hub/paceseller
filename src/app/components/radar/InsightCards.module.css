@@ -1,0 +1,339 @@
+/* Cinco desenhos de cartão, um por natureza do insight (Radar Integrado para o Varejista).
+   A forma muda junto com a cor: quem não distingue cores ainda reconhece o tipo pelo desenho. */
+
+.tag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 2px;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- Corretivo
+   Faixa horizontal de largura total: o problema, há quanto tempo e o botão cheio. */
+.corretivo {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  border: 1px solid light-dark(var(--mantine-color-red-2), var(--mantine-color-red-9));
+  border-left: 6px solid var(--mantine-color-red-7);
+  border-radius: var(--mantine-radius-md);
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+}
+
+.corretivoElapsed {
+  padding-left: var(--mantine-spacing-lg);
+  border-left: 1px solid light-dark(var(--mantine-color-red-2), var(--mantine-color-red-9));
+  text-align: right;
+  min-width: 140px;
+}
+
+.corretivoActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 48em) {
+  .corretivo {
+    grid-template-columns: auto 1fr;
+  }
+  .corretivoElapsed {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    border-left: 0;
+    text-align: left;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .corretivoActions {
+    grid-column: 1 / -1;
+  }
+  .corretivoActions > button:first-child {
+    flex: 1;
+  }
+}
+
+/* ---------------------------------------------------------------- Proativo
+   Calendário + linha do tempo: o que fazer e até quando, antes de virar problema. */
+.calendar {
+  flex: none;
+  width: 64px;
+  border: 1px solid var(--mantine-color-blue-6);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+  text-align: center;
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+}
+
+.calendarHead {
+  background: var(--mantine-color-blue-6);
+  color: var(--mantine-color-white);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 0;
+}
+
+.calendarDay {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  padding-top: 4px;
+  color: light-dark(var(--mantine-color-blue-9), var(--mantine-color-blue-2));
+}
+
+.calendarMonth {
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-dimmed);
+  padding-bottom: 4px;
+}
+
+.timeline {
+  position: relative;
+  height: 64px;
+  margin: 4px 6px 0;
+}
+
+.timelineTrack {
+  position: absolute;
+  top: 27px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 2px;
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+}
+
+.timelineWindow {
+  position: absolute;
+  top: 27px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mantine-color-blue-6);
+}
+
+.timelineLead {
+  position: absolute;
+  top: 27px;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--mantine-color-blue-3) 0 4px,
+    transparent 4px 7px
+  );
+}
+
+.timelineDot {
+  position: absolute;
+  top: 22px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  border: 3px solid light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+  background: var(--mantine-color-gray-5);
+}
+
+.timelineDotAct {
+  background: var(--mantine-color-blue-6);
+  box-shadow: 0 0 0 2px var(--mantine-color-blue-6);
+}
+
+.timelineDotEnd {
+  background: var(--mantine-color-red-6);
+}
+
+.timelineLabel {
+  position: absolute;
+  top: 42px;
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.25;
+  white-space: nowrap;
+  color: var(--mantine-color-dimmed);
+}
+
+.suggestion {
+  padding-left: var(--mantine-spacing-sm);
+  border-left: 3px solid var(--mantine-color-blue-6);
+  font-family: var(--mantine-font-family-monospace);
+  font-weight: 700;
+  font-size: var(--mantine-font-size-sm);
+}
+
+/* ---------------------------------------------------------------- Preventivo
+   Borda tracejada de "confira antes" e um medidor contra o limite. */
+.preventivo {
+  border: 1.5px dashed var(--mantine-color-amber-6);
+  border-radius: var(--mantine-radius-md);
+  background: light-dark(var(--mantine-color-amber-0), rgba(245, 158, 11, 0.08));
+}
+
+.meter {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-5));
+  box-shadow: inset 0 0 0 1px light-dark(var(--mantine-color-amber-2), var(--mantine-color-dark-4));
+  overflow: visible;
+}
+
+.meterFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 6px 0 0 6px;
+  background: var(--mantine-color-amber-5);
+}
+
+.meterExcess {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--mantine-color-amber-7) 0 3px,
+    var(--mantine-color-amber-3) 3px 6px
+  );
+}
+
+.meterLimit {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  margin-left: -1px;
+  background: light-dark(var(--mantine-color-gray-9), var(--mantine-color-gray-0));
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--mantine-radius-md);
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  border: 1px solid light-dark(var(--mantine-color-amber-2), var(--mantine-color-dark-4));
+  font-size: var(--mantine-font-size-sm);
+}
+
+.callout {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  color: light-dark(var(--mantine-color-amber-9), var(--mantine-color-amber-3));
+}
+
+/* ---------------------------------------------------------------- Oportunidade
+   Faixa superior com o ganho em destaque e a prova (lojas, meta, comparação). */
+.oportunidade {
+  border: 1px solid light-dark(var(--mantine-color-green-2), var(--mantine-color-green-9));
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+}
+
+.oportunidadeBand {
+  padding: var(--mantine-spacing-lg);
+  background: light-dark(var(--mantine-color-green-0), rgba(34, 197, 94, 0.08));
+  border-bottom: 1px solid light-dark(var(--mantine-color-green-1), var(--mantine-color-green-9));
+}
+
+.featured {
+  border-color: light-dark(var(--mantine-color-brand-9), var(--mantine-color-brand-7));
+  background: var(--mantine-color-brand-9);
+}
+
+.featured .oportunidadeBand {
+  background: transparent;
+  border-bottom-color: var(--mantine-color-brand-7);
+}
+
+.peers {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.goalTrack {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-5));
+  box-shadow: inset 0 0 0 1px light-dark(var(--mantine-color-green-2), var(--mantine-color-dark-4));
+}
+
+.goalFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 5px;
+  background: var(--mantine-color-green-6);
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: var(--mantine-font-size-sm);
+}
+
+.bar {
+  height: 10px;
+  border-radius: 0 5px 5px 0;
+}
+
+/* ---------------------------------------------------------------- Informativo
+   Bloco silencioso, sem borda colorida nem botão: um número, uma tendência e a fonte. */
+.informativo {
+  border-radius: var(--mantine-radius-md);
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  padding: var(--mantine-spacing-md);
+  height: 100%;
+}
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 32px;
+  overflow: visible;
+}
+
+.thinTrack {
+  height: 6px;
+  border-radius: 3px;
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  overflow: hidden;
+}
+
+.thinFill {
+  height: 100%;
+  border-radius: 3px;
+  background: light-dark(var(--mantine-color-gray-6), var(--mantine-color-gray-4));
+}
+
+/* ---------------------------------------------------------------- Resolvido */
+.resolved {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  border: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  border-radius: var(--mantine-radius-md);
+}
+
+.timelineActLabel {
+  top: 0;
+}
