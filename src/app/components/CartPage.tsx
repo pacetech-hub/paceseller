@@ -20,19 +20,31 @@ export function LineItem({ cart, productId, sizes, editable }: {
   const n = pairsOf(sizes);
   const value = lineValue({ productId, sizes });
   return (
-    <Paper withBorder px="md" py="sm">
+    <Paper withBorder px={{ base: 'sm', xs: 'md' }} py="sm">
       <Group align="flex-start" gap="sm" wrap="nowrap">
         <ProductThumb src={p.image} alt={p.name} size={44} />
         <Box miw={0} flex={1}>
           <Text fw={600} size="sm">{productDisplayName(p)}</Text>
+          {/* celular: valor logo abaixo do nome, para o nome usar a largura toda */}
+          <Text className="mono" size="sm" fw={600} hiddenFrom="xs" mt={2}>{formatCurrency(value)}</Text>
           <UnstyledButton onClick={() => setOpen(o => !o)} mt={2} aria-expanded={open} aria-label={`${open ? 'Ocultar' : 'Ver'} numeração de ${p.name}`}>
             <Group gap={4} wrap="nowrap">
-              <Text fz={12} ff="monospace" c="dimmed">qtd {n} · grade {sizeRange(sizes)}</Text>
+              <Text fz={12} ff="monospace" c="dimmed" style={{ whiteSpace: 'nowrap' }}>qtd {n} · grade {sizeRange(sizes)}</Text>
               {open ? <CaretUpIcon size={12} /> : <CaretDownIcon size={12} />}
             </Group>
           </UnstyledButton>
+          {editable && (
+            <Group gap="md" mt={6} hiddenFrom="xs">
+              <Anchor component="button" type="button" size="sm" onClick={() => openGrade({ productId, mode: 'edit', cartId: cart.id, initial: sizes })}>
+                Editar grade
+              </Anchor>
+              <Anchor component="button" type="button" size="sm" c="red.7" onClick={() => removeLine(cart.id, productId, role)} aria-label={`Remover ${p.name} do carrinho`}>
+                Remover
+              </Anchor>
+            </Group>
+          )}
         </Box>
-        <Stack gap={2} align="flex-end" flex="none">
+        <Stack gap={2} align="flex-end" flex="none" visibleFrom="xs">
           <Text className="mono" size="sm" fw={600}>{formatCurrency(value)}</Text>
           {editable && (
             <Group gap="sm">

@@ -166,10 +166,10 @@ export function LojistaCartPage({ onNavigate, cartContext, onSwitchCart, onCheck
               {cart.lines.length > 0 && (
                 <Group justify="space-between" align="center" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
                   <Text className="mono" fw={600}>Subtotal: {formatCurrency(subtotal)}</Text>
-                  <Group gap="md" wrap="wrap" justify="flex-end">
+                  <Group gap="md" wrap="wrap" justify="flex-start" w={{ base: '100%', sm: 'auto' }}>
                     {waitingText && <Text size="sm" c="dimmed">{waitingText}</Text>}
                     {primary && (
-                      <Button size="lg" onClick={primary.run} disabled={'disabled' in primary && primary.disabled} leftSection={<primary.icon size={16} />}>
+                      <Button size="lg" w={{ base: '100%', sm: 'auto' }} onClick={primary.run} disabled={'disabled' in primary && primary.disabled} leftSection={<primary.icon size={16} />}>
                         {primary.label}
                       </Button>
                     )}

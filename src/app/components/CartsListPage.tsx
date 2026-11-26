@@ -111,18 +111,19 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
       {/* a linha inteira abre o carrinho; o nome é o link de teclado; a ação é um botão à parte */}
       <Box onClick={onOpen} className={classes.hoverable} p={{ base: 'sm', sm: 'md' }} style={{ cursor: 'pointer' }}>
         <Group gap="md" wrap="nowrap" align="flex-start">
-          <ThemeIcon size={36} radius="md" variant="light" color={color} aria-hidden style={{ flex: 'none' }}>
+          <ThemeIcon size={36} radius="md" variant="light" color={color} aria-hidden style={{ flex: 'none' }} visibleFrom="sm">
             <ShoppingCartIcon size={18} />
           </ThemeIcon>
 
           <Box flex={1} miw={0}>
-            <Group gap="xs" wrap="wrap" justify="space-between" align="flex-start">
-              <Box miw={0}>
+            {/* nome à esquerda (quebra linha); números e ação sempre na mesma coluna à direita */}
+            <Group gap="lg" wrap="nowrap" justify="space-between" align="flex-start">
+              <Box miw={0} flex={1}>
                 <Group gap="xs" wrap="wrap">
                   <UnstyledButton onClick={e => { e.stopPropagation(); onOpen(); }} aria-label={`Abrir carrinho ${cart.cartName}`}>
                     <Text fw={600}>{cart.cartName}</Text>
                   </UnstyledButton>
-                  <Badge variant="light" color={color} radius="sm" styles={{ label: { textTransform: 'none' } }}>{statusLabelFor(status, cart, viewerRole)}</Badge>
+                  <Badge variant="light" color={color} radius="sm" maw="100%" h="auto" py={2} styles={{ label: { textTransform: 'none', whiteSpace: 'normal', overflow: 'visible' } }}>{statusLabelFor(status, cart, viewerRole)}</Badge>
                 </Group>
                 <Text size="sm" c="dimmed" mt={2}>
                   {showClient ? `${cart.clientName} · ` : ''}
@@ -131,8 +132,8 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
                 </Text>
               </Box>
 
-              {/* grade mínima, valor e a ação */}
-              <Group gap="lg" wrap="nowrap" visibleFrom="sm">
+              {/* grade mínima, valor e a ação (telas largas: colunas alinhadas à direita) */}
+              <Group gap="lg" wrap="nowrap" visibleFrom="md">
                 <Group gap={8} wrap="nowrap" w={110}>
                   <Box w={52} h={4} bg="var(--mantine-color-default-border)" style={{ borderRadius: 2, overflow: 'hidden' }} aria-hidden>
                     <Box h="100%" w={`${Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)}%`} bg={full ? 'teal.7' : 'brand.9'} />
@@ -151,10 +152,15 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
               </Group>
             </Group>
 
-            {/* no celular, grade mínima e valor numa linha própria */}
-            <Group gap="md" mt={6} hiddenFrom="sm">
-              <Text fz={12} ff="monospace" c="dimmed">{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
-              <Text className="mono" fw={600}>{formatCurrency(cartValue(cart))}</Text>
+            {/* celular e tablet: grade mínima e valor numa linha própria */}
+            <Group gap="md" mt={8} hiddenFrom="md" justify="space-between" wrap="nowrap">
+              <Group gap={8} wrap="nowrap" miw={0}>
+                <Box w={52} h={4} flex="none" bg="var(--mantine-color-default-border)" style={{ borderRadius: 2, overflow: 'hidden' }} aria-hidden>
+                  <Box h="100%" w={`${Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)}%`} bg={full ? 'teal.7' : 'brand.9'} />
+                </Box>
+                <Text fz={12} ff="monospace" c="dimmed" style={{ whiteSpace: 'nowrap' }}>{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
+              </Group>
+              <Text className="mono" fw={600} style={{ whiteSpace: 'nowrap' }}>{formatCurrency(cartValue(cart))}</Text>
             </Group>
 
             {/* miniaturas dos produtos */}
@@ -199,7 +205,7 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
             )}
 
             {action && (
-              <Button hiddenFrom="sm" mt="sm" size="compact-md" variant="default" onClick={e => { e.stopPropagation(); runAction(); }}
+              <Button hiddenFrom="md" mt="sm" variant="default" w={{ base: '100%', xs: 'auto' }} onClick={e => { e.stopPropagation(); runAction(); }}
                 rightSection={action.kind !== 'open' ? <PaperPlaneTiltIcon size={14} /> : <CaretRightIcon size={14} />}>
                 {action.label}
               </Button>
@@ -237,7 +243,7 @@ function Notice({ children, action, onAction }: { children: React.ReactNode; act
           <ThemeIcon radius="xl" size={28} color="blue" aria-hidden><UserIcon size={14} /></ThemeIcon>
           <Text size="sm">{children}</Text>
         </Group>
-        <Button size="compact-md" variant="outline" color="blue" bg="var(--mantine-color-body)" onClick={onAction}>{action}</Button>
+        <Button variant="outline" color="blue" bg="var(--mantine-color-body)" onClick={onAction} w={{ base: '100%', xs: 'auto' }}>{action}</Button>
       </Group>
     </Paper>
   );

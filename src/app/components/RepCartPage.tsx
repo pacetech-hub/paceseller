@@ -180,10 +180,10 @@ export function RepCartPage({ onNavigate, cartContext, onSwitchCart, onOpenChat 
                     <Text className="mono" fw={600}>Subtotal: {formatCurrency(subtotal)}</Text>
                     {margin !== null && <Text size="xs" c="dimmed">Margem da loja {margin}% no PDV sugerido · custo da loja, sem impostos e sem frete</Text>}
                   </Box>
-                  <Group gap="md" wrap="wrap" justify="flex-end">
+                  <Group gap="md" wrap="wrap" justify="flex-start" w={{ base: '100%', sm: 'auto' }}>
                     <Text size="sm" c="dimmed">{waitingText}</Text>
                     {primary && (
-                      <Button size="lg" onClick={primary.run} leftSection={<primary.icon size={16} />}>{primary.label}</Button>
+                      <Button size="lg" w={{ base: '100%', sm: 'auto' }} onClick={primary.run} leftSection={<primary.icon size={16} />}>{primary.label}</Button>
                     )}
                   </Group>
                 </Group>
