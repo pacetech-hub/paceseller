@@ -34,9 +34,9 @@ import { ClientStockTab } from "./ClientStockTab";
 import classes from "./interactive.module.css";
 
 const tabs = [
-  { id: 'industry-stock', label: 'Estoque Industrial' },
-  { id: 'client-stock', label: 'Estoque do Cliente' },
-  { id: 'pricing', label: 'Campanhas Comerciais' },
+  { id: 'industry-stock', label: 'Estoque industrial' },
+  { id: 'client-stock', label: 'Estoque do cliente' },
+  { id: 'pricing', label: 'Campanhas comerciais' },
   { id: 'policies', label: 'Políticas' },
   { id: 'permissions', label: 'Permissões' },
   { id: 'settings', label: 'Configurações' },
@@ -268,7 +268,7 @@ export function AdminPage() {
       icon={MagnifyingGlassIcon}
       title="Nenhum usuário encontrado"
       description={`Nenhum nome ou e-mail corresponde a "${search}". Confira a grafia ou limpe a busca para ver todos.`}
-      action={{ label: 'Limpar Busca', onClick: () => setSearch(''), forward: false }}
+      action={{ label: 'Limpar busca', onClick: () => setSearch(''), forward: false }}
       withBorder={false}
     />
   ) : (
@@ -276,7 +276,7 @@ export function AdminPage() {
       icon={UsersIcon}
       title="Nenhum usuário cadastrado"
       description="Adicione o primeiro usuário para liberar o acesso ao PaceSeller."
-      action={showAddUser ? undefined : { label: 'Adicionar Usuário', onClick: () => setShowAddUser(true), forward: false }}
+      action={showAddUser ? undefined : { label: 'Adicionar usuário', onClick: () => setShowAddUser(true), forward: false }}
       withBorder={false}
     />
   );
@@ -475,9 +475,9 @@ export function AdminPage() {
           <Stack gap="sm">
             <Group justify="space-between" gap="sm">
               <Title order={3}>Usuários</Title>
-              {/* Abre o formulário: ação secundária (a principal é "Criar Usuário", dentro dele) */}
+              {/* Abre o formulário: ação secundária (a principal é "Criar usuário", dentro dele) */}
               <Button onClick={() => (showAddUser ? closeAddUser() : setShowAddUser(true))} variant="default" leftSection={<PlusIcon size={16} />}>
-                Adicionar Usuário
+                Adicionar usuário
               </Button>
             </Group>
             <Collapse in={showAddUser}>
@@ -531,7 +531,7 @@ export function AdminPage() {
                 </Stack>
                 <Group justify="flex-end" gap="sm" mt="md">
                   <Button onClick={closeAddUser} variant="default">Cancelar</Button>
-                  <Button onClick={createUser}>Criar Usuário</Button>
+                  <Button onClick={createUser}>Criar usuário</Button>
                 </Group>
               </Paper>
             </Collapse>

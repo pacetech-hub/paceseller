@@ -6,8 +6,8 @@ import { IndustryStockTable } from "./IndustryStockTable";
 import { ClientStockTab } from "./ClientStockTab";
 
 const tabs = [
-  { id: 'industrial', label: 'Estoque Industrial' },
-  { id: 'cliente', label: 'Estoque do Cliente' },
+  { id: 'industrial', label: 'Estoque industrial' },
+  { id: 'cliente', label: 'Estoque do cliente' },
 ] as const;
 
 type TabId = (typeof tabs)[number]['id'];

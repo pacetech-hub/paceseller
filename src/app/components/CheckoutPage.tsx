@@ -100,7 +100,7 @@ function BoletoPanel({ amount, condition }: { amount: number; condition: Conditi
         {condition === 'prazo'
           ? `3 boletos de ${formatCurrency(amount / 3)}, com vencimento em 30, 60 e 90 dias.`
           : `1 boleto de ${formatCurrency(amount)}, com vencimento em 2 dias úteis.`}{' '}
-        Ficam em Pagamentos e Boletos logo após a confirmação.
+        Ficam em Pagamentos e boletos logo após a confirmação.
       </Text>
       <Group gap="xs">
         {parts.map(d => (
@@ -206,7 +206,7 @@ export function CheckoutPage({ cartContext, onNavigate }: { cartContext: CartCon
                 <ThemeIcon variant="light" color="gray" size={36}><CreditCardIcon size={18} /></ThemeIcon>
                 <Box>
                   <Group gap="xs" align="baseline">
-                    <Text fw={700} className="mono">{formatCurrency(total)}</Text>
+                    <Text fw={600} className="mono">{formatCurrency(total)}</Text>
                     {discountPct > 0 && <Text size="xs" c="dimmed" td="line-through" className="mono">{formatCurrency(subtotal)}</Text>}
                   </Group>
                   <Text size="xs" c="dimmed">Valor deste pedido ({pairsText(pairs)})</Text>
@@ -336,11 +336,11 @@ export function CheckoutPage({ cartContext, onNavigate }: { cartContext: CartCon
           <Stack gap="md" pl={{ lg: 'lg' }} className={classes.cartAside}>
             <Box>
               <Eyebrow truncate>Carrinho: {cart.cartName}</Eyebrow>
-              <Text fz={28} fw={700} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
+              <Text fz={28} fw={600} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
               <Text className="mono" size="sm" c="dimmed">{formatCurrency(total)}</Text>
             </Box>
             <Paper withBorder p="sm">
-              <Text size="sm">Compartilhado com <Text span fw={700} inherit>{repName}</Text>, que já confirmou as condições deste pedido</Text>
+              <Text size="sm">Compartilhado com <Text span fw={600} inherit>{repName}</Text>, que já confirmou as condições deste pedido</Text>
             </Paper>
           </Stack>
         </Grid.Col>

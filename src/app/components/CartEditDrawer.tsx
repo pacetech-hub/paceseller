@@ -89,7 +89,7 @@ export function CartEditDrawer({ cart, opened, onClose }: { cart: Cart; opened: 
           <Box>
             <Group justify="space-between">
               <Text size="sm" c="dimmed">Grade mínima do pedido</Text>
-              <Text size="sm" fw={700} ff="monospace" c={minReached ? 'teal.7' : 'yellow.8'}>{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
+              <Text size="sm" fw={600} ff="monospace" c={minReached ? 'teal.7' : 'yellow.8'}>{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
             </Group>
             <Progress mt={6} size="sm" value={Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)} color={minReached ? 'teal' : 'yellow'} aria-label="Progresso da grade mínima" />
           </Box>
@@ -142,7 +142,7 @@ export function CartEditDrawer({ cart, opened, onClose }: { cart: Cart; opened: 
           <Paper withBorder px="md" py="sm">
             <Text size="sm">
               {shippingGap > 0
-                ? <>{role === 'rep' ? 'A loja está a' : 'Você está a'} <Text span fw={700} inherit>{formatCurrency(shippingGap)}</Text> de ganhar frete grátis</>
+                ? <>{role === 'rep' ? 'A loja está a' : 'Você está a'} <Text span fw={600} inherit>{formatCurrency(shippingGap)}</Text> de ganhar frete grátis</>
                 : <>Frete grátis neste pedido (a partir de {formatCurrency(CART_PARAMS.freeShippingFrom)})</>}
             </Text>
           </Paper>

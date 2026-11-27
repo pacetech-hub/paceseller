@@ -104,21 +104,18 @@ function coverageDays(productId: string): number | null {
   return Math.round(s.stock / s.dailySales);
 }
 
-/** Etiqueta com contorno sobre a foto, em caixa-alta mono (cor só como reforço do texto). */
+/** Etiqueta com contorno sobre a foto (cor só como reforço do texto). */
 function OutlineTag({ children, color }: { children: ReactNode; color?: string }) {
   return (
     <Box
       component="span"
       px={6}
       py={2}
-      fz={10}
+      fz={12}
       fw={600}
-      ff="monospace"
-      tt="uppercase"
-      lts={0.4}
       c={color ? `${color}.8` : undefined}
       bg="var(--mantine-color-body)"
-      lh="14px"
+      lh="16px"
       display="inline-block"
       style={{ border: `1px solid ${color ? `var(--mantine-color-${color}-7)` : 'var(--mantine-color-text)'}`, borderRadius: 'var(--mantine-radius-xs)', whiteSpace: 'nowrap' }}
     >
@@ -179,10 +176,10 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
               <span style={{ display: "inline-flex" }}><OutlineTag color={SEVERITY_META[signal.severity].color}>{signalChip(signal, product)}</OutlineTag></span>
             </Tooltip>
           )}
-          {product.availability !== 'disponível' && <OutlineTag color={availColor[product.availability]}>{product.availability}</OutlineTag>}
+          {product.availability !== 'disponível' && <OutlineTag color={availColor[product.availability]}>{product.availability.charAt(0).toUpperCase() + product.availability.slice(1)}</OutlineTag>}
         </Group>
         <Tooltip label={markupLabel(product)} position="top">
-          <Text pos="absolute" bottom={12} left={8} right={8} ta="center" fz={11} ff="monospace" lh={1.3}>
+          <Text pos="absolute" bottom={12} left={8} right={8} ta="center" fz={12} lh={1.4}>
             {marginLabel(product)}
             {coverage !== null && <Text span inherit c="dimmed" display="block">Cobertura de {coverage} dias na loja</Text>}
           </Text>
@@ -232,14 +229,14 @@ function ModelCard({ variants, initialId, onOpenDetail, onAdd }: {
       {/* texto: linha, nome, cor e preço; "+" ao lado do nome abre a grade */}
       <Group gap="xs" wrap="nowrap" align="flex-start" mt="sm">
         <UnstyledButton onClick={() => onOpenDetail(product)} flex={1} miw={0} display="block">
-          <Text fz={11} ff="monospace" tt="uppercase" c="dimmed" lts={0.4}>{product.line}</Text>
-          <Text fw={700} lh={1.3} mt={2} truncate>{lineName}</Text>
+          <Text size="xs" c="dimmed">{product.line}</Text>
+          <Text fw={600} lh={1.3} mt={2} truncate>{lineName}</Text>
           <Text size="sm" c="dimmed" truncate>{colorwayOf(product)}</Text>
           <Group gap={6} align="baseline" mt={6} wrap="wrap" style={{ rowGap: 0 }}>
             <Tooltip label="Seu custo por par">
-              <Text className="mono" fw={700}>{formatCurrency(product.price)}</Text>
+              <Text className="mono" fw={600}>{formatCurrency(product.price)}</Text>
             </Tooltip>
-            <Text fz={11} ff="monospace" c="dimmed">PDV sugerido {formatCurrency(product.priceRetail)}</Text>
+            <Text fz={12} c="dimmed">PDV sugerido {formatCurrency(product.priceRetail)}</Text>
           </Group>
         </UnstyledButton>
         <Tooltip label={soldOut ? 'Esgotado' : 'Adicionar ao carrinho'}>
@@ -265,7 +262,7 @@ const footLength = (size: string) => (Number(size) * 0.667 - 0.5).toLocaleString
 
 /** Rótulo de seção em caixa-alta mono, como nos cartões do Radar. */
 function Eyebrow({ children, mb = 'xs' }: { children: ReactNode; mb?: string | number }) {
-  return <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed" mb={mb}>{children}</Text>;
+  return <Text size="sm" fw={600} c="dimmed" mb={mb}>{children}</Text>;
 }
 
 /**
@@ -421,7 +418,7 @@ function ProductDetailPage({ product, entry, onClose, onSwitch, onToggleFav, isF
           {/* FR-302: Seu custo, PDV sugerido e a única margem (BR-01 a BR-04) */}
           <Box>
             <Group gap={8} align="baseline">
-              <Text className="mono" fw={700} fz={26} lh={1.1}>{formatCurrency(product.price)}</Text>
+              <Text className="mono" fw={600} fz={26} lh={1.1}>{formatCurrency(product.price)}</Text>
               <Text size="sm" c="dimmed">Seu custo por par</Text>
             </Group>
             <Group gap="sm" mt={8} align="center">
@@ -455,7 +452,7 @@ function ProductDetailPage({ product, entry, onClose, onSwitch, onToggleFav, isF
             <Paper id="bloco-como-girar" withBorder p="md" bd={entry?.block === 'como-girar' ? '2px solid var(--mantine-color-yellow-6)' : undefined}>
               <Group gap="xs" mb={4}><MegaphoneIcon size={16} /><Text fw={600}>Como girar</Text></Group>
               <Stack gap={2}>
-                <Text size="sm">• Crie uma campanha no Marketing IA com este modelo.</Text>
+                <Text size="sm">• Crie uma campanha no Marketing com este modelo.</Text>
                 <Text size="sm">• Coloque na vitrine ou perto do caixa por 15 dias.</Text>
                 <Text size="sm">• O Radar não sugere reposição nem combos com este produto enquanto o giro estiver baixo.</Text>
               </Stack>
@@ -531,7 +528,7 @@ function CombosView({ combos, onOpenDetail, onAdd }: { combos: Combo[]; onOpenDe
         <Paper key={c.id} withBorder p={{ base: 'sm', sm: 'md' }}>
           <Group justify="space-between" align="flex-start" gap="sm" mb="md">
             <Box>
-              <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed">Combo sugerido · {c.items.length} modelos</Text>
+              <Text size="sm" fw={600} c="dimmed">Combo sugerido · {c.items.length} modelos</Text>
               <Title order={3} mt={2}>{c.name}</Title>
               <Text size="sm" c="dimmed">{c.reason}</Text>
             </Box>
@@ -683,7 +680,7 @@ export function CatalogPage({ filters, onFiltersChange, entry, initialSortBy, on
               icon={PackageIcon}
               title="Nenhum produto encontrado"
               description="Nenhum produto combina com a busca e os filtros. Limpe a busca e os filtros para ver o catálogo inteiro."
-              action={{ label: 'Limpar Busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
+              action={{ label: 'Limpar busca e Filtros', onClick: clearSearchAndFilters, forward: false }}
               suggestions={[
                 { label: 'Ver produtos em alta', description: 'Sinal Alto giro do Radar', icon: LightningIcon, onClick: () => onFiltersChange({ ...defaultFilters, priceTable: filters.priceTable, radar: ['alto-giro' as RadarFilter] }) },
               ]}

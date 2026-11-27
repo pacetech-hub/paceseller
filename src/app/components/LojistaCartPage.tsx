@@ -122,8 +122,8 @@ export function LojistaCartPage({ onNavigate, cartContext, onSwitchCart, onCheck
               <Avatar size={28} radius="xl" color="brand" variant="filled">{initials(cart.rep)}</Avatar>
               <Text size="sm">
                 {sharedNow
-                  ? <>Compartilhado com <Text span fw={700} inherit>{repName}</Text> — acompanha e comenta este pedido</>
-                  : <>Só você vê este carrinho por enquanto. Ele vai para <Text span fw={700} inherit>{repName}</Text> quando você enviar.</>}
+                  ? <>Compartilhado com <Text span fw={600} inherit>{repName}</Text> — acompanha e comenta este pedido</>
+                  : <>Só você vê este carrinho por enquanto. Ele vai para <Text span fw={600} inherit>{repName}</Text> quando você enviar.</>}
               </Text>
             </Group>
 
@@ -131,7 +131,7 @@ export function LojistaCartPage({ onNavigate, cartContext, onSwitchCart, onCheck
             <Paper withBorder style={{ overflow: 'hidden' }}>
               <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
                 <Box miw={0}>
-                  <Text fw={700}>Pedido</Text>
+                  <Text fw={600}>Pedido</Text>
                   <Text fz={12} ff="monospace" c="dimmed" mt={2}>
                     {status === 'aguardando-pagamento' ? `30/60/90 dias ou à vista com ${CART_PARAMS.cashDiscountPct}%` : '30/60/90 dias'} · {CART_PARAMS.leadTimeLabel}
                   </Text>
@@ -165,11 +165,11 @@ export function LojistaCartPage({ onNavigate, cartContext, onSwitchCart, onCheck
 
               {cart.lines.length > 0 && (
                 <Group justify="space-between" align="center" wrap="wrap" gap="sm" px={{ base: 'md', sm: 'lg' }} py="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
-                  <Text className="mono" fw={700}>Subtotal: {formatCurrency(subtotal)}</Text>
-                  <Group gap="md" wrap="wrap" justify="flex-end">
+                  <Text className="mono" fw={600}>Subtotal: {formatCurrency(subtotal)}</Text>
+                  <Group gap="md" wrap="wrap" justify="flex-start" w={{ base: '100%', sm: 'auto' }}>
                     {waitingText && <Text size="sm" c="dimmed">{waitingText}</Text>}
                     {primary && (
-                      <Button size="lg" onClick={primary.run} disabled={'disabled' in primary && primary.disabled} leftSection={<primary.icon size={16} />}>
+                      <Button size="lg" w={{ base: '100%', sm: 'auto' }} onClick={primary.run} disabled={'disabled' in primary && primary.disabled} leftSection={<primary.icon size={16} />}>
                         {primary.label}
                       </Button>
                     )}
@@ -253,7 +253,7 @@ export function LojistaCartPage({ onNavigate, cartContext, onSwitchCart, onCheck
                   </ActionIcon>
                 </Group>
               )}
-              <Text fz={28} fw={700} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
+              <Text fz={28} fw={600} lh={1.2} mt={4}>{pairsText(pairs)}</Text>
               <Text className="mono" size="sm" c="dimmed">{formatCurrency(subtotal)}</Text>
             </Box>
 

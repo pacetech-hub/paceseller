@@ -30,7 +30,7 @@ type Profile = 'admin' | 'rep' | 'lojista';
 interface RadarPageProps {
   profile: Profile;
   userName: string;
-  /** Quem está operando a conta (preposto do representante); só muda a saudação. */
+  /** Quem está operando a conta (preposto do representante). */
   greetName?: string;
   /** Todo CTA abre o destino com o contexto aplicado (FR-108). */
   onCta: (target: CtaTarget) => void;
@@ -74,13 +74,6 @@ const HEALTH = {
 } as const;
 
 const DISMISS_REASONS = ['Já resolvi por fora', 'Não faz sentido pra minha loja', 'Dados errados', 'Outro motivo'];
-
-export function getGreeting(date = new Date()): string {
-  const hour = date.getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
-  return 'Boa noite';
-}
 
 /** Adiar (FR-106): mesmas opções nos dois Radares. */
 function SnoozeItems({ options, onSnooze }: { options: number[]; onSnooze: (d: number) => void }) {
@@ -193,7 +186,7 @@ function BucketTabs({ value, onChange, counts, noun = ['pendência', 'pendência
 /** Sinais mostrados na seção de widgets "Pedidos, pagamentos e entregas" em vez de cartões. */
 const WIDGET_SIGNALS = new Set<SignalType>(['pedido-atrasado', 'boleto-a-vencer']);
 
-function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
+function LojistaRadar({ onCta }: Omit<RadarPageProps, 'profile'>) {
   const [period, setPeriod] = useState<Bucket>('hoje');
   const [showAll, setShowAll] = useState(false);
   const [why, setWhy] = useState<RadarSignal | null>(null);
@@ -233,11 +226,11 @@ function LojistaRadar({ userName, onCta }: Omit<RadarPageProps, 'profile'>) {
   return (
     <Stack gap="xl">
       <Stack gap="md">
-        {/* FR-101/102: saudação, saúde da loja (pela quantidade de críticos) e total de pendências */}
+        {/* FR-101/102: saúde da loja (pela quantidade de críticos) e total de pendências */}
         <Box>
-          <Title order={1}>{getGreeting()}, {userName}</Title>
-          <Group gap="sm" mt={4} wrap="wrap">
-            <Text fw={600} c={health.color}>{health.title}</Text>
+          <Title order={1}>{health.title}</Title>
+          <Group gap={8} mt={4} wrap="nowrap" align="center">
+            <Box w={8} h={8} flex="none" bg={`var(--mantine-color-${health.color.replace('.', '-')})`} style={{ borderRadius: '50%' }} aria-hidden />
             <Text c="dimmed">
               {total} {total === 1 ? 'pendência' : 'pendências'} · {radar.critical} {radar.critical === 1 ? 'crítica' : 'críticas'}
             </Text>
@@ -351,7 +344,7 @@ function IndustryRadar({ onCta }: Omit<RadarPageProps, 'profile'>) {
   return (
     <Stack gap="xl">
       <Box>
-        <Title order={1}>{getGreeting()}</Title>
+        <Title order={1}>Radar da rede</Title>
         <Text c="dimmed" mt={4}>Como está a rede: pedidos, faturamento, vendedores e clientes para contatar</Text>
       </Box>
       <IndustrySalesSection onCta={onCta} />

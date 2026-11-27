@@ -113,7 +113,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         {/* Header */}
         <Group justify="space-between" gap="sm">
           <Box>
-            <Title order={2}>Histórico de Compras</Title>
+            <Title order={2}>Histórico de compras</Title>
             <Text c="dimmed" mt={4}>Visão de sell-in × sell-out e linhas em destaque</Text>
           </Box>
           <Group gap="sm">
@@ -128,7 +128,7 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
               onClick={() => onNavigate('history')}
               leftSection={<ClockCounterClockwiseIcon size={16} />}
             >
-              Ver Histórico de Pedidos
+              Ver Histórico de pedidos
             </Button>
           </Group>
         </Group>
@@ -147,21 +147,17 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
         {/* KPIs */}
         <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="md">
           {kpis.map(k => {
-            const Icon = k.icon;
             const TrendIcon = k.up ? TrendUpIcon : TrendDownIcon;
             return (
               // tile: rótulo + número grande + linha de comparação (sinal, unidade e base)
               <Paper key={k.label} withBorder p="md">
                 <Group gap="xs" wrap="nowrap" mb="xs">
-                  <ThemeIcon size={32} variant="light">
-                    <Icon size={16} />
-                  </ThemeIcon>
                   <Box miw={0}>
                     <Text c="dimmed" size="sm">{k.label}</Text>
                     <Text c="dimmed" size="sm" truncate>{k.sub}</Text>
                   </Box>
                 </Group>
-                <Text fz={{ base: 'lg', sm: 'xl' }} fw={700} className="mono">{k.value}</Text>
+                <Text fz={{ base: 'lg', sm: 'xl' }} fw={600} className="mono">{k.value}</Text>
                 <Group gap={4} c={k.up ? 'teal.7' : 'red.7'} wrap="nowrap" mt={4}>
                   <TrendIcon size={16} />
                   <Text size="sm" fw={600} c="inherit">{k.trend}</Text>
@@ -252,11 +248,11 @@ export function LojistaHistoryDashboard({ onNavigate }: Props) {
                             flex="none"
                             className={classes.rank}
                           >
-                            <Text size="sm" fw={700} c="inherit">{i + 1}</Text>
+                            <Text size="sm" fw={600} c="inherit">{i + 1}</Text>
                           </Center>
                           <Text fw={600} truncate>{l.name}</Text>
                         </Group>
-                        <Text c={l.growth >= 0 ? 'teal.7' : 'red.6'} size="sm" fw={700}>
+                        <Text c={l.growth >= 0 ? 'teal.7' : 'red.6'} size="sm" fw={600}>
                           {formatGrowth(l.growth)}
                         </Text>
                       </Group>

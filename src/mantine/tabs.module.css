@@ -1,5 +1,5 @@
-/* Abas do app (um só desenho em todas as páginas): rótulo em caixa alta e monoespaçado,
-   inativa em cinza, ativa em negrito com traço de 2px na cor do texto. Linha fina embaixo
+/* Abas do app (um só desenho em todas as páginas): rótulo em caixa normal,
+   inativa em cinza, ativa na cor do texto com traço de 2px. Linha fina embaixo
    da lista inteira. Classes duplicadas para vencer o estilo padrão do Tabs do Mantine. */
 
 .list.list {
@@ -21,11 +21,8 @@
 .tab.tab {
   flex: none;
   padding: 8px 0 10px;
-  font-family: var(--mantine-font-family-monospace);
-  font-size: var(--mantine-font-size-xs);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--mantine-font-size-md);
+  font-weight: 400;
   white-space: nowrap;
   color: var(--mantine-color-dimmed);
   background-color: transparent;
@@ -41,7 +38,7 @@
 
 .tab.tab[data-active] {
   color: var(--mantine-color-text);
-  font-weight: 700;
+  font-weight: 600;
   border-color: var(--mantine-color-text);
 }
 
@@ -51,5 +48,5 @@
 }
 
 .tabSection.tabSection {
-  font-family: var(--mantine-font-family-monospace);
+  font-variant-numeric: tabular-nums;
 }

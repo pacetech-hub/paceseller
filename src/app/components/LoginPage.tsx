@@ -69,10 +69,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </Box>
 
         <Title order={1} mb={4}>
-          Bem-vindo de volta!
+          Entrar
         </Title>
         <Text c="dimmed" size="sm" mb={{ base: 'lg', sm: 'xl' }}>
-          Catálogo digital, pedidos por grade, marketing com IA e sell-out em uma única plataforma.
+          Catálogo, pedidos por grade e sell-out da Tesla Footwear para indústria, representantes e lojas
         </Text>
 
         <Box component="form" onSubmit={handleLogin}>

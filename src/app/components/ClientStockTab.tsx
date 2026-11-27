@@ -87,7 +87,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
           icon={StorefrontIcon}
           title="Nenhum cliente selecionado"
           description="Busque um cliente acima pelo nome ou código para ver o estoque reportado por ele."
-          action={{ label: 'Buscar Cliente', onClick: () => searchRef.current?.focus(), forward: false }}
+          action={{ label: 'Buscar cliente', onClick: () => searchRef.current?.focus(), forward: false }}
           suggestions={popularClients.map(c => ({
             label: `Ver estoque de ${c.name}`,
             description: `${c.city} · ${c.state}`,
@@ -105,7 +105,7 @@ export function ClientStockTab({ readOnly = false, scopeClients }: ClientStockTa
                 <StorefrontIcon size={16} />
               </ThemeIcon>
               <Box miw={0}>
-                <Text fw={700} truncate>{selected.name}</Text>
+                <Text fw={600} truncate>{selected.name}</Text>
                 <Group gap="xs" c="dimmed" wrap="nowrap">
                   <MapPinIcon size={16} style={{ flexShrink: 0 }} />
                   <Text size="sm" c="dimmed" truncate>{selected.city} · {selected.state} · Rep: {selected.rep}</Text>

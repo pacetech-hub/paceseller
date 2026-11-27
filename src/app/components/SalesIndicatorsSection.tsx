@@ -266,7 +266,7 @@ export function SalesIndicatorsSection({
                   onClick={() => onOpenStatus(s.orderStatus)}
                   label={<Text>{s.label}</Text>}
                   leftSection={<ColorSwatch color={`var(--mantine-color-${s.color.replace('.', '-')})`} size={10} withShadow={false} />}
-                  rightSection={<Text fw={700} className="mono">{s.count.toLocaleString('pt-BR')}</Text>}
+                  rightSection={<Text fw={600} className="mono">{s.count.toLocaleString('pt-BR')}</Text>}
                   styles={{ root: { borderRadius: 'var(--mantine-radius-md)' } }}
                 />
               ))}
@@ -291,7 +291,7 @@ export function SalesIndicatorsSection({
                   {e.role === 'representante' ? 'Representante' : `Preposto de ${e.parentRep}`}
                 </Text>
               </Box>
-              <Text fw={700} className="mono" flex="none">{brl(e.value)}</Text>
+              <Text fw={600} className="mono" flex="none">{brl(e.value)}</Text>
             </Group>
           ))}
           {ranked.length === 0 && (
@@ -336,7 +336,7 @@ export function SalesIndicatorsSection({
               icon={AddressBookIcon}
               title="Nenhum cliente para contatar agora"
               description="A carteira ainda não tem clientes vinculados. Vincule clientes para ver aqui quem precisa de contato."
-              action={{ label: 'Abrir Clientes', onClick: onNavigateClients }}
+              action={{ label: 'Abrir clientes', onClick: onNavigateClients }}
             />
           )}
         </Stack>
@@ -350,7 +350,7 @@ function KpiCard({ label, value, delta }: { label: string; value: string; delta:
   return (
     <Paper withBorder p="md">
       <Text c="dimmed" size="sm">{label}</Text>
-      <Text size="xl" fw={700} mt={4} className="mono">{value}</Text>
+      <Text size="xl" fw={600} mt={4} className="mono">{value}</Text>
       <Text c="teal.7" size="sm" fw={600} mt={4}>{delta} vs. período anterior</Text>
     </Paper>
   );

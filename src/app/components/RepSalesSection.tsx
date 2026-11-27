@@ -75,7 +75,7 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
                   }
                 >
                   <Box>
-                    <Text fw={700} lh={1.1} c={st === 'em análise' && count > 0 ? 'yellow.8' : undefined} style={{ fontSize: 'clamp(22px, 5vw, 30px)' }}>
+                    <Text fw={600} lh={1.1} style={{ fontSize: 'clamp(22px, 5vw, 30px)' }}>
                       {int(count)}
                     </Text>
                     <Text size="xs" c="dimmed" mt={4}>
@@ -99,11 +99,11 @@ export function RepSalesSection({ repName, onCta }: { repName: string; onCta: (t
                   <Group key={x.id} justify="space-between" wrap="nowrap" gap="sm">
                     <Group gap="sm" wrap="nowrap" miw={0}>
                       <ThemeIcon size={26} radius="xl" variant={i === 0 ? 'filled' : 'light'} color="brand" aria-label={`${i + 1}º lugar`}>
-                        <Text size="xs" fw={700} c="inherit">{i + 1}º</Text>
+                        <Text size="xs" fw={600} c="inherit">{i + 1}º</Text>
                       </ThemeIcon>
                       <Text size="sm" fw={600} truncate>{x.name}{x.name === repName ? ' (você)' : ''}</Text>
                     </Group>
-                    <Text size="sm" fw={700} style={{ whiteSpace: 'nowrap' }}>{reais(x.value)}</Text>
+                    <Text size="sm" fw={600} style={{ whiteSpace: 'nowrap' }}>{reais(x.value)}</Text>
                   </Group>
                 ))}
               </Stack>

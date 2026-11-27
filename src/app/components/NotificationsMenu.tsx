@@ -71,7 +71,7 @@ export function NotificationsMenu({ profile, onNavigate }: { profile: Profile; o
       </Popover.Target>
       <Popover.Dropdown p={0}>
         <Group justify="space-between" wrap="nowrap" gap="xs" px="md" py="sm" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
-          <Text fw={700} size="sm" truncate>Notificações{unread > 0 ? ` · ${unread} não lidas` : ''}</Text>
+          <Text fw={600} size="sm" truncate>Notificações{unread > 0 ? ` · ${unread} não lidas` : ''}</Text>
           {unread > 0 && (
             <Anchor component="button" type="button" size="xs" fw={600} flex="none" onClick={() => setItems(list => list.map(x => ({ ...x, read: true })))}>
               Marcar todas como lidas

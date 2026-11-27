@@ -24,7 +24,7 @@ export function ProductThumb({ src, alt, size = 64 }: { src: string; alt: string
 
 /** Rótulo de seção em caixa alta e monoespaçado ("CONDIÇÃO DE PAGAMENTO"). */
 export function Eyebrow({ children, ...props }: TextProps & { children: React.ReactNode }) {
-  return <Text fz={12} ff="monospace" tt="uppercase" lts={0.6} c="dimmed" {...props}>{children}</Text>;
+  return <Text size="sm" fw={600} c="dimmed" {...props}>{children}</Text>;
 }
 
 export const timeAgo = (iso: string) => {

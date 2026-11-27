@@ -17,7 +17,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 function BigNumber({ value, color }: { value: string; color?: string }) {
   return (
     // encolhe no celular para caber em duas colunas
-    <Text fw={700} lh={1.1} c={color} style={{ fontSize: 'clamp(22px, 5vw, 30px)', whiteSpace: 'nowrap' }}>{value}</Text>
+    <Text fw={600} lh={1.1} c={color} style={{ fontSize: 'clamp(22px, 5vw, 30px)', whiteSpace: 'nowrap' }}>{value}</Text>
   );
 }
 
@@ -78,7 +78,7 @@ export function LojistaOrdersSection({ clientId, onCta }: { clientId: string; on
               }
             >
               <Box>
-                <BigNumber value={String(inReview)} color={inReview > 0 ? 'yellow.8' : undefined} />
+                <BigNumber value={String(inReview)} />
                 <Text size="xs" c="dimmed" mt={4}>
                   {inReview === 0 ? 'Nenhum pedido em análise' : `${inReview === 1 ? 'pedido' : 'pedidos'} · ${reais(inReviewValue)}`}
                 </Text>
@@ -120,7 +120,7 @@ export function LojistaOrdersSection({ clientId, onCta }: { clientId: string; on
               footer={<WidgetLink label="Ver boletos" onClick={() => onCta({ kind: 'boletos' })} />}
             >
               <Box>
-                <BigNumber value={reais(billsTotal)} color={bills.length > 0 ? 'yellow.8' : undefined} />
+                <BigNumber value={reais(billsTotal)} />
                 <Text size="xs" c="dimmed" mt={4}>
                   {bills.length === 0 ? `Nenhum boleto nos próximos ${days(BILLS_WINDOW_DAYS)}` : `${plural(bills.length, 'boleto', 'boletos')} nos próximos ${days(BILLS_WINDOW_DAYS)}`}
                 </Text>

@@ -218,7 +218,7 @@ export function OrderHistory({ onNavigate, onSelectOrder, profile = 'admin', ini
             icon={MagnifyingGlassIcon}
             title="Nenhum pedido encontrado"
             description="Nenhum pedido corresponde à busca ou ao status selecionado. Limpe os filtros para ver todos os pedidos."
-            action={{ label: 'Limpar Filtros', onClick: () => { setSearch(''); setStatusFilter('todos'); }, forward: false }}
+            action={{ label: 'Limpar filtros', onClick: () => { setSearch(''); setStatusFilter('todos'); }, forward: false }}
           />
         ) : (
           <EmptyState

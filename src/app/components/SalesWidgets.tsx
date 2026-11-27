@@ -1,5 +1,5 @@
-import { Box, Group, ScrollArea, SegmentedControl, Text, Tooltip } from "@mantine/core";
-import { LineChart, Sparkline } from "@mantine/charts";
+import { Box, Group, ScrollArea, SegmentedControl, Text } from "@mantine/core";
+import { LineChart } from "@mantine/charts";
 import { ChartLineUpIcon, type Icon } from "@phosphor-icons/react";
 import { barDomain } from "../lib/charts";
 import { DeltaBadge, Widget } from "./ui/Widget";
@@ -19,7 +19,7 @@ const axis = (v: number) =>
 
 // Mesmas cores do Indicadores: período atual em neutro escuro, ano anterior em amarelo
 const CURRENT_COLOR = 'brand.9';
-const PREVIOUS_COLOR = 'yellow.6';
+const PREVIOUS_COLOR = 'gray.5';
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -46,49 +46,21 @@ export function PeriodCaption({ summary }: { summary: SalesSummary }) {
 // ---------------------------------------------------------------------------
 export type Metric = 'value' | 'orders' | 'ticket' | 'pairs';
 
-/**
- * Acumulado ponto a ponto (ticket = média acumulada), para a linha subir de forma legível.
- * No "Dia" a série são os últimos 7 dias: aí cada ponto é o valor do dia, não um acumulado.
- */
-function sparkData(series: SeriesPoint[], metric: Metric, accumulate: boolean): number[] {
-  if (!accumulate) return series.map(p => p.current[metric]);
-  let value = 0, orders = 0, pairs = 0;
-  return series.map(p => {
-    value += p.current.value; orders += p.current.orders; pairs += p.current.pairs;
-    if (metric === 'value') return value;
-    if (metric === 'orders') return orders;
-    if (metric === 'pairs') return pairs;
-    return orders ? Math.round(value / orders) : 0;
-  });
-}
-
 export function KpiWidget({ icon, label, metric, format, summary }: {
   icon: Icon; label: string; metric: Metric; format: (n: number) => string; summary: SalesSummary;
 }) {
   const now = summary.current[metric];
   const before = summary.previous[metric];
-  const accumulate = summary.period !== 'dia';
-  const data = sparkData(summary.series, metric, accumulate);
-  const hint = accumulate
-    ? `${metric === 'ticket' ? 'Média acumulada' : 'Acumulado'} no período · ${summary.seriesUnit}`
-    : `Valor por dia · ${summary.seriesUnit}`;
   return (
     <Widget icon={icon} title={label}>
       <Box>
         {/* encolhe no celular para o valor caber em duas colunas */}
-        <Text fw={700} lh={1.1} style={{ fontSize: 'clamp(22px, 5vw, 30px)', whiteSpace: 'nowrap' }}>{format(now)}</Text>
+        <Text fw={600} lh={1.1} style={{ fontSize: 'clamp(22px, 5vw, 30px)', whiteSpace: 'nowrap' }}>{format(now)}</Text>
         <Group gap={6} mt={8} wrap="wrap">
           <DeltaBadge value={deltaPct(now, before)} />
           <Text size="xs" c="dimmed">vs. {format(before)}</Text>
         </Group>
       </Box>
-      {data.length > 1 && (
-        <Tooltip label={hint} withArrow>
-          <Box mt="auto">
-            <Sparkline h={44} data={data} curveType="monotone" color={CURRENT_COLOR} fillOpacity={0.12} strokeWidth={2} aria-hidden />
-          </Box>
-        </Tooltip>
-      )}
     </Widget>
   );
 }

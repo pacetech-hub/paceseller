@@ -225,7 +225,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       {/* Header */}
       <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
         <Group gap="md" wrap="nowrap" miw={0}>
-          <Avatar size={56} color="brand" variant="light" styles={{ placeholder: { fontWeight: 700 } }}>
+          <Avatar size={56} color="brand" variant="light" styles={{ placeholder: { fontWeight: 600 } }}>
             {client.avatar}
           </Avatar>
           <Box miw={0}>
@@ -235,7 +235,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                 <Badge variant="light" color="yellow">inadimplente</Badge>
               )}
             </Group>
-            <Title order={1} fw={700} mb={4}>{client.name}</Title>
+            <Title order={1} fw={600} mb={4}>{client.name}</Title>
             <Group gap={4} c="dimmed">
               <MapPinIcon size={16} />
               <Text size="sm" c="dimmed">{client.city}/{client.state}</Text>
@@ -297,19 +297,13 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
       {/* Último pedido e ticket médio */}
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         <Paper withBorder p="md">
-          <ThemeIcon variant="light" color="brand" size={36} mb="sm">
-            <ClockIcon size={16} />
-          </ThemeIcon>
           <Text c="dimmed" size="sm">Último pedido</Text>
-          <Text className="mono" size="xl" fw={700} mt={4}>{formatOrderDate(client.lastOrder)}</Text>
+          <Text className="mono" size="xl" fw={600} mt={4}>{formatOrderDate(client.lastOrder)}</Text>
         </Paper>
 
         <Paper withBorder p="md">
-          <ThemeIcon variant="light" color="brand" size={36} mb="sm">
-            <ChartBarIcon size={16} />
-          </ThemeIcon>
           <Text c="dimmed" size="sm">Ticket médio por pedido</Text>
-          <Text className="mono" size="xl" fw={700} mt={4}>{formatCurrency(avgTicket)}</Text>
+          <Text className="mono" size="xl" fw={600} mt={4}>{formatCurrency(avgTicket)}</Text>
         </Paper>
       </SimpleGrid>
 
@@ -376,7 +370,7 @@ export function ClientDetailPage({ client, onNavigate, cartCount }: ClientDetail
                     <Text c="dimmed" size="sm" truncate>{p.line} · {p.reference}</Text>
                   </Box>
                   <Box ta="right" flex="none">
-                    <Text className="mono" fw={700}>{p.soldUnits.toLocaleString('pt-BR')} pares</Text>
+                    <Text className="mono" fw={600}>{p.soldUnits.toLocaleString('pt-BR')} pares</Text>
                     <Text c="dimmed" size="sm">vendidas · giro baixo</Text>
                   </Box>
                 </Group>
@@ -498,9 +492,9 @@ function BuyProductCard({ product, onBuy }: { product: Product & { stockStatus: 
         <Text c="dimmed" size="sm" truncate>{product.line} · {product.reference}</Text>
         <Divider mt="xs" color="var(--mantine-color-default-border)" />
         {/* preço acima e ação principal no rodapé do cartão, em largura total (cabe nos cartões estreitos do mobile) */}
-        <Text className="mono" size="lg" fw={700} pt="xs">{formatCurrency(product.price)}</Text>
+        <Text className="mono" size="lg" fw={600} pt="xs">{formatCurrency(product.price)}</Text>
         {/* repetido em cada cartão: ação secundária (bordada), não compete com a principal da página */}
-        <Button onClick={onBuy} variant="default" fullWidth mt="sm" rightSection={<ArrowRightIcon size={16} />}>Montar Pedido</Button>
+        <Button onClick={onBuy} variant="default" fullWidth mt="sm" rightSection={<ArrowRightIcon size={16} />}>Montar pedido</Button>
       </Stack>
     </Card>
   );

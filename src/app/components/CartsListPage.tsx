@@ -111,18 +111,19 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
       {/* a linha inteira abre o carrinho; o nome é o link de teclado; a ação é um botão à parte */}
       <Box onClick={onOpen} className={classes.hoverable} p={{ base: 'sm', sm: 'md' }} style={{ cursor: 'pointer' }}>
         <Group gap="md" wrap="nowrap" align="flex-start">
-          <ThemeIcon size={36} radius="md" variant="light" color={color} aria-hidden style={{ flex: 'none' }}>
+          <ThemeIcon size={36} radius="md" variant="light" color={color} aria-hidden style={{ flex: 'none' }} visibleFrom="sm">
             <ShoppingCartIcon size={18} />
           </ThemeIcon>
 
           <Box flex={1} miw={0}>
-            <Group gap="xs" wrap="wrap" justify="space-between" align="flex-start">
-              <Box miw={0}>
+            {/* nome à esquerda (quebra linha); números e ação sempre na mesma coluna à direita */}
+            <Group gap="lg" wrap="nowrap" justify="space-between" align="flex-start">
+              <Box miw={0} flex={1}>
                 <Group gap="xs" wrap="wrap">
                   <UnstyledButton onClick={e => { e.stopPropagation(); onOpen(); }} aria-label={`Abrir carrinho ${cart.cartName}`}>
-                    <Text fw={700}>{cart.cartName}</Text>
+                    <Text fw={600}>{cart.cartName}</Text>
                   </UnstyledButton>
-                  <Badge variant="light" color={color} radius="sm" styles={{ label: { textTransform: 'none' } }}>{statusLabelFor(status, cart, viewerRole)}</Badge>
+                  <Badge variant="light" color={color} radius="sm" maw="100%" h="auto" py={2} styles={{ label: { textTransform: 'none', whiteSpace: 'normal', overflow: 'visible' } }}>{statusLabelFor(status, cart, viewerRole)}</Badge>
                 </Group>
                 <Text size="sm" c="dimmed" mt={2}>
                   {showClient ? `${cart.clientName} · ` : ''}
@@ -131,15 +132,15 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
                 </Text>
               </Box>
 
-              {/* grade mínima, valor e a ação */}
-              <Group gap="lg" wrap="nowrap" visibleFrom="sm">
+              {/* grade mínima, valor e a ação (telas largas: colunas alinhadas à direita) */}
+              <Group gap="lg" wrap="nowrap" visibleFrom="md">
                 <Group gap={8} wrap="nowrap" w={110}>
                   <Box w={52} h={4} bg="var(--mantine-color-default-border)" style={{ borderRadius: 2, overflow: 'hidden' }} aria-hidden>
                     <Box h="100%" w={`${Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)}%`} bg={full ? 'teal.7' : 'brand.9'} />
                   </Box>
                   <Text fz={12} ff="monospace" c="dimmed" aria-label={`${pairs} de ${CART_PARAMS.minOrderPairs} pares da grade mínima`}>{pairs}/{CART_PARAMS.minOrderPairs}</Text>
                 </Group>
-                <Text className="mono" fw={700} w={110} ta="right">{formatCurrency(cartValue(cart))}</Text>
+                <Text className="mono" fw={600} w={110} ta="right">{formatCurrency(cartValue(cart))}</Text>
                 <Box w={170} ta="right">
                   {action && (
                     <Anchor component="button" type="button" fw={600} size="sm" onClick={e => { e.stopPropagation(); runAction(); }}>
@@ -151,10 +152,15 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
               </Group>
             </Group>
 
-            {/* no celular, grade mínima e valor numa linha própria */}
-            <Group gap="md" mt={6} hiddenFrom="sm">
-              <Text fz={12} ff="monospace" c="dimmed">{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
-              <Text className="mono" fw={700}>{formatCurrency(cartValue(cart))}</Text>
+            {/* celular e tablet: grade mínima e valor numa linha própria */}
+            <Group gap="md" mt={8} hiddenFrom="md" justify="space-between" wrap="nowrap">
+              <Group gap={8} wrap="nowrap" miw={0}>
+                <Box w={52} h={4} flex="none" bg="var(--mantine-color-default-border)" style={{ borderRadius: 2, overflow: 'hidden' }} aria-hidden>
+                  <Box h="100%" w={`${Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)}%`} bg={full ? 'teal.7' : 'brand.9'} />
+                </Box>
+                <Text fz={12} ff="monospace" c="dimmed" style={{ whiteSpace: 'nowrap' }}>{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
+              </Group>
+              <Text className="mono" fw={600} style={{ whiteSpace: 'nowrap' }}>{formatCurrency(cartValue(cart))}</Text>
             </Group>
 
             {/* miniaturas dos produtos */}
@@ -199,7 +205,7 @@ function CartRow({ cart, viewerRole, onOpen, showClient }: { cart: Cart; viewerR
             )}
 
             {action && (
-              <Button hiddenFrom="sm" mt="sm" size="compact-md" variant="default" onClick={e => { e.stopPropagation(); runAction(); }}
+              <Button hiddenFrom="md" mt="sm" variant="default" w={{ base: '100%', xs: 'auto' }} onClick={e => { e.stopPropagation(); runAction(); }}
                 rightSection={action.kind !== 'open' ? <PaperPlaneTiltIcon size={14} /> : <CaretRightIcon size={14} />}>
                 {action.label}
               </Button>
@@ -237,7 +243,7 @@ function Notice({ children, action, onAction }: { children: React.ReactNode; act
           <ThemeIcon radius="xl" size={28} color="blue" aria-hidden><UserIcon size={14} /></ThemeIcon>
           <Text size="sm">{children}</Text>
         </Group>
-        <Button size="compact-md" variant="outline" color="blue" bg="var(--mantine-color-body)" onClick={onAction}>{action}</Button>
+        <Button variant="outline" color="blue" bg="var(--mantine-color-body)" onClick={onAction} w={{ base: '100%', xs: 'auto' }}>{action}</Button>
       </Group>
     </Paper>
   );
@@ -373,7 +379,7 @@ export function CartsListPage({
         )}
 
         {newOpen && selectedClient && (
-          <Paper withBorder p="md" maw={960}>
+          <Paper withBorder p="md">
             <Title order={2} size="h4" mb={4}>Criar novo carrinho</Title>
             <Group gap="xs" mb="md">
               <StorefrontIcon size={16} />
@@ -391,19 +397,19 @@ export function CartsListPage({
         {/* FR-503: avisos com os mesmos nomes de ação das linhas */}
         {viewerRole === 'rep' && waitingRep.length > 0 && (
           <Notice action={waitingRep.length === 1 ? 'Revisar pedido' : 'Revisar o primeiro'} onAction={() => onOpenCart(toContext(waitingRep[0]))}>
-            <Text span inherit fw={700}>{waitingRep.length === 1 ? '1 pedido espera' : `${waitingRep.length} pedidos esperam`} suas condições</Text>
+            <Text span inherit fw={600}>{waitingRep.length === 1 ? '1 pedido espera' : `${waitingRep.length} pedidos esperam`} suas condições</Text>
             {' — '}{waitingRep.map(c => `"${c.cartName}"`).join(', ')}
           </Notice>
         )}
         {viewerRole === 'rep' && waitingClient.length > 0 && (
           <Notice action="Ver carrinho" onAction={() => onOpenCart(toContext(waitingClient[0]))}>
-            <Text span inherit fw={700}>Você sugeriu {waitingClient.length === 1 ? '1 pedido novo' : `${waitingClient.length} pedidos novos`}</Text>
+            <Text span inherit fw={600}>Você sugeriu {waitingClient.length === 1 ? '1 pedido novo' : `${waitingClient.length} pedidos novos`}</Text>
             {' — '}{waitingClient[0].cartName}, parado há {days(daysInStage(waitingClient[0]))} esperando revisão do lojista
           </Notice>
         )}
         {viewerRole === 'lojista' && waitingClient.length > 0 && (
           <Notice action="Revisar e aprovar" onAction={() => onOpenCart(toContext(waitingClient[0]))}>
-            <Text span inherit fw={700}>{repFirstName(repName)} sugeriu {waitingClient.length === 1 ? '1 pedido' : `${waitingClient.length} pedidos`}</Text>
+            <Text span inherit fw={600}>{repFirstName(repName)} sugeriu {waitingClient.length === 1 ? '1 pedido' : `${waitingClient.length} pedidos`}</Text>
             {' — '}{waitingClient[0].cartName}, esperando sua revisão há {days(daysInStage(waitingClient[0]))}
           </Notice>
         )}
@@ -415,13 +421,13 @@ export function CartsListPage({
               toast.success(`${ready.length === 1 ? 'Carrinho enviado' : `${ready.length} carrinhos enviados`} para ${repFirstName(repName)}`, 'Você é avisado quando as condições forem confirmadas.');
             }}
           >
-            <Text span inherit fw={700}>{ready.length === 1 ? '1 carrinho pronto' : `${ready.length} carrinhos prontos`} pra enviar</Text>
+            <Text span inherit fw={600}>{ready.length === 1 ? '1 carrinho pronto' : `${ready.length} carrinhos prontos`} pra enviar</Text>
             {' — '}já {ready.length === 1 ? 'passou' : 'passaram'} da grade mínima de {CART_PARAMS.minOrderPairs} pares
           </Notice>
         )}
 
         {loading ? (
-          <Box maw={960}><ListSkeleton rows={3} withAvatar /></Box>
+          <ListSkeleton rows={3} withAvatar />
         ) : scoped.length === 0 ? (
           (() => {
             const suggestions: EmptyStateSuggestion[] = [];
@@ -439,7 +445,7 @@ export function CartsListPage({
             );
           })()
         ) : (
-          <Stack gap="xl" maw={960}>
+          <Stack gap="xl">
             <Section title="Compartilhados" carts={shared} viewerRole={viewerRole} onOpenCart={onOpenCart} showClient={!byClient} />
             <Section title="Não compartilhados" carts={notShared} viewerRole={viewerRole} onOpenCart={onOpenCart} showClient={!byClient} />
           </Stack>

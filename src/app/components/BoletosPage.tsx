@@ -477,7 +477,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
             <Text
               className="mono"
               c={stat.tone === 'danger' ? 'red.6' : undefined}
-              fw={700}
+              fw={600}
               mb={stat.caption ? 4 : 0}
               fz="xl"
             >
@@ -533,7 +533,7 @@ export function BoletosPage({ profile, initialSearch = '' }: BoletosPageProps) {
               icon={ReceiptIcon}
               title="Nenhum boleto encontrado"
               description="Nenhum boleto corresponde à busca ou ao status selecionado. Limpe-os para ver todos os seus boletos."
-              action={{ label: 'Limpar Busca e Filtros', onClick: () => { setSearch(''); setStatusFilter('todos'); }, forward: false }}
+              action={{ label: 'Limpar busca e Filtros', onClick: () => { setSearch(''); setStatusFilter('todos'); }, forward: false }}
             />
           )
         )}

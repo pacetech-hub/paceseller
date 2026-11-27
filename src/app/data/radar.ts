@@ -658,7 +658,7 @@ function compute(carts: Cart[]): RadarResult {
       metric: formatCurrency(total),
       subject: `${dueSoon.length} ${dueSoon.length === 1 ? 'boleto vence' : 'boletos vencem'} nos próximos ${days(BILLS_WINDOW_DAYS)}`,
       context: `Próximo: ${formatCurrency(next.amount)} em ${ddmm(dateInDays(next.dueInDays))} · pedido #${next.orderId}, parcela ${next.installment}`,
-      suggestion: 'Pague pelo PIX ou boleto em Pagamentos e Boletos',
+      suggestion: 'Pague pelo PIX ou boleto em Pagamentos e boletos',
       impact: total, ctaLabel: 'Ver boletos', cta: { kind: 'boletos' },
       why: `Soma dos boletos da loja com vencimento nos próximos ${days(BILLS_WINDOW_DAYS)}. A data de agir é o vencimento do primeiro boleto; pagar em dia evita juros e bloqueio de novos pedidos.`,
       updatedHoursAgo: 1,

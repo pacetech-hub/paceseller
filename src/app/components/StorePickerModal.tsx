@@ -35,7 +35,7 @@ export function StorePickerModal({ opened, onClose, repName, current, onSelect }
     <Modal
       opened={opened}
       onClose={() => { setQuery(''); onClose(); }}
-      title={<Text fw={700}>Qual loja você está atendendo?</Text>}
+      title={<Text fw={600}>Qual loja você está atendendo?</Text>}
       centered
       size="lg"
     >

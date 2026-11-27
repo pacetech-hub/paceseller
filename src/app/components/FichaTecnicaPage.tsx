@@ -320,7 +320,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
   return (
     <Stack gap="xl" p={{ base: 'md', sm: 'lg' }} maw={1400} mx="auto" w="100%">
       <Box>
-        <Title order={1}>Ficha Técnica</Title>
+        <Title order={1}>Ficha técnica</Title>
         <Text c="dimmed">Consulte informações completas, imagens e medidas de cada produto</Text>
       </Box>
 
@@ -389,7 +389,7 @@ function ProductGrid({ onOpen }: { onOpen: (product: Product) => void }) {
           title="Nenhum produto encontrado"
           description="Nenhum produto combina com a busca, a linha e a categoria escolhidas. Limpe a busca e os filtros para ver todos os produtos."
           action={{
-            label: 'Limpar Busca e Filtros',
+            label: 'Limpar busca e Filtros',
             onClick: () => { setSearch(''); setLine('Todos'); setCategory('Todos'); },
             forward: false,
           }}
@@ -487,7 +487,7 @@ function ProductSpecSheet({ product, profile, onBack, onOpenRelated }: { product
           ml={-12}
           leftSection={<CaretLeftIcon size={16} />}
         >
-          Voltar para Ficha Técnica
+          Voltar para Ficha técnica
         </Button>
 
       <Group justify="flex-end" gap="sm">

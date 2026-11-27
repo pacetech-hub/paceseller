@@ -24,7 +24,7 @@ import { selloutData, regionData, formatCurrency } from "../data/mockData";
 const encalheAlerts = [
   { product: 'Mocassim Couro Trançado', sku: 'TCF-2026-003', stock: 240, diasEstoque: 62, region: 'Sul', action: 'Sugerir Desconto' },
   { product: 'Derby Casual Urban', sku: 'TCF-2026-002', stock: 180, diasEstoque: 54, region: 'Nordeste', action: 'Redistribuir Estoque' },
-  { product: 'Sandália Slide Premium', sku: 'TCF-2026-006', stock: 420, diasEstoque: 78, region: 'Centro-Oeste', action: 'Criar Campanha' },
+  { product: 'Sandália Slide Premium', sku: 'TCF-2026-006', stock: 420, diasEstoque: 78, region: 'Centro-Oeste', action: 'Criar campanha' },
   { product: 'Tênis Vulcanizado', sku: 'TCF-2026-008', stock: 96, diasEstoque: 45, region: 'Norte', action: 'Reposicionar Produto' },
 ].sort((a, b) => b.diasEstoque - a.diasEstoque);
 
@@ -71,9 +71,9 @@ const linesByGiro = [...stockByLine].sort((a, b) => b.giro - a.giro);
 // (menos encalhe, giro mais rápido e menos alertas também são bons)
 const kpis = [
   { label: 'Taxa de Sell-out', value: '95,3%', sub: 'Coleção Inverno 2026', trend: 'up', trendVal: '+2,1 p.p.', color: 'teal.7' },
-  { label: 'Estoque Parado', value: formatCurrency(140000), sub: 'valor em encalhe', trend: 'down', trendVal: '-R$ 28 mil', color: 'teal.7' },
-  { label: 'Giro Médio', value: '28 dias', sub: 'da produção à venda', trend: 'down', trendVal: '-3 dias', color: 'teal.7' },
-  { label: 'Alertas Ativos', value: '6', sub: 'produtos em encalhe', trend: 'down', trendVal: '-2 na semana', color: 'teal.7' },
+  { label: 'Estoque parado', value: formatCurrency(140000), sub: 'valor em encalhe', trend: 'down', trendVal: '-R$ 28 mil', color: 'teal.7' },
+  { label: 'Giro médio', value: '28 dias', sub: 'da produção à venda', trend: 'down', trendVal: '-3 dias', color: 'teal.7' },
+  { label: 'Alertas ativos', value: '6', sub: 'produtos em encalhe', trend: 'down', trendVal: '-2 na semana', color: 'teal.7' },
 ] as const;
 
 function ChartTitle({ children }: { children: React.ReactNode }) {
@@ -168,7 +168,7 @@ export function SelloutDashboard() {
           return (
             <Paper key={kpi.label} withBorder p={{ base: 'md', sm: 'lg' }}>
               <Text c="dimmed" size="sm">{kpi.label}</Text>
-              <Text className="mono" fw={700} fz={{ base: 'lg', sm: 'xl' }} mt={4}>{kpi.value}</Text>
+              <Text className="mono" fw={600} fz={{ base: 'lg', sm: 'xl' }} mt={4}>{kpi.value}</Text>
               <Group gap="xs" mt={4} wrap="nowrap">
                 <Group gap={4} c={kpi.color} wrap="nowrap" flex="none">
                   <TrendIcon size={16} />
@@ -223,7 +223,7 @@ export function SelloutDashboard() {
         <Grid.Col span={{ base: 12, lg: 4 }}>
           <Card withBorder padding="lg" h="100%">
             <Box mb="md">
-              <ChartTitle>Giro da Coleção</ChartTitle>
+              <ChartTitle>Giro da coleção</ChartTitle>
               <Text c="dimmed" size="sm" mt={4}>Vendido × em estoque · em R$</Text>
             </Box>
             <Center flex={1}>
@@ -238,7 +238,7 @@ export function SelloutDashboard() {
                   withTooltip={false}
                 />
                 <Stack gap={0} align="center" justify="center" pos="absolute" inset={0} className={classes.donutLabel}>
-                  <Text fw={700} size="xl" lh={1.1}>{fmtPct(soldPct, 0)}</Text>
+                  <Text fw={600} size="xl" lh={1.1}>{fmtPct(soldPct, 0)}</Text>
                   <Text c="dimmed" size="sm">girado</Text>
                 </Stack>
               </Box>
@@ -264,7 +264,7 @@ export function SelloutDashboard() {
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
         <Paper withBorder p={{ base: 'md', sm: 'lg' }}>
           <Box mb="md">
-            <ChartTitle>Performance por Linha</ChartTitle>
+            <ChartTitle>Desempenho por linha</ChartTitle>
             <Text c="dimmed" size="sm" mt={4}>Giro = sell-out ÷ sell-in · maior giro primeiro</Text>
           </Box>
           <Stack gap="md">
@@ -272,7 +272,7 @@ export function SelloutDashboard() {
               <Box key={line.name}>
                 <Group justify="space-between" mb="xs" wrap="nowrap">
                   <Text fw={600}>{line.name}</Text>
-                  <Text size="sm" fw={700} c={giroTextColor(line.giro)} className="mono">{fmtPct(line.giro)}</Text>
+                  <Text size="sm" fw={600} c={giroTextColor(line.giro)} className="mono">{fmtPct(line.giro)}</Text>
                 </Group>
                 <Progress value={line.giro} size={8} color={giroBarColor(line.giro)} transitionDuration={800} />
                 <Group justify="space-between" mt={4}>
@@ -313,7 +313,7 @@ export function SelloutDashboard() {
           <Box>
             <Group gap="xs">
               <WarningIcon size={20} color="var(--mantine-color-yellow-6)" />
-              <ChartTitle>Alertas de Encalhe</ChartTitle>
+              <ChartTitle>Alertas de encalhe</ChartTitle>
               <Badge variant="light" color="yellow">
                 {encalheAlerts.length} alertas
               </Badge>

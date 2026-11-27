@@ -41,7 +41,7 @@ function Tile({ lab, val, sub, tone }: { lab: string; val: string; sub?: string;
     <Paper withBorder p="sm" bg="var(--mantine-color-gray-0)">
       <Text c="dimmed" size="sm">{lab}</Text>
       {/* número-chave do bloco: tamanho xl */}
-      <Text c={color} size="xl" fw={700} className="mono">{val}</Text>
+      <Text c={color} size="xl" fw={600} className="mono">{val}</Text>
       {sub && <Text c="dimmed" size="sm" mt={4}>{sub}</Text>}
     </Paper>
   );
@@ -218,7 +218,7 @@ export function DashboardLojista({ onNavigate }: DashboardLojistaProps) {
           </Card>
 
           <Card title="Pedidos repetidos" hint="Contados pelo botão “repetir pedido” do histórico" span={5}>
-            <Text size="xl" fw={700} className="mono">4 pedidos</Text>
+            <Text size="xl" fw={600} className="mono">4 pedidos</Text>
             <Group gap={4} c={POS} wrap="nowrap" mt={4}>
               <TrendUpIcon size={16} />
               <Text c="inherit" size="sm" fw={600}>+2 pedidos vs. período anterior</Text>

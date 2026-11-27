@@ -2,7 +2,7 @@ import { Card, Group, Paper, Table, Text } from "@mantine/core";
 import sticky from "./stickyTable.module.css";
 
 // Padrão único de tabela do app (o mesmo de Meu Estoque, Pedidos e Pagamentos e Boletos):
-// cartão com borda, cabeçalho fixo em cinza e caixa-alta, 1ª coluna sempre visível,
+// cartão com borda, cabeçalho fixo em cinza, 1ª coluna sempre visível,
 // texto sem quebra e rolagem lateral no celular (a tabela não vira lista de cartões).
 // Colunas numéricas (e "Ações") ficam alinhadas à direita no cabeçalho; nas células use ta="right".
 
@@ -14,7 +14,7 @@ export function DataTableHeader({ labels, numeric = [] }: { labels: string[]; nu
           // fundo em cada Th (não no Thead) para o cabeçalho fixo e a 1ª coluna fixa ficarem iguais
           <Table.Th key={`${h}-${i}`} bg="var(--mantine-color-gray-0)"
             ta={numeric.includes(h) || h === 'Ações' ? 'right' : undefined}>
-            <Text c="dimmed" size="sm" fw={600} tt="uppercase">{h}</Text>
+            <Text c="dimmed" size="sm" fw={600}>{h}</Text>
           </Table.Th>
         ))}
       </Table.Tr>

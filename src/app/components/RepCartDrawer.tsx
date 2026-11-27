@@ -74,7 +74,7 @@ export function RepCartDrawer({ opened, onClose, storeName, onChooseStore, onVie
             <Box>
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">Grade mínima do pedido</Text>
-                <Text size="sm" fw={700} ff="monospace" c={minReached ? 'teal.7' : 'red.7'}>{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
+                <Text size="sm" fw={600} ff="monospace" c={minReached ? 'teal.7' : 'red.7'}>{pairs}/{CART_PARAMS.minOrderPairs} pares</Text>
               </Group>
               <Progress mt={6} size="sm" value={Math.min(100, (pairs / CART_PARAMS.minOrderPairs) * 100)} color={minReached ? 'teal' : 'red'} aria-label="Progresso da grade mínima" />
               {!minReached && <Text size="xs" c="red.7" mt={6}>Faltam {missing} pares pra fechar o pedido</Text>}
@@ -119,7 +119,7 @@ export function RepCartDrawer({ opened, onClose, storeName, onChooseStore, onVie
           <Paper withBorder px="md" py="sm">
             <Text size="sm">
               {shippingGap > 0
-                ? <>A loja está a <Text span fw={700} inherit>{formatCurrency(shippingGap)}</Text> de ganhar frete grátis</>
+                ? <>A loja está a <Text span fw={600} inherit>{formatCurrency(shippingGap)}</Text> de ganhar frete grátis</>
                 : <>Frete grátis neste pedido (a partir de {formatCurrency(CART_PARAMS.freeShippingFrom)})</>}
             </Text>
           </Paper>

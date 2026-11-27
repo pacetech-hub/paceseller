@@ -8,7 +8,7 @@ import {
   PackageIcon,
   ShoppingBagIcon,
   ClockIcon,
-  SparkleIcon,
+  MegaphoneIcon,
   UsersIcon,
   StorefrontIcon,
   CaretDownIcon,
@@ -94,9 +94,9 @@ const PROFILE_PAGES: Record<Profile, MenuPage[]> = {
     { icon: UsersIcon, label: 'Clientes', view: 'clients' },
     { icon: ClockIcon, label: 'Pedidos', view: 'history' },
     { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
-    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-    { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-    { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+    { icon: FileTextIcon, label: 'Ficha técnica', view: 'ficha-tecnica' },
+    { icon: ReceiptIcon, label: 'Pagamentos e boletos', view: 'boletos' },
+    { icon: MegaphoneIcon, label: 'Marketing', view: 'marketing' },
   ],
   rep: [
     { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
@@ -105,17 +105,17 @@ const PROFILE_PAGES: Record<Profile, MenuPage[]> = {
     { icon: StorefrontIcon, label: 'Clientes', view: 'clients' },
     { icon: ClockIcon, label: 'Pedidos', view: 'history' },
     { icon: WarehouseIcon, label: 'Estoque', view: 'industry-stock' },
-    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-    { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+    { icon: FileTextIcon, label: 'Ficha técnica', view: 'ficha-tecnica' },
+    { icon: MegaphoneIcon, label: 'Marketing', view: 'marketing' },
   ],
   lojista: [
     { icon: CrosshairIcon, label: 'Radar', view: 'radar' },
     { icon: PackageIcon, label: 'Catálogo', view: 'catalog' },
     { icon: ShoppingBagIcon, label: 'Pedidos', view: 'history' },
-    { icon: WarehouseIcon, label: 'Meu Estoque', view: 'stock' },
-    { icon: FileTextIcon, label: 'Ficha Técnica', view: 'ficha-tecnica' },
-    { icon: ReceiptIcon, label: 'Pagamentos e Boletos', view: 'boletos' },
-    { icon: SparkleIcon, label: 'Marketing IA', view: 'marketing' },
+    { icon: WarehouseIcon, label: 'Meu estoque', view: 'stock' },
+    { icon: FileTextIcon, label: 'Ficha técnica', view: 'ficha-tecnica' },
+    { icon: ReceiptIcon, label: 'Pagamentos e boletos', view: 'boletos' },
+    { icon: MegaphoneIcon, label: 'Marketing', view: 'marketing' },
   ],
 };
 
@@ -129,7 +129,7 @@ function mainPages(profile: Profile): MenuPage[] {
 /** Páginas da conta: ficam no menu do usuário, não na barra. */
 function accountPages(profile: Profile): MenuPage[] {
   return [
-    { icon: UserCircleIcon, label: 'Meu Perfil', view: 'profile' },
+    { icon: UserCircleIcon, label: 'Meu perfil', view: 'profile' },
     profile === 'admin'
       ? { icon: ShieldIcon, label: 'Administração', view: 'admin' }
       : { icon: ShieldIcon, label: 'Permissões', view: 'permissions' },
@@ -318,7 +318,7 @@ export function TopBar({ profile, userName, currentView: view, actions, onNaviga
             selectedClient ? (
               <Group gap={6} wrap="nowrap" visibleFrom="md" maw={{ md: 280, lg: 360 }} miw={0}>
                 <Text size="sm" c="dimmed" flex="none">Atendendo:</Text>
-                <Text size="sm" fw={700} truncate>{selectedClient.name}</Text>
+                <Text size="sm" fw={600} truncate>{selectedClient.name}</Text>
                 <Anchor component="button" type="button" size="sm" fw={600} flex="none" onClick={onSwitchStore}>Trocar loja</Anchor>
               </Group>
             ) : (
