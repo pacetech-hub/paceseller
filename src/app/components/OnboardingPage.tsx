@@ -1,26 +1,14 @@
 import { useState, type ReactNode } from "react";
 import {
-  Alert, Box, Button, Chip, Divider, Group, Loader, Select, Stack, Stepper, Text, TextInput, Title, UnstyledButton,
+  Alert, Box, Button, Chip, Divider, Group, Loader, Progress, Select, Stack, Stepper, Text, TextInput, Title, UnstyledButton,
 } from "@mantine/core";
 import { ArrowRightIcon, CaretRightIcon, CheckCircleIcon, StackIcon, WarningIcon } from "@phosphor-icons/react";
 import {
-  AUDIENCES, CHANNELS, DIFFERENTIALS, REGIONS, SEGMENTS, STORE_SIZES, finishOnboarding, goToStep, saveProfile,
-  setStockConnected, skipOnboarding, useOnboarding, type StoreProfile,
+  AUDIENCES, CHANNELS, DIFFERENTIALS, LAST_STEP, ONBOARDING_STEPS, REGIONS, SEGMENTS, STORE_SIZES, answerStep,
+  finishOnboarding, goToStep, setStockConnected, skipOnboarding, useOnboarding, type OnboardingStepKey, type StoreProfile,
 } from "../data/onboarding";
 import { useSmallerThan } from "../lib/responsive";
 import classes from "./OnboardingPage.module.css";
-
-/** Campo do formulário: rótulo, conteúdo e o erro embaixo. */
-function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string; children: ReactNode }) {
-  return (
-    <Box>
-      <Text size="sm" fw={600} mb={8}>{label}</Text>
-      {children}
-      {hint && <Text size="xs" c="dimmed" mt={6}>{hint}</Text>}
-      {error && <Text size="sm" c="red.7" mt={6}>{error}</Text>}
-    </Box>
-  );
-}
 
 function SingleChips({ options, value, onChange }: { options: string[]; value: string | null; onChange: (v: string) => void }) {
   return (
@@ -39,85 +27,112 @@ function MultiChips({ options, value, onChange }: { options: string[]; value: st
 }
 
 // ---------------------------------------------------------------------------
-// Etapa 1: perfil da loja
+// Perguntas do perfil: uma por etapa
 // ---------------------------------------------------------------------------
-function ProfileStep({ initial }: { initial: StoreProfile }) {
+interface Question {
+  title: string;
+  help?: string;
+  /** Mensagem quando a resposta obrigatória está vazia. */
+  missing?: string;
+  isEmpty: (p: StoreProfile) => boolean;
+  render: (p: StoreProfile, set: (patch: Partial<StoreProfile>) => void, submit: () => void) => ReactNode;
+}
+
+const QUESTIONS: Record<Exclude<OnboardingStepKey, 'stock'>, Question> = {
+  name: {
+    title: 'Qual o nome da sua loja?',
+    missing: 'Informe o nome da loja',
+    isEmpty: p => !p.name.trim(),
+    render: (p, set, submit) => (
+      <TextInput
+        aria-label="Nome da loja"
+        value={p.name}
+        onChange={e => set({ name: e.currentTarget.value })}
+        onKeyDown={e => { if (e.key === 'Enter') submit(); }}
+        data-autofocus
+        autoFocus
+        size="md"
+        maw={480}
+      />
+    ),
+  },
+  segment: {
+    title: 'Qual o segmento da loja?',
+    missing: 'Escolha um segmento',
+    isEmpty: p => !p.segment,
+    render: (p, set) => <SingleChips options={SEGMENTS} value={p.segment} onChange={v => set({ segment: v })} />,
+  },
+  size: {
+    title: 'Qual o porte da loja?',
+    help: 'Pelo faturamento anual: até R$ 4,8 mi é pequena, até R$ 300 mi é média',
+    missing: 'Escolha o porte',
+    isEmpty: p => !p.size,
+    render: (p, set) => <SingleChips options={STORE_SIZES} value={p.size} onChange={v => set({ size: v })} />,
+  },
+  region: {
+    title: 'Onde fica a loja?',
+    missing: 'Escolha a região',
+    isEmpty: p => !p.region,
+    render: (p, set) => (
+      <Select aria-label="Região" data={REGIONS} value={p.region} onChange={v => set({ region: v })} allowDeselect={false} size="md" maw={400} />
+    ),
+  },
+  audience: {
+    title: 'Quem compra na sua loja?',
+    help: 'Escolha quantos quiser',
+    isEmpty: p => p.audience.length === 0,
+    render: (p, set) => <MultiChips options={AUDIENCES} value={p.audience} onChange={v => set({ audience: v })} />,
+  },
+  differentials: {
+    title: 'O que diferencia sua loja?',
+    help: 'Escolha quantos quiser',
+    isEmpty: p => p.differentials.length === 0,
+    render: (p, set) => <MultiChips options={DIFFERENTIALS} value={p.differentials} onChange={v => set({ differentials: v })} />,
+  },
+  channel: {
+    title: 'Como você vende hoje?',
+    isEmpty: p => !p.channel,
+    render: (p, set) => <SingleChips options={CHANNELS} value={p.channel} onChange={v => set({ channel: v })} />,
+  },
+};
+
+function QuestionStep({ stepKey, required, initial, step }: {
+  stepKey: Exclude<OnboardingStepKey, 'stock'>; required: boolean; initial: StoreProfile; step: number;
+}) {
+  const q = QUESTIONS[stepKey];
   const [p, setP] = useState(initial);
   const [tried, setTried] = useState(false);
-  const errors = {
-    name: !p.name.trim() ? 'Informe o nome da loja' : undefined,
-    segment: !p.segment ? 'Escolha um segmento' : undefined,
-    size: !p.size ? 'Escolha o porte' : undefined,
-    region: !p.region ? 'Escolha a região' : undefined,
+  const set = (patch: Partial<StoreProfile>) => setP(prev => ({ ...prev, ...patch }));
+  const empty = q.isEmpty(p);
+  const submit = () => {
+    setTried(true);
+    if (required && empty) return;
+    answerStep(p);
   };
-  const valid = !Object.values(errors).some(Boolean);
-  const err = (k: keyof typeof errors) => (tried ? errors[k] : undefined);
 
   return (
     <Stack gap="xl">
       <Box>
-        <Title order={1}>Perfil da loja</Title>
-        <Text c="dimmed" mt={6}>Alimenta o Radar e a curva de tamanhos sugerida no catálogo</Text>
+        <Title order={1}>{q.title}</Title>
+        {q.help && <Text c="dimmed" mt={6}>{q.help}</Text>}
       </Box>
-
-      <TextInput
-        label="Nome da loja"
-        value={p.name}
-        onChange={e => setP({ ...p, name: e.currentTarget.value })}
-        error={err('name')}
-        maw={560}
-      />
-
-      <Group align="flex-start" gap="xl" wrap="wrap">
-        <Box flex="1 1 280px">
-          <Field label="Segmento" error={err('segment')}>
-            <SingleChips options={SEGMENTS} value={p.segment} onChange={v => setP({ ...p, segment: v })} />
-          </Field>
-        </Box>
-        <Box flex="1 1 280px">
-          <Field label="Porte" hint="Pelo faturamento anual: até R$ 4,8 mi é pequena, até R$ 300 mi é média" error={err('size')}>
-            <SingleChips options={STORE_SIZES} value={p.size} onChange={v => setP({ ...p, size: v })} />
-          </Field>
-        </Box>
-      </Group>
-
-      <Select
-        label="Região"
-        data={REGIONS}
-        value={p.region}
-        onChange={v => setP({ ...p, region: v })}
-        error={err('region')}
-        allowDeselect={false}
-        maw={400}
-      />
-
-      <Field label="Público">
-        <MultiChips options={AUDIENCES} value={p.audience} onChange={v => setP({ ...p, audience: v })} />
-      </Field>
-
-      <Field label="O que diferencia sua loja">
-        <MultiChips options={DIFFERENTIALS} value={p.differentials} onChange={v => setP({ ...p, differentials: v })} />
-      </Field>
-
-      <Field label="Como você vende hoje">
-        <SingleChips options={CHANNELS} value={p.channel} onChange={v => setP({ ...p, channel: v })} />
-      </Field>
-
-      <Group>
-        <Button
-          size="md"
-          rightSection={<ArrowRightIcon size={18} />}
-          onClick={() => { setTried(true); if (valid) saveProfile(p); }}
-        >
-          Continuar
-        </Button>
+      <Box>
+        {q.render(p, set, submit)}
+        {tried && required && empty && <Text size="sm" c="red.7" mt={8}>{q.missing}</Text>}
+      </Box>
+      <Group gap="sm">
+        {step > 0 && <Button size="md" variant="default" onClick={() => goToStep(step - 1)}>Voltar</Button>}
+        <Button size="md" rightSection={<ArrowRightIcon size={18} />} onClick={submit}>Continuar</Button>
+        {!required && empty && (
+          <Button size="md" variant="subtle" color="gray" onClick={() => answerStep(p)}>Pular</Button>
+        )}
       </Group>
     </Stack>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Etapa 2: integração de dados
+// Última etapa: estoque
 // ---------------------------------------------------------------------------
 function DataStep({ connected }: { connected: boolean }) {
   const [connecting, setConnecting] = useState(false);
@@ -131,12 +146,11 @@ function DataStep({ connected }: { connected: boolean }) {
   return (
     <Stack gap="xl">
       <Box>
-        <Title order={1}>Integração de dados</Title>
+        <Title order={1}>Conecte o estoque da loja</Title>
         <Text c="dimmed" mt={6}>Com o estoque conectado, o Radar recomenda pela venda real da loja</Text>
       </Box>
 
       <Stack gap="md">
-        <Text size="sm" fw={600}>Estoque e vendas</Text>
         <UnstyledButton
           className={classes.connect}
           data-connected={connected || undefined}
@@ -173,7 +187,7 @@ function DataStep({ connected }: { connected: boolean }) {
       </Stack>
 
       <Group gap="sm">
-        <Button size="md" variant="default" onClick={() => goToStep(0)}>Voltar</Button>
+        <Button size="md" variant="default" onClick={() => goToStep(LAST_STEP - 1)}>Voltar</Button>
         <Button size="md" onClick={finishOnboarding} rightSection={<ArrowRightIcon size={18} />}>Ir para o Radar</Button>
       </Group>
     </Stack>
@@ -187,6 +201,7 @@ function DataStep({ connected }: { connected: boolean }) {
 export function OnboardingPage() {
   const ob = useOnboarding();
   const mobile = useSmallerThan('sm');
+  const current = ONBOARDING_STEPS[ob.step];
 
   return (
     <div className={classes.page}>
@@ -202,24 +217,42 @@ export function OnboardingPage() {
               Já configurei, ir pro Radar
             </Button>
           </Group>
-          <Stepper
-            active={ob.step}
-            onStepClick={s => { if (s === 0 || ob.profileSaved) goToStep(s as 0 | 1); }}
-            orientation={mobile ? 'horizontal' : 'vertical'}
-            size="sm"
-            color="brand"
-            mt="md"
-          >
-            <Stepper.Step label="Perfil da loja" description={mobile ? undefined : "Segmento, região e diferenciais"} />
-            <Stepper.Step label="Integração de dados" description={mobile ? undefined : "Estoque e vendas"} allowStepSelect={ob.profileSaved} />
-          </Stepper>
+          {mobile ? (
+            <Box>
+              <Group justify="space-between" mb={6}>
+                <Text size="sm" fw={600}>{ONBOARDING_STEPS[ob.step].label}</Text>
+                <Text size="sm" c="dimmed">{ob.step + 1} de {ONBOARDING_STEPS.length}</Text>
+              </Group>
+              <Progress value={((ob.step + 1) / ONBOARDING_STEPS.length) * 100} size="sm" color="brand" aria-label={`Etapa ${ob.step + 1} de ${ONBOARDING_STEPS.length}`} />
+            </Box>
+          ) : (
+            <Stepper
+              active={ob.step}
+              onStepClick={goToStep}
+              orientation="vertical"
+              size="xs"
+              color="brand"
+              mt="md"
+              // oito etapas: passos mais baixos para a lista caber na tela
+              styles={{ step: { minHeight: 52 }, stepDescription: { marginTop: 0 } }}
+            >
+              {ONBOARDING_STEPS.map((st, i) => (
+                <Stepper.Step
+                  key={st.key}
+                  label={st.label}
+                  description={st.required ? undefined : 'Opcional'}
+                  allowStepSelect={i <= Math.min(ob.completed, LAST_STEP)}
+                />
+              ))}
+            </Stepper>
+          )}
         </Stack>
       </aside>
 
       <main className={classes.content}>
-        {ob.step === 0
-          ? <ProfileStep initial={ob.profile} />
-          : <DataStep connected={ob.stockConnected} />}
+        {current.key === 'stock'
+          ? <DataStep connected={ob.stockConnected} />
+          : <QuestionStep key={current.key} stepKey={current.key} required={current.required} initial={ob.profile} step={ob.step} />}
       </main>
     </div>
   );

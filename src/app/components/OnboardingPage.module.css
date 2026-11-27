@@ -21,6 +21,8 @@
 @media (max-width: 48em) {
   .page {
     grid-template-columns: 1fr;
+    /* o cabeçalho fica do tamanho do conteúdo; a pergunta ocupa o resto */
+    grid-template-rows: auto 1fr;
   }
   .rail {
     padding: 24px 16px;

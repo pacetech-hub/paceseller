@@ -20,10 +20,10 @@ export interface OnboardingState {
   status: OnboardingStatus;
   /** A tela de configuração está aberta (no primeiro acesso, ou retomada pelo aviso do Radar). */
   open: boolean;
-  /** Etapa atual: 0 = perfil da loja, 1 = integração de dados. */
-  step: 0 | 1;
-  /** Perfil salvo (a etapa 1 foi concluída). */
-  profileSaved: boolean;
+  /** Pergunta atual (índice em ONBOARDING_STEPS). */
+  step: number;
+  /** Quantas perguntas já foram respondidas ou puladas, em ordem. */
+  completed: number;
   profile: StoreProfile;
   stockConnected: boolean;
   /** O lojista fechou o aviso do Radar nesta sessão. */
@@ -31,6 +31,20 @@ export interface OnboardingState {
 }
 
 const lojista = clients[0];
+
+/** Uma pergunta por etapa; as opcionais podem ser puladas. A última conecta o estoque. */
+export const ONBOARDING_STEPS = [
+  { key: 'name', label: 'Nome da loja', required: true },
+  { key: 'segment', label: 'Segmento', required: true },
+  { key: 'size', label: 'Porte', required: true },
+  { key: 'region', label: 'Região', required: true },
+  { key: 'audience', label: 'Público', required: false },
+  { key: 'differentials', label: 'Diferenciais', required: false },
+  { key: 'channel', label: 'Como vende', required: false },
+  { key: 'stock', label: 'Estoque', required: false },
+] as const;
+export type OnboardingStepKey = typeof ONBOARDING_STEPS[number]['key'];
+export const LAST_STEP = ONBOARDING_STEPS.length - 1;
 
 export const SEGMENTS = ['Streetwear', 'Casual', 'Esportivo', 'Feminino', 'Infantil'];
 export const STORE_SIZES = ['Pequena', 'Média', 'Grande'];
@@ -51,7 +65,7 @@ let state: OnboardingState = {
   status: 'pendente',
   open: false,
   step: 0,
-  profileSaved: false,
+  completed: 0,
   profile: {
     name: lojista.name.replace(/\s+LTDA$/i, ''),
     segment: null,
@@ -73,13 +87,18 @@ const set = (patch: Partial<OnboardingState>) => {
 
 /** No login do lojista: abre a configuração enquanto ela não foi feita nem pulada. */
 export const openOnLogin = () => { if (state.status === 'pendente') set({ open: true, step: 0 }); };
-export const saveProfile = (profile: StoreProfile) => set({ profile, profileSaved: true, step: 1 });
-export const goToStep = (step: 0 | 1) => set({ step });
+/** Salva a resposta da pergunta atual e vai para a próxima. */
+export const answerStep = (patch: Partial<StoreProfile>) => {
+  const next = Math.min(state.step + 1, LAST_STEP);
+  set({ profile: { ...state.profile, ...patch }, completed: Math.max(state.completed, state.step + 1), step: next });
+};
+/** Só volta para perguntas já vistas (ou a próxima depois da última respondida). */
+export const goToStep = (step: number) => { if (step >= 0 && step <= Math.min(state.completed, LAST_STEP)) set({ step }); };
 export const setStockConnected = (stockConnected: boolean) => set({ stockConnected });
-export const finishOnboarding = () => set({ status: 'concluido', open: false });
+export const finishOnboarding = () => set({ status: 'concluido', open: false, completed: ONBOARDING_STEPS.length });
 export const skipOnboarding = () => set({ status: 'pulado', open: false, bannerHidden: false });
 /** Retoma pelo aviso do Radar, na primeira etapa que falta. */
-export const resumeOnboarding = () => set({ open: true, step: state.profileSaved ? 1 : 0 });
+export const resumeOnboarding = () => set({ open: true, step: Math.min(state.completed, LAST_STEP) });
 export const hideOnboardingBanner = () => set({ bannerHidden: true });
 
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
