@@ -1,33 +1,45 @@
-/* Configuração da loja em tela cheia: trilho à esquerda, formulário à direita. */
+/* Configuração da loja em tela cheia: etapas no topo, a pergunta embaixo. */
 .page {
   min-height: 100dvh;
-  display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   background-color: var(--mantine-color-body);
 }
 
-.rail {
-  padding: 48px 32px;
+.header {
+  padding: 24px 48px;
   background-color: light-dark(var(--mantine-color-brand-1), var(--mantine-color-dark-7));
-  border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-md);
+}
+
+/* oito etapas numa linha: rótulos curtos e separadores estreitos */
+.steps :global(.mantine-Stepper-stepLabel) {
+  font-size: var(--mantine-font-size-sm);
+  white-space: nowrap;
+}
+
+.steps :global(.mantine-Stepper-separator) {
+  margin-inline: 8px;
+  min-width: 12px;
 }
 
 .content {
-  padding: 48px 64px;
+  width: 100%;
   max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
 }
 
-/* No celular o trilho vira um cabeçalho e as etapas ficam em linha */
 @media (max-width: 48em) {
-  .page {
-    grid-template-columns: 1fr;
-    /* o cabeçalho fica do tamanho do conteúdo; a pergunta ocupa o resto */
-    grid-template-rows: auto 1fr;
-  }
-  .rail {
-    padding: 24px 16px;
-    border-right: 0;
-    border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  .header {
+    padding: 16px;
   }
   .content {
     padding: 24px 16px 48px;

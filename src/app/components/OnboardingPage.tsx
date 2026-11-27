@@ -7,6 +7,7 @@ import {
   AUDIENCES, CHANNELS, DIFFERENTIALS, LAST_STEP, ONBOARDING_STEPS, REGIONS, SEGMENTS, STORE_SIZES, answerStep,
   finishOnboarding, goToStep, setStockConnected, skipOnboarding, useOnboarding, type OnboardingStepKey, type StoreProfile,
 } from "../data/onboarding";
+import { useMediaQuery } from "@mantine/hooks";
 import { useSmallerThan } from "../lib/responsive";
 import classes from "./OnboardingPage.module.css";
 
@@ -114,7 +115,7 @@ function QuestionStep({ stepKey, required, initial, step }: {
     <Stack gap="xl">
       <Box>
         <Title order={1}>{q.title}</Title>
-        {q.help && <Text c="dimmed" mt={6}>{q.help}</Text>}
+        {(q.help || !required) && <Text c="dimmed" mt={6}>{[q.help, required ? null : 'Opcional'].filter(Boolean).join(' · ')}</Text>}
       </Box>
       <Box>
         {q.render(p, set, submit)}
@@ -201,53 +202,54 @@ function DataStep({ connected }: { connected: boolean }) {
 export function OnboardingPage() {
   const ob = useOnboarding();
   const mobile = useSmallerThan('sm');
+  // as oito etapas com nome só cabem em telas largas; nas médias, só a atual mostra o nome
+  const wide = useMediaQuery('(min-width: 1280px)');
   const current = ONBOARDING_STEPS[ob.step];
+
+  const total = ONBOARDING_STEPS.length;
 
   return (
     <div className={classes.page}>
-      <aside className={classes.rail}>
-        <Stack gap="lg">
-          <Box>
-            <Text size="sm" c="dimmed">Configuração da loja</Text>
-            <Title order={2} mt={6}>Conte sobre sua loja</Title>
-            <Text size="sm" c="dimmed" mt={8}>Assim o Radar traz oportunidades certas desde o primeiro dia</Text>
+      {/* Topo: título à esquerda, pular à direita; as etapas logo abaixo */}
+      <header className={classes.header}>
+        <div className={classes.headerRow}>
+          <Box miw={0}>
+            <Text fw={600}>Conte sobre sua loja</Text>
+            <Text size="sm" c="dimmed" visibleFrom="sm">Assim o Radar traz oportunidades certas desde o primeiro dia</Text>
           </Box>
-          <Group>
-            <Button variant="default" radius="xl" size="sm" rightSection={<ArrowRightIcon size={16} />} onClick={skipOnboarding}>
-              Já configurei, ir pro Radar
-            </Button>
-          </Group>
-          {mobile ? (
-            <Box>
-              <Group justify="space-between" mb={6}>
-                <Text size="sm" fw={600}>{ONBOARDING_STEPS[ob.step].label}</Text>
-                <Text size="sm" c="dimmed">{ob.step + 1} de {ONBOARDING_STEPS.length}</Text>
-              </Group>
-              <Progress value={((ob.step + 1) / ONBOARDING_STEPS.length) * 100} size="sm" color="brand" aria-label={`Etapa ${ob.step + 1} de ${ONBOARDING_STEPS.length}`} />
-            </Box>
-          ) : (
-            <Stepper
-              active={ob.step}
-              onStepClick={goToStep}
-              orientation="vertical"
-              size="xs"
-              color="brand"
-              mt="md"
-              // oito etapas: passos mais baixos para a lista caber na tela
-              styles={{ step: { minHeight: 52 }, stepDescription: { marginTop: 0 } }}
-            >
-              {ONBOARDING_STEPS.map((st, i) => (
-                <Stepper.Step
-                  key={st.key}
-                  label={st.label}
-                  description={st.required ? undefined : 'Opcional'}
-                  allowStepSelect={i <= Math.min(ob.completed, LAST_STEP)}
-                />
-              ))}
-            </Stepper>
-          )}
-        </Stack>
-      </aside>
+          <Button variant="default" radius="xl" size="sm" rightSection={<ArrowRightIcon size={16} />} onClick={skipOnboarding} style={{ flex: 'none' }}>
+            {mobile ? 'Ir pro Radar' : 'Já configurei, ir pro Radar'}
+          </Button>
+        </div>
+
+        {mobile ? (
+          <Box mt="md">
+            <Group justify="space-between" mb={6}>
+              <Text size="sm" fw={600}>{current.label}</Text>
+              <Text size="sm" c="dimmed">{ob.step + 1} de {total}</Text>
+            </Group>
+            <Progress value={((ob.step + 1) / total) * 100} size="sm" color="brand" aria-label={`Etapa ${ob.step + 1} de ${total}`} />
+          </Box>
+        ) : (
+          <Stepper
+            active={ob.step}
+            onStepClick={goToStep}
+            size="xs"
+            color="brand"
+            mt="lg"
+            className={classes.steps}
+          >
+            {ONBOARDING_STEPS.map((st, i) => (
+              <Stepper.Step
+                key={st.key}
+                label={wide || i === ob.step ? st.label : undefined}
+                aria-label={st.label}
+                allowStepSelect={i <= Math.min(ob.completed, LAST_STEP)}
+              />
+            ))}
+          </Stepper>
+        )}
+      </header>
 
       <main className={classes.content}>
         {current.key === 'stock'
