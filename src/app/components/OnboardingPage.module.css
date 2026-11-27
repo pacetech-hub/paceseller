@@ -1,0 +1,66 @@
+/* Configuração da loja em tela cheia: trilho à esquerda, formulário à direita. */
+.page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  background-color: var(--mantine-color-body);
+}
+
+.rail {
+  padding: 48px 32px;
+  background-color: light-dark(var(--mantine-color-brand-1), var(--mantine-color-dark-7));
+  border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+}
+
+.content {
+  padding: 48px 64px;
+  max-width: 760px;
+}
+
+/* No celular o trilho vira um cabeçalho e as etapas ficam em linha */
+@media (max-width: 48em) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+  .rail {
+    padding: 24px 16px;
+    border-right: 0;
+    border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  }
+  .content {
+    padding: 24px 16px 48px;
+  }
+}
+
+/* Cartão de conexão do Pace Stock: a linha inteira é o botão */
+/* classe dobrada: vence o reset do UnstyledButton (borda e padding zerados) */
+.connect.connect {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  width: 100%;
+  padding: var(--mantine-spacing-md);
+  border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-radius: var(--mantine-radius-md);
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.connect.connect:hover:not([data-disabled]) {
+  border-color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-2));
+}
+
+.connect.connect[data-connected] {
+  border-color: var(--mantine-color-teal-6);
+  background-color: light-dark(var(--mantine-color-teal-0), rgba(18, 184, 134, 0.08));
+}
+
+.connectIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mantine-radius-md);
+  background-color: light-dark(var(--mantine-color-brand-1), var(--mantine-color-dark-5));
+}
