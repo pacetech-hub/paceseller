@@ -42,6 +42,8 @@ import { AccessPermissionsPage } from "./components/AccessPermissionsPage";
 import { RadarPage } from "./components/RadarPage";
 import { SupportPage } from "./components/SupportPage";
 import { StorePickerModal } from "./components/StorePickerModal";
+import { OnboardingPage } from "./components/OnboardingPage";
+import { openOnLogin, useOnboarding } from "./data/onboarding";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -86,6 +88,7 @@ export default function App() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeCart, setActiveCart] = useState<CartContext | null>(null);
   const { carts } = useCartStore();
+  const onboarding = useOnboarding();
   const [catalogFilters, setCatalogFilters] = useState<CatalogFilters>(defaultFilters);
   const [orderStatusFilter, setOrderStatusFilter] = useState('todos');
   const [catalogEntry, setCatalogEntry] = useState<CatalogEntry | undefined>(undefined);
@@ -129,6 +132,8 @@ export default function App() {
     setCurrentView('radar');
     setSelectedClient(null);
     setCatalogFilters(defaultFilters);
+    // primeiro acesso do lojista: configuração da loja antes do Radar
+    if (selectedProfile === 'lojista') openOnLogin();
   };
 
   const handleLogout = () => {
@@ -232,6 +237,8 @@ export default function App() {
       </div>
     );
   }
+
+  if (profile === 'lojista' && onboarding.open) return <OnboardingPage />;
 
   // Páginas do processo de compra: só nelas o topo mostra o carrinho e o cliente selecionado
   const commerceView = (['catalog', 'order-grade', 'cart', 'carts', 'checkout', 'cart-chat'] as View[]).includes(currentView);

@@ -24,6 +24,7 @@ import {
 } from "./radar/InsightCards";
 import { productById } from "../data/cartStore";
 import { toast } from "../lib/toast";
+import { OnboardingBanner } from "./OnboardingBanner";
 
 type Profile = 'admin' | 'rep' | 'lojista';
 
@@ -225,6 +226,8 @@ function LojistaRadar({ onCta }: Omit<RadarPageProps, 'profile'>) {
 
   return (
     <Stack gap="xl">
+      {/* configuração da loja pulada: aviso para retomar, acima de tudo */}
+      <OnboardingBanner />
       <Stack gap="md">
         {/* FR-101/102: saúde da loja (pela quantidade de críticos) e total de pendências */}
         <Box>
